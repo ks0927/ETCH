@@ -45,7 +45,7 @@ function Footer() {
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center pt-8 mt-8 md:flex-row md:justify-between">
+      <div className="flex flex-col items-center justify-center mt-8 md:flex-row md:justify-between">
         <p className="mb-2 text-sm text-center text-gray-600 md:text-left md:mb-0">
           © 2025 E:TCH. All rights reserved.
         </p>
