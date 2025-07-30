@@ -1,11 +1,7 @@
 import { Link } from "react-router";
-import HeaderSearch from "../organisms/headerSearch";
+import HeaderSearch from "../molecules/headerSearch";
 
 function Header() {
-  const handleSearch = (keyword: string) => {
-    console.log("검색어:", keyword);
-    // API 호출 등 실제 로직
-  };
   return (
     <>
       <header className="bg-white ">
@@ -28,7 +24,7 @@ function Header() {
 
           {/* 오른쪽 검색 + 프로필 */}
           <div className="flex flex-col items-center w-full gap-4 md:flex-row md:w-auto">
-            <HeaderSearch onSearch={handleSearch} />
+            <HeaderSearch />
             <Link to={"/mypage"}>
               <img src="src/assets/profile.png" className="w-10" />
             </Link>

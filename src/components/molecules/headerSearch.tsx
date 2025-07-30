@@ -2,28 +2,32 @@ import React, { useState } from "react";
 import Input from "../atoms/input";
 import Button from "../atoms/button";
 import searchIcon from "../../assets/search.png";
+import { useNavigate } from "react-router";
 
-interface HeaderSearchProps {
-  onSearch: (keyword: string) => void;
-}
-
-function HeaderSearch({ onSearch }: HeaderSearchProps) {
+function HeaderSearch() {
   const [keyword, setKeyword] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (value: string) => {
     setKeyword(value);
   };
 
+  const handleSearch = () => {
+    const trimmedKeyword = keyword.trim();
+    if (trimmedKeyword) {
+      navigate(`/search?q=${encodeURIComponent(trimmedKeyword)}`);
+      setKeyword(""); // 검색 후 입력창 초기화
+    }
+  };
+
   const handleSearchClick = () => {
-    onSearch(keyword);
-    setKeyword(""); // 검색 후 입력창 초기화
+    handleSearch();
   };
 
   const handleKeyEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      onSearch(keyword); // Enter 키로 검색 실행
-      setKeyword(""); // 검색 후 입력창 초기화
+      handleSearch(); // Enter 키로 검색 실행
     }
   };
 

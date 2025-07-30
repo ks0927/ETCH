@@ -1,8 +1,9 @@
 import { createBrowserRouter } from "react-router";
 import { lazy, Suspense } from "react";
 import Layout from "../layout/layout.tsx";
-import ErrorPage from "../components/common/errorPage.tsx";
-import Loading from "../components/common/loadingPage.tsx";
+import ErrorPage from "../components/pages/errorPage.tsx";
+import LoadingPage from "../components/pages/loadingPage.tsx";
+import SearchPage from "../components/pages/searchPage.tsx";
 
 const Main = lazy(() => import("../components/pages/testMain.tsx"));
 
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<LoadingPage />}>
             <Main />
           </Suspense>
         ),
@@ -22,6 +23,18 @@ const router = createBrowserRouter([
       {
         path: "*",
         element: <ErrorPage />,
+      },
+      {
+        path: "/test",
+        element: <LoadingPage />,
+      },
+      {
+        path: "/search",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <SearchPage />
+          </Suspense>
+        ),
       },
     ],
   },

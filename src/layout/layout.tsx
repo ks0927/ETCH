@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
-import Footer from "../components/templates/footer";
-import Header from "../components/templates/header";
+import Footer from "../components/organisms/footer";
+import Header from "../components/organisms/header";
 
 function Layout() {
   return (
