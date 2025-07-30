@@ -3,6 +3,7 @@ interface InputProps {
   type: string; // 어떤 형식인지(ex.email, password, text 등등)
   placeholder: string; //   placeholder에 적을 말
   onChange: (value: string) => void;
+  onKeyEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 키보드 이벤트 핸들러
 }
 
 export default function Input({
@@ -10,6 +11,7 @@ export default function Input({
   type,
   placeholder,
   onChange,
+  onKeyEnter,
 }: InputProps) {
   return (
     <input
@@ -18,6 +20,7 @@ export default function Input({
       type={type}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
+      onKeyDown={onKeyEnter} // 키보드 이벤트 핸들러 추가
     />
   );
 }
