@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import Input from "../atoms/input";
-import Button from "../atoms/button";
 import searchIcon from "../../assets/search.png";
 import { useNavigate } from "react-router";
+import HeaderButton from "../molecules/header/headerButton";
+import HeaderInput from "../molecules/header/headerinput";
 
 function HeaderSearch() {
   const [keyword, setKeyword] = useState("");
@@ -33,14 +33,14 @@ function HeaderSearch() {
 
   return (
     <div style={{ display: "flex", gap: "8px" }}>
-      <Input
+      <HeaderInput
         value={keyword}
         type="text"
         placeholder="검색어를 입력하세요"
         onChange={handleChange}
         onKeyEnter={handleKeyEnter} // 키보드 이벤트 핸들러 추가
       />
-      <Button img={searchIcon} onClick={handleSearchClick} />
+      <HeaderButton img={searchIcon} onClick={handleSearchClick} />
     </div>
   );
 }

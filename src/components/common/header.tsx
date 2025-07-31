@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import HeaderSearch from "../molecules/headerSearch";
+import HeaderSearch from "../organisms/headerSearch";
 
 function Header() {
   return (

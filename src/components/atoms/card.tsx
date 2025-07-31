@@ -1,17 +1,22 @@
-type CardType = "job" | "project";
+type CardType = "job" | "project" | "news";
 
 interface BaseCardProps {
   id: number;
   type: CardType;
   title: string;
 }
-export interface JobCard extends BaseCardProps {
+export interface JobCardProps extends BaseCardProps {
   type: "job";
   createTime: Date;
 }
 
-export interface ProjectCard extends BaseCardProps {
+export interface ProjectCardProps extends BaseCardProps {
   type: "project";
   img: string;
   content: string;
+}
+export interface NewsCardProps extends BaseCardProps {
+  type: "news";
+  createTime: Date;
+  company: string;
 }

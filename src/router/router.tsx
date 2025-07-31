@@ -5,7 +5,7 @@ import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
 
-const Main = lazy(() => import("../components/pages/testMain.tsx"));
+const MainPage = lazy(() => import("../components/pages/mainPage.tsx"));
 
 const router = createBrowserRouter([
   {
@@ -16,7 +16,7 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPage />}>
-            <Main />
+            <MainPage />
           </Suspense>
         ),
       },
