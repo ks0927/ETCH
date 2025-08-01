@@ -1,9 +1,9 @@
 import { Link } from "react-router";
-import { mockNews } from "../../types/mockNewsData";
-import CompanyNews from "../organisms/news/companyNews";
-import LatestNews from "../organisms/news/latestNews";
-import RecommendNews from "../organisms/news/recommendNews";
-import { mockCompany } from "../../types/mockCompanyData";
+import { mockNews } from "../../../types/mockNewsData";
+import CompanyNews from "../../organisms/news/mainCompanyNews";
+import LatestNews from "../../organisms/news/mainLatestNews";
+import RecommendNews from "../../organisms/news/mainRecommendNews";
+import { mockCompany } from "../../../types/mockCompanyData";
 
 function NewsPage() {
   return (

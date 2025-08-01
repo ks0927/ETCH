@@ -5,9 +5,16 @@ import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
 
-const MainPage = lazy(() => import("../components/pages/mainPage.tsx"));
-const NewsPage = lazy(() => import("../components/pages/newsPage.tsx"));
-
+const MainPage = lazy(() => import("../components/pages/homePage.tsx"));
+const NewsPage = lazy(
+  () => import("../components/pages/news/newsMainPage.tsx")
+);
+const NewsLatestPage = lazy(
+  () => import("../components/pages/news/newsLatestPage.tsx")
+);
+const NewsRecommendPage = lazy(
+  () => import("../components/pages/news/newsRecommendPage.tsx")
+);
 const router = createBrowserRouter([
   {
     path: "/",
@@ -42,6 +49,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPage />}>
             <NewsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/news/latest",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <NewsLatestPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/news/recommend",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <NewsRecommendPage />
           </Suspense>
         ),
       },

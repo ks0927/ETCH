@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import HeaderSearch from "../organisms/headerSearch";
+import LogoImg from "../../assets/logo.png";
 
 function Header() {
   return (
@@ -9,7 +10,7 @@ function Header() {
           {/* 왼쪽 메뉴 */}
           <div className="flex flex-col items-center gap-4 space-x-5 md:flex-row">
             <Link to={"/"}>
-              <img src="src/assets/logo.png" alt="로고" className="w-36" />
+              <img src={LogoImg} alt="로고" className="w-36" />
             </Link>
             <Link to={"/jobs"} className="text-sm md:text-base ">
               채용공고
