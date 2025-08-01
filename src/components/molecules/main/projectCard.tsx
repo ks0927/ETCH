@@ -7,7 +7,7 @@ function ProcjectCard({ id, title, content, img }: ProjectCardProps) {
       <Link to={`/projects/${id}`}>
         <section className="w-full h-36">
           <img
-            className="w-full object-cover h-full"
+            className="w-full object-cover h-full "
             src={img}
             alt="카드 이미지"
           />
