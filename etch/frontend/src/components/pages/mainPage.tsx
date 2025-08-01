@@ -10,66 +10,179 @@ import MainProjectCard from "../organisms/main/mainProjectCard";
 
 function MainPage() {
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-[#007DFC] w-full py-10 px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto text-white">
-          <div className="text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl font-bold">
+      <section className="bg-gradient-to-br from-[#007DFC] to-[#0056CC] w-full py-12 sm:py-16 lg:py-20 px-6 relative overflow-hidden">
+        {/* 배경 장식 */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
+          <div className="absolute top-32 right-20 w-16 h-16 bg-white rounded-full"></div>
+          <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white rounded-full"></div>
+          <div className="absolute bottom-10 right-10 w-8 h-8 bg-white rounded-full"></div>
+        </div>
+
+        <div className="flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto text-white relative z-10 gap-8">
+          <div className="text-center lg:text-left flex-1">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
               IT 취업의 모든 것
               <br />
-              E:TCH에서 시작하세요
+              <span className="text-blue-200">E:TCH</span>에서 시작하세요
             </h1>
-            <p className="mt-4 text-base md:text-lg">
+            <p className="text-lg sm:text-xl text-blue-100 mb-8 leading-relaxed">
               채용 정보부터 기업 분석, 포트폴리오 작성까지
               <br />
               IT 취업 준비를 위한 모든 것을 한 곳에서
             </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <button className="bg-white text-[#007DFC] px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg">
+                시작하기
+              </button>
+            </div>
           </div>
-          <img
-            src={testImg}
-            alt="메인 이미지"
-            className="w-full max-w-md md:max-w-[368px]  h-auto rounded-2xl mt-6 md:mt-0"
-          />
+          <div className="flex-1 max-w-lg">
+            <img
+              src={testImg}
+              alt="메인 이미지"
+              className="w-full h-auto rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
+            />
+          </div>
         </div>
       </section>
 
       {/* 채용 정보 */}
-      <section className="px-6 py-8 max-w-7xl mx-auto">
-        <h2 className="font-bold text-xl md:text-2xl mb-4">진행중인 채용</h2>
-        <MainJobCard mockJobs={mockJobs} />
+      <section className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6z"
+                  />
+                </svg>
+              </div>
+              <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                진행중인 채용
+              </h2>
+              <div className="flex-1"></div>
+              <div className="hidden sm:flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-green-700 font-medium">
+                  실시간 업데이트
+                </span>
+              </div>
+            </div>
+            <MainJobCard mockJobs={mockJobs} />
+          </div>
+        </div>
       </section>
 
       {/* 프로젝트 + 뉴스 */}
-      <section className="px-6 py-8 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* 인기 프로젝트 - 2/3 너비 */}
-          <div className="xl:col-span-2">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-xl md:text-2xl">인기 프로젝트</h2>
-              <button className="text-sm md:text-base text-[#007DFC] font-semibold">
-                더보기
-              </button>
+      <section className="py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* 인기 프로젝트 - 2/3 너비 */}
+            <div className="xl:col-span-2">
+              <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 h-full">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-purple-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                      인기 프로젝트
+                    </h2>
+                  </div>
+                  <button className="inline-flex items-center space-x-1 text-[#007DFC] hover:text-[#0056CC] font-semibold text-sm sm:text-base transition-colors group">
+                    <span>더보기</span>
+                    <svg
+                      className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
+                </div>
+                <MainProjectCard mockProjects={mockProjects} />
+              </div>
             </div>
-            <MainProjectCard mockProjects={mockProjects} />
-          </div>
 
-          {/* 뉴스 - 1/3 너비 */}
-          <div className="xl:col-span-1">
-            <h2 className="font-bold text-xl md:text-2xl mb-4">뉴스</h2>
-            <MainNewsCard mockNews={mockNews} />
+            {/* 뉴스 - 1/3 너비 */}
+            <div className="xl:col-span-1">
+              <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 h-full">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                    뉴스
+                  </h2>
+                </div>
+                <MainNewsCard mockNews={mockNews} />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* 주요 기능 소개 */}
-      <section className="pb-20 px-6 max-w-7xl mx-auto">
-        <h2 className="text-xl md:text-2xl font-bold text-center mb-6">
-          E:TCH의 주요 기능
-        </h2>
-        <MainFuncComponent funcData={funcData} />
+      <section className="py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center bg-blue-50 rounded-full px-4 py-2 mb-4"></div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              E:TCH의 주요 기능
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              IT 취업 성공을 위한 모든 도구와 정보를 하나의 플랫폼에서
+              만나보세요
+            </p>
+          </div>
+          <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8">
+            <MainFuncComponent funcData={funcData} />
+          </div>
+        </div>
       </section>
-    </>
+    </div>
   );
 }
 
