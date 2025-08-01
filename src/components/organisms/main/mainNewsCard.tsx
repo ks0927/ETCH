@@ -9,14 +9,7 @@ function MainNewsCard({ mockNews }: Props) {
   return (
     <div className="space-y-3">
       {mockNews.slice(0, 5).map((news) => (
-        <NewsCard
-          key={news.id}
-          id={news.id}
-          createTime={news.createTime}
-          title={news.title}
-          company={news.company}
-          type="news"
-        />
+        <NewsCard {...news} type="news" />
       ))}
     </div>
   );

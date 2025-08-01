@@ -1,11 +1,16 @@
 import { Link } from "react-router";
 import type { NewsCardProps } from "../../atoms/card";
 
-function NewsCard({ id, title, company, createTime }: NewsCardProps) {
+function NewsCard({
+  link,
+  title,
+  mediaCompany: company,
+  createTime,
+}: NewsCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <div className="p-3 sm:p-4">
-        <Link to={`/news/${id}`}>
+        <Link to={link}>
           <div className="text-base sm:text-lg font-bold mb-2 line-clamp-2 text-gray-800">
             {title}
           </div>

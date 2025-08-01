@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import searchIcon from "../../assets/search.png";
 import { useNavigate } from "react-router";
 import HeaderButton from "../molecules/header/headerButton";
-import HeaderInput from "../molecules/header/headerinput";
+import HeaderInput from "../molecules/header/headerInput";
 
 function HeaderSearch() {
   const [keyword, setKeyword] = useState("");
