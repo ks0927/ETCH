@@ -1,5 +1,7 @@
 package com.ssafy.etch.oauth.jwt.filter;
 
+import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.oauth.jwt.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
