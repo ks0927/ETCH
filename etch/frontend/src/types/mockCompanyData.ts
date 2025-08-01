@@ -2,13 +2,13 @@ import Samsung from "../assets/samsung.png";
 export interface mockCompanyData {
   companyName: string;
   like: number;
-  img: string;
+  img?: string;
 }
 export const mockCompany: mockCompanyData[] = [
   {
     companyName: "삼성전자",
     like: 142,
-    img: Samsung,
+    // img: Samsung,
   },
   {
     companyName: "삼성생명",
