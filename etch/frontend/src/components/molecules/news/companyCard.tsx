@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import type { CompanyCardProps } from "../../atoms/card";
+import TestImg from "../../../assets/testImg.png";
 
 function CompanyCard({ img, companyName, like }: CompanyCardProps) {
   return (
@@ -8,7 +9,7 @@ function CompanyCard({ img, companyName, like }: CompanyCardProps) {
         {/* 상단 이미지 영역 - 반응형 높이 */}
         <div className="w-full h-20 xs:h-24 sm:h-28 md:h-32 lg:h-36 bg-gray-50 flex items-center justify-center p-2 sm:p-3 lg:p-4">
           <img
-            src={img}
+            src={img || TestImg}
             alt={`${companyName} 로고`}
             className="max-w-full max-h-full object-contain"
           />
