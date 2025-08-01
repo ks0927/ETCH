@@ -5,3 +5,8 @@ export interface InputProps {
   onChange: (value: string) => void;
   onKeyEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 키보드 이벤트 핸들러
 }
+
+export interface RadioInputProps extends InputProps {
+  name: string; // 라디오 버튼 그룹 이름
+  checked: boolean; // 라디오 버튼이 선택되었는지 여부
+}

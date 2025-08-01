@@ -20,6 +20,9 @@ const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
 const OAuthLoadingPage = lazy(
   () => import("../components/pages/oauthLoadingPage.tsx")
 );
+const AdditionalInfoPage = lazy(
+  () => import("../components/pages/additionalInfoPage.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -93,6 +96,10 @@ const router = createBrowserRouter([
       {
         path: "/Oauth",
         element: <OAuthLoadingPage />,
+      },
+      {
+        path: "/additional-info",
+        element: <AdditionalInfoPage />,
       },
     ],
   },
