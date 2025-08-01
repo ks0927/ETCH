@@ -17,6 +17,9 @@ const NewsRecommendPage = lazy(
 );
 const JoinPage = lazy(() => import("../components/pages/joinPage.tsx"));
 const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
+const OAuthLoadingPage = lazy(
+  () => import("../components/pages/oauthLoadingPage.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -86,6 +89,10 @@ const router = createBrowserRouter([
             <LoginPage />
           </Suspense>
         ),
+      },
+      {
+        path: "/Oauth",
+        element: <OAuthLoadingPage />,
       },
     ],
   },
