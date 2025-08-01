@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import HeaderSearch from "../organisms/headerSearch";
 import LogoImg from "../../assets/logo.png";
+import HeaderAuth from "../organisms/headerAuth";
 
 function Header() {
   return (
@@ -23,12 +24,13 @@ function Header() {
             </Link>
           </div>
 
-          {/* 오른쪽 검색 + 프로필 */}
+          {/* 오른쪽 검색 + 버튼들 */}
           <div className="flex flex-col items-center w-full gap-4 md:flex-row md:w-auto">
             <HeaderSearch />
-            <Link to={"/mypage"}>
+            <HeaderAuth />
+            {/* <Link to={"/mypage"}>
               <img src="src/assets/profile.png" className="w-10" />
-            </Link>
+            </Link> */}
           </div>
         </div>
       </header>

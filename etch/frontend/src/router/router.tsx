@@ -15,6 +15,9 @@ const NewsLatestPage = lazy(
 const NewsRecommendPage = lazy(
   () => import("../components/pages/news/newsRecommendPage.tsx")
 );
+const JoinPage = lazy(() => import("../components/pages/joinPage.tsx"));
+const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -65,6 +68,22 @@ const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingPage />}>
             <NewsRecommendPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/join",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <JoinPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/login",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <LoginPage />
           </Suspense>
         ),
       },
