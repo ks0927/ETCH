@@ -1,6 +1,7 @@
 package com.ssafy.etch.member.entity;
 
 import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.member.dto.MemberRequestDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -91,4 +92,10 @@ public class MemberEntity {
     public static void changeMemberStatus(MemberEntity memberEntity, boolean isDeleted) {
         memberEntity.isDeleted = isDeleted;
     }
+    public static void updateMemberInfo(MemberEntity memberEntity, MemberRequestDTO memberRequestDTO) {
+        memberEntity.nickname = memberRequestDTO.getNickname();
+        memberEntity.phoneNumber = memberRequestDTO.getPhoneNumber();
+        memberEntity.profile = memberRequestDTO.getProfile();
+    }
+
 }

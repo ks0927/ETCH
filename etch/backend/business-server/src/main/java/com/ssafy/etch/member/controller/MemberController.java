@@ -3,6 +3,7 @@ package com.ssafy.etch.member.controller;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.service.MemberService;
@@ -74,5 +75,14 @@ public class MemberController {
     public ResponseEntity<ApiResponse<?>> deleteMember(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
         memberService.deleteMember(oAuth2User.getId());
         return ResponseEntity.ok(ApiResponse.success(null, "회원 탈퇴가 완료되었습니다."));
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<?>> updateMemberInfo(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @RequestBody MemberRequestDTO memberRequestDTO) {
+
+        MemberDTO memberDTO = memberService.updateMember(oAuth2User.getId(), memberRequestDTO);
+        return ResponseEntity.ok(ApiResponse.success(MemberResponseDTO.from(memberDTO), "회원 정보가 수정되었습니다."));
     }
 }
