@@ -56,7 +56,7 @@ public class AuthController {
         // DB에 저장된 리프레시 토큰과 일치하는지 확인
         String id = jwtUtil.getId(refreshToken);
         MemberDTO memberDTO = memberService.findById(Long.parseLong(id));
-        if (memberDTO.getRefreshToken().equals(refreshToken)) {
+        if (!memberDTO.getRefreshToken().equals(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid refresh token."));
         }
 
