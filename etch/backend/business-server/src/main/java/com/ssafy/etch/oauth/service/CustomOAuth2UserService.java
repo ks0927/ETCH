@@ -1,5 +1,11 @@
 package com.ssafy.etch.oauth.service;
 
+import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.member.entity.MemberEntity;
+import com.ssafy.etch.member.repository.MemberRepository;
+import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import com.ssafy.etch.oauth.dto.GoogleResponse;
+import com.ssafy.etch.oauth.dto.OAuth2Response;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -17,11 +23,10 @@ public class CustomOAuth2UserService  extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String RegistrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
 
         // 이메일을 통해 기존 회원인지 확인
-        MemberEntity existData = memberRepository.findByEmail(oAuth2Response.getEmail());
+        MemberEntity existData = memberRepository.findByEmail(oAuth2Response.getEmail()).orElse(null);
 
         // 처음 로그인 하는 회원(GUEST)
         if (existData == null) {
