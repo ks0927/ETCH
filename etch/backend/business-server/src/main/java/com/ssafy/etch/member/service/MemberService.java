@@ -8,4 +8,6 @@ public interface MemberService {
     MemberDTO registerNewMember(MemberDTO memberDTO);
 
     void updateRefreshToken(Long id, String refreshToken);
+
+    void deleteMember(Long id);
 }

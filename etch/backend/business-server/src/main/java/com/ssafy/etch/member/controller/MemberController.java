@@ -69,4 +69,10 @@ public class MemberController {
         MemberResponseDTO responseDTO = MemberResponseDTO.from(memberDTO);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responseDTO));
     }
+
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<?>> deleteMember(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+        memberService.deleteMember(oAuth2User.getId());
+        return ResponseEntity.ok(ApiResponse.success(null, "회원 탈퇴가 완료되었습니다."));
+    }
 }
