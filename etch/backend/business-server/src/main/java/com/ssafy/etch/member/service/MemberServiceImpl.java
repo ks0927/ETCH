@@ -3,6 +3,7 @@ package com.ssafy.etch.member.service;
 import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.entity.MemberRole;
 import com.ssafy.etch.member.repository.MemberRepository;
@@ -62,5 +63,16 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         MemberEntity.changeMemberStatus(memberEntity, true);
+    }
+
+    @Override
+    @Transactional
+    public MemberDTO updateMember(Long id, MemberRequestDTO memberRequestDTO) {
+        MemberEntity memberEntity = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        MemberEntity.updateMemberInfo(memberEntity, memberRequestDTO);
+
+        return memberEntity.toMemberDTO();
     }
 }
