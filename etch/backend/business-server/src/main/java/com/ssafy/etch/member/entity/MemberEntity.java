@@ -88,4 +88,7 @@ public class MemberEntity {
     public static void updateRefreshToken(MemberEntity memberEntity, String refreshToken) {
         memberEntity.refreshToken = refreshToken;
     }
+    public static void changeMemberStatus(MemberEntity memberEntity, boolean isDeleted) {
+        memberEntity.isDeleted = isDeleted;
+    }
 }

@@ -50,9 +50,17 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public void updateRefreshToken(Long id, String refreshToken) {
         MemberEntity memberEntity = memberRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         MemberEntity.updateRefreshToken(memberEntity, refreshToken);
     }
 
+    @Override
+    @Transactional
+    public void deleteMember(Long id) {
+        MemberEntity memberEntity = memberRepository.findById(id)
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        MemberEntity.changeMemberStatus(memberEntity, true);
+    }
 }
