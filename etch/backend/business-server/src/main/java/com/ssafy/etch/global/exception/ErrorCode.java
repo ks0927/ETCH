@@ -8,7 +8,11 @@ import lombok.Getter;
 public enum ErrorCode {
     USER_NOT_FOUND("USER_404", "사용자를 찾을 수 없습니다."),
     INVALID_INPUT("INPUT_400", "잘못된 입력입니다."),
-    INTERNAL_ERROR("INTERNAL_500", "서버 오류가 발생했습니다.");
+    INTERNAL_ERROR("INTERNAL_500", "서버 오류가 발생했습니다."),
+    ACCESS_TOKEN_EXPIRED("ACCESS_TOKEN_401", "액세스 토큰이 만료되었습니다."),
+    ACCESS_TOKEN_INVALID("ACCESS_TOKEN_401", "유효하지 않은 액세스 토큰입니다."),
+    REFRESH_TOKEN_EXPIRED("REFRESH_TOKEN_403", "리프레시 토큰이 만료되었습니다."),
+    REFRESH_TOKEN_INVALID("REFRESH_TOKEN_403", "유효하지 않은 리프레시 토큰입니다.");
 
     private final String code;
     private final String message;

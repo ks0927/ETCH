@@ -1,6 +1,10 @@
 package com.ssafy.etch.oauth.jwt.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.etch.global.exception.ErrorCode;
+import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.member.dto.MemberDTO;
+import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,6 +20,7 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JWTFilter(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -34,22 +39,26 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰 만료 여부 확인
         if (jwtUtil.isExpired(accessToken)) {
-            filterChain.doFilter(request, response);
+            sendErrorResponse(response, ErrorCode.ACCESS_TOKEN_EXPIRED);
             return;
         }
 
         // 토큰이 "access" 카테고리인지 확인 (리프레시 토큰으로 API 접근 방지)
         String category = jwtUtil.getCategory(accessToken);
         if (!category.equals("access")) {
-            filterChain.doFilter(request, response);
+            sendErrorResponse(response, ErrorCode.ACCESS_TOKEN_INVALID);
             return;
         }
 
-        // 토큰에서 username과 role 추출
+        // 토큰에서 id와 role 추출
+        String email = jwtUtil.getEmail(accessToken);
         String role = jwtUtil.getRole(accessToken);
 
-        // UserDTO 생성 (JWTFilter에서는 인증 자체에만 집중하므로, 최소한의 정보만 담음)
-        MemberDTO memberDTO = MemberDTO.builder().role(role).build();
+        // MemberDTO 생성
+        MemberDTO memberDTO = MemberDTO.builder()
+                .email(email)
+                .role(role)
+                .build();
 
         // CustomOAuth2User 객체 생성
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(memberDTO);
@@ -60,5 +69,12 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        ApiResponse<?> apiResponse = ApiResponse.error(errorCode.getMessage());
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 }

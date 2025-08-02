@@ -5,7 +5,7 @@ import jakarta.servlet.http.Cookie;
 public class CookieUtil {
     public static Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60);
+        cookie.setMaxAge(24 * 60 * 60); // 1일
 
         // HTTPS 환경에서만 쿠키를 전송(배포 시 주석 해제)
         // cookie.setSecure(true);
@@ -16,5 +16,16 @@ public class CookieUtil {
         cookie.setHttpOnly(true);
 
         return cookie;
+    }
+
+    public static String getCookieValue(Cookie[] cookies, String name) {
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(name)) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

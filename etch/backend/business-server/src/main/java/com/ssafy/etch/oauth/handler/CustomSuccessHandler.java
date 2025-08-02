@@ -39,19 +39,15 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if ("USER".equals(role)) {
             Long id = customUserDetails.getId();
             // 액세스 토큰 및 리프레시 토큰 생성
-            accessToken = jwtUtil.createJwt("access", email, role, id, 600000L); // 10분
-            String refreshToken = jwtUtil.createJwt("refresh", email, role, id, 86400000L); // 24시간
+            accessToken = jwtUtil.createJwt("access", email, role, id, 30 * 60 * 1000L); // 30분
+            String refreshToken = jwtUtil.createJwt("refresh", email, role, id,  24 * 60 * 60 * 1000L); // 24시간
 
             // DB에 리프레시 토큰 저장
-            MemberEntity memberEntity = memberRepository.findById(id).orElse(null);
-            if (memberEntity != null) {
-                MemberEntity.updateRefreshToken(memberEntity, refreshToken);
-                memberRepository.save(memberEntity);
-            }
+            memberRepository.findById(id).ifPresent(memberEntity -> MemberEntity.updateRefreshToken(memberEntity, refreshToken));
 
             response.addCookie(CookieUtil.createCookie("refresh", refreshToken));
         } else if ("GUEST".equals(role)) {
-            accessToken = jwtUtil.createJwt("access", email, role, null, 600000L); // 10분                                               │
+            accessToken = jwtUtil.createJwt("access", email, role, null, 30 * 60 * 1000L); // 30분                                               │
         }
         String redirectUrl = "http://localhost:3000/login?token=" + accessToken;
 
