@@ -68,6 +68,23 @@ public class MemberEntity {
                 .build();
     }
 
+    public static MemberEntity toMemberEntity(MemberDTO memberDTO) {
+        MemberEntity memberEntity = new MemberEntity();
+        if (memberDTO.getId() != null) {
+            memberEntity.id = memberDTO.getId();
+        }
+        memberEntity.nickname = memberDTO.getNickname();
+        memberEntity.email = memberDTO.getEmail();
+        memberEntity.phoneNumber = memberDTO.getPhoneNumber();
+        memberEntity.profile = memberDTO.getProfile();
+        memberEntity.gender = memberDTO.getGender();
+        memberEntity.birth = LocalDate.parse(memberDTO.getBirth());
+        memberEntity.isDeleted = false;
+        memberEntity.refreshToken = memberDTO.getRefreshToken();
+        return memberEntity;
+    }
+
+
     public static void updateRefreshToken(MemberEntity memberEntity, String refreshToken) {
         memberEntity.refreshToken = refreshToken;
     }
