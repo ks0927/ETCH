@@ -1,8 +1,14 @@
 package com.ssafy.etch.oauth.handler;
 
+import com.ssafy.etch.global.util.CookieUtil;
+import com.ssafy.etch.member.entity.MemberEntity;
+import com.ssafy.etch.member.repository.MemberRepository;
+import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import com.ssafy.etch.oauth.jwt.util.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +43,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             String refreshToken = jwtUtil.createJwt("refresh", email, role, id, 86400000L); // 24시간
 
             // DB에 리프레시 토큰 저장
-            MemberEntity memberEntity = memberRepository.findByEmail(email);
+            MemberEntity memberEntity = memberRepository.findById(id).orElse(null);
             if (memberEntity != null) {
                 MemberEntity.updateRefreshToken(memberEntity, refreshToken);
                 memberRepository.save(memberEntity);

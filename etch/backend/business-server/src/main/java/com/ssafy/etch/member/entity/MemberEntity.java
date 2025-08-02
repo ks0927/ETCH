@@ -1,5 +1,6 @@
 package com.ssafy.etch.member.entity;
 
+import com.ssafy.etch.member.dto.MemberDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -52,4 +53,22 @@ public class MemberEntity {
 //    @OneToMany(mappedBy = "user")
 //    private List<LikedContentEntity> likedContents = new ArrayList<>();
 
+    public MemberDTO toMemberDTO() {
+        return MemberDTO.builder()
+                .id(id)
+                .nickname(nickname)
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .profile(profile)
+                .gender(gender)
+                .birth(String.valueOf(birth))
+                .role(role.name())
+                .isDeleted(isDeleted)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    public static void updateRefreshToken(MemberEntity memberEntity, String refreshToken) {
+        memberEntity.refreshToken = refreshToken;
+    }
 }
