@@ -4,6 +4,7 @@ import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
+import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.service.MemberService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
@@ -59,5 +60,13 @@ public class MemberController {
         response.setHeader("access", newAccessToken);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(newMember,"회원가입 성공"));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getMemberInfo(@PathVariable("id") Long id) {
+        MemberDTO memberDTO = memberService.findById(id);
+
+        MemberResponseDTO responseDTO = MemberResponseDTO.from(memberDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responseDTO));
     }
 }
