@@ -10,4 +10,13 @@ public class MemberResponseDTO {
     private String email;
     private String nickname;
     private String profile;
+
+    public static MemberResponseDTO from(MemberDTO member) {
+        return MemberResponseDTO.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .profile(member.getProfile())
+                .build();
+    }
 }

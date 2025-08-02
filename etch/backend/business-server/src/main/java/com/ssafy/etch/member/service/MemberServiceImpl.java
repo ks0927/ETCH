@@ -1,5 +1,7 @@
 package com.ssafy.etch.member.service;
 
+import com.ssafy.etch.global.exception.CustomException;
+import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.entity.MemberRole;
@@ -21,7 +23,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDTO findById(long id) {
         MemberEntity memberEntity = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다. id: " + id));
+                .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         return memberEntity.toMemberDTO();
     }
