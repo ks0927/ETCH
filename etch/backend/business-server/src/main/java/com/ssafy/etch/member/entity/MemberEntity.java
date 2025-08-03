@@ -1,10 +1,13 @@
 package com.ssafy.etch.member.entity;
 
+import com.ssafy.etch.follow.entity.FollowEntity;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="member")
@@ -36,15 +39,17 @@ public class MemberEntity {
 
     private boolean isDeleted = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String refreshToken;
 
 //    @OneToMany(mappedBy = "user")
 //    private List<AppliedJobEntity> appliedJobs = new ArrayList<>();
 //
-//    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
-//    private List<FollowEntity> following = new ArrayList<>();
-//
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FollowEntity> followingList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FollowEntity> followerList = new ArrayList<>();
 //    @OneToMany(mappedBy = "user")
 //    private List<ProjectEntity> projects = new ArrayList<>();
 //
