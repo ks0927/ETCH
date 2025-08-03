@@ -63,4 +63,16 @@ public class FollowServiceImpl implements FollowService {
                 .map(MemberResponseDTO::from)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<MemberResponseDTO> getFollowingList(Long memberId) {
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return followRepository.findByFollower(member).stream()
+                .map(FollowEntity::toFollowDTO)
+                .map(FollowDTO::getFollowing)
+                .map(MemberResponseDTO::from)
+                .collect(Collectors.toList());
+    }
 }

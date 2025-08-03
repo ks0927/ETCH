@@ -2,7 +2,6 @@ package com.ssafy.etch.follow.controller;
 
 import com.ssafy.etch.follow.service.FollowService;
 import com.ssafy.etch.global.response.ApiResponse;
-import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +37,12 @@ public class FollowController {
     @GetMapping("/followers")
     public ResponseEntity<ApiResponse<List<MemberResponseDTO>>> getFollowerList(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
         List<MemberResponseDTO> result = followService.getFollowerList(oAuth2User.getId());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/following")
+    public ResponseEntity<ApiResponse<List<MemberResponseDTO>>> getFollowingList(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+        List<MemberResponseDTO> result = followService.getFollowingList(oAuth2User.getId());
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
