@@ -5,14 +5,12 @@ import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
-import com.ssafy.etch.member.entity.MemberRole;
 import com.ssafy.etch.member.repository.MemberRepository;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +30,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberDTO registerNewMember(MemberDTO memberDTO) {
+        // role 설정
+        memberDTO.setRole("USER");
+        MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
+        MemberEntity savedEntity = memberRepository.save(memberEntity);
+        memberDTO = savedEntity.toMemberDTO();
         // refreshToken 생성
         String refreshToken = jwtUtil.createJwt(
                 "refresh",
@@ -40,12 +43,9 @@ public class MemberServiceImpl implements MemberService {
                 memberDTO.getId(),
                 24 * 60 * 60 * 1000L // 1일
         );
-        // role 설정
-        memberDTO.setRole("USER");
-        memberDTO.setRefreshToken(refreshToken);
-        MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
-        MemberEntity saved = memberRepository.save(memberEntity);
-        return saved.toMemberDTO();
+        MemberEntity.updateRefreshToken(savedEntity, refreshToken);
+
+        return savedEntity.toMemberDTO();
     }
     @Override
     @Transactional
