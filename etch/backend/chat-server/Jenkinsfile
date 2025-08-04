@@ -48,7 +48,7 @@ pipeline {
             echo "⚠️ 빌드 실패! 확인 필요"
         }
         success {
-            echo "✅ 배포 완료!!"
+            echo "✅ 배포 완료!!!!"
         }
     }
 }
