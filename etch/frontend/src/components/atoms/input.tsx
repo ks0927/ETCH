@@ -1,6 +1,8 @@
+type InputType = "email" | "password" | "text" | "tel" | "radio";
+
 export interface InputProps {
   value: string; // input안에 들어올 내용
-  type: string; // 어떤 형식인지(ex.email, password, text 등등)
+  type: InputType; // 어떤 형식인지(ex.email, password, text 등등)
   placeholder: string; //   placeholder에 적을 말
   onChange: (value: string) => void;
   onKeyEnter?: (event: React.KeyboardEvent<HTMLInputElement>) => void; // 키보드 이벤트 핸들러

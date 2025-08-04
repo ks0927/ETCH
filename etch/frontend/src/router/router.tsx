@@ -15,13 +15,17 @@ const NewsLatestPage = lazy(
 const NewsRecommendPage = lazy(
   () => import("../components/pages/news/newsRecommendPage.tsx")
 );
-const JoinPage = lazy(() => import("../components/pages/joinPage.tsx"));
+const JoinPage = lazy(() => import("../components/pages/join/joinPage.tsx"));
 const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
 const OAuthLoadingPage = lazy(
   () => import("../components/pages/oauthLoadingPage.tsx")
 );
 const AdditionalInfoPage = lazy(
-  () => import("../components/pages/additionalInfoPage.tsx")
+  () => import("../components/pages/join/additionalInfoPage.tsx")
+);
+
+const ProjectPage = lazy(
+  () => import("../components/pages/project/projectPage.tsx")
 );
 
 const router = createBrowserRouter([
@@ -100,6 +104,10 @@ const router = createBrowserRouter([
       {
         path: "/additional-info",
         element: <AdditionalInfoPage />,
+      },
+      {
+        path: "/project",
+        element: <ProjectPage />,
       },
     ],
   },
