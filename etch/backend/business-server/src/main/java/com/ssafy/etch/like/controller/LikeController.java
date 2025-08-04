@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +30,18 @@ public class LikeController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(null, "뉴스 좋아요가 등록되었습니다."));
     }
+    @DeleteMapping("/news/{id}")
+    public ResponseEntity<ApiResponse<?>> deleteLikeNews(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
+                                                         @PathVariable Long id) {
+        if (oAuth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("인증되지 않은 사용자입니다."));
+        }
+        likeService.deleteLike(oAuth2User.getId(), id, LikeType.NEWS);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(null, "뉴스 좋아요가 삭제되었습니다."));
+    }
+
     @PostMapping("/companies")
     public ResponseEntity<ApiResponse<Object>> createLikeCompany(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
                                                               @RequestBody LikeRequestDTO likeRequestDTO) {
