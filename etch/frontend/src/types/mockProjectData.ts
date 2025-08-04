@@ -37,4 +37,52 @@ export const mockProjects: mockProjectData[] = [
     content: "Test Content5",
     img: TestImg,
   },
+  {
+    id: 6,
+    title: "Test Title6",
+    content: "Test Content6",
+    img: TestImg,
+  },
+  {
+    id: 7,
+    title: "Test Title7",
+    content: "Test Content7",
+    img: TestImg,
+  },
+  {
+    id: 8,
+    title: "Test Title8",
+    content: "Test Content8",
+    img: TestImg,
+  },
+  {
+    id: 9,
+    title: "Test Title9",
+    content: "Test Content9",
+    img: TestImg,
+  },
+  {
+    id: 10,
+    title: "Test Title10",
+    content: "Test Content10",
+    img: TestImg,
+  },
+  {
+    id: 11,
+    title: "Test Title11",
+    content: "Test Content11",
+    img: TestImg,
+  },
+  {
+    id: 12,
+    title: "Test Title12",
+    content: "Test Content12",
+    img: TestImg,
+  },
+  {
+    id: 13,
+    title: "Test Title13",
+    content: "Test Content13",
+    img: TestImg,
+  },
 ];
