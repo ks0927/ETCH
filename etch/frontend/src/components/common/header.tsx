@@ -1,7 +1,7 @@
 import { Link } from "react-router";
-import HeaderSearch from "../organisms/headerSearch";
+import HeaderSearch from "../organisms/header/headerSearch";
 import LogoImg from "../../assets/logo.png";
-import HeaderAuth from "../organisms/headerAuth";
+import HeaderAuth from "../organisms/header/headerAuth";
 
 function Header() {
   return (

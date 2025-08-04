@@ -1,4 +1,4 @@
-import type { DropdownProps } from "../atoms/dropdown";
+import type { DropdownProps } from "../../atoms/dropdown";
 
 function BirthDropdown({
   options,

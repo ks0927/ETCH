@@ -1,4 +1,4 @@
-import type { InputProps } from "../atoms/input";
+import type { InputProps } from "../../atoms/input";
 
 function NicknameInput({ value, type, placeholder, onChange }: InputProps) {
   return (

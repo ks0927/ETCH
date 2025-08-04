@@ -1,10 +1,10 @@
 import { useState } from "react";
-import NicknameInput from "../molecules/nicknameInput";
-import TelInput from "../molecules/telInput";
-import BirthDateSelector from "../organisms/BirthDateSelector";
-import GenderRadioGroup from "../organisms/genderRadioGroup";
-import ProfileImageUploader from "../organisms/profileImageUploader";
-import CompletionButton from "../molecules/completionButton";
+import NicknameInput from "../../molecules/join/nicknameInput";
+import TelInput from "../../molecules/join/telInput";
+import BirthDateSelector from "../../organisms/join/BirthDateSelector";
+import GenderRadioGroup from "../../organisms/join/genderRadioGroup";
+import ProfileImageUploader from "../../organisms/join/profileImageUploader";
+import CompletionButton from "../../molecules/join/completionButton";
 
 function AdditionalInfoPage() {
   const [nickname, setNickname] = useState("");

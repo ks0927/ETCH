@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router";
-import GoogleAuthButton from "../molecules/googleAuthButton";
+import GoogleAuthButton from "../../molecules/googleAuthButton";
 
 function JoinPage() {
   const navigate = useNavigate();

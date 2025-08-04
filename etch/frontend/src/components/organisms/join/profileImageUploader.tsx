@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FileUploadButton from "../molecules/FileUploadButton";
-import ProfileImagePreview from "../molecules/ProfileImagePreview";
+import FileUploadButton from "../../molecules/join/FileUploadButton";
+import ProfileImagePreview from "../../molecules/join/ProfileImagePreview";
 
 function ProfileImageUploader() {
   const [imageUrl, setImageUrl] = useState<string>("");
