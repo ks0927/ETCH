@@ -78,6 +78,17 @@ public class LikeController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(null, "공고 좋아요가 등록되었습니다."));
     }
+    @DeleteMapping("/jobs/{id}")
+    public ResponseEntity<ApiResponse<?>> deleteLikeJob(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
+                                                            @PathVariable Long id) {
+        if (oAuth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("인증되지 않은 사용자입니다."));
+        }
+        likeService.deleteLike(oAuth2User.getId(), id, LikeType.JOB);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(null, "공고 좋아요가 삭제되었습니다."));
+    }
 
     @PostMapping("/projects")
     public ResponseEntity<ApiResponse<Object>> createLikeProject(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
