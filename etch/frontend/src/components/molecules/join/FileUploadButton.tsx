@@ -1,4 +1,4 @@
-import type { fileUploadButtonProps } from "../atoms/button";
+import type { fileUploadButtonProps } from "../../atoms/button";
 
 function FileUploadButton({
   text,

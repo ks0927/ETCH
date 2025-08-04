@@ -1,4 +1,4 @@
-import type { InputProps } from "../atoms/input";
+import type { InputProps } from "../../atoms/input";
 
 function TelInput({ type, value, placeholder, onChange }: InputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

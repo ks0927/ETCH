@@ -1,4 +1,4 @@
-import HeaderAuthButton from "../molecules/header/headerAuthButton";
+import HeaderAuthButton from "../../molecules/header/headerAuthButton";
 import { useNavigate } from "react-router";
 
 function HeaderAuth() {

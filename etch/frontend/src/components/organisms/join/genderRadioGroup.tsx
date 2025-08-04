@@ -1,5 +1,5 @@
 import { useState } from "react";
-import RadioInput from "../molecules/radioInput";
+import RadioInput from "../../molecules/join/radioInput";
 
 function GenderRadioGroup() {
   const [selectedGender, setSelectedGender] = useState("");

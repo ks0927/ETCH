@@ -1,4 +1,4 @@
-import defaultProfile from "../../assets/default-profile.png";
+import defaultProfile from "../../../assets/default-profile.png";
 
 function ProfileImagePreview({ imageUrl }: { imageUrl?: string }) {
   return (

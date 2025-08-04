@@ -1,5 +1,5 @@
 import { useState } from "react";
-import BirthDropdown from "../molecules/birthDropdown";
+import BirthDropdown from "../../molecules/join/birthDropdown";
 
 function BirthDateSelector() {
   const [selectedDate, setSelectedDate] = useState({

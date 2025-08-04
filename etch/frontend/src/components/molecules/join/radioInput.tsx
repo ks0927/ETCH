@@ -1,4 +1,4 @@
-import type { RadioInputProps } from "../atoms/input";
+import type { RadioInputProps } from "../../atoms/input";
 
 function RadioInput({
   value,

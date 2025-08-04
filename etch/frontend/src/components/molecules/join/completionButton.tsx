@@ -1,4 +1,4 @@
-import type { AdditionalButtonProps } from "../atoms/button";
+import type { AdditionalButtonProps } from "../../atoms/button";
 
 function CompletionButton({
   text = "완료",
