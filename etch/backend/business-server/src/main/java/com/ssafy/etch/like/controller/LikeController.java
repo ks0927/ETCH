@@ -58,4 +58,17 @@ public class LikeController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(null, "공고 좋아요가 등록되었습니다."));
     }
+
+    @PostMapping("/projects")
+    public ResponseEntity<ApiResponse<Object>> createLikeProject(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
+                                                             @RequestBody LikeRequestDTO likeRequestDTO) {
+        if (oAuth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("인증되지 않은 사용자입니다."));
+        }
+
+        likeService.saveLike(oAuth2User.getId(), likeRequestDTO, LikeType.PROJECT);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(null, "프로젝트 좋아요가 등록되었습니다."));
+    }
 }
