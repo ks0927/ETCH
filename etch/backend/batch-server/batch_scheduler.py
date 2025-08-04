@@ -7,7 +7,7 @@ from dotenv import load_dotenv, find_dotenv
 
 # 배치 스케쥴 목록
 # 1. news api 등록
-from fetch_news import fetch_and_save
+from fetch_news import run_batch
 # 2. top10 기업 추출 및 redis 저장
 from cache_for_redis import fetch_and_store_top10
 
@@ -26,7 +26,7 @@ SEOUL = ZoneInfo("Asia/Seoul")
 # 뉴스 호출에 대한 스케쥴링
 def job_news():
     try:
-        cnt = fetch_and_save()
+        run_batch()
         logger.info("news에 대한 Batch가 끝났습니다. %d 개의 기사가 처리되었습니다.", cnt)
     except Exception as e:
         logger.exception("Batch가 실패했습니다: %s", e)
