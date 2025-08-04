@@ -1,13 +1,13 @@
-# Java 17 기반 이미지 사용
-FROM openjdk:17-jdk-alpine
+# backend/business-server/Dockerfile
+FROM openjdk:17
+WORKDIR /app
 
-# jar 파일 위치를 /app/app.jar 에 두도록 설정
-ARG JAR_FILE=build/libs/*.jar
-COPY ${JAR_FILE} app.jar
+# JAR 복사
+COPY build/libs/*.jar app.jar
 
-# 포트 설정
+# 환경 변수 설정이 있다면 여기 추가 가능
+ENV JAVA_OPTS=""
+
 EXPOSE 8081
-
-# jar 실행
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
