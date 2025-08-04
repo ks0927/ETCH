@@ -1,4 +1,4 @@
-type InputType = "email" | "password" | "text";
+type InputType = "email" | "password" | "text" | "tel" | "radio";
 
 export interface InputProps {
   value: string; // input안에 들어올 내용
