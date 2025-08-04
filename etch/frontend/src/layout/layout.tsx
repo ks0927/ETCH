@@ -6,14 +6,12 @@ import Header from "../components/common/header";
 function Layout() {
   const { pathname } = useLocation();
 
-  // 페이지 이동 시 스크롤을 맨 위로 (더 안정적인 방법)
   useEffect(() => {
-    // 약간의 지연을 주어 DOM 렌더링 완료 후 스크롤
     const timer = setTimeout(() => {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: "instant", // 즉시 이동
+        behavior: "instant",
       });
     }, 0);
 
@@ -21,12 +19,29 @@ function Layout() {
   }, [pathname]);
 
   return (
-    <div className="px-4 py-6 mx-auto max-w-5xl sm:px-6 lg:px-8">
-      <Header />
-      <main className="pt-4 pb-4">
-        <Outlet />
-      </main>
-      <Footer />
+    <div className="min-h-screen">
+      {/* 고정 헤더 */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+        <div className="px-6 py-3 mx-auto max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
+          <Header />
+        </div>
+      </div>
+
+      {/* 메인 콘텐츠 */}
+      <div className="pt-16">
+        {" "}
+        {/* pt-20 → pt-16으로 줄임 */}
+        <div className="px-6 py-2 mx-auto max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
+          {" "}
+          {/* py-6 → py-2로 줄임 */}
+          <main className="pt-2 pb-2">
+            {" "}
+            {/* pt-4 pb-4 → pt-2 pb-2로 줄임 */}
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+      </div>
     </div>
   );
 }

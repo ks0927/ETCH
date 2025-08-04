@@ -4,7 +4,7 @@ import ProcjectCard from "../../molecules/home/projectCard.tsx";
 interface Props {
   mockProjects: mockProjectData[];
 }
-function MainProjectCard({ mockProjects }: Props) {
+function HomeProjectCard({ mockProjects }: Props) {
   return (
     <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-4">
       {mockProjects.slice(0, 4).map((project) => (
@@ -13,4 +13,4 @@ function MainProjectCard({ mockProjects }: Props) {
     </div>
   );
 }
-export default MainProjectCard;
+export default HomeProjectCard;

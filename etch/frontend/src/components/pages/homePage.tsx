@@ -4,12 +4,12 @@ import { funcData } from "../../types/funcComponentData";
 import { mockJobs } from "../../types/mockJobData";
 import { mockNews } from "../../types/mockNewsData";
 import { mockProjects } from "../../types/mockProjectData";
-import MainFuncComponent from "../organisms/main/mainFuncComponent";
-import MainJobCard from "../organisms/main/mainJobCard";
-import MainNewsCard from "../organisms/main/mainNewsCard";
-import MainProjectCard from "../organisms/main/mainProjectCard";
+import HomeFuncComponent from "../organisms/home/homeFuncComponent";
+import HomeJobCard from "../organisms/home/homeJobCard";
+import HomeNewsCard from "../organisms/home/homeNewsCard";
+import HomeProjectCard from "../organisms/home/homeProjectCard";
 
-function MainPage() {
+function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -36,7 +36,7 @@ function MainPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link to={"/mypage"}>
-                <button className="bg-white text-[#007DFC] px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg">
+                <button className="bg-white cursor-pointer text-[#007DFC] px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg">
                   시작하기
                 </button>
               </Link>
@@ -83,7 +83,7 @@ function MainPage() {
                 </span>
               </div>
             </div>
-            <MainJobCard mockJobs={mockJobs} />
+            <HomeJobCard mockJobs={mockJobs} />
           </div>
         </div>
       </section>
@@ -133,7 +133,7 @@ function MainPage() {
                     </svg>
                   </button>
                 </div>
-                <MainProjectCard mockProjects={mockProjects} />
+                <HomeProjectCard mockProjects={mockProjects} />
               </div>
             </div>
 
@@ -160,7 +160,7 @@ function MainPage() {
                     뉴스
                   </h2>
                 </div>
-                <MainNewsCard mockNews={mockNews} />
+                <HomeNewsCard mockNews={mockNews} />
               </div>
             </div>
           </div>
@@ -180,7 +180,7 @@ function MainPage() {
             </p>
           </div>
           <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8">
-            <MainFuncComponent funcData={funcData} />
+            <HomeFuncComponent funcData={funcData} />
           </div>
         </div>
       </section>
@@ -188,4 +188,4 @@ function MainPage() {
   );
 }
 
-export default MainPage;
+export default HomePage;

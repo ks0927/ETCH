@@ -1,8 +1,8 @@
 import { Link } from "react-router";
 import { mockNews } from "../../../types/mockNewsData";
-import CompanyNews from "../../organisms/news/mainCompanyNews";
-import LatestNews from "../../organisms/news/mainLatestNews";
-import RecommendNews from "../../organisms/news/mainRecommendNews";
+import CompanyNews from "../../organisms/news/newsListCompany";
+import LatestNews from "../../organisms/news/newsListLatest";
+import RecommendNews from "../../organisms/news/newsListRecommend";
 import { mockCompany } from "../../../types/mockCompanyData";
 
 function NewsPage() {
