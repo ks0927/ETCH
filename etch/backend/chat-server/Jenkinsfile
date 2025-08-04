@@ -14,19 +14,24 @@ pipeline {
             }
         }
 
-        stage('Build Jar') {
+	stage('Build Jar') {
             steps {
-		sh 'chmod +x ./gradlew && ./gradlew clean build -x test'
-            }
-        }
+        	dir('etch/backend/chat-server') {
+           	    sh 'chmod +x ./gradlew'
+            	    sh './gradlew clean build -x test'
+        	}
+    	    }
+	}
 
         stage('Docker Build') {
             steps {
-                sh """
-                docker rm -f \$CONTAINER_NAME || true
-                docker build -t \$IMAGE_NAME:latest .
-                """
-            }
+		dir('etch/backend/chat-server'){
+                    sh """
+                    docker rm -f \$CONTAINER_NAME || true
+                    docker build -t \$IMAGE_NAME:latest .
+                    """
+                }
+	    }
         }
 
         stage('Run Docker Container') {
