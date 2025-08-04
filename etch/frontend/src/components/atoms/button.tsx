@@ -3,6 +3,7 @@ export interface ButtonProps {
   color?: string; //  버튼의 색상
   img?: string; //  버튼의 이미지
   onClick?: () => void; //  버튼을 누르면 생기는 기능
+  textColor?: string; //  버튼의 텍스트 색상
 }
 
 export interface AdditionalButtonProps extends ButtonProps {
