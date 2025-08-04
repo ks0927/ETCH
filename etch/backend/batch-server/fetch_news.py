@@ -1,7 +1,6 @@
 import os
 import sys
 import logging
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 import pymysql
@@ -58,144 +57,83 @@ def get_conn():
         cursorclass=pymysql.cursors.DictCursor,
     )
 
-def ensure_table_exists(conn): # conn은 DB 연결 객체
-    # 테스트용 
-    ddl = """
-    CREATE TABLE IF NOT EXISTS news_articles (
-        id BIGINT NOT NULL AUTO_INCREMENT,
-        source_id VARCHAR(255) NULL,
-        source_name VARCHAR(255) NULL,
-        author VARCHAR(512) NULL,
-        title VARCHAR(1024) NOT NULL,
-        description TEXT NULL,
-        url VARCHAR(1024) NOT NULL,
-        url_to_image VARCHAR(1024) NULL,
-        published_at DATETIME NULL,
-        content MEDIUMTEXT NULL,
-        query VARCHAR(255) NOT NULL,
-        fetched_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        UNIQUE KEY uq_url (url)
-    ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    """
-    # try-with-resources 
-    with conn.cursor() as cur: # conn.cursor()로 SQL 명령 실행할 수 있는 커서 가져오기
-        cur.execute(ddl) # MySQL로 쿼리 날리기
-
-# NewsAPI
-def fetch_news(
-    query: Optional[str] = None,
-    page_size: Optional[int] = None,
-    language: Optional[str] = None,
-    sort_by: Optional[str] = None,
+# NewsAPI 호출
+def _fetch_news(
+    query: str,
+    page_size: int,
+    language: str,
+    sort_by: str
 ) -> List[Dict[str, Any]]:
-    # api 호출 -> 리스트 반환
-    q = query or NEWS_QUERY
-    size = page_size or NEWS_PAGE_SIZE
-    lang = language or NEWS_LANGUAGE
-    sort = sort_by or NEWS_SORT_BY
-
     url = "https://newsapi.org/v2/everything"
     headers = {"X-Api-Key": NEWSAPI_KEY}
     params = {
-        "q": q,
-        "pageSize": size,
-        "page": 1,
-        "language": lang,
-        "sortBy": sort,
+        "q":        query,
+        "pageSize": page_size,
+        "page":     1,
+        "language": language,
+        "sortBy":   sort_by,
     }
-    
-    logger.info("호출한 NewsAPI: q=%s, pageSize=%s, language=%s, sortBy=%s", q, size, lang, sort)
-    
     resp = requests.get(url, headers=headers, params=params, timeout=30)
-    if resp.status_code != 200:
-        try:
-            payload = resp.json()
-        except Exception:
-            payload = {"text": resp.text}
-        raise RuntimeError(f"NewsAPI 에러 {resp.status_code}: {payload}")
+    resp.raise_for_status()
     data = resp.json()
-    articles = data.get("articles", [])
-    
-    logger.info("불러들인 기사 개수: %d 개", len(articles))
-    
-    return articles
 
-def parse_datetime(dt_str: Optional[str]) -> Optional[datetime]:
-    if not dt_str:
-        return None
-    
-    try:
-        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        return dt.astimezone(timezone.utc).replace(tzinfo=None)
-    except Exception:
-        return None
+    return data.get("articles", [])
 
-def save_articles(conn, articles: List[Dict[str, Any]], query_used: str):
-    # MySQL에 기사 삽입, url 체크로 중복 제거
+# 회사 이름으로 company_id 조회
+def _get_company_id(conn, name: str) -> int:
+    with conn.cursor() as cur:
+        cur.execute("SELECT id FROM company WHERE name = %s", (name,))
+        row = cur.fetchone()
+        if not row:
+            raise ValueError(f"회사 '{name}' 없음")
+        
+        return row["id"]
+
+# db에 기사 저장
+def _save_news(conn, company_id: int, articles: List[Dict[str, Any]]) -> int:
     sql = """
-    INSERT INTO news_articles (
-        source_id, source_name, author, title, description, url, url_to_image,
-        published_at, content, query, fetched_at
+    INSERT INTO news (
+        thumbnail_url, title, description, url, published_at, company_id
     ) VALUES (
-        %(source_id)s, %(source_name)s, %(author)s, %(title)s, %(description)s, %(url)s, %(url_to_image)s,
-        %(published_at)s, %(content)s, %(query)s, NOW()
-    )
-    ON DUPLICATE KEY UPDATE
+        %(thumbnail_url)s, %(title)s, %(description)s, %(url)s, %(published_at)s, %(company_id)s
+    ) ON DUPLICATE KEY UPDATE
         title = VALUES(title),
         description = VALUES(description),
-        url_to_image = VALUES(url_to_image),
-        published_at = VALUES(published_at),
-        content = VALUES(content),
-        query = VALUES(query),
-        fetched_at = NOW();
+        thumbnail_url = VALUES(thumbnail_url),
+        published_at = VALUES(published_at);
     """
-    rows = []
-    
-    for a in articles:
-        src = a.get("source") or {}
-        rows.append({
-            "source_id": src.get("id"),
-            "source_name": src.get("name"),
-            "author": a.get("author"),
-            "title": a.get("title") or "",
-            "description": a.get("description"),
-            "url": a.get("url"),
-            "url_to_image": a.get("urlToImage"),
-            "published_at": parse_datetime(a.get("publishedAt")),
-            "content": a.get("content"),
-            "query": query_used,
-        })
-    inserted = 0
-    
     with conn.cursor() as cur:
-        for row in rows:
-            try:
-                cur.execute(sql, row)
-                inserted += 1
-            except pymysql.err.IntegrityError:
-                pass
+        for a in articles:
+            cur.execute(sql, {
+                "thumbnail_url": a.get("urlToImage"),
+                "title":         a["title"],
+                "description":   a.get("description"),
+                "url":           a["url"],
+                "published_at":  a["publishedAt"][:10],
+                "company_id":    company_id
+            })
+    conn.commit()
     
-    logger.info("저장된 행의 개수: %d 개", inserted)
+    return len(articles)
 
-def fetch_and_save(query: Optional[str] = None, page_size: Optional[int] = None) -> int:
-    # 기사 불러와서 DB에 저장하고, 불러온 기사들의 개수 반환 - 통합 함수 
-    conn = None
-    try:
-        conn = get_conn()
-        ensure_table_exists(conn)
-        q = query or NEWS_QUERY
-        arts = fetch_news(query=q, page_size=page_size or NEWS_PAGE_SIZE)
-        save_articles(conn, arts, q)
-       
-        return len(arts)
-    finally:
-        if conn:
-            conn.close()
+# 외부에서 호출할 통합 함수
+def fetch_and_store(company_name: str) -> int:
+    articles = _fetch_news(
+        query      = company_name,
+        page_size  = NEWS_PAGE_SIZE,
+        language   = NEWS_LANGUAGE,
+        sort_by    = NEWS_SORT_BY
+    )
+    with get_conn() as conn:
+        cid = _get_company_id(conn, company_name)
+        cnt = _save_news(conn, cid, articles)
+    logger.info("저장 완료: %s (%d건)", company_name, cnt)
+
+    return cnt
 
 if __name__ == "__main__":
     q = sys.argv[1] if len(sys.argv) >= 2 else NEWS_QUERY
     size = int(sys.argv[2]) if len(sys.argv) >= 3 else NEWS_PAGE_SIZE
-    count = fetch_and_save(query=q, page_size=size)
+    count = fetch_and_store(q)
     
     logger.info("완료됨. %d 개의 기사가 처리되었습니다.", count)
