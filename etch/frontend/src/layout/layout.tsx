@@ -1,10 +1,13 @@
 import { Outlet, useLocation } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../components/common/footer";
 import Header from "../components/common/header";
+import ChatButton from "../components/molecules/chat/chatButton";
+import ChatModalContainer from "../components/common/chatModalContainer";
 
 function Layout() {
   const { pathname } = useLocation();
+  const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +42,13 @@ function Layout() {
             {/* pt-4 pb-4 → pt-2 pb-2로 줄임 */}
             <Outlet />
           </main>
+          <ChatButton onClick={() => setShowChatModal(true)} />
           <Footer />
+          {showChatModal && (
+            <div className="fixed bottom-28 right-4 z-40 border border-gray-400 shadow-lg w-80 h-[500px] rounded-lg overflow-hidden bg-white">
+              <ChatModalContainer onClose={() => setShowChatModal(false)} />
+            </div>
+          )}
         </div>
       </div>
     </div>
