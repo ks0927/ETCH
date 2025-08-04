@@ -26,7 +26,7 @@ SEOUL = ZoneInfo("Asia/Seoul")
 # 뉴스 호출에 대한 스케쥴링
 def job_news():
     try:
-        run_batch()
+        cnt = run_batch()
         logger.info("news에 대한 Batch가 끝났습니다. %d 개의 기사가 처리되었습니다.", cnt)
     except Exception as e:
         logger.exception("Batch가 실패했습니다: %s", e)
@@ -41,7 +41,7 @@ def job_top10():
 
 if __name__ == "__main__":
     scheduler = BlockingScheduler(timezone=SEOUL)
-
+    
     # 뉴스 API 배치 스케쥴: 시간 변경 가능
     scheduler.add_job(job_news, CronTrigger(hour=21, minute=41, timezone=SEOUL), id="news_batch")
 

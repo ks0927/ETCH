@@ -131,20 +131,23 @@ def fetch_and_store(company_name: str) -> int:
 
     return cnt
 
-def _get_all_company_names() -> List[str]: # 구현하세요
+def _get_all_company_names() -> List[str]: 
     with get_conn() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT name FROM company")
             all_company_names = [row["name"] for row in cur.fetchall()]
             return all_company_names
 
-def run_batch() -> None:
+def run_batch() -> int:
     """배치 작업 실행. 모든 회사에 대한 뉴스 기사 가져오기 및 저장
     """
     # DB에서 회사명 리스트 받아오기
     all_company_names: List[str] = _get_all_company_names()
+    processed_count = 0
     for company_name in all_company_names:
-        fetch_and_store(company_name)
+        cnt = fetch_and_store(company_name)
+        processed_count += cnt
+    return processed_count # 처리된 기사 수
 
 if __name__ == "__main__":
     q = sys.argv[1] if len(sys.argv) >= 2 else NEWS_QUERY
