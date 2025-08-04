@@ -44,4 +44,18 @@ public class LikeServiceImpl implements LikeService {
 
         likeRepository.save(likeEntity);
     }
+
+    @Override
+    @Transactional
+    public void deleteLike(Long memberId, Long targetId, LikeType likeType) {
+        if (targetId == null) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+
+        // 존재하는 좋아요 엔티티 조회
+        LikeEntity likeEntity = likeRepository.findByMember_IdAndTargetIdAndType(memberId, targetId, likeType)
+                .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
+
+        likeRepository.delete(likeEntity);
+    }
 }
