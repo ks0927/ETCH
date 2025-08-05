@@ -36,8 +36,8 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
         }
 
-        String id = jwtUtil.getId(refreshToken);
-        MemberDTO memberDTO = memberService.findById(Long.parseLong(id));
+        Long id = jwtUtil.getId(refreshToken);
+        MemberDTO memberDTO = memberService.findById(id);
         if (!memberDTO.getRefreshToken().equals(refreshToken)) {
             throw new CustomException(ErrorCode.REFRESH_TOKEN_INVALID);
         }
@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         memberService.updateRefreshToken(memberDTO.getId(), newRefreshToken);
 
         // 응답 헤더에 새로운 액세스 토큰 추가
-        response.setHeader("access", newAccessToken);
+        response.setHeader("Authorization", newAccessToken);
         // 쿠키로 전달
         Cookie refreshCookie = CookieUtil.createCookie("refresh", newRefreshToken);
         response.addCookie(refreshCookie);
