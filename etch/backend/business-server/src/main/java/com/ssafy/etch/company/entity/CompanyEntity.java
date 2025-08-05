@@ -9,9 +9,11 @@ import com.ssafy.etch.job.entity.JobEntity;
 import com.ssafy.etch.news.entity.NewsEntity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name="company")
+@Getter
 public class CompanyEntity {
 
 	@Id
