@@ -30,6 +30,7 @@ const ProjectListPage = lazy(
 const ProjectWritePage = lazy(
   () => import("../components/pages/project/projectWritePage.tsx")
 );
+const JobPage = lazy(() => import("../components/pages/job/jobPage.tsx"));
 
 const router = createBrowserRouter([
   {
@@ -115,6 +116,10 @@ const router = createBrowserRouter([
       {
         path: "/project/write",
         element: <ProjectWritePage />,
+      },
+      {
+        path: "/jobs",
+        element: <JobPage />,
       },
     ],
   },
