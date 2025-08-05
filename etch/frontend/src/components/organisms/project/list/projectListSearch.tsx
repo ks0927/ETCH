@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import ProjectSearchInput from "../../molecules/project/projectSearchInput";
-import ProjectSearchButton from "../../molecules/project/projectSearchButton";
+import ProjectInput from "../../../molecules/project/projectInput";
+import ProjectButton from "../../../molecules/project/projectButton";
 
-function ProjectProjectSearch() {
+function ProjectListSearch() {
   const [keyword, setKeyword] = useState("");
   const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ function ProjectProjectSearch() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex gap-3">
         <div className="flex-1">
-          <ProjectSearchInput
+          <ProjectInput
             value={keyword}
             type="text"
             placeholder="프로젝트, 기술 스택, 개발자 검색..."
@@ -42,15 +42,16 @@ function ProjectProjectSearch() {
             onKeyEnter={handleKeyEnter}
           />
         </div>
-        <ProjectSearchButton
+        <ProjectButton
           text="검색"
-          color="bg-[#007DFC]"
+          bgColor="bg-[#007DFC]"
           textColor="text-white"
           onClick={handleSearchClick}
+          css="px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity whitespace-nowrap"
         />
       </div>
     </div>
   );
 }
 
-export default ProjectProjectSearch;
+export default ProjectListSearch;

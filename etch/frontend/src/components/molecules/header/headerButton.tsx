@@ -1,6 +1,6 @@
 import type { ButtonProps } from "../../atoms/button";
 
-function HeaderButton({ text, color, img, onClick }: ButtonProps) {
+function HeaderButton({ text, bgColor: color, img, onClick }: ButtonProps) {
   return (
     <button
       style={{ backgroundColor: color }}

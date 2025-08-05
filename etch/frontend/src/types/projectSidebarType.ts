@@ -24,32 +24,27 @@ export const ProjectSidebarType: ProjectSidebarInventory[] = [
   },
   {
     type: "field",
-    list: "백엔드/API",
-    value: "백엔드/API",
+    list: "서버",
+    value: "서버",
     checked: false,
   },
   {
     type: "field",
-    list: "데이터 사이언스",
-    value: "데이터 사이언스",
+    list: "데이터베이스",
+    value: "데이터베이스",
     checked: false,
   },
   {
     type: "field",
-    list: "DevOps/인프라",
-    value: "DevOps/인프라",
+    list: "DevOps",
+    value: "DevOps",
     checked: false,
   },
+
   {
     type: "field",
-    list: "AI/머신러닝",
-    value: "AI/머신러닝",
-    checked: false,
-  },
-  {
-    type: "field",
-    list: "블록체인",
-    value: "블록체인",
+    list: "보안",
+    value: "보안",
     checked: false,
   },
   //stack

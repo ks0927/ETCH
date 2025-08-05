@@ -2,7 +2,7 @@ import type { AdditionalButtonProps } from "../../atoms/button";
 
 function CompletionButton({
   text = "완료",
-  color = "bg-blue-600",
+  bgColor: color = "bg-blue-600",
   textColor = "text-white",
   onClick,
 }: AdditionalButtonProps) {
