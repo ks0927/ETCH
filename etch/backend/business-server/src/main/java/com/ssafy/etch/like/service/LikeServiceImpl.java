@@ -1,5 +1,8 @@
 package com.ssafy.etch.like.service;
 
+import com.ssafy.etch.company.dto.CompanyLikeResponseDTO;
+import com.ssafy.etch.company.entity.CompanyEntity;
+import com.ssafy.etch.company.repository.CompanyRepository;
 import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.like.dto.LikeDTO;
@@ -9,7 +12,7 @@ import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.repository.LikeRepository;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
-import com.ssafy.etch.news.dto.NewsResponseDTO;
+import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
 import jakarta.transaction.Transactional;
@@ -25,6 +28,7 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
     private final NewsRepository newsRepository;
+    private final CompanyRepository companyRepository;
 
     @Override
     @Transactional
@@ -66,12 +70,22 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public List<NewsResponseDTO> getLikedNews(Long memberId) {
+    public List<NewsLikeResponseDTO> getLikedNews(Long memberId) {
         List<Long> targetIds = getLikedTargetIds(memberId, LikeType.NEWS);
         return newsRepository.findAllByIdIn(targetIds)
                 .stream()
                 .map(NewsEntity::toNewsDTO)
-                .map(NewsResponseDTO::from)
+                .map(NewsLikeResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<CompanyLikeResponseDTO> getLikedCompany(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        return companyRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(CompanyEntity::toCompanyDTO)
+                .map(CompanyLikeResponseDTO::from)
                 .toList();
     }
 

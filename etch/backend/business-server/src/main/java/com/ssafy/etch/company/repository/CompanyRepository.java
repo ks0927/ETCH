@@ -1,11 +1,12 @@
 package com.ssafy.etch.company.repository;
 
-import java.util.List;
-
+import com.ssafy.etch.company.entity.CompanyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ssafy.etch.company.entity.CompanyEntity;
+import java.util.Collection;
+import java.util.List;
 
 public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
 	CompanyEntity findById(long id);
+    List<CompanyEntity> findAllByIdIn(Collection<Long> id);
 }
