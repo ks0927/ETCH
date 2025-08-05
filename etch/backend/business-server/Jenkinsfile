@@ -1,0 +1,50 @@
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME = 'business-server'
+        CONTAINER_NAME = 'business-server'
+        PORT = '8081'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build Jar') {
+            steps {
+                sh 'chmod +x ./gradlew && ./gradlew clean build -x test'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh """
+                docker rm -f \$CONTAINER_NAME || true
+                docker build -t \$IMAGE_NAME:latest .
+                """
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                sh """
+                docker run -d --name \$CONTAINER_NAME -p \$PORT:\$PORT \$IMAGE_NAME:latest
+                """
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "⚠️ 빌드 실패! 확인 필요"
+        }
+        success {
+            echo "✅ 배포 완료!!"
+        }
+    }
+}
+
