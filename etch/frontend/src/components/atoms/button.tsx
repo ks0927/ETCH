@@ -18,3 +18,13 @@ export interface fileUploadButtonProps extends ButtonProps {
   onFileSelect: (file: File) => void; // 파일 선택 시 호출되는 함수
   accept?: string; // 허용되는 파일 형식
 }
+
+export interface NavButtonProps extends ButtonProps {
+  to: string;
+  isActive?: boolean;
+}
+
+export interface StatsButtonProps extends ButtonProps {
+  count: number;
+  label: string;
+}
