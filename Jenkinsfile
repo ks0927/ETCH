@@ -76,6 +76,21 @@ pipeline {
                 }
             }
         }
+
+        // --- 새로운 배포 스테이지 ---
+        stage('Deploy to EC2') {
+            steps {
+                echo "EC2 서버에 배포를 시작합니다..."
+                // sshagent 플러그인을 사용하여 Jenkins에 등록된 SSH 키로 인증을 수행합니다.
+                sshagent(credentials: ['jenkins-ssh-key']) {
+                    // -o StrictHostKeyChecking=no 옵션은 SSH 처음 접속 시 'yes'를 입력하는 과정을 생략해줍니다.
+                    // Jenkins가 EC2 호스트에 접속하여 ~/app/deploy.sh 스크립트를 실행합니다.
+                    sh '''
+                        ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io '~/app/deploy.sh'
+                    '''
+                }
+            }
+        }
         
         stage('Cleanup') {
             steps {
