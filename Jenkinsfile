@@ -96,23 +96,25 @@ pipeline {
                         }
                     }
                 }
-#                stage('[Package] Batch-Server') {
-#                    when { expression { env.CHANGED_FILES.contains('etch/backend/batch-server/') } }
-#                    agent any
-#                    steps {
-#                        dir('etch/backend/batch-server') {
-#                            echo "Packaging Batch-Server Docker image..."
-#                            script {
-#                                def imageName = "${env.DOCKERHUB_USERNAME}/etch-batch-server"
-#                                def customImage = docker.build(imageName)
-#                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-#                                    customImage.push("${env.BUILD_NUMBER}")
-#                                    customImage.push("latest")
-#                                }
-#                            }
-#                        }
-#                    }
-#                }
+		/*
+                stage('[Package] Batch-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/batch-server/') } }
+                    agent any
+                    steps {
+                        dir('etch/backend/batch-server') {
+                            echo "Packaging Batch-Server Docker image..."
+                           script {
+                                def imageName = "${env.DOCKERHUB_USERNAME}/etch-batch-server"
+                                def customImage = docker.build(imageName)
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("latest")
+                                }
+                            }
+                        }
+                    }
+                }
+		*/
                 stage('[Package] Recommend-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/recommend-server/') } }
                     agent any
