@@ -2,13 +2,11 @@ package com.ssafy.etch.company.dto;
 
 import java.time.LocalDate;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 @Builder
 @Getter
-@AllArgsConstructor
 public class CompanyInfoDTO {
 	private Long id;
 	private String name;
@@ -27,4 +25,26 @@ public class CompanyInfoDTO {
 	private Double femaleRatio;
 	private Long salary;
 	private Long serviceYear;
+
+	public static CompanyInfoDTO from(CompanyDTO companyDTO) {
+		return CompanyInfoDTO.builder()
+			.id(companyDTO.getId())
+			.name(companyDTO.getName())
+			.industry(companyDTO.getIndustry())
+			.mainProducts(companyDTO.getMainProducts())
+			.ceoName(companyDTO.getCeoName())
+			.summary(companyDTO.getSummary())
+			.stock(companyDTO.getStock())
+			.address(companyDTO.getAddress())
+			.homepageUrl(companyDTO.getHomepageUrl())
+			.foundedDate(companyDTO.getFoundedDate())
+			.totalEmployees(companyDTO.getTotalEmployees())
+			.maleEmployees(companyDTO.getMaleEmployees())
+			.femaleEmployees(companyDTO.getFemaleEmployees())
+			.maleRatio(companyDTO.getMaleRatio())
+			.femaleRatio(companyDTO.getFemaleRatio())
+			.salary(companyDTO.getSalary())
+			.serviceYear(companyDTO.getServiceYear())
+			.build();
+	}
 }

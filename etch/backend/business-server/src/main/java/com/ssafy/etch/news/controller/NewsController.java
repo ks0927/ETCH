@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
-import com.ssafy.etch.news.service.NewsService;
+import com.ssafy.etch.news.service.NewsServiceImpl;
 
 @RestController
 @RequestMapping("/news")
 public class NewsController {
 
-	private final NewsService newsService;
+	private final NewsServiceImpl newsService;
 
-	public NewsController(NewsService newsService) {
+	public NewsController(NewsServiceImpl newsService) {
 		this.newsService = newsService;
 	}
 
