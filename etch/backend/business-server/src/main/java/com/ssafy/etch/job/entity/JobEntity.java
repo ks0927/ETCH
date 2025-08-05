@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.ssafy.etch.company.entity.CompanyEntity;
 
+import com.ssafy.etch.job.dto.JobDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,4 +40,15 @@ public class JobEntity {
 	@ManyToOne
 	@JoinColumn(name = "company_id", nullable = false)
 	private CompanyEntity company;
+
+	public JobDTO toJobDTO() {
+		return JobDTO.builder()
+				.id(id)
+				.title(title)
+				.openingDate(openingDate)
+				.expirationDate(expirationDate)
+				.createdAt(createdAt)
+				.updatedAt(updatedAt)
+				.build();
+	}
 }

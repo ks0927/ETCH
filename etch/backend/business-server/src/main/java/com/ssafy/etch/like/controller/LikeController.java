@@ -2,6 +2,7 @@ package com.ssafy.etch.like.controller;
 
 import com.ssafy.etch.company.dto.CompanyLikeResponseDTO;
 import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.job.dto.JobLikeResponseDTO;
 import com.ssafy.etch.like.dto.LikeRequestDTO;
 import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.service.LikeService;
@@ -83,7 +84,14 @@ public class LikeController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(null, "기업 좋아요가 삭제되었습니다."));
     }
-    
+
+    @GetMapping("/jobs")
+    public ResponseEntity<ApiResponse<List<JobLikeResponseDTO>>> getLikeJob(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
+
+        List<JobLikeResponseDTO> list = likeService.getLikedJob(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
+    }
     @PostMapping("/jobs")
     public ResponseEntity<ApiResponse<Object>> createLikeJob(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
                                                                  @RequestBody LikeRequestDTO likeRequestDTO) {
