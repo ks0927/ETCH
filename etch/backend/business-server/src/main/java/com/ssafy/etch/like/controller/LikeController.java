@@ -4,12 +4,15 @@ import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.like.dto.LikeRequestDTO;
 import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.service.LikeService;
+import com.ssafy.etch.news.dto.NewsResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,6 +21,13 @@ public class LikeController {
 
     private final LikeService likeService;
 
+    @GetMapping("/news")
+    public ResponseEntity<ApiResponse<List<NewsResponseDTO>>> news(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
+
+        List<NewsResponseDTO> list = likeService.getLikedNews(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
+    }
     @PostMapping("/news")
     public ResponseEntity<ApiResponse<Object>> createLikeNews(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
                                                               @RequestBody LikeRequestDTO likeRequestDTO) {

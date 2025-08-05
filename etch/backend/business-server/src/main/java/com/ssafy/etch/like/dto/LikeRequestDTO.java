@@ -1,10 +1,10 @@
 package com.ssafy.etch.like.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
+@Builder
 @Getter
-@Setter
 public class LikeRequestDTO {
     private Long targetId;
 }

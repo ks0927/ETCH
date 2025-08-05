@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.ssafy.etch.company.entity.CompanyEntity;
 
+import com.ssafy.etch.news.dto.NewsDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -39,4 +40,16 @@ public class NewsEntity {
 	@ManyToOne
 	@JoinColumn(name = "company_id", nullable = false)
 	private CompanyEntity company;
+
+	public NewsDTO toNewsDTO() {
+		return NewsDTO.builder()
+				.id(id)
+				.thumbnailUrl(thumbnailUrl)
+				.title(title)
+				.description(description)
+				.url(url)
+				.publishedAt(publishedAt)
+				.company(company)
+				.build();
+	}
 }
