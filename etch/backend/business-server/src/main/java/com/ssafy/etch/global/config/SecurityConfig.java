@@ -91,7 +91,7 @@ public class SecurityConfig {
 		//경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/", "/signup", "/v3/api-docs/**",
+				.requestMatchers("/**", "/signup", "/v3/api-docs/**",
 					"/swagger-ui/**",
 					"/swagger-ui.html").permitAll()
 				.requestMatchers("/user/**", "/auth/me").hasAnyRole("GUEST", "USER")
