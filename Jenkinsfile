@@ -22,7 +22,7 @@ pipeline {
         // 각 서비스의 소스 코드를 컴파일하거나 빌드하여 실행 가능한 파일(JAR, 정적 파일 등)을 만듭니다.
         stage('Build Changed Services in Parallel') {
             parallel {
-                stage('Build Business-Server') {
+                stage('[Build] Business-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
                     agent any
                     steps {
@@ -33,7 +33,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Build Chat-Server') {
+                stage('[Build] Chat-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
@@ -44,7 +44,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Build Frontend') {
+                stage('[Build] Frontend') {
                     when { expression { env.CHANGED_FILES.contains('etch/frontend/') } }
                     agent { docker { image 'node:20-alpine' } }
                     steps {
@@ -62,7 +62,7 @@ pipeline {
         // 빌드 단계에서 생성된 결과물을 사용하여 Docker 이미지를 만듭니다.
         stage('Package Changed Services as Docker Images in Parallel') {
             parallel {
-                stage('Package Business-Server') {
+                stage('[Package] Business-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
                     agent any // Docker CLI가 설치된 Jenkins Master에서 실행
                     steps {
@@ -79,7 +79,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Package Chat-Server') {
+                stage('[Package] Chat-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
@@ -96,7 +96,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Package Batch-Server') {
+                stage('[Package] Batch-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/batch-server/') } }
                     agent any
                     steps {
@@ -113,7 +113,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Package Recommend-Server') {
+                stage('[Package] Recommend-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/recommend-server/') } }
                     agent any
                     steps {
@@ -130,7 +130,7 @@ pipeline {
                         }
                     }
                 }
-                stage('Package Frontend') {
+                stage('[Package] Frontend') {
                     when { expression { env.CHANGED_FILES.contains('etch/frontend/') } }
                     agent any
                     steps {
