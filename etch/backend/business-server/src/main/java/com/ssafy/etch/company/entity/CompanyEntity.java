@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ssafy.etch.company.dto.CompanyDTO;
 import com.ssafy.etch.job.entity.JobEntity;
 import com.ssafy.etch.news.entity.NewsEntity;
 
@@ -74,4 +75,27 @@ public class CompanyEntity {
 	// 기업 1: 채용공고 N
 	@OneToMany(mappedBy = "company", fetch = FetchType.LAZY, orphanRemoval = false)
 	private List<JobEntity> jobList = new ArrayList<>();
+
+	public CompanyDTO toCompanyDTO() {
+		return CompanyDTO.builder()
+				.id(id)
+				.name(name)
+				.industry(industry)
+				.mainProducts(mainProducts)
+				.ceoName(ceoName)
+				.summary(summary)
+				.stock(stock)
+				.businessNo(businessNo)
+				.address(address)
+				.homepageUrl(homepageUrl)
+				.foundedDate(foundedDate)
+				.totalEmployees(totalEmployees)
+				.maleEmployees(maleEmployees)
+				.femaleEmployees(femaleEmployees)
+				.maleRatio(maleRatio)
+				.femaleRatio(femaleRatio)
+				.salary(salary)
+				.serviceYear(serviceYear)
+				.build();
+	}
 }

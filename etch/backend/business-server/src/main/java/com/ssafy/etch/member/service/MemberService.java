@@ -6,7 +6,7 @@ import com.ssafy.etch.member.dto.MemberRequestDTO;
 public interface MemberService {
     MemberDTO findById(long id);
 
-    MemberDTO registerNewMember(MemberDTO memberDTO);
+    MemberDTO registerNewMember(String email, MemberDTO memberDTO);
 
     void updateRefreshToken(Long id, String refreshToken);
 

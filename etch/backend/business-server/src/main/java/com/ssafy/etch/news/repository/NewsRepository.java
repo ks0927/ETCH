@@ -1,11 +1,12 @@
 package com.ssafy.etch.news.repository;
 
-import java.util.List;
-
+import com.ssafy.etch.news.entity.NewsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ssafy.etch.news.entity.NewsEntity;
+import java.util.Collection;
+import java.util.List;
 
 public interface NewsRepository extends JpaRepository<NewsEntity, Long> {
-	List<NewsEntity> findAllByOrderByPublishedAtDesc(); // 최신순
+    List<NewsEntity> findAllByIdIn(Collection<Long> id);
+    List<NewsEntity> findAllByOrderByPublishedAtDesc(); // 최신순
 }
