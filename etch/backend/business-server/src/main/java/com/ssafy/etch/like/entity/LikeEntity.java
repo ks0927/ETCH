@@ -30,4 +30,13 @@ public class LikeEntity {
         likeEntity.member = memberEntity;
         return likeEntity;
     }
+
+    public LikeDTO toDTO() {
+        return LikeDTO.builder()
+                .id(id)
+                .memberId(member.toMemberDTO().getId())
+                .targetId(targetId)
+                .type(type)
+                .build();
+    }
 }

@@ -9,9 +9,14 @@ import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.repository.LikeRepository;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
+import com.ssafy.etch.news.dto.NewsResponseDTO;
+import com.ssafy.etch.news.entity.NewsEntity;
+import com.ssafy.etch.news.repository.NewsRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +24,7 @@ public class LikeServiceImpl implements LikeService {
 
     private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
+    private final NewsRepository newsRepository;
 
     @Override
     @Transactional
@@ -57,5 +63,29 @@ public class LikeServiceImpl implements LikeService {
                 .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
 
         likeRepository.delete(likeEntity);
+    }
+
+    @Override
+    public List<NewsResponseDTO> getLikedNews(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.NEWS);
+        return newsRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(NewsEntity::toNewsDTO)
+                .map(NewsResponseDTO::from)
+                .toList();
+    }
+
+    private List<Long> getLikedTargetIds(Long memberId, LikeType likeType) {
+        List<Long> targetIds = likeRepository.findByMemberIdAndType(memberId, likeType)
+                .stream()
+                .map(LikeEntity::toDTO)
+                .map(LikeDTO::getTargetId)
+                .toList();
+
+        if (targetIds.isEmpty()) {
+            throw new CustomException(ErrorCode.LIKE_NOT_FOUND);
+        }
+
+        return targetIds;
     }
 }
