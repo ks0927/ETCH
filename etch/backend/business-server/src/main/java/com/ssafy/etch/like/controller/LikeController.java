@@ -1,10 +1,11 @@
 package com.ssafy.etch.like.controller;
 
+import com.ssafy.etch.company.dto.CompanyLikeResponseDTO;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.like.dto.LikeRequestDTO;
 import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.service.LikeService;
-import com.ssafy.etch.news.dto.NewsResponseDTO;
+import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,9 +23,9 @@ public class LikeController {
     private final LikeService likeService;
 
     @GetMapping("/news")
-    public ResponseEntity<ApiResponse<List<NewsResponseDTO>>> news(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
+    public ResponseEntity<ApiResponse<List<NewsLikeResponseDTO>>> getLikeNews(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
 
-        List<NewsResponseDTO> list = likeService.getLikedNews(oAuth2User.getId());
+        List<NewsLikeResponseDTO> list = likeService.getLikedNews(oAuth2User.getId());
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
     }
@@ -52,6 +53,13 @@ public class LikeController {
                 .body(ApiResponse.success(null, "뉴스 좋아요가 삭제되었습니다."));
     }
 
+    @GetMapping("/companies")
+    public ResponseEntity<ApiResponse<List<CompanyLikeResponseDTO>>> getLikeCompany(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
+
+        List<CompanyLikeResponseDTO> list = likeService.getLikedCompany(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
+    }
     @PostMapping("/companies")
     public ResponseEntity<ApiResponse<Object>> createLikeCompany(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
                                                               @RequestBody LikeRequestDTO likeRequestDTO) {
