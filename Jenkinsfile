@@ -11,30 +11,6 @@ pipeline {
     stages {
         stage('Build & Package All Services in Parallel') {
             parallel {
-                // --- Frontend 빌드 및 패키징 ---
-                stage('Frontend') {
-                    agent {
-                        docker { image 'node:18-alpine' }
-                    }
-                    steps {
-                        dir('etch/frontend') {
-                            echo "Frontend 빌드를 시작합니다..."
-                            sh 'npm ci'
-                            sh 'npm run build'
-
-                            echo "Frontend Docker 이미지를 패키징합니다..."
-                            script {
-                                def imageName = "${env.DOCKERHUB_USERNAME}/etch-frontend"
-                                def customImage = docker.build(imageName)
-
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
-                                    customImage.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
 
                 
                 // --- Chat-Server 빌드 및 패키징 (Spring Boot) ---
