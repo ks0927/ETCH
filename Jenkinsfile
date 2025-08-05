@@ -51,31 +51,6 @@ pipeline {
                     }
                 }
 
-                // --- Business-Server 빌드 및 패키징 ---
-                #stage('Business-Server') {
-                #    // 이 스테이지는 Jenkins Master의 기본 환경(JDK 11 포함)에서 실행됩니다.
-                #    agent any
-                #    steps {
-                #        dir('etch/backend/business-server') {
-                #            echo "Business-Server 빌드를 시작합니다..."
-                #            // gradlew에 실행 권한 부여
-                #            sh 'chmod +x ./gradlew'
-                #            // Gradle Wrapper로 프로젝트를 빌드합니다.
-                #            sh './gradlew clean build'
-
-                #            echo "Business-Server Docker 이미지를 패키징합니다..."
-                #            script {
-                #                def imageName = "${env.DOCKERHUB_USERNAME}/a402-business-server"
-                #                def customImage = docker.build(imageName)
-
-                #                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                #                    customImage.push("${env.BUILD_NUMBER}")
-                #                    customImage.push("latest")
-                #                }
-                #            }
-                #        }
-                #    }
-                #}
                 
                 // --- Chat-Server 빌드 및 패키징 ---
                 stage('Chat-Server') {
