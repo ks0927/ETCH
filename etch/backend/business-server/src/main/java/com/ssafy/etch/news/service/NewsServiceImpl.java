@@ -18,6 +18,7 @@ public class NewsServiceImpl implements NewsService {
 		this.newsRepository = newsRepository;
 	}
 
+	@Override
 	public List<LatestNewsDTO> getLatestNews() {
 		return newsRepository.findAllByOrderByPublishedAtDesc()
 			.stream()
@@ -26,6 +27,7 @@ public class NewsServiceImpl implements NewsService {
 			.toList();
 	}
 
+	@Override
 	public List<CompanyNewsDTO> getNewsByCompanyId(Long companyId) {
 		return newsRepository.findAllByCompanyIdOrderByPublishedAtDesc(companyId)
 			.stream()
