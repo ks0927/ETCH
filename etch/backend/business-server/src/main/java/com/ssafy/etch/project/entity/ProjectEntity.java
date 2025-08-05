@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.ssafy.etch.member.entity.MemberEntity;
 
+import com.ssafy.etch.project.dto.ProjectDTO;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,7 +20,7 @@ public class ProjectEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private String id;
+	private Long id;
 
 	@Column(nullable = false)
 	private String title;
@@ -45,4 +46,18 @@ public class ProjectEntity {
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private MemberEntity member;
+
+	public ProjectDTO toProjectDTO() {
+		return ProjectDTO.builder()
+				.id(id)
+				.title(title)
+				.content(content)
+				.thumbnailUrl(thumbnailUrl)
+				.viewCount(viewCount)
+				.createdAt(createdAt)
+				.updatedAt(updatedAt)
+				.isDeleted(isDeleted)
+				.member(member)
+				.build();
+	}
 }

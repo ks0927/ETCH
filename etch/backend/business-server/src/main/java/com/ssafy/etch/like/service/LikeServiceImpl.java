@@ -18,6 +18,9 @@ import com.ssafy.etch.member.repository.MemberRepository;
 import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
+import com.ssafy.etch.project.ProjectRepository;
+import com.ssafy.etch.project.dto.ProjectLikeResponseDTO;
+import com.ssafy.etch.project.entity.ProjectEntity;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +36,7 @@ public class LikeServiceImpl implements LikeService {
     private final NewsRepository newsRepository;
     private final CompanyRepository companyRepository;
     private final JobRepository jobRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     @Transactional
@@ -100,6 +104,16 @@ public class LikeServiceImpl implements LikeService {
                 .stream()
                 .map(JobEntity::toJobDTO)
                 .map(JobLikeResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<ProjectLikeResponseDTO> getLikedProject(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        return projectRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(ProjectEntity::toProjectDTO)
+                .map(ProjectLikeResponseDTO::from)
                 .toList();
     }
 

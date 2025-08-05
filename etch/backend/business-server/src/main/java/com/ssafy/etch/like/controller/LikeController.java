@@ -8,6 +8,7 @@ import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.service.LikeService;
 import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import com.ssafy.etch.project.dto.ProjectLikeResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -116,6 +117,13 @@ public class LikeController {
                 .body(ApiResponse.success(null, "공고 좋아요가 삭제되었습니다."));
     }
 
+    @GetMapping("/projects")
+    public ResponseEntity<ApiResponse<List<ProjectLikeResponseDTO>>> getLikeProject(@AuthenticationPrincipal CustomOAuth2User oAuth2User){
+
+        List<ProjectLikeResponseDTO> list = likeService.getLikedProject(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
+    }
     @PostMapping("/projects")
     public ResponseEntity<ApiResponse<Object>> createLikeProject(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
                                                              @RequestBody LikeRequestDTO likeRequestDTO) {
