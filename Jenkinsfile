@@ -3,7 +3,7 @@
 pipeline {
     environment {
         // 본인의 Docker Hub 사용자 이름으로 수정했는지 확인
-        DOCKERHUB_USERNAME = 'seungsu'
+        DOCKERHUB_USERNAME = 'kkaebu'
     }
 
     agent any
