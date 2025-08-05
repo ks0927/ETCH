@@ -5,7 +5,6 @@ import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
-import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.service.MemberService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
@@ -42,7 +41,7 @@ public class MemberController {
         }
 
         // 회원 등록
-        MemberDTO newMember = memberService.registerNewMember(requestDTO);
+        MemberDTO newMember = memberService.registerNewMember(oAuth2User.getEmail(), requestDTO);
 
         // 새로운 액세스 토큰 발급
         String newAccessToken = jwtUtil.createJwt(
@@ -58,7 +57,7 @@ public class MemberController {
         response.addCookie(refreshCookie);
 
         // 응답 헤더에 액세스 토큰 추가
-        response.setHeader("access", newAccessToken);
+        response.setHeader("Authorization", newAccessToken);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(newMember,"회원가입 성공"));
     }

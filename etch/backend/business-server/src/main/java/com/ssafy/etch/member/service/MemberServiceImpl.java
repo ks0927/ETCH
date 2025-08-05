@@ -29,9 +29,9 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public MemberDTO registerNewMember(MemberDTO memberDTO) {
+    public MemberDTO registerNewMember(String email, MemberDTO memberDTO) {
         // role 설정
-        memberDTO.setRole("USER");
+        memberDTO = memberDTO.toBuilder().role("USER").email(email).build();
         MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
         MemberEntity savedEntity = memberRepository.save(memberEntity);
         memberDTO = savedEntity.toMemberDTO();
