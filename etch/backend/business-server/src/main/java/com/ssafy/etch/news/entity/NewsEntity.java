@@ -13,7 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
 
+@Getter
 @Entity
 @Table(name="news")
 public class NewsEntity {
@@ -34,7 +36,7 @@ public class NewsEntity {
 	@Column(unique = true, nullable = false)
 	private String url;
 
-	@Column(name = "published_at", nullable = false)
+	@Column(name = "published_at")
 	private LocalDate publishedAt;
 
 	@ManyToOne
