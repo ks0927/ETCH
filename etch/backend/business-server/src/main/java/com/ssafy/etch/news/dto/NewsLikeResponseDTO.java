@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Builder
 @Getter
-public class NewsResponseDTO {
+public class NewsLikeResponseDTO {
     private Long id;
     private String thumbnailUrl;
     private String title;
@@ -16,8 +16,8 @@ public class NewsResponseDTO {
     private LocalDate publishedAt;
     private String name;
 
-    public static NewsResponseDTO from(NewsDTO newsDTO) {
-        return NewsResponseDTO.builder()
+    public static NewsLikeResponseDTO from(NewsDTO newsDTO) {
+        return NewsLikeResponseDTO.builder()
                 .id(newsDTO.getId())
                 .thumbnailUrl(newsDTO.getThumbnailUrl())
                 .title(newsDTO.getTitle())
