@@ -2,7 +2,7 @@ import type { AdditionalButtonProps } from "../../atoms/button";
 
 function HeaderAuthButton({
   text,
-  color,
+  bgColor: color,
   textColor,
   onClick,
 }: AdditionalButtonProps) {

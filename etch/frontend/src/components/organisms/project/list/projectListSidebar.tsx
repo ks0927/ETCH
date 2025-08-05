@@ -1,12 +1,12 @@
 import { useState } from "react";
-import type { ProjectSidebarInventory } from "../../../types/projectSidebarType";
-import ProjectSidebar from "../../molecules/project/projectSidebar";
+import type { ProjectSidebarInventory } from "../../../../types/projectSidebarType";
+import ProjectSidebar from "../../../molecules/project/projectSidebar";
 
 interface Props {
   ProjectSidebarType: ProjectSidebarInventory[];
 }
 
-function ProjectProjectSidebar({ ProjectSidebarType }: Props) {
+function ProjectListSidebar({ ProjectSidebarType }: Props) {
   const [sidebarData, setSidebarData] =
     useState<ProjectSidebarInventory[]>(ProjectSidebarType);
 
@@ -42,4 +42,4 @@ function ProjectProjectSidebar({ ProjectSidebarType }: Props) {
   );
 }
 
-export default ProjectProjectSidebar;
+export default ProjectListSidebar;

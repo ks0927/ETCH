@@ -8,13 +8,13 @@ function HeaderAuth() {
     <div className="flex items-center gap-2">
       <HeaderAuthButton
         text="로그인"
-        color="#FFFFFF"
+        bgColor="#FFFFFF"
         textColor="#007DFC"
         onClick={() => navigate("/login")}
       />
       <HeaderAuthButton
         text="회원가입"
-        color="#007DFC"
+        bgColor="#007DFC"
         textColor="#FFFFFF"
         onClick={() => navigate("/join")}
       />

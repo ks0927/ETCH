@@ -1,6 +1,6 @@
 import type { InputProps } from "../../atoms/input";
 
-function ProjectSearchInput({
+function ProjectInput({
   type,
   value,
   placeholder,
@@ -19,4 +19,4 @@ function ProjectSearchInput({
   );
 }
 
-export default ProjectSearchInput;
+export default ProjectInput;

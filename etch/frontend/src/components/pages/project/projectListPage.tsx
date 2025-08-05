@@ -1,9 +1,9 @@
 import { Link } from "react-router";
 import { mockProjects } from "../../../types/mockProjectData";
-import ProjectProjectCard from "../../organisms/project/projectListCard";
+import ProjectListCard from "../../organisms/project/list/projectListCard";
 import { ProjectSidebarType } from "../../../types/projectSidebarType";
-import ProjectProjectSidebar from "../../organisms/project/projectListSidebar";
-import ProjectProjectSearch from "../../organisms/project/projectListSearch";
+import ProjectListSidebar from "../../organisms/project/list/projectListSidebar";
+import ProjectListSearch from "../../organisms/project/list/projectListSearch";
 
 function ProjectPage() {
   return (
@@ -13,7 +13,7 @@ function ProjectPage() {
         <div className="flex gap-8">
           {/* 사이드바 영역 - sticky 제거 */}
           <div className="w-64 flex-shrink-0 hidden lg:block">
-            <ProjectProjectSidebar ProjectSidebarType={ProjectSidebarType} />
+            <ProjectListSidebar ProjectSidebarType={ProjectSidebarType} />
           </div>
 
           {/* 메인 콘텐츠 영역 */}
@@ -28,7 +28,7 @@ function ProjectPage() {
                 확인하세요. 실력있는 개발자들의 최신 프로젝트와 기술 스택을
                 탐색할 수 있습니다.
               </p>
-              <Link to={"/project/new"}>
+              <Link to={"/project/write"}>
                 <button className="bg-[#007DFC] hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg">
                   새 프로젝트 등록
                 </button>
@@ -37,12 +37,12 @@ function ProjectPage() {
 
             {/* 검색 섹션 */}
             <section>
-              <ProjectProjectSearch />
+              <ProjectListSearch />
             </section>
 
             {/* 프로젝트 카드 섹션 */}
             <section>
-              <ProjectProjectCard mockProjects={mockProjects} />
+              <ProjectListCard mockProjects={mockProjects} />
             </section>
           </div>
         </div>
