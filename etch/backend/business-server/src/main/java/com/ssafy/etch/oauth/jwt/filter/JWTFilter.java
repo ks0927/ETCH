@@ -29,7 +29,7 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 헤더에서 "access" 토큰을 찾음
-        String accessToken = request.getHeader("access");
+        String accessToken = extractToken(request);
 
         // 액세스 토큰이 없는 경우 다음 필터로 넘김
         if (accessToken == null) {
@@ -53,9 +53,11 @@ public class JWTFilter extends OncePerRequestFilter {
         // 토큰에서 id와 role 추출
         String email = jwtUtil.getEmail(accessToken);
         String role = jwtUtil.getRole(accessToken);
+        Long id = jwtUtil.getId(accessToken);
 
         // MemberDTO 생성
         MemberDTO memberDTO = MemberDTO.builder()
+                .id(id)
                 .email(email)
                 .role(role)
                 .build();
@@ -76,5 +78,15 @@ public class JWTFilter extends OncePerRequestFilter {
         response.setContentType("application/json;charset=UTF-8");
         ApiResponse<?> apiResponse = ApiResponse.error(errorCode.getMessage());
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+    }
+
+    public String extractToken(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7); // "Bearer " 이후의 문자열 추출
+        }
+
+        return null;
     }
 }
