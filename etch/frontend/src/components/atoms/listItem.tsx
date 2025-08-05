@@ -20,3 +20,11 @@ export interface ChatMessageItemProps extends BaseListItemProps {
   time: string;
   senderName?: string;
 }
+
+// 채용정보 아이템 전용
+export interface JobItemProps extends BaseListItemProps {
+  company: string;
+  location: string;
+  deadline: string;
+  tags: string[];
+}

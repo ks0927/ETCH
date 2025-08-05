@@ -1,7 +1,13 @@
 package com.ssafy.etch.like.service;
 
+import com.ssafy.etch.company.dto.CompanyLikeResponseDTO;
+import com.ssafy.etch.company.entity.CompanyEntity;
+import com.ssafy.etch.company.repository.CompanyRepository;
 import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
+import com.ssafy.etch.job.dto.JobLikeResponseDTO;
+import com.ssafy.etch.job.entity.JobEntity;
+import com.ssafy.etch.job.repository.JobRepository;
 import com.ssafy.etch.like.dto.LikeDTO;
 import com.ssafy.etch.like.dto.LikeRequestDTO;
 import com.ssafy.etch.like.entity.LikeEntity;
@@ -9,9 +15,12 @@ import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.repository.LikeRepository;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
-import com.ssafy.etch.news.dto.NewsResponseDTO;
+import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
+import com.ssafy.etch.project.ProjectRepository;
+import com.ssafy.etch.project.dto.ProjectLikeResponseDTO;
+import com.ssafy.etch.project.entity.ProjectEntity;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,6 +34,9 @@ public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final MemberRepository memberRepository;
     private final NewsRepository newsRepository;
+    private final CompanyRepository companyRepository;
+    private final JobRepository jobRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     @Transactional
@@ -66,12 +78,42 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public List<NewsResponseDTO> getLikedNews(Long memberId) {
+    public List<NewsLikeResponseDTO> getLikedNews(Long memberId) {
         List<Long> targetIds = getLikedTargetIds(memberId, LikeType.NEWS);
         return newsRepository.findAllByIdIn(targetIds)
                 .stream()
                 .map(NewsEntity::toNewsDTO)
-                .map(NewsResponseDTO::from)
+                .map(NewsLikeResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<CompanyLikeResponseDTO> getLikedCompany(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        return companyRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(CompanyEntity::toCompanyDTO)
+                .map(CompanyLikeResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<JobLikeResponseDTO> getLikedJob(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        return jobRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(JobEntity::toJobDTO)
+                .map(JobLikeResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<ProjectLikeResponseDTO> getLikedProject(Long memberId) {
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        return projectRepository.findAllByIdIn(targetIds)
+                .stream()
+                .map(ProjectEntity::toProjectDTO)
+                .map(ProjectLikeResponseDTO::from)
                 .toList();
     }
 
