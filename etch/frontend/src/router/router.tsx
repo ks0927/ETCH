@@ -47,6 +47,9 @@ const MypageFavoritePage = lazy(
   () => import("../components/pages/mypage/mypageFavoritePage.tsx")
 );
 
+const MypageCoverLetterPage = lazy(
+  () => import("../components/pages/mypage/mypageCoverLetterPage.tsx")
+);
 const router = createBrowserRouter([
   {
     path: "/",
@@ -163,6 +166,10 @@ const router = createBrowserRouter([
           {
             path: "projects",
             element: <MypageProjectPage />,
+          },
+          {
+            path: "coverletters",
+            element: <MypageCoverLetterPage />,
           },
         ],
       },
