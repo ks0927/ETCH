@@ -40,6 +40,10 @@ const MypageProjectPage = lazy(
   () => import("../components/pages/mypage/mypageProjectPage.tsx")
 );
 
+const MypageFavoritePage = lazy(
+  () => import("../components/pages/mypage/mypageFavoritePage.tsx")
+);
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -118,11 +122,11 @@ const router = createBrowserRouter([
         element: <AdditionalInfoPage />,
       },
       {
-        path: "/project",
+        path: "/projects",
         element: <ProjectListPage />,
       },
       {
-        path: "/project/write",
+        path: "/projects/write",
         element: <ProjectWritePage />,
       },
       {
@@ -151,7 +155,7 @@ const router = createBrowserRouter([
           },
           {
             path: "favorites",
-            // element: <FavoritesPage />
+            element: <MypageFavoritePage />,
           },
           {
             path: "projects",

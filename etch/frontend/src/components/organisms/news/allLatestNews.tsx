@@ -1,5 +1,5 @@
 import type { mockNewsData } from "../../../types/mockNewsData";
-import RecommendCard from "../../molecules/news/recommendCard";
+import RecommendCard from "../../molecules/news/recommendList";
 interface Props {
   newsData: mockNewsData[];
 }

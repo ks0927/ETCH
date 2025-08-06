@@ -9,6 +9,7 @@ interface Props {
 
 function ProjectListCard({ mockProjects }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
+  const hasMore = mockProjects.length > visibleCount;
 
   // 모달 상태 관리
   const [selectedProject, setSelectedProject] =
@@ -16,7 +17,6 @@ function ProjectListCard({ mockProjects }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const visibleProjects = mockProjects.slice(0, visibleCount);
-  const hasMore = mockProjects.length > visibleCount;
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 10);

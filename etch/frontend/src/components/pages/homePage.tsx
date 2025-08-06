@@ -9,6 +9,7 @@ import HomeJobCard from "../organisms/home/homeJobCard";
 import HomeNewsCard from "../organisms/home/homeNewsCard";
 import HomeProjectCard from "../organisms/home/homeProjectCard";
 import ProjectSVG from "../svg/projectSVG";
+import SeeMore from "../svg/seeMore";
 
 function HomePage() {
   return (
@@ -77,12 +78,9 @@ function HomePage() {
                 진행중인 채용
               </h2>
               <div className="flex-1"></div>
-              <div className="hidden sm:flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-green-700 font-medium">
-                  실시간 업데이트
-                </span>
-              </div>
+              <Link to={"/jobs"}>
+                <SeeMore />
+              </Link>
             </div>
             <HomeJobCard mockJobs={mockJobs} />
           </div>
@@ -105,22 +103,9 @@ function HomePage() {
                       인기 프로젝트
                     </h2>
                   </div>
-                  <button className="inline-flex items-center space-x-1 text-[#007DFC] hover:text-[#0056CC] font-semibold text-sm sm:text-base transition-colors group">
-                    <span>더보기</span>
-                    <svg
-                      className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </button>
+                  <Link to={"/projects"}>
+                    <SeeMore />
+                  </Link>
                 </div>
                 <HomeProjectCard mockProjects={mockProjectData} />
               </div>
@@ -129,25 +114,30 @@ function HomePage() {
             {/* 뉴스 - 1/3 너비 */}
             <div className="xl:col-span-1">
               <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 h-full">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-                      />
-                    </svg>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                      <svg
+                        className="w-5 h-5 text-blue-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                      뉴스
+                    </h2>
                   </div>
-                  <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
-                    뉴스
-                  </h2>
+                  <Link to={"/news"}>
+                    <SeeMore />
+                  </Link>
                 </div>
                 <HomeNewsCard mockNews={mockNews} />
               </div>

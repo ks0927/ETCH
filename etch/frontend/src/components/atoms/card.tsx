@@ -27,6 +27,7 @@ export interface ProjectCardProps extends BaseCardProps {
   writerImg: string;
   commentCount?: number;
   comments?: CommentProps[];
+  onCardClick?: (id: number) => void;
 }
 export interface NewsCardProps extends BaseCardProps {
   link: string;
