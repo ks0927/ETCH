@@ -26,7 +26,7 @@ public class CompanyServiceImpl implements CompanyService {
 		this.companyRepository = companyRepository;
 	}
 
-	// 좋아요가 많은 순으로 정렬한 10개의 기업
+	// 좋아요가 많은 순으로 정렬한 10개의 기업 - 수정 필요
 	@Override
 	public List<CompanyRankingDTO> getTop10() {
 		ListOperations<String, String> listOps = redisTemplate.opsForList();
@@ -59,30 +59,9 @@ public class CompanyServiceImpl implements CompanyService {
 	// 기업정보
 	@Override
 	public CompanyInfoDTO getCompanyInfo(long id) {
-		CompanyEntity entity = companyRepository.findById(id);
-
-		if (entity == null) {
-			throw new RuntimeException("기업 정보를 찾을 수 없습니다.");
-		}
-
-		return CompanyInfoDTO.builder()
-			.id(entity.getId())
-			.name(entity.getName())
-			.industry(entity.getIndustry())
-			.mainProducts(entity.getMainProducts())
-			.ceoName(entity.getCeoName())
-			.summary(entity.getSummary())
-			.stock(entity.getStock())
-			.address(entity.getAddress())
-			.homepageUrl(entity.getHomepageUrl())
-			.foundedDate(entity.getFoundedDate())
-			.totalEmployees(entity.getTotalEmployees())
-			.maleEmployees(entity.getMaleEmployees())
-			.femaleEmployees(entity.getFemaleEmployees())
-			.maleRatio(entity.getMaleRatio())
-			.femaleRatio(entity.getFemaleRatio())
-			.salary(entity.getSalary())
-			.serviceYear(entity.getServiceYear())
-			.build();
+		return companyRepository.findById(id)
+			.map(CompanyEntity::toCompanyDTO)
+			.map(CompanyInfoDTO::from)
+			.orElseThrow(RuntimeException::new);
 	}
 }

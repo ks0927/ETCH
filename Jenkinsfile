@@ -1,32 +1,93 @@
-// S13P11A402/Jenkinsfile (수정 완료 버전)
+// S13P11A402/Jenkinsfile (역할 분리 최종 버전)
 
 pipeline {
     environment {
-        // 본인의 Docker Hub 사용자 이름으로 수정했는지 확인
         DOCKERHUB_USERNAME = 'kkaebu'
     }
 
     agent any
 
     stages {
-        stage('Build & Package All Services in Parallel') {
+        stage('Prepare') {
+            steps {
+                script {
+                    def changedFiles = sh(script: 'git diff --name-only HEAD~1 HEAD', returnStdout: true).trim()
+                    echo "Changed files in this commit:\n${changedFiles}"
+                    env.CHANGED_FILES = changedFiles
+                }
+            }
+        }
+        
+        // --- 1. 빌드 스테이지 ---
+        // 각 서비스의 소스 코드를 컴파일하거나 빌드하여 실행 가능한 파일(JAR, 정적 파일 등)을 만듭니다.
+        stage('Build Changed Services in Parallel') {
             parallel {
-
-                
-                // --- Chat-Server 빌드 및 패키징 (Spring Boot) ---
-                stage('Chat-Server') {
+                stage('[Build] Business-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
+                    agent any
+                    steps {
+                        dir('etch/backend/business-server') {
+                            echo "Building Business-Server..."
+                            sh 'chmod +x ./gradlew'
+                            sh './gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('[Build] Chat-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
                         dir('etch/backend/chat-server') {
-                            echo "Chat-Server 빌드를 시작합니다..."
+                            echo "Building Chat-Server..."
                             sh 'chmod +x ./gradlew'
-                            sh './gradlew clean build'
-                            
-                            echo "Chat-Server Docker 이미지를 패키징합니다..."
+                            sh './gradlew clean build -x test'
+                        }
+                    }
+                }
+                stage('[Build] Frontend') {
+                    when { expression { env.CHANGED_FILES.contains('etch/frontend/') } }
+                    agent { docker { image 'node:20-alpine' } }
+                    steps {
+                        dir('etch/frontend') {
+                            echo "Building Frontend..."
+                            sh 'npm ci'
+                            sh 'npm run build || true'
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 2. 패키징 스테이지 ---
+        // 빌드 단계에서 생성된 결과물을 사용하여 Docker 이미지를 만듭니다.
+        stage('Package Changed Services as Docker Images in Parallel') {
+            parallel {
+                stage('[Package] Business-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
+                    agent any // Docker CLI가 설치된 Jenkins Master에서 실행
+                    steps {
+                        dir('etch/backend/business-server') {
+                            echo "Packaging Business-Server Docker image..."
+                            script {
+                                def imageName = "${env.DOCKERHUB_USERNAME}/etch-business-server"
+                                def customImage = docker.build(imageName)
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("latest")
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('[Package] Chat-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
+                    agent any
+                    steps {
+                        dir('etch/backend/chat-server') {
+                            echo "Packaging Chat-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-chat-server"
                                 def customImage = docker.build(imageName)
-                                
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                                     customImage.push("${env.BUILD_NUMBER}")
                                     customImage.push("latest")
@@ -35,18 +96,16 @@ pipeline {
                         }
                     }
                 }
-                
-                // --- Batch-Server 빌드 및 패키징 (Python) ---
-                // Python 프로젝트는 별도의 빌드 과정 없이 바로 Docker 이미지 패키징을 진행합니다.
-                stage('Batch-Server') {
+		/*
+                stage('[Package] Batch-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/batch-server/') } }
                     agent any
                     steps {
                         dir('etch/backend/batch-server') {
-                            echo "Batch-Server Docker 이미지를 패키징합니다..."
-                            script {
+                            echo "Packaging Batch-Server Docker image..."
+                           script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-batch-server"
                                 def customImage = docker.build(imageName)
-                                
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                                     customImage.push("${env.BUILD_NUMBER}")
                                     customImage.push("latest")
@@ -55,17 +114,33 @@ pipeline {
                         }
                     }
                 }
-
-                // --- Recommend-Server 빌드 및 패키징 (Python) ---
-                stage('Recommend-Server') {
+		*/
+                stage('[Package] Recommend-Server') {
+                    when { expression { env.CHANGED_FILES.contains('etch/backend/recommend-server/') } }
                     agent any
                     steps {
                         dir('etch/backend/recommend-server') {
-                            echo "Recommend-Server Docker 이미지를 패키징합니다..."
+                            echo "Packaging Recommend-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-recommend-server"
                                 def customImage = docker.build(imageName)
-                                
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("latest")
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('[Package] Frontend') {
+                    when { expression { env.CHANGED_FILES.contains('etch/frontend/') } }
+                    agent any
+                    steps {
+                        dir('etch/frontend') {
+                            echo "Packaging Frontend Docker image..."
+                            script {
+                                def imageName = "${env.DOCKERHUB_USERNAME}/etch-frontend"
+                                def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                                     customImage.push("${env.BUILD_NUMBER}")
                                     customImage.push("latest")
@@ -77,14 +152,12 @@ pipeline {
             }
         }
 
-        // --- 새로운 배포 스테이지 ---
+        // --- 3. 배포 스테이지 ---
         stage('Deploy to EC2') {
+            when { expression { env.CHANGED_FILES.contains('etch/backend/') || env.CHANGED_FILES.contains('etch/frontend/') } }
             steps {
-                echo "EC2 서버에 배포를 시작합니다..."
-                // sshagent 플러그인을 사용하여 Jenkins에 등록된 SSH 키로 인증을 수행합니다.
+                echo "Deploying to EC2 server..."
                 sshagent(credentials: ['jenkins-ssh-key']) {
-                    // -o StrictHostKeyChecking=no 옵션은 SSH 처음 접속 시 'yes'를 입력하는 과정을 생략해줍니다.
-                    // Jenkins가 EC2 호스트에 접속하여 ~/app/deploy.sh 스크립트를 실행합니다.
                     sh '''
                         ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io '~/app/deploy.sh'
                     '''
@@ -92,9 +165,10 @@ pipeline {
             }
         }
         
+        // --- 4. 정리 스테이지 ---
         stage('Cleanup') {
             steps {
-                echo "모든 빌드가 완료되었습니다. 중간 생성물을 정리합니다."
+                echo "Cleaning up Jenkins workspace..."
                 sh "docker image prune -f"
             }
         }

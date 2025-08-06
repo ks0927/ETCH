@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class LatestNewsDTO {
+public class CompanyNewsDTO {
 	private Long id;
 	private String thumbnailUrl;
 	private String title;
@@ -15,8 +15,8 @@ public class LatestNewsDTO {
 	private String url;
 	private LocalDate publishedAt;
 
-	public static LatestNewsDTO from(NewsDTO newsDTO) {
-		return LatestNewsDTO.builder()
+	public static CompanyNewsDTO from(NewsDTO newsDTO) {
+		return CompanyNewsDTO.builder()
 			.id(newsDTO.getId())
 			.thumbnailUrl(newsDTO.getThumbnailUrl())
 			.title(newsDTO.getTitle())
