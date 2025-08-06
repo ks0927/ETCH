@@ -8,7 +8,6 @@ import com.ssafy.etch.company.dto.CompanyDTO;
 import com.ssafy.etch.job.entity.JobEntity;
 import com.ssafy.etch.news.entity.NewsEntity;
 
-import io.micrometer.observation.ObservationFilter;
 import jakarta.persistence.*;
 import lombok.Getter;
 
