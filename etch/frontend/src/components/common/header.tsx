@@ -19,7 +19,7 @@ function Header() {
             <Link to={"/news"} className="text-sm md:text-base ">
               뉴스
             </Link>
-            <Link to={"/project"} className="text-sm md:text-base">
+            <Link to={"/projects"} className="text-sm md:text-base">
               프로젝트
             </Link>
           </div>
