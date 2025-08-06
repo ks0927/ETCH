@@ -7,6 +7,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
@@ -14,7 +15,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * - LettuceConnectionFactory: Redis connection pool 관리
  * - RedisTemplate: 문자열 crud 가능
  */
-
 @Configuration
 public class RedisConfig {
 
@@ -47,8 +47,13 @@ public class RedisConfig {
 	 * - 가독성 위해 직렬화 적용함, 문자열 처리
 	 */
 	@Bean
-	public RedisTemplate<String, String> redisTemplate(RedisConnectionFactory factory) { // redis에 명령어를 쉽게 날려주는 상자
-		RedisTemplate<String, String> template = new RedisTemplate<>();
+	public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+		return new StringRedisTemplate(connectionFactory);
+	}
+
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) { // redis에 명령어를 쉽게 날려주는 상자
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(factory);
 
 		StringRedisSerializer strRedisSerializer = new StringRedisSerializer();
