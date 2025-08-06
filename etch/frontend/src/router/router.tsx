@@ -39,6 +39,9 @@ const DashboardPage = lazy(
 const MypageProjectPage = lazy(
   () => import("../components/pages/mypage/mypageProjectPage.tsx")
 );
+const MypageApplicationsPage = lazy(
+  () => import("../components/pages/mypage/mypageApplicationsPage.tsx")
+);
 
 const MypageFavoritePage = lazy(
   () => import("../components/pages/mypage/mypageFavoritePage.tsx")
@@ -151,7 +154,7 @@ const router = createBrowserRouter([
           },
           {
             path: "applications",
-            // element: <ApplicationsPage />
+            element: <MypageApplicationsPage />,
           },
           {
             path: "favorites",

@@ -1,4 +1,4 @@
-export interface UserProfile {
+export interface MockUserProfile {
   name: string;
   description: string;
   imageUrl?: string;
@@ -6,7 +6,7 @@ export interface UserProfile {
   following: number;
 }
 
-export const mockUserProfile: UserProfile = {
+export const mockUserProfile: MockUserProfile = {
   name: "김철",
   description: "개발자 꿈나무입니다. 성장하는 중이에요!",
   imageUrl: "",

@@ -1,11 +1,11 @@
-export interface DocumentItem {
+export interface MockDocumentItem {
   id: number;
   title: string;
   date: string;
   type: "coverLetter" | "portfolio";
 }
 
-export const mockCoverLetters: DocumentItem[] = [
+export const mockCoverLetters: MockDocumentItem[] = [
   {
     id: 1,
     title: "네이버 백엔드 개발자 지원서",
@@ -20,7 +20,7 @@ export const mockCoverLetters: DocumentItem[] = [
   }
 ];
 
-export const mockPortfolios: DocumentItem[] = [
+export const mockPortfolios: MockDocumentItem[] = [
   {
     id: 3,
     title: "풀스택 개발자 포트폴리오",

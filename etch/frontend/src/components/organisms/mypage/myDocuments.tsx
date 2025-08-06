@@ -1,12 +1,17 @@
 import { useState } from "react";
 import TabToggle from "../../molecules/mypage/tabToggle";
 import DocumentItem from "../../molecules/mypage/documentItem";
-import { mockCoverLetters, mockPortfolios } from "../../../types/mockDocumentsData";
+import type { MockDocumentItem } from "../../../types/mockDocumentsData";
 
-const MyDocuments = () => {
+interface MyDocumentsProps {
+  coverLetters: MockDocumentItem[];
+  portfolios: MockDocumentItem[];
+}
+
+const MyDocuments = ({ coverLetters, portfolios }: MyDocumentsProps) => {
   const [currentTab, setCurrentTab] = useState<"coverLetter" | "portfolio">("coverLetter");
 
-  const currentDocuments = currentTab === "coverLetter" ? mockCoverLetters : mockPortfolios;
+  const currentDocuments = currentTab === "coverLetter" ? coverLetters : portfolios;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
