@@ -49,12 +49,18 @@ def fetch_and_store_top10():
 
     r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True) # db=0
 
+    # 회사id, 회사명, 좋아요, 기사 개수 
     try:
         with conn.cursor() as cursor:
             cursor.execute("""
-                SELECT company_name, likes
-                FROM companies
-                ORDER BY likes DESC
+                SELECT c.id AS company_id, c.name AS company_name,
+                    COUNT(DISTINCT l.id) AS like_count,
+                    COUNT(DISTINCT n.id) AS article_count
+                FROM company c
+                LEFT JOIN liked_content l ON c.id = l.targetId AND l.type = 'COMPANY'
+                LEFT JOIN news n ON c.id = n.company_id
+                GROUP BY c.id, c.name
+                ORDER BY like_count DESC
                 LIMIT 10
             """)
             top10 = cursor.fetchall() # sql 리턴값에서 모든 데이터 가져오기
@@ -66,9 +72,11 @@ def fetch_and_store_top10():
             key = f"top10_companies:{idx+1}"
 
             # 개별적으로 redis에 저장
+            r.hset(key, "company_id",   company['company_id'])
             r.hset(key, "company_name", company['company_name'])
-            r.hset(key, "likes", company['likes'])
-            
+            r.hset(key, "likes", company['like_count'])
+            r.hset(key, "article_count", company['article_count'])
+
             r.rpush('top10_companies', key)
     finally:
         conn.close()
