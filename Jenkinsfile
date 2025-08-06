@@ -3,6 +3,9 @@
 pipeline {
     environment {
         DOCKERHUB_USERNAME = 'kkaebu'
+	//모든 스테이지에서 사용할 고유한 버전 태그를 정의합니다.
+	// Git 커밋 해시의 앞 8자리를 버전으로 사용 (예: b112db70)
+        GIT_HASH = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
     }
 
     agent any
@@ -70,9 +73,10 @@ pipeline {
                             echo "Packaging Business-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-business-server"
-                                def customImage = docker.build(imageName)
+                                //docker.build 명령어는 이미지 이름만 받으므로, 태그는 push 단계에서 지정합니다.
+				def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("${env.GIT_HASH}")
                                     customImage.push("latest")
                                 }
                             }
@@ -87,9 +91,9 @@ pipeline {
                             echo "Packaging Chat-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-chat-server"
-                                def customImage = docker.build(imageName)
+				def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("${env.GIT_HASH}")
                                     customImage.push("latest")
                                 }
                             }
@@ -105,9 +109,9 @@ pipeline {
                             echo "Packaging Batch-Server Docker image..."
                            script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-batch-server"
-                                def customImage = docker.build(imageName)
+				def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("${env.GIT_HASH}")
                                     customImage.push("latest")
                                 }
                             }
@@ -123,9 +127,9 @@ pipeline {
                             echo "Packaging Recommend-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-recommend-server"
-                                def customImage = docker.build(imageName)
+				def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("${env.GIT_HASH}")
                                     customImage.push("latest")
                                 }
                             }
@@ -140,9 +144,9 @@ pipeline {
                             echo "Packaging Frontend Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-frontend"
-                                def customImage = docker.build(imageName)
+				def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    customImage.push("${env.BUILD_NUMBER}")
+                                    customImage.push("${env.GIT_HASH}")
                                     customImage.push("latest")
                                 }
                             }
@@ -159,7 +163,7 @@ pipeline {
                 echo "Deploying to EC2 server..."
                 sshagent(credentials: ['jenkins-ssh-key']) {
                     sh '''
-                        ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io '~/app/deploy.sh'
+			ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'VERSION=${env.GIT_HASH} ~/app/deploy.sh'
                     '''
                 }
             }
