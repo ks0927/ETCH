@@ -40,6 +40,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     //테스트를 실행할 때만 H2 데이터베이스를 사용합니다.
     testImplementation 'com.h2database:h2'
+    //Spring Security의 테스트 기능을 사용하기 위해 아래 의존성을 추가합니다.
+    testImplementation 'org.springframework.security:spring-security-test'
+
 }
 
 tasks.named('test') {
