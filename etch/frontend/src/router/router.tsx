@@ -5,7 +5,7 @@ import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
 
-const MainPage = lazy(() => import("../components/pages/homePage.tsx"));
+const HomePage = lazy(() => import("../components/pages/homePage.tsx"));
 const NewsPage = lazy(
   () => import("../components/pages/news/newsMainPage.tsx")
 );
@@ -31,7 +31,17 @@ const ProjectWritePage = lazy(
   () => import("../components/pages/project/projectWritePage.tsx")
 );
 const JobPage = lazy(() => import("../components/pages/job/jobPage.tsx"));
+const MyPageLayout = lazy(() => import("../layout/mypageLayout.tsx"));
+const DashboardPage = lazy(
+  () => import("../components/pages/mypage/dashboardPage.tsx")
+);
 
+const MypageProjectPage = lazy(
+  () => import("../components/pages/mypage/mypageProjectPage.tsx")
+);
+const MypageApplicationsPage = lazy(
+  () => import("../components/pages/mypage/mypageApplicationsPage.tsx")
+);
 const router = createBrowserRouter([
   {
     path: "/",
@@ -41,7 +51,7 @@ const router = createBrowserRouter([
         index: true,
         element: (
           <Suspense fallback={<LoadingPage />}>
-            <MainPage />
+            <HomePage />
           </Suspense>
         ),
       },
@@ -120,6 +130,36 @@ const router = createBrowserRouter([
       {
         path: "/jobs",
         element: <JobPage />,
+      },
+      {
+        path: "/mypage",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <MyPageLayout />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <DashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "applications",
+            element: <MypageApplicationsPage />,
+          },
+          {
+            path: "favorites",
+            // element: <FavoritesPage />
+          },
+          {
+            path: "projects",
+            element: <MypageProjectPage />,
+          },
+        ],
       },
     ],
   },

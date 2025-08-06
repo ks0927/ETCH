@@ -1,21 +1,28 @@
 package com.ssafy.etch.project.entity;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.ssafy.etch.file.entity.FileEntity;
+import com.ssafy.etch.comment.entity.CommentEntity;
 import com.ssafy.etch.member.entity.MemberEntity;
 
 import com.ssafy.etch.project.dto.ProjectDTO;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "project")
+@Table(name = "project_post")
 public class ProjectEntity {
 
 	@Id
@@ -25,7 +32,7 @@ public class ProjectEntity {
 	@Column(nullable = false)
 	private String title;
 
-	@Column(nullable = false)
+	@Column(columnDefinition = "TEXT", nullable = false)
 	private String content;
 
 	@Column(name = "thumbnail_url")
@@ -46,6 +53,12 @@ public class ProjectEntity {
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private MemberEntity member;
+
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<CommentEntity> comments;
+
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	private List<FileEntity> files;
 
 	public ProjectDTO toProjectDTO() {
 		return ProjectDTO.builder()

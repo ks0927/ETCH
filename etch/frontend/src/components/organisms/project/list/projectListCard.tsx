@@ -1,10 +1,10 @@
 import { useState } from "react";
-import type { mockProjectData } from "../../../../types/mockProjectData.ts";
 import ProcjectCard from "../../../molecules/project/projectCard.tsx";
-// import ProjectModal from "../../../organisms/project/projectModal.tsx"; // 모달 컴포넌트 (나중에 생성)
+import ProjectModal from "../../../common/projectModal.tsx";
+import type { ProjectCardProps } from "../../../atoms/card.tsx";
 
 interface Props {
-  mockProjects: mockProjectData[];
+  mockProjects: ProjectCardProps[];
 }
 
 function ProjectListCard({ mockProjects }: Props) {
@@ -12,7 +12,7 @@ function ProjectListCard({ mockProjects }: Props) {
 
   // 모달 상태 관리
   const [selectedProject, setSelectedProject] =
-    useState<mockProjectData | null>(null);
+    useState<ProjectCardProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const visibleProjects = mockProjects.slice(0, visibleCount);
@@ -72,42 +72,7 @@ function ProjectListCard({ mockProjects }: Props) {
 
       {/* 프로젝트 모달 */}
       {isModalOpen && selectedProject && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedProject.title}
-                </h2>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <img
-                  src={selectedProject.img}
-                  alt={selectedProject.title}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-
-                <div className="text-gray-700 leading-relaxed">
-                  {selectedProject.content}
-                </div>
-
-                {/* 추가 정보들을 여기에 표시할 수 있습니다 */}
-                <div className="pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
-                    프로젝트 ID: {selectedProject.id}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
       )}
     </div>
   );

@@ -3,7 +3,7 @@ import testImg from "../../assets/testImg.png";
 import { funcData } from "../../types/funcComponentData";
 import { mockJobs } from "../../types/mockJobData";
 import { mockNews } from "../../types/mockNewsData";
-import { mockProjects } from "../../types/mockProjectData";
+import { mockProjectData } from "../../types/mockProjectData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
 import HomeJobCard from "../organisms/home/homeJobCard";
 import HomeNewsCard from "../organisms/home/homeNewsCard";
@@ -122,7 +122,7 @@ function HomePage() {
                     </svg>
                   </button>
                 </div>
-                <HomeProjectCard mockProjects={mockProjects} />
+                <HomeProjectCard mockProjects={mockProjectData} />
               </div>
             </div>
 

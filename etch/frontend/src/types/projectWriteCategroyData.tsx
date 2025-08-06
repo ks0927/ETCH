@@ -23,7 +23,7 @@ export const ProjectWriteCategoryData: ButtonProps[] = [
     checked: false,
   },
   {
-    text: "DevOps/인프라",
+    text: "DevOps",
     icon: <DevOpsSVG />,
     checked: false,
   },

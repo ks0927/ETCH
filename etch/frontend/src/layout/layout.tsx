@@ -23,23 +23,19 @@ function Layout() {
 
   return (
     <div className="min-h-screen">
-      {/* 고정 헤더 */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
+      {/* 헤더 - 모바일에서는 고정 안함, 데스크톱에서만 고정 */}
+      <div className="sm:fixed sm:top-0 sm:left-0 sm:right-0 sm:z-50 bg-white sm:shadow-sm">
         <div className="px-6 py-3 mx-auto max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
           <Header />
         </div>
       </div>
 
       {/* 메인 콘텐츠 */}
-      <div className="pt-16">
+      <div className="sm:pt-16">
         {" "}
-        {/* pt-20 → pt-16으로 줄임 */}
+        {/* 모바일에서는 pt-0, 데스크톱에서는 pt-16 */}
         <div className="px-6 py-2 mx-auto max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
-          {" "}
-          {/* py-6 → py-2로 줄임 */}
           <main className="pt-2 pb-2">
-            {" "}
-            {/* pt-4 pb-4 → pt-2 pb-2로 줄임 */}
             <Outlet />
           </main>
           <ChatButton onClick={() => setShowChatModal(true)} />

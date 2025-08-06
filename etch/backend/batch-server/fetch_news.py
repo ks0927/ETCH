@@ -139,7 +139,8 @@ def _get_all_company_names() -> List[str]:
             return all_company_names
 
 def run_batch() -> int:
-    """배치 작업 실행. 모든 회사에 대한 뉴스 기사 가져오기 및 저장
+    """
+    배치 작업 실행. 모든 회사에 대한 뉴스 기사 가져오기 및 저장
     """
     # DB에서 회사명 리스트 받아오기
     all_company_names: List[str] = _get_all_company_names()

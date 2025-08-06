@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
+import com.ssafy.etch.news.dto.TopCompanyDTO;
 import com.ssafy.etch.news.service.NewsServiceImpl;
 
 @RestController
@@ -35,6 +36,14 @@ public class NewsController {
 	@GetMapping("/latest") 
 	public ResponseEntity<ApiResponse<List<LatestNewsDTO>>> getLatestNews() {
 		List<LatestNewsDTO> list = newsService.getLatestNews();
+
+		return ResponseEntity.ok(ApiResponse.success(list));
+	}
+
+	// top10
+	@GetMapping("/top-companies")
+	public ResponseEntity<ApiResponse<List<TopCompanyDTO>>> getTopCompanies() {
+		List<TopCompanyDTO> list = newsService.getTopCompaniesFromRedis();
 
 		return ResponseEntity.ok(ApiResponse.success(list));
 	}

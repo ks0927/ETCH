@@ -18,7 +18,7 @@ import com.ssafy.etch.member.repository.MemberRepository;
 import com.ssafy.etch.news.dto.NewsLikeResponseDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
-import com.ssafy.etch.project.ProjectRepository;
+import com.ssafy.etch.project.repository.ProjectRepository;
 import com.ssafy.etch.project.dto.ProjectLikeResponseDTO;
 import com.ssafy.etch.project.entity.ProjectEntity;
 import jakarta.transaction.Transactional;

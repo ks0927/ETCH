@@ -16,7 +16,7 @@ export interface ChatRoomItemProps extends BaseListItemProps {
 // 채팅 메시지 아이템 전용
 export interface ChatMessageItemProps extends BaseListItemProps {
   message: string;
-  sender: 'me' | 'other';
+  sender: "me" | "other";
   time: string;
   senderName?: string;
 }
@@ -27,4 +27,30 @@ export interface JobItemProps extends BaseListItemProps {
   location: string;
   deadline: string;
   tags: string[];
+}
+
+// 마이페이지 대시보드 문서 아이템 전용
+export interface DocumentItemProps extends BaseListItemProps {
+  title: string;
+  date: string;
+}
+
+// 지원현황 아이템 전용
+export interface ApplicationItemProps extends BaseListItemProps {
+  company: string;
+  position: string;
+  applyDate: string;
+  status: 'scheduled' | 'document_submitted' | 'interview' | 'passed' | 'failed';
+  statusText: string;
+  stage: string;
+  onStatusChange?: (id: string) => void;
+}
+
+// 마감일 아이템 전용
+export interface DeadlineItemProps extends BaseListItemProps {
+  company: string;
+  position: string;
+  dueDate: string;
+  daysLeft: number;
+  urgency: 'urgent' | 'warning';
 }
