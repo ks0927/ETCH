@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { mockProjects } from "../../../types/mockProjectData";
+import { mockProjectData } from "../../../types/mockProjectData";
 import ProjectListCard from "../../organisms/project/list/projectListCard";
 import { ProjectSidebarType } from "../../../types/projectSidebarType";
 import ProjectListSidebar from "../../organisms/project/list/projectListSidebar";
@@ -42,7 +42,7 @@ function ProjectPage() {
 
             {/* 프로젝트 카드 섹션 */}
             <section>
-              <ProjectListCard mockProjects={mockProjects} />
+              <ProjectListCard mockProjects={mockProjectData} />
             </section>
           </div>
         </div>

@@ -2,6 +2,7 @@ import type { ProjectCardProps } from "../../atoms/card";
 
 interface Props extends ProjectCardProps {
   onCardClick: (id: number) => void; // 부모 컴포넌트에서 모달 상태를 관리
+  type: "project";
 }
 
 function ProjectCard({ id, title, content, img, onCardClick }: Props) {
