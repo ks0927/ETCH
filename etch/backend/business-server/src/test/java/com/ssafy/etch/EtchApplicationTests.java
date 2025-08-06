@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * 2. 복잡한 의존성을 가진 SecurityConfig를 직접 Import하지 않습니다.
  * 3. 대신, @WebMvcTest가 자동으로 적용하는 기본 보안 설정을 통해 /health 엔드포인트가
  * '보호되고 있는지' (즉, 인증 없이 접근 시 401 Unauthorized 에러가 발생하는지)를 테스트합니다.
- * 이것이 바로 외부 의존성(DB, Redis) 없이 Controller의 보안 적용 여부를 확인하는 가장 확실한 방법입니다.
+ * 이것이 바로 외부 의존성(DB, Redis) 없이 Controller의 보안 적용 여부를 확인하는 가장 확실한 방법입니다!
  */
 @WebMvcTest(controllers = healthController.class)
 class EtchApplicationTests {
