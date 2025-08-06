@@ -55,6 +55,7 @@ def get_conn():
         charset=MYSQL_CHARSET,
         autocommit=True,
         cursorclass=pymysql.cursors.DictCursor,
+        ssl={"ssl": {}}
     )
 
 # NewsAPI 호출
@@ -134,7 +135,7 @@ def fetch_and_store(company_name: str) -> int:
 def _get_all_company_names() -> List[str]: 
     with get_conn() as conn:
         with conn.cursor() as cur:
-            cur.execute("SELECT name FROM company")
+            cur.execute("SELECT name FROM company") # 테스트 중에는 WHERE절로 필터링 하는 것을 권장
             all_company_names = [row["name"] for row in cur.fetchall()]
             return all_company_names
 
