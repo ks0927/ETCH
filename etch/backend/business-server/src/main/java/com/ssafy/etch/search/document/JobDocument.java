@@ -1,0 +1,48 @@
+package com.ssafy.etch.search.document;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import lombok.Getter;
+
+@Document(indexName = "job")
+@Getter
+public class JobDocument {
+	@Id
+	private Long jobId;
+
+	@Field(type = FieldType.Text, analyzer = "nori")
+	private String title; // 검색어 대상
+
+	@Field(type = FieldType.Text, analyzer = "nori")
+	private String companyName; // 검색어 대상
+
+	@Field(type = FieldType.Keyword)
+	private String industry;
+
+	@Field(type = FieldType.Text, analyzer = "nori")
+	private List<String> regions; // 지역 필터, 검색 대상 (다중 가능)
+
+	@Field(type = FieldType.Text, analyzer = "nori")
+	private List<String> jobCategories; // 직무 필터, 검색 대상 (다중 가능)
+
+	@Field(type = FieldType.Keyword)
+	private String workType; // 필터
+
+	@Field(type = FieldType.Keyword)
+	private String educationLevel; // 필터
+
+	@Field(type = FieldType.Date)
+	private LocalDateTime postingDate;
+
+	@Field(type = FieldType.Date)
+	private LocalDateTime applyStartDate;
+
+	@Field(type = FieldType.Date)
+	private LocalDateTime applyEndDate;
+}
