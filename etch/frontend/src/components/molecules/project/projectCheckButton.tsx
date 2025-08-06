@@ -6,7 +6,7 @@ function ProjectCheckButton({ text, icon }: ButtonProps) {
       <div className="border border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group-hover:shadow-md">
         {/* 아이콘 영역 */}
         <div className="flex justify-center mb-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 group-hover:text-blue-600 transition-colors duration-200">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 text-gray-600 group-hover:text-blue-600 transition-colors duration-200 flex items-center justify-center">
             {icon}
           </div>
         </div>
