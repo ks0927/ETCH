@@ -1,9 +1,10 @@
 import StatsCards from "../../organisms/mypage/statsCards";
 import MyDocuments from "../../organisms/mypage/myDocuments";
+import RecommendedJobs from "../../organisms/mypage/recommendedJobs";
 
 const DashboardPage = () => {
   return (
-    <div>
+    <div className="space-y-6">
       <div>
         <StatsCards />
       </div>
@@ -11,7 +12,7 @@ const DashboardPage = () => {
         <MyDocuments />
       </div>
       <div>
-        <h1>추천 채용공고</h1>
+        <RecommendedJobs />
       </div>
     </div>
   );
