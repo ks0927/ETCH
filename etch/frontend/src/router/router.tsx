@@ -31,6 +31,10 @@ const ProjectWritePage = lazy(
   () => import("../components/pages/project/projectWritePage.tsx")
 );
 const JobPage = lazy(() => import("../components/pages/job/jobPage.tsx"));
+const MyPageLayout = lazy(() => import("../layout/mypageLayout.tsx"));
+const DashboardPage = lazy(
+  () => import("../components/pages/mypage/dashboardPage.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -120,6 +124,36 @@ const router = createBrowserRouter([
       {
         path: "/jobs",
         element: <JobPage />,
+      },
+      {
+        path: "/mypage",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <MyPageLayout />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <DashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "applications",
+            // element: <ApplicationsPage />
+          },
+          {
+            path: "favorites",
+            // element: <FavoritesPage />
+          },
+          {
+            path: "projects",
+            // element: <ProjectsPage />
+          },
+        ],
       },
     ],
   },

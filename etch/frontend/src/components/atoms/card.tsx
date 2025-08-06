@@ -1,6 +1,6 @@
 import type { CommentProps } from "./comment";
 
-type CardType = "job" | "project" | "news" | "company";
+type CardType = "job" | "project" | "news" | "company" | "stats";
 
 interface BaseCardProps {
   type: CardType;
@@ -41,4 +41,12 @@ export interface CompanyCardProps extends BaseCardProps {
   like: number;
   companyName: string;
   img?: string;
+}
+
+export interface StatsCardData extends BaseCardProps {
+  title: string;
+  type: "stats";
+  value: number;
+  icon: string;
+  color: string;
 }
