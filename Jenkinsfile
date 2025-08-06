@@ -162,9 +162,9 @@ pipeline {
             steps {
                 echo "Deploying to EC2 server..."
                 sshagent(credentials: ['jenkins-ssh-key']) {
-                    sh '''
-			ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'VERSION=${env.GIT_HASH} ~/app/deploy.sh'
-                    '''
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'VERSION=${env.GIT_HASH} ~/app/deploy.sh'
+                    """
                 }
             }
         }
