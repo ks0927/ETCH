@@ -34,3 +34,23 @@ export interface DocumentItemProps extends BaseListItemProps {
   title: string;
   date: string;
 }
+
+// 지원현황 아이템 전용
+export interface ApplicationItemProps extends BaseListItemProps {
+  company: string;
+  position: string;
+  applyDate: string;
+  status: 'scheduled' | 'document_submitted' | 'interview' | 'passed' | 'failed';
+  statusText: string;
+  stage: string;
+  onStatusChange?: (id: string) => void;
+}
+
+// 마감일 아이템 전용
+export interface DeadlineItemProps extends BaseListItemProps {
+  company: string;
+  position: string;
+  dueDate: string;
+  daysLeft: number;
+  urgency: 'urgent' | 'warning';
+}
