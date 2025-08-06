@@ -1,9 +1,11 @@
 import JobListItem from "../../molecules/job/jobListItem";
-import { mockJobList } from "../../../types/mockJobListData";
+import type { JobItemProps } from "../../atoms/listItem";
 
-const RecommendedJobs = () => {
-  const recommendedJobs = mockJobList.slice(0, 3);
+interface RecommendedJobsProps {
+  jobs: JobItemProps[];
+}
 
+const RecommendedJobs = ({ jobs }: RecommendedJobsProps) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       <div className="border-b border-gray-200 p-6">
@@ -12,7 +14,7 @@ const RecommendedJobs = () => {
       </div>
       <div className="p-6">
         <div className="space-y-3">
-          {recommendedJobs.map((job) => (
+          {jobs.map((job) => (
             <JobListItem
               key={job.id}
               id={job.id}

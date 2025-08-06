@@ -1,17 +1,21 @@
 import StatsCard from "../../molecules/mypage/statsCard";
-import { mockStatsData } from "../../../types/mockStatsData";
+import type { StatsCardData } from "../../atoms/card";
 
-const StatsCards = () => {
+interface StatsCardsProps {
+  stats: StatsCardData[];
+}
+
+const StatsCards = ({ stats }: StatsCardsProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {mockStatsData.map((stats, index) => (
+      {stats.map((statsItem, index) => (
         <StatsCard
           key={index}
-          title={stats.title}
-          type={stats.type}
-          value={stats.value}
-          icon={stats.icon}
-          color={stats.color}
+          title={statsItem.title}
+          type={statsItem.type}
+          value={statsItem.value}
+          icon={statsItem.icon}
+          color={statsItem.color}
         />
       ))}
     </div>

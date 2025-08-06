@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 import NavMenu from "../components/organisms/mypage/navMenu";
 import ProfileCard from "../components/organisms/mypage/profileCard";
+import { mockUserProfile } from "../types/mockUserProfileData";
 
 const MyPageLayout = () => {
   return (
@@ -8,7 +9,7 @@ const MyPageLayout = () => {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* 왼쪽 사이드바 */}
       <div className="lg:col-span-1 space-y-4">
-        <ProfileCard />
+        <ProfileCard userProfile={mockUserProfile} />
         <NavMenu />
       </div>
 

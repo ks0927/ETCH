@@ -1,10 +1,14 @@
 import ProfileAvatar from "../../molecules/mypage/profileAvatar";
 import StatsButton from "../../molecules/mypage/statsButton";
 import ActionButton from "../../molecules/mypage/actionButton";
-import { mockUserProfile } from "../../../types/mockUserProfileData";
+import type { MockUserProfile } from "../../../types/mockUserProfileData";
 
-const ProfileCard = () => {
-  const { name, description, imageUrl, followers, following } = mockUserProfile;
+interface ProfileCardProps {
+  userProfile: MockUserProfile;
+}
+
+const ProfileCard = ({ userProfile }: ProfileCardProps) => {
+  const { name, description, imageUrl, followers, following } = userProfile;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
