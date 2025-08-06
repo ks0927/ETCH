@@ -1,8 +1,8 @@
-import type { mockProjectData } from "../../../types/mockProjectData.ts";
+import type { ProjectCardProps } from "../../atoms/card.tsx";
 import ProcjectCard from "../../molecules/home/projectCard.tsx";
 
 interface Props {
-  mockProjects: mockProjectData[];
+  mockProjects: ProjectCardProps[];
 }
 function HomeProjectCard({ mockProjects }: Props) {
   return (
