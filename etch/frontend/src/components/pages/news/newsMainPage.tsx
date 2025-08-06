@@ -4,6 +4,7 @@ import CompanyNews from "../../organisms/news/newsListCompany";
 import LatestNews from "../../organisms/news/newsListLatest";
 import RecommendNews from "../../organisms/news/newsListRecommend";
 import { mockCompany } from "../../../types/mockCompanyData";
+import SeeMore from "../../svg/seeMore";
 
 function NewsPage() {
   return (
@@ -132,24 +133,8 @@ function NewsPage() {
                 추천 뉴스
               </h2>
             </div>
-            <Link
-              to="/news/recommend"
-              className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base transition-colors group"
-            >
-              <span>더보기</span>
-              <svg
-                className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+            <Link to="/news/recommend">
+              <SeeMore />
             </Link>
           </div>
           <RecommendNews newsData={mockNews} />

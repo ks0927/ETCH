@@ -28,7 +28,7 @@ function ProjectPage() {
                 확인하세요. 실력있는 개발자들의 최신 프로젝트와 기술 스택을
                 탐색할 수 있습니다.
               </p>
-              <Link to={"/project/write"}>
+              <Link to={"/projects/write"}>
                 <button className="bg-[#007DFC] hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg">
                   새 프로젝트 등록
                 </button>
