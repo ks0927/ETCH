@@ -9,15 +9,15 @@ const ProfileAvatar = ({
 }: ImageProps & { onClick?: () => void }) => {
   return (
     <div className="relative inline-block">
-      <div className="w-20 h-20 mx-auto bg-gray-200 rounded-full flex items-center justify-center text-lg font-semibold">
-        <img 
-          src={src || defaultSrc || defaultProfile} 
+      <div className="flex items-center justify-center w-20 h-20 mx-auto text-lg font-semibold bg-gray-200 rounded-full">
+        <img
+          src={src || defaultSrc || defaultProfile}
           alt={alt}
-          className="w-full h-full rounded-full object-cover"
+          className="object-cover w-full h-full rounded-full"
         />
       </div>
-      <button 
-        className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full p-0 bg-gray-100 border border-gray-200"
+      <button
+        className="absolute w-8 h-8 p-0 bg-gray-100 border border-gray-200 rounded-full cursor-pointer -bottom-1 -right-1"
         onClick={onClick}
       >
         📷
