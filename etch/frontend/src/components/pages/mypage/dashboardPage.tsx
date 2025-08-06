@@ -1,4 +1,5 @@
 import StatsCards from "../../organisms/mypage/statsCards";
+import MyDocuments from "../../organisms/mypage/myDocuments";
 
 const DashboardPage = () => {
   return (
@@ -7,7 +8,7 @@ const DashboardPage = () => {
         <StatsCards />
       </div>
       <div>
-        <h1>내문서</h1>
+        <MyDocuments />
       </div>
       <div>
         <h1>추천 채용공고</h1>
