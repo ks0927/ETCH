@@ -34,7 +34,9 @@ class EtchApplicationTests {
     @Autowired
     private MockMvc mvc;
 
-    // SecurityConfig가 의존하는 Bean들을 MockBean으로 주입
+    // SecurityConfig가 의존하는 Bean들을 MockBean으로 주입합니다.
+    // @WebMvcTest는 이 Bean들을 자동으로 스캔하지 않으므로,
+    // 가짜 객체를 만들어 SecurityConfig를 생성할 수 있도록 제공해야 합니다.
     @MockBean
     private CustomOAuth2UserService customOAuth2UserService;
     @MockBean
@@ -44,11 +46,12 @@ class EtchApplicationTests {
 
 
     @Test
-    @WithMockUser
+    @WithMockUser // Spring Security가 적용된 환경에서 인증된 사용자인 것처럼 테스트를 실행합니다.
     void contextLoadsAndHealthCheck() throws Exception {
+        // MockMvc를 사용하여 실제 HTTP 요청처럼 /health 엔드포인트를 호출합니다.
         mvc.perform(get("/health"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("spring server is health!"));
+                .andExpect(status().isOk()) // 상태 코드가 200 OK인지 확인
+                .andExpect(content().string("spring server is health!")); // 응답 본문이 예상과 같은지 확인
     }
 
 }
