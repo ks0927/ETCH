@@ -1,6 +1,6 @@
 import type { CommentProps } from "./comment";
 
-type CardType = "job" | "project" | "news" | "company" | "stats";
+type CardType = "job" | "project" | "news" | "company" | "stats" | "question";
 
 interface BaseCardProps {
   type: CardType;
@@ -50,4 +50,14 @@ export interface StatsCardData extends BaseCardProps {
   value: number;
   icon: string;
   color: string;
+}
+
+export interface QuestionCardProps extends BaseCardProps {
+  questionNumber: number;
+  questionTitle: string;
+  structure: string;
+  tips: string;
+  keywords: string;
+  answer: string;
+  onAnswerChange: (answer: string) => void;
 }
