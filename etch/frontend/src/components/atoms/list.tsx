@@ -5,6 +5,7 @@ export interface FavoriteProjectProps extends BaseListProps {
   projectName: string;
   writer: string;
   img: string;
+  writerImg: string;
 }
 
 export interface FavoriteJobProps extends BaseListProps {

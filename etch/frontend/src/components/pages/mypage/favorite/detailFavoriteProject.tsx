@@ -1,7 +1,9 @@
-import { mockFavoriteCompanyData } from "../../../../types/mockFavoriteCompanyData";
-import DetailCompanyList from "../../../organisms/mypage/favorite/detail/detailCompanyList";
+import { mockFavoriteProjectsData } from "../../../../types/mockFavoriteProjectData";
+import { mockProjectData } from "../../../../types/mockProjectData";
+import { mockProjectData2 } from "../../../../types/mockProjectData2";
+import DetailProjectList from "../../../organisms/mypage/favorite/detail/detailProjectList";
 
-function DetailFavoriteCompany() {
+function DetailFavoriteProject() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 페이지 컨테이너 */}
@@ -13,16 +15,18 @@ function DetailFavoriteCompany() {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                  관심 기업
+                  관심 프로젝트
                 </h1>
                 <p className="text-lg text-gray-600">
-                  팔로우한 기업들을 관리하고 최신 소식을 확인하세요
+                  팔로우한 프로젝트를 한눈에 확인하세요
                 </p>
               </div>
+
+              {/* 통계 정보 */}
               <div className="bg-white rounded-lg px-4 py-3 shadow-sm border border-gray-200">
-                <div className="text-sm text-gray-500">총 관심 기업</div>
+                <div className="text-sm text-gray-500">총 관심 프로젝트</div>
                 <div className="text-2xl font-bold text-blue-600">
-                  {mockFavoriteCompanyData.length}
+                  {mockFavoriteProjectsData.length}
                 </div>
               </div>
             </div>
@@ -31,12 +35,15 @@ function DetailFavoriteCompany() {
 
         {/* 컨텐츠 영역 */}
         <div className="bg-white border-t border-gray-200 min-h-[60vh]">
-          <DetailCompanyList favoriteData={mockFavoriteCompanyData} />
+          <DetailProjectList
+            favoriteData={mockFavoriteProjectsData}
+            mockProjects={mockProjectData2}
+          />
         </div>
       </div>
 
       {/* 빈 상태 처리 */}
-      {mockFavoriteCompanyData.length === 0 && (
+      {mockFavoriteProjectsData.length === 0 && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
           <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-200">
             <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -50,7 +57,7 @@ function DetailFavoriteCompany() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-6m-6 0H3m2-2V7a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2z"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
             </div>
@@ -58,10 +65,10 @@ function DetailFavoriteCompany() {
               관심 기업이 없습니다
             </h3>
             <p className="text-gray-500 mb-6">
-              관심 있는 기업을 팔로우하여 최신 정보를 받아보세요
+              관심 있는 기업을 팔로우하여 최신 프로젝트를 확인해보세요
             </p>
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-              기업 찾아보기
+              기업 둘러보기
             </button>
           </div>
         </div>
@@ -70,4 +77,4 @@ function DetailFavoriteCompany() {
   );
 }
 
-export default DetailFavoriteCompany;
+export default DetailFavoriteProject;
