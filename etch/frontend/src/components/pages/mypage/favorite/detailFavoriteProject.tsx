@@ -1,5 +1,4 @@
 import { mockFavoriteProjectsData } from "../../../../types/mockFavoriteProjectData";
-import { mockProjectData } from "../../../../types/mockProjectData";
 import { mockProjectData2 } from "../../../../types/mockProjectData2";
 import DetailProjectList from "../../../organisms/mypage/favorite/detail/detailProjectList";
 
