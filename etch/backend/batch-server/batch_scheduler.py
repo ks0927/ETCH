@@ -36,11 +36,11 @@ if __name__ == "__main__":
     sched = BlockingScheduler(timezone=SEOUL)
 
     sched.add_job(job_news,
-                  CronTrigger(hour=14, minute=50, timezone=SEOUL),
+                  CronTrigger(hour=15, minute=0, timezone=SEOUL),
                   id="news_batch")
 
     sched.add_job(job_top10,
-                  CronTrigger(hour=14, minute=53, timezone=SEOUL),
+                  CronTrigger(hour=15, minute=3, timezone=SEOUL),
                   id="top10_batch")
 
     logger.info("스케쥴러 시작")
