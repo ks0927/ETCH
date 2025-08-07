@@ -1,6 +1,7 @@
 package com.ssafy.etch.coverLetter.controller;
 
 import com.ssafy.etch.coverLetter.dto.CoverLetterListResponseDTO;
+import com.ssafy.etch.coverLetter.service.CoverLetterService;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,14 @@ import java.util.List;
 @RequestMapping("/coverletters")
 public class CoverLetterController {
 
+    private final CoverLetterService coverLetterService;
+
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<CoverLetterListResponseDTO>>> list(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
 
+        List<CoverLetterListResponseDTO> list = coverLetterService.getCoverLetterlist(oAuth2User.getId());
 
-
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null,null));
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list,null));
     }
 }

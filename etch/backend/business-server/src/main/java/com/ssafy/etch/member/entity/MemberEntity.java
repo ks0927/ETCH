@@ -1,5 +1,6 @@
 package com.ssafy.etch.member.entity;
 
+import com.ssafy.etch.coverLetter.entity.CoverLetterEntity;
 import com.ssafy.etch.follow.entity.FollowEntity;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
@@ -45,11 +46,14 @@ public class MemberEntity {
 //    @OneToMany(mappedBy = "user")
 //    private List<AppliedJobEntity> appliedJobs = new ArrayList<>();
 //
-    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "follower")
     private List<FollowEntity> followingList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "following")
     private List<FollowEntity> followerList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<CoverLetterEntity> coverLetterList = new ArrayList<>();
 //    @OneToMany(mappedBy = "user")
 //    private List<ProjectEntity> projects = new ArrayList<>();
 //
