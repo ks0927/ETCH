@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @EnableJpaRepositories(
     basePackages = {
+        "com.ssafy.etch.comment.repository",
         "com.ssafy.etch.company.repository",
         "com.ssafy.etch.coverLetter.repository", 
         "com.ssafy.etch.follow.repository",
