@@ -1,6 +1,7 @@
 package com.ssafy.etch.coverLetter.entity;
 
 import com.ssafy.etch.coverLetter.dto.CoverLetterDTO;
+import com.ssafy.etch.coverLetter.dto.CoverLetterRequestDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.SQLRestriction;
@@ -66,5 +67,14 @@ public class CoverLetterEntity {
 
     public void updateStatus() {
         this.isDeleted = true;
+    }
+
+    public void update(CoverLetterRequestDTO  coverLetterRequestDTO) {
+        name = coverLetterRequestDTO.getName();
+        answer1 = coverLetterRequestDTO.getAnswer1();
+        answer2 = coverLetterRequestDTO.getAnswer2();
+        answer3 = coverLetterRequestDTO.getAnswer3();
+        answer4 = coverLetterRequestDTO.getAnswer4();
+        answer5 = coverLetterRequestDTO.getAnswer5();
     }
 }

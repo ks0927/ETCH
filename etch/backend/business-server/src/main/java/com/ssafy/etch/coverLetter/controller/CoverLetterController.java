@@ -1,5 +1,6 @@
 package com.ssafy.etch.coverLetter.controller;
 
+import com.ssafy.etch.coverLetter.dto.CoverLetterDetailResponseDTO;
 import com.ssafy.etch.coverLetter.dto.CoverLetterListResponseDTO;
 import com.ssafy.etch.coverLetter.dto.CoverLetterRequestDTO;
 import com.ssafy.etch.coverLetter.service.CoverLetterService;
@@ -47,6 +48,15 @@ public class CoverLetterController {
             @PathVariable Long id) {
 
         coverLetterService.deleteCoverLetter(oAuth2User.getId(), id);
-        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null,"자기소개서 삭제 성공"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null,"자기소개서 삭제 성공"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<CoverLetterDetailResponseDTO>> update(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long id,
+            @RequestBody CoverLetterRequestDTO coverLetterRequestDTO) {
+        CoverLetterDetailResponseDTO responseDTO = coverLetterService.updateCoverLetter(oAuth2User.getId(), id, coverLetterRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responseDTO,"자기소개서 수정 성공"));
     }
 }

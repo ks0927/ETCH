@@ -1,6 +1,7 @@
 package com.ssafy.etch.coverLetter.service;
 
 import com.ssafy.etch.coverLetter.dto.CoverLetterDTO;
+import com.ssafy.etch.coverLetter.dto.CoverLetterDetailResponseDTO;
 import com.ssafy.etch.coverLetter.dto.CoverLetterListResponseDTO;
 import com.ssafy.etch.coverLetter.dto.CoverLetterRequestDTO;
 import com.ssafy.etch.coverLetter.entity.CoverLetterEntity;
@@ -59,5 +60,22 @@ public class CoverLetterServiceImpl implements CoverLetterService {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
         coverLetterEntity.updateStatus();
+    }
+
+    @Override
+    @Transactional
+    public CoverLetterDetailResponseDTO updateCoverLetter(Long memberId, Long coverLetterId, CoverLetterRequestDTO coverLetterRequestDTO) {
+        MemberEntity memberEntity = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        CoverLetterEntity coverLetterEntity = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (memberEntity != coverLetterEntity.toCoverLetterDTO().getMember()) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+        coverLetterEntity.update(coverLetterRequestDTO);
+
+        return CoverLetterDetailResponseDTO.from(coverLetterEntity.toCoverLetterDTO());
     }
 }
