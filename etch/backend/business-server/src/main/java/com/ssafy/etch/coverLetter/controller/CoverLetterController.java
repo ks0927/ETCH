@@ -40,4 +40,13 @@ public class CoverLetterController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null,"자기소개서 등록 성공"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<CoverLetterListResponseDTO>> delete(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long id) {
+
+        coverLetterService.deleteCoverLetter(oAuth2User.getId(), id);
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null,"자기소개서 삭제 성공"));
+    }
 }

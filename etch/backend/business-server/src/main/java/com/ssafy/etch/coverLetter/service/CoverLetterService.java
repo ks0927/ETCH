@@ -8,4 +8,5 @@ import java.util.List;
 public interface CoverLetterService {
     List<CoverLetterListResponseDTO> getCoverLetterlist(Long memberId);
     void saveCoverLetter(Long memberId, CoverLetterRequestDTO coverLetterRequestDTO);
+    void deleteCoverLetter(Long memberId, Long coverLetterId);
 }
