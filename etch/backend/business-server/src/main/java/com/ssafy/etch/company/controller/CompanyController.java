@@ -20,9 +20,9 @@ public class CompanyController {
 	}
 
 	// 기업정보
-	@GetMapping("/{id}")
-	public ResponseEntity<CompanyInfoDTO> getCompanyInfo(@PathVariable long id) {
-		CompanyInfoDTO companyInfo = companyService.getCompanyInfo(id);
+	@GetMapping("/{companyId}")
+	public ResponseEntity<CompanyInfoDTO> getCompanyInfo(@PathVariable Long companyId) {
+		CompanyInfoDTO companyInfo = companyService.getCompanyInfo(companyId);
 
 		return ResponseEntity.ok(companyInfo);
 	}

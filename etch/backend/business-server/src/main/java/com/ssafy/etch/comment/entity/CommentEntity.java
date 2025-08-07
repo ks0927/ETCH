@@ -2,6 +2,7 @@ package com.ssafy.etch.comment.entity;
 
 import java.time.LocalDate;
 
+import com.ssafy.etch.comment.dto.CommentDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.project.entity.ProjectEntity;
 
@@ -13,9 +14,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
 
 @Entity
 @Table(name = "project_comment")
+@Getter
 public class CommentEntity {
 
 	@Id
@@ -38,4 +41,15 @@ public class CommentEntity {
 	@ManyToOne
 	@JoinColumn(name = "project_post")
 	private ProjectEntity project;
+
+	public CommentDTO toCommentDTO() {
+		return CommentDTO.builder()
+			.id(id)
+			.content(content)
+			.createdAt(createdAt)
+			.isDeleted(isDeleted)
+			.member(member)
+			.project(project)
+			.build();
+	}
 }
