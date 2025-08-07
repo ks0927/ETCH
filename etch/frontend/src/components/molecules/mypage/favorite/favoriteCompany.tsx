@@ -1,4 +1,4 @@
-import type { FavoriteCompanyProps } from "../../atoms/list";
+import type { FavoriteCompanyProps } from "../../../atoms/list";
 
 function FavoriteCompany({ companyName, img }: FavoriteCompanyProps) {
   return (

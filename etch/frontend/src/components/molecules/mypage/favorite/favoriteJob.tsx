@@ -1,4 +1,4 @@
-import type { FavoriteJobProps } from "../../atoms/list";
+import type { FavoriteJobProps } from "../../../atoms/list";
 
 function FavoriteJob({ companyName }: FavoriteJobProps) {
   return (

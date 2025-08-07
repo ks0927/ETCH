@@ -1,7 +1,5 @@
-import { Link } from "react-router";
-import type { FavoriteCompanyProps } from "../../atoms/list";
-import FavoriteCompany from "../../molecules/mypage/favoriteCompany";
-import SeeMore from "../../svg/seeMore";
+import type { FavoriteCompanyProps } from "../../../../atoms/list";
+import FavoriteCompanyCard from "../../../../molecules/mypage/favorite/detail/favoriteCompanyCard";
 
 interface Props {
   titleText: string;
@@ -9,30 +7,25 @@ interface Props {
   favoriteData: FavoriteCompanyProps[];
 }
 
-function FavoriteCompanyList({ titleText, subText, favoriteData }: Props) {
+function DetailCompanyList({ titleText, subText, favoriteData }: Props) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit space-y-3">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit space-y-4">
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900 mb-1">
-            {titleText} ({favoriteData.length})
-          </h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-1">{titleText}</h1>
           <p className="text-sm text-gray-500">{subText}</p>
-        </div>
-        <div className="flex items-center h-full">
-          <Link to={"/mypage/favorites/companies"}>
-            <SeeMore />
-          </Link>
         </div>
       </div>
 
-      {/* List Section */}
-      <div className="space-y-3">
+      {/* Grid Section */}
+      <div>
         {favoriteData.length > 0 ? (
-          favoriteData
-            .slice(0, 5)
-            .map((data) => <FavoriteCompany key={data.id} {...data} />)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {favoriteData.map((data) => (
+              <FavoriteCompanyCard key={data.id} {...data} />
+            ))}
+          </div>
         ) : (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -63,4 +56,4 @@ function FavoriteCompanyList({ titleText, subText, favoriteData }: Props) {
   );
 }
 
-export default FavoriteCompanyList;
+export default DetailCompanyList;

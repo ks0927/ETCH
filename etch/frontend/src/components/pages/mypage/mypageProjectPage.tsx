@@ -34,7 +34,7 @@ function MypageProjectPage() {
 
             {/* CTA 버튼 */}
             <div className="flex-shrink-0">
-              <Link to="/project/write">
+              <Link to="/projects/write">
                 <button className="group relative bg-gradient-to-r from-[#007DFC] to-blue-600 hover:from-blue-600 hover:to-[#007DFC] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-3">
                   <PlusSVG />새 프로젝트 등록
                 </button>
@@ -72,9 +72,9 @@ function MypageProjectPage() {
               <p className="text-gray-500 mb-6">
                 첫 번째 프로젝트를 등록하고 다른 개발자들과 공유해보세요!
               </p>
-              <Link to="/project/write">
-                <button className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-                  프로젝트 등록하기
+              <Link to="/projects/write">
+                <button className="group relative bg-gradient-to-r from-[#007DFC] to-blue-600 hover:from-blue-600 hover:to-[#007DFC] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-3">
+                  <PlusSVG />새 프로젝트 등록
                 </button>
               </Link>
             </div>
