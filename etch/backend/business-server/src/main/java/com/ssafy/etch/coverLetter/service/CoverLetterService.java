@@ -11,4 +11,5 @@ public interface CoverLetterService {
     void saveCoverLetter(Long memberId, CoverLetterRequestDTO coverLetterRequestDTO);
     void deleteCoverLetter(Long memberId, Long coverLetterId);
     CoverLetterDetailResponseDTO updateCoverLetter(Long memberId, Long coverLetterId, CoverLetterRequestDTO coverLetterRequestDTO);
+    CoverLetterDetailResponseDTO getCoverLetterDetail(Long memberId, Long coverLetterId);
 }
