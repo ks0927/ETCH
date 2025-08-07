@@ -63,4 +63,8 @@ public class CoverLetterEntity {
         coverLetterEntity.member = coverLetterDTO.getMember();
         return coverLetterEntity;
     }
+
+    public void updateStatus() {
+        this.isDeleted = true;
+    }
 }

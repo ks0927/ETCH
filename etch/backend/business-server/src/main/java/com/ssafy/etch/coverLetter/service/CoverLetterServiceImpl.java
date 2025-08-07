@@ -9,7 +9,6 @@ import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
-import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,5 +44,20 @@ public class CoverLetterServiceImpl implements CoverLetterService {
         CoverLetterEntity entity = CoverLetterEntity.from(coverLetterDTO);
 
         coverLetterRepository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCoverLetter(Long memberId, Long coverLetterId) {
+        MemberEntity memberEntity = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        CoverLetterEntity coverLetterEntity = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if(memberEntity != coverLetterEntity.toCoverLetterDTO().getMember()){
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+        coverLetterEntity.updateStatus();
     }
 }
