@@ -8,4 +8,11 @@ import lombok.Getter;
 public class CoverLetterListResponseDTO {
     private Long id;
     private String name;
+
+    public static CoverLetterListResponseDTO from(CoverLetterDTO coverLetterDTO) {
+        return CoverLetterListResponseDTO.builder()
+                .id(coverLetterDTO.getId())
+                .name(coverLetterDTO.getName())
+                .build();
+    }
 }
