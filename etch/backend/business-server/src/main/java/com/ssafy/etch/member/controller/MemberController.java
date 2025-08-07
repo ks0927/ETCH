@@ -8,6 +8,7 @@ import com.ssafy.etch.member.dto.MemberResponseDTO;
 import com.ssafy.etch.member.service.MemberService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
+import com.ssafy.etch.project.dto.ProjectListDTO;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -83,5 +86,14 @@ public class MemberController {
 
         MemberDTO memberDTO = memberService.updateMember(oAuth2User.getId(), memberRequestDTO);
         return ResponseEntity.ok(ApiResponse.success(MemberResponseDTO.from(memberDTO), "회원 정보가 수정되었습니다."));
+    }
+
+    @GetMapping("/projects")
+    public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getProjectList(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+
+        List<ProjectListDTO> list = memberService.findAllProjectByMemberId(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
     }
 }

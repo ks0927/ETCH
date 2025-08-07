@@ -7,9 +7,14 @@ import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
+import com.ssafy.etch.project.dto.ProjectListDTO;
+import com.ssafy.etch.project.entity.ProjectEntity;
+import com.ssafy.etch.project.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Service;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final ProjectRepository projectRepository;
     private final JWTUtil jwtUtil;
 
     @Override
@@ -74,5 +80,14 @@ public class MemberServiceImpl implements MemberService {
         MemberEntity.updateMemberInfo(memberEntity, memberRequestDTO);
 
         return memberEntity.toMemberDTO();
+    }
+
+    @Override
+    public List<ProjectListDTO> findAllProjectByMemberId(Long memberId) {
+        return projectRepository.findAllByMemberId(memberId)
+                .stream()
+                .map(ProjectEntity::toProjectDTO)
+                .map(ProjectListDTO::from)
+                .toList();
     }
 }

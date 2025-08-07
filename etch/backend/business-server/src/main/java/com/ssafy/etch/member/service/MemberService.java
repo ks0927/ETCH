@@ -2,6 +2,9 @@ package com.ssafy.etch.member.service;
 
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
+import com.ssafy.etch.project.dto.ProjectListDTO;
+
+import java.util.List;
 
 public interface MemberService {
     MemberDTO findById(long id);
@@ -13,4 +16,6 @@ public interface MemberService {
     void deleteMember(Long id);
 
     MemberDTO updateMember(Long id, MemberRequestDTO memberRequestDTO);
+
+    List<ProjectListDTO> findAllProjectByMemberId(Long memberId);
 }
