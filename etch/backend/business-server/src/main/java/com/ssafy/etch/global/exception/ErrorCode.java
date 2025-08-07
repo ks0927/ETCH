@@ -14,7 +14,8 @@ public enum ErrorCode {
     REFRESH_TOKEN_EXPIRED("REFRESH_TOKEN_403", "리프레시 토큰이 만료되었습니다."),
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_403", "유효하지 않은 리프레시 토큰입니다."),
     ALREADY_LIKED("LIKE_400", "이미 좋아요를 누른 콘텐츠입니다."),
-    LIKE_NOT_FOUND("LIKE_404", "좋아요 정보가 존재하지 않습니다.");
+    LIKE_NOT_FOUND("LIKE_404", "좋아요 정보가 존재하지 않습니다."),
+    CONTENT_NOT_FOUND("CONTENT_404", "조회한 결과가 없습니다.");
     private final String code;
     private final String message;
 }

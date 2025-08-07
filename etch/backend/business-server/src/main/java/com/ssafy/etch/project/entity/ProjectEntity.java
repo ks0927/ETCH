@@ -9,17 +9,7 @@ import com.ssafy.etch.member.entity.MemberEntity;
 
 import com.ssafy.etch.project.dto.ProjectDTO;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "project_post")
@@ -41,6 +31,10 @@ public class ProjectEntity {
 	@Column(name = "view_count")
 	private Long viewCount;
 
+	@Column(name = "category")
+	@Enumerated(EnumType.STRING)
+	private ProjectCategory category;
+
 	@Column(name = "created_at")
 	private LocalDate createdAt;
 
@@ -60,6 +54,9 @@ public class ProjectEntity {
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<FileEntity> files;
 
+	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ProjectTechEntity> projectTechs;
+
 	public ProjectDTO toProjectDTO() {
 		return ProjectDTO.builder()
 				.id(id)
@@ -71,6 +68,9 @@ public class ProjectEntity {
 				.updatedAt(updatedAt)
 				.isDeleted(isDeleted)
 				.member(member)
+				.projectTechs(projectTechs)
+				.comments(comments)
+				.files(files)
 				.build();
 	}
 }
