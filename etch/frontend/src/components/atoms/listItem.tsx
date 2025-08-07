@@ -40,7 +40,12 @@ export interface ApplicationItemProps extends BaseListItemProps {
   company: string;
   position: string;
   applyDate: string;
-  status: 'scheduled' | 'document_submitted' | 'interview' | 'passed' | 'failed';
+  status:
+    | "scheduled"
+    | "document_submitted"
+    | "interview"
+    | "passed"
+    | "failed";
   statusText: string;
   stage: string;
   onStatusChange?: (id: string) => void;
@@ -52,5 +57,17 @@ export interface DeadlineItemProps extends BaseListItemProps {
   position: string;
   dueDate: string;
   daysLeft: number;
-  urgency: 'urgent' | 'warning';
+  urgency: "urgent" | "warning";
+}
+
+// 사용자 아이템 전용
+export interface UserItemProps extends BaseListItemProps {
+  username: string;
+  displayName: string;
+  email: string;
+  avatar?: string;
+  isFollowing: boolean;
+  canChat: boolean;
+  onChatClick: (userId: string) => void;
+  onFollowToggle: (userId: string) => void;
 }

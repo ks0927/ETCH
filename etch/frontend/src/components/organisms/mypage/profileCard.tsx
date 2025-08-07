@@ -27,16 +27,20 @@ const ProfileCard = ({ userProfile }: ProfileCardProps) => {
           </div>
 
           <div className="flex justify-center space-x-6 text-sm">
-            <StatsButton
-              count={followers}
-              label="팔로워"
-              onClick={() => console.log("팔로워 보기")}
-            />
-            <StatsButton
-              count={following}
-              label="팔로잉"
-              onClick={() => console.log("팔로잉 보기")}
-            />
+            <Link to="/mypage/followers">
+              <StatsButton
+                count={followers}
+                label="팔로워"
+                onClick={() => console.log("팔로워 보기")}
+              />
+            </Link>
+            <Link to="/mypage/following">
+              <StatsButton
+                count={following}
+                label="팔로잉"
+                onClick={() => console.log("팔로잉 보기")}
+              />
+            </Link>
           </div>
 
           <div className="space-y-2">
