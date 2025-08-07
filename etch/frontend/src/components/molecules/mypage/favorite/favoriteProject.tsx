@@ -1,4 +1,4 @@
-import type { FavoriteProjectProps } from "../../atoms/list";
+import type { FavoriteProjectProps } from "../../../atoms/list";
 
 interface Props extends FavoriteProjectProps {
   onCardClick: (id: number) => void; // 부모 컴포넌트에서 모달 상태를 관리

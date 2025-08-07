@@ -1,7 +1,7 @@
 import { Link } from "react-router";
-import type { FavoriteJobProps } from "../../atoms/list";
-import FavoriteJob from "../../molecules/mypage/favoriteJob";
-import SeeMore from "../../svg/seeMore";
+import type { FavoriteJobProps } from "../../../atoms/list";
+import FavoriteJob from "../../../molecules/mypage/favorite/favoriteJob";
+import SeeMore from "../../../svg/seeMore";
 
 interface Props {
   titleText: string;

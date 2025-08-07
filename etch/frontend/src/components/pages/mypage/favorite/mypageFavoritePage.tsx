@@ -1,10 +1,10 @@
-import { mockFavoriteCompanyData } from "../../../types/mockFavoriteCompanyData";
-import { mockFavoriteJobs } from "../../../types/mockFavoriteJobData";
-import { mockFavoriteProjectsData } from "../../../types/mockFavoriteProjectData";
-import { mockProjectData } from "../../../types/mockProjectData";
-import FavoriteCompanyList from "../../organisms/mypage/favoriteCompanyList";
-import FavoriteJobList from "../../organisms/mypage/favoriteJobList";
-import FavoriteProjectList from "../../organisms/mypage/favoriteProjectList";
+import { mockFavoriteCompanyData } from "../../../../types/mockFavoriteCompanyData";
+import { mockFavoriteJobs } from "../../../../types/mockFavoriteJobData";
+import { mockFavoriteProjectsData } from "../../../../types/mockFavoriteProjectData";
+import { mockProjectData } from "../../../../types/mockProjectData";
+import FavoriteCompanyList from "../../../organisms/mypage/favorite/favoriteCompanyList";
+import FavoriteJobList from "../../../organisms/mypage/favorite/favoriteJobList";
+import FavoriteProjectList from "../../../organisms/mypage/favorite/favoriteProjectList";
 
 function MypageFavoritePage() {
   return (

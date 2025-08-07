@@ -17,15 +17,12 @@ function MypageApplicationsPage() {
   return (
     <div className="space-y-6">
       <ApplicationStats stats={mockApplicationStats} />
-      <ApplicationList 
+      <ApplicationList
         applications={mockApplications}
         onStatusChange={handleStatusChange}
         onClick={handleItemClick}
       />
-      <UpcomingDeadlines 
-        deadlines={mockDeadlines}
-        onClick={handleItemClick}
-      />
+      <UpcomingDeadlines deadlines={mockDeadlines} onClick={handleItemClick} />
     </div>
   );
 }

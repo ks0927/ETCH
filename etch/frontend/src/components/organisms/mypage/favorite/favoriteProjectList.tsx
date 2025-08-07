@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { FavoriteProjectProps } from "../../atoms/list";
-import FavoriteProject from "../../molecules/mypage/favoriteProject";
-import type { ProjectCardProps } from "../../atoms/card";
-import ProjectModal from "../../common/projectModal";
-import SeeMore from "../../svg/seeMore";
+import type { FavoriteProjectProps } from "../../../atoms/list";
+import FavoriteProject from "../../../molecules/mypage/favorite/favoriteProject";
+import type { ProjectCardProps } from "../../../atoms/card";
+import ProjectModal from "../../../common/projectModal";
+import SeeMore from "../../../svg/seeMore";
 import { Link } from "react-router";
 
 interface Props {
