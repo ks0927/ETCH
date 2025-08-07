@@ -55,7 +55,7 @@ def get_conn():
         charset=MYSQL_CHARSET,
         autocommit=True,
         cursorclass=pymysql.cursors.DictCursor,
-        # ssl={"ssl": {}}
+        ssl={"ssl": {}}
     )
 
 # NewsAPI 호출

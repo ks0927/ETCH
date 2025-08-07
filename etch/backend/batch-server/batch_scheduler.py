@@ -43,10 +43,10 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler(timezone=SEOUL)
     
     # 뉴스 API 배치 스케쥴: 시간 변경 가능
-    scheduler.add_job(job_news, CronTrigger(hour=12, minute=00, timezone=SEOUL), id="news_batch")
+    scheduler.add_job(job_news, CronTrigger(hour=12, minute=10, timezone=SEOUL), id="news_batch")
 
     # Top 10 기업 추출 연산 배치 스케쥴: 시간 변경 가능
-    scheduler.add_job(job_top10, CronTrigger(hour=12, minute=30, timezone=SEOUL), id="top10_batch")
+    scheduler.add_job(job_top10, CronTrigger(hour=12, minute=15, timezone=SEOUL), id="top10_batch")
 
     logger.info("스케쥴러가 시작되었습니다.") 
 
