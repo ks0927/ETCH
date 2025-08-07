@@ -30,7 +30,7 @@ public class CoverLetterEntity {
     @Lob
     private String answer5;
 
-    private boolean isDeleted;
+    private boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
@@ -46,6 +46,21 @@ public class CoverLetterEntity {
                 .answer4(answer4)
                 .answer5(answer5)
                 .isDeleted(isDeleted)
+                .member(member)
                 .build();
+    }
+
+    public static CoverLetterEntity from(CoverLetterDTO coverLetterDTO) {
+        CoverLetterEntity coverLetterEntity = new CoverLetterEntity();
+        coverLetterEntity.id = coverLetterDTO.getId();
+        coverLetterEntity.name = coverLetterDTO.getName();
+        coverLetterEntity.answer1 = coverLetterDTO.getAnswer1();
+        coverLetterEntity.answer2 = coverLetterDTO.getAnswer2();
+        coverLetterEntity.answer3 = coverLetterDTO.getAnswer3();
+        coverLetterEntity.answer4 = coverLetterDTO.getAnswer4();
+        coverLetterEntity.answer5 = coverLetterDTO.getAnswer5();
+        coverLetterEntity.isDeleted = coverLetterDTO.isDeleted();
+        coverLetterEntity.member = coverLetterDTO.getMember();
+        return coverLetterEntity;
     }
 }
