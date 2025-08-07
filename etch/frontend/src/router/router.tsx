@@ -54,6 +54,12 @@ const DetailFavoriteCompany = lazy(
 const MypageCoverLetterPage = lazy(
   () => import("../components/pages/mypage/mypageCoverLetterPage.tsx")
 );
+const MypageFollowerPage = lazy(
+  () => import("../components/pages/mypage/mypageFollowerPage.tsx")
+);
+const MypageFollowingPage = lazy(
+  () => import("../components/pages/mypage/mypageFollowingPage.tsx")
+);
 const router = createBrowserRouter([
   {
     path: "/",
@@ -190,6 +196,14 @@ const router = createBrowserRouter([
           {
             path: "coverletters",
             element: <MypageCoverLetterPage />,
+          },
+          {
+            path: "followers",
+            element: <MypageFollowerPage />,
+          },
+          {
+            path: "following",
+            element: <MypageFollowingPage />,
           },
         ],
       },
