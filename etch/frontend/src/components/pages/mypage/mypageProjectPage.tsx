@@ -1,7 +1,8 @@
 import { Link } from "react-router";
 import { mockProjectData } from "../../../types/mockProjectData";
-import ProjectListCard from "../../organisms/project/list/projectListCard";
 import PlusSVG from "../../svg/plusSVG";
+import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
+import { mockProjectData2 } from "../../../types/mockProjectData2";
 
 function MypageProjectPage() {
   return (
@@ -47,7 +48,7 @@ function MypageProjectPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {mockProjectData.length > 0 ? (
             <div className="p-6">
-              <ProjectListCard mockProjects={mockProjectData} />
+              <MypageProjectList mockProjects={mockProjectData2} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20">

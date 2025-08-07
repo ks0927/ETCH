@@ -9,6 +9,7 @@ import { Link } from "react-router";
 interface Props {
   titleText: string;
   subText: string;
+  sliceCount: number;
   favoriteData: FavoriteProjectProps[];
   mockProjects: ProjectCardProps[];
 }
@@ -16,6 +17,7 @@ interface Props {
 function FavoriteProjectList({
   titleText,
   subText,
+  sliceCount,
   favoriteData,
   mockProjects,
 }: Props) {
@@ -60,7 +62,7 @@ function FavoriteProjectList({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {favoriteData.length > 0 ? (
           favoriteData
-            .slice(0, 4)
+            .slice(0, sliceCount)
             .map((data) => (
               <FavoriteProject
                 key={data.id}

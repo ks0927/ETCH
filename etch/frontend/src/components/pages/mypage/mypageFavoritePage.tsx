@@ -1,10 +1,10 @@
-import { mockFavoriteCompanyData } from "../../../../types/mockFavoriteCompanyData";
-import { mockFavoriteJobs } from "../../../../types/mockFavoriteJobData";
-import { mockFavoriteProjectsData } from "../../../../types/mockFavoriteProjectData";
-import { mockProjectData } from "../../../../types/mockProjectData";
-import FavoriteCompanyList from "../../../organisms/mypage/favorite/favoriteCompanyList";
-import FavoriteJobList from "../../../organisms/mypage/favorite/favoriteJobList";
-import FavoriteProjectList from "../../../organisms/mypage/favorite/favoriteProjectList";
+import { mockFavoriteCompanyData } from "../../../types/mockFavoriteCompanyData";
+import { mockFavoriteJobs } from "../../../types/mockFavoriteJobData";
+import { mockFavoriteProjectsData } from "../../../types/mockFavoriteProjectData";
+import { mockProjectData } from "../../../types/mockProjectData";
+import FavoriteCompanyList from "../../organisms/mypage/favorite/favoriteCompanyList";
+import FavoriteJobList from "../../organisms/mypage/favorite/favoriteJobList";
+import FavoriteProjectList from "../../organisms/mypage/favorite/favoriteProjectList";
 
 function MypageFavoritePage() {
   return (
@@ -32,6 +32,7 @@ function MypageFavoritePage() {
         <FavoriteProjectList
           titleText="관심 프로젝트"
           subText="좋아요한 프로젝트"
+          sliceCount={4}
           favoriteData={mockFavoriteProjectsData}
           mockProjects={mockProjectData}
         />

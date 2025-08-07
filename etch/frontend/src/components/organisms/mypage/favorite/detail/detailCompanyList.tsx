@@ -2,22 +2,12 @@ import type { FavoriteCompanyProps } from "../../../../atoms/list";
 import FavoriteCompanyCard from "../../../../molecules/mypage/favorite/detail/favoriteCompanyCard";
 
 interface Props {
-  titleText: string;
-  subText: string;
   favoriteData: FavoriteCompanyProps[];
 }
 
-function DetailCompanyList({ titleText, subText, favoriteData }: Props) {
+function DetailCompanyList({ favoriteData }: Props) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit space-y-4">
-      {/* Header Section */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900 mb-1">{titleText}</h1>
-          <p className="text-sm text-gray-500">{subText}</p>
-        </div>
-      </div>
-
       {/* Grid Section */}
       <div>
         {favoriteData.length > 0 ? (
