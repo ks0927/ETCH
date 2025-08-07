@@ -59,4 +59,14 @@ public class CoverLetterController {
         CoverLetterDetailResponseDTO responseDTO = coverLetterService.updateCoverLetter(oAuth2User.getId(), id, coverLetterRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responseDTO,"자기소개서 수정 성공"));
     }
+
+    @GetMapping("/{coverLetterId}")
+    public ResponseEntity<ApiResponse<CoverLetterDetailResponseDTO>> getCoverLetter(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User
+            , @PathVariable Long coverLetterId) {
+
+        CoverLetterDetailResponseDTO responseDTO = coverLetterService.getCoverLetterDetail(oAuth2User.getId(), coverLetterId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responseDTO, "자기소개서 상세조회"));
+    }
 }
