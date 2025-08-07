@@ -100,7 +100,7 @@ pipeline {
                         }
                     }
                 }
-		/*
+		
                 stage('[Package] Batch-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/batch-server/') } }
                     agent any
@@ -118,7 +118,7 @@ pipeline {
                         }
                     }
                 }
-		*/
+		
                 stage('[Package] Recommend-Server') {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/recommend-server/') } }
                     agent any
