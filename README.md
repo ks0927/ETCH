@@ -126,7 +126,7 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 ### Infrastructure
 | 담당자 | 주요 업무 |
 |---|---|
-| **한승수** | Jenkins CI/CD 파이프라인 구축, GitLab Webhook 연동, Nginx 리버스 프록시 설정, ERD 정형화, 프로젝트 API 구현 |
+| **한승수** | prometheus와 grafana 모니터링 적용, 빌드/배포 시간 감축, 블루/그린 배포 적용 |
 
 ### Backend
 | 담당자 | 역할 | 주요 업무 |
