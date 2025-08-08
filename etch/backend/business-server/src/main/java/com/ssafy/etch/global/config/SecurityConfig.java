@@ -1,7 +1,7 @@
 package com.ssafy.etch.global.config;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +51,10 @@ public class SecurityConfig {
 
 					CorsConfiguration configuration = new CorsConfiguration();
 
-					configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+					configuration.setAllowedOrigins(List.of(
+						"http://localhost:3000",
+						"https://etch.it.kr"
+					));
 					configuration.setAllowCredentials(true);
 					configuration.setAllowedMethods(
 						Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 명시적으로 허용
