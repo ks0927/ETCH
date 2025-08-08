@@ -2,6 +2,7 @@ package com.ssafy.etch.comment.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy.etch.comment.dto.CommentDeleteResponseDTO;
 import com.ssafy.etch.comment.dto.CommentListResponseDTO;
 import com.ssafy.etch.comment.dto.CommentRequestDTO;
 import com.ssafy.etch.comment.dto.CommentResponseDTO;
@@ -46,4 +48,14 @@ public class CommentController {
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
+	@DeleteMapping("/{commentId}")
+	public ResponseEntity<ApiResponse<CommentDeleteResponseDTO>> deleteComment (
+		@PathVariable Long projectId,
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal CustomOAuth2User user) {
+
+		CommentDeleteResponseDTO response = commentService.deleteComment(projectId, commentId, user.getId());
+
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
 }

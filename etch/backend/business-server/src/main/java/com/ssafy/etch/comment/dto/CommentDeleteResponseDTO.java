@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class CommentDeleteResponseDTO {
-	private Long deletedId;
-	private Boolean success;
+	private Long deletedId; // 삭제된 댓글 ID
+	private Boolean success; // 삭제 성공 여부
 }
