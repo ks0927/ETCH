@@ -3,6 +3,7 @@ package com.ssafy.etch.portfolio.controller;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.portfolio.dto.PortfolioListResponseDTO;
+import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
 import com.ssafy.etch.portfolio.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,4 +27,13 @@ public class PortfolioController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list));
     }
 
+    @PostMapping
+    public ResponseEntity<ApiResponse<PortfolioListResponseDTO>> createPortfolio(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @RequestBody PortfolioRequestDTO portfolioRequestDTO) {
+
+        portfolioService.savePortfolio(oAuth2User.getId(), portfolioRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null, "포트폴리오 등록 성공"));
+    }
 }
