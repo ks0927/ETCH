@@ -1,4 +1,4 @@
-import TestImg from "../assets/testImg.png";
+import TestImg from "../../assets/testImg.png";
 
 export interface mockNewsData {
   id: number;

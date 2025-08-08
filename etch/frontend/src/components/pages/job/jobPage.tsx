@@ -1,7 +1,7 @@
 import { useState } from "react";
 import JobHeader from "../../organisms/job/jobHeader";
 import JobList from "../../organisms/job/jobList";
-import { mockJobList } from "../../../types/mockJobListData";
+import { mockJobList } from "../../../types/mock/mockJobListData";
 
 export default function JobPage() {
   const [currentView, setCurrentView] = useState<"list" | "calendar">(

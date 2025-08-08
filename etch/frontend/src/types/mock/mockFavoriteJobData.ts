@@ -1,4 +1,4 @@
-import type { FavoriteJobProps } from "../components/atoms/list";
+import type { FavoriteJobProps } from "../../components/atoms/list";
 
 export const mockFavoriteJobs: FavoriteJobProps[] = [
   {

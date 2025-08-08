@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import CoverLetterInfoSection from "../../molecules/mypage/coverLetterInfoSection";
 import QuestionList from "../../organisms/mypage/questionList";
-import { mockQuestions } from "../../../types/mockQuestionData";
+import { mockQuestions } from "../../../types/mock/mockQuestionData";
 import CoverLetterActions from "../../organisms/mypage/coverLetterActions";
 
 function MyPageCoverLetterCreatePage() {
@@ -33,7 +33,7 @@ function MyPageCoverLetterCreatePage() {
           <span className="text-xl font-semibold">자기소개서 작성</span>
         </div>
       </div>
-      
+
       <CoverLetterInfoSection
         value={coverLetterName}
         type="text"

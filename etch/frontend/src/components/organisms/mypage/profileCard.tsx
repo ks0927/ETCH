@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import ProfileAvatar from "../../molecules/mypage/profileAvatar";
 import StatsButton from "../../molecules/mypage/statsButton";
 import ActionButton from "../../molecules/mypage/actionButton";
-import type { MockUserProfile } from "../../../types/mockUserProfileData";
+import type { MockUserProfile } from "../../../types/mock/mockUserProfileData";
 
 interface ProfileCardProps {
   userProfile: MockUserProfile;

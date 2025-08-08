@@ -1,10 +1,10 @@
-import TestImg from "../assets/testImg.png";
-import type { ProjectCardProps } from "../components/atoms/card";
+import TestImg from "../../assets/testImg.png";
+import type { ProjectCardProps } from "../../components/atoms/card";
 
-export const mockProjectData: ProjectCardProps[] = [
+export const mockProjectData2: ProjectCardProps[] = [
   {
     id: 1,
-    title: "모바일 쇼핑몰 앱",
+    title: "모바일 쇼핑몰 앱2",
     content:
       "React와 SpringBoot를 활용한 크로스플랫폼 쇼핑몰 애플리케이션입니다. 사용자 친화적인 UI/UX와 안정적인 백엔드를 구현했습니다.",
     img: TestImg,

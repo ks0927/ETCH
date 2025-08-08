@@ -1,5 +1,5 @@
 import ChatRoomList from "../../organisms/chat/chatRoomList";
-import { mockChatRooms } from "../../../types/mockChatRoomData";
+import { mockChatRooms } from "../../../types/mock/mockChatRoomData";
 
 interface ChatListPageProps {
   onRoomSelect?: (roomId: string, roomName: string) => void;

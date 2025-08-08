@@ -1,4 +1,4 @@
-import type { ChatRoomItemProps } from "../components/atoms/listItem";
+import type { ChatRoomItemProps } from "../../components/atoms/listItem";
 
 export const mockChatRooms: ChatRoomItemProps[] = [
   {
@@ -96,5 +96,5 @@ export const mockChatRooms: ChatRoomItemProps[] = [
     name: "고객지원팀",
     lastMessage: "고객 문의 대응 매뉴얼 업데이트",
     time: "어제",
-  }
+  },
 ];

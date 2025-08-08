@@ -1,5 +1,5 @@
 import UserItem from "../../molecules/mypage/userItem";
-import type { UserData } from "../../../types/mockFollowData";
+import type { UserData } from "../../../types/mock/mockFollowData";
 
 interface UserListProps {
   users: UserData[];
@@ -12,8 +12,12 @@ function UserList({ users, onChatClick, onFollowToggle }: UserListProps) {
     return (
       <div className="text-center py-16 px-5 text-gray-600">
         <div className="text-4xl mb-5 opacity-30">👥</div>
-        <div className="text-lg font-semibold mb-2 text-gray-700">아직 사용자가 없습니다</div>
-        <div className="text-sm text-gray-600 leading-relaxed">새로운 사람들을 찾아보세요!</div>
+        <div className="text-lg font-semibold mb-2 text-gray-700">
+          아직 사용자가 없습니다
+        </div>
+        <div className="text-sm text-gray-600 leading-relaxed">
+          새로운 사람들을 찾아보세요!
+        </div>
       </div>
     );
   }

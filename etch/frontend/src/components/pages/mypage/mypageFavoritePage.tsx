@@ -1,7 +1,7 @@
-import { mockFavoriteCompanyData } from "../../../types/mockFavoriteCompanyData";
-import { mockFavoriteJobs } from "../../../types/mockFavoriteJobData";
-import { mockFavoriteProjectsData } from "../../../types/mockFavoriteProjectData";
-import { mockProjectData } from "../../../types/mockProjectData";
+import { mockFavoriteCompanyData } from "../../../types/mock/mockFavoriteCompanyData";
+import { mockFavoriteJobs } from "../../../types/mock/mockFavoriteJobData";
+import { mockFavoriteProjectsData } from "../../../types/mock/mockFavoriteProjectData";
+import { mockProjectData } from "../../../types/mock/mockProjectData";
 import FavoriteCompanyList from "../../organisms/mypage/favorite/favoriteCompanyList";
 import FavoriteJobList from "../../organisms/mypage/favorite/favoriteJobList";
 import FavoriteProjectList from "../../organisms/mypage/favorite/favoriteProjectList";

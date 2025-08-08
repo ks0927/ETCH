@@ -1,3 +1,4 @@
+import type { Company } from "../../types/companyData";
 import type { CommentProps } from "./comment";
 
 type CardType = "job" | "project" | "news" | "company" | "stats" | "question";
@@ -30,12 +31,13 @@ export interface ProjectCardProps extends BaseCardProps {
   onCardClick?: (id: number) => void;
 }
 export interface NewsCardProps extends BaseCardProps {
-  link: string;
-  createTime: Date;
-  mediaCompany: string;
-  content?: string;
-  img?: string;
+  id: number;
+  thumbnailUrl: string;
   title: string;
+  description: string;
+  url: string;
+  publishedAt: string; // LocalDate는 문자열로 옴
+  company: Company;
 }
 
 export interface CompanyCardProps extends BaseCardProps {

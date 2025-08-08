@@ -1,6 +1,6 @@
 import ChatMessageList from "../../organisms/chat/chatMessageList";
 import ChatInputArea from "../../organisms/chat/chatInputArea";
-import { mockChatMessages } from "../../../types/mockChatData";
+import { mockChatMessages } from "../../../types/mock/mockChatData";
 
 export default function ChatRoomPage() {
   const handleSendMessage = (message: string) => {

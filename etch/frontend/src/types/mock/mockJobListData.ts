@@ -1,4 +1,4 @@
-import type { JobItemProps } from "../components/atoms/listItem";
+import type { JobItemProps } from "../../components/atoms/listItem";
 
 export const mockJobList: JobItemProps[] = [
   {

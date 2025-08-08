@@ -1,7 +1,7 @@
 import { useState } from "react";
 import TabToggle from "../../molecules/mypage/tabToggle";
 import DocumentItem from "../../molecules/mypage/documentItem";
-import type { MockDocumentItem } from "../../../types/mockDocumentsData";
+import type { MockDocumentItem } from "../../../types/mock/mockDocumentsData";
 
 interface MyDocumentsProps {
   coverLetters: MockDocumentItem[];
@@ -9,9 +9,12 @@ interface MyDocumentsProps {
 }
 
 const MyDocuments = ({ coverLetters, portfolios }: MyDocumentsProps) => {
-  const [currentTab, setCurrentTab] = useState<"coverLetter" | "portfolio">("coverLetter");
+  const [currentTab, setCurrentTab] = useState<"coverLetter" | "portfolio">(
+    "coverLetter"
+  );
 
-  const currentDocuments = currentTab === "coverLetter" ? coverLetters : portfolios;
+  const currentDocuments =
+    currentTab === "coverLetter" ? coverLetters : portfolios;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -20,10 +23,7 @@ const MyDocuments = ({ coverLetters, portfolios }: MyDocumentsProps) => {
       </div>
       <div className="p-6">
         <div className="mb-4">
-          <TabToggle 
-            currentTab={currentTab}
-            onTabChange={setCurrentTab}
-          />
+          <TabToggle currentTab={currentTab} onTabChange={setCurrentTab} />
         </div>
 
         <div className="space-y-3">

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import NavMenu from "../components/organisms/mypage/navMenu";
 import ProfileCard from "../components/organisms/mypage/profileCard";
-import { mockUserProfile } from "../types/mockUserProfileData";
+import { mockUserProfile } from "../types/mock/mockUserProfileData";
 
 const MyPageLayout = () => {
   return (
