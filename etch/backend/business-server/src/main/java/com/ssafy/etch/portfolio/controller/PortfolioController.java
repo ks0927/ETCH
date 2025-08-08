@@ -47,4 +47,14 @@ public class PortfolioController {
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "포트폴리오 수정 성공"));
     }
+
+    @DeleteMapping("/{portfolioId}")
+    public ResponseEntity<ApiResponse<?>> deletePortfolio(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long portfolioId) {
+
+        portfolioService.deletePortfolio(oAuth2User.getId(), portfolioId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "포트폴리오 삭제 완료"));
+    }
 }
