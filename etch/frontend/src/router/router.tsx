@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { lazy, Suspense } from "react";
 import Layout from "../layout/layout.tsx";
+import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
 
@@ -78,6 +79,10 @@ const router = createBrowserRouter([
       {
         path: "/test",
         element: <DetailFavoriteCompany />,
+      },
+      {
+        path: "*",
+        element: <ErrorPage />,
       },
       {
         path: "/loading",
