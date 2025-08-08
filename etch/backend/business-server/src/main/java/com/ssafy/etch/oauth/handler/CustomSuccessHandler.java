@@ -52,8 +52,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //String redirectUrl = "http://localhost:3000/login?token=" + accessToken;
 
         // ⭐️ [수정] 로그인 성공 후 리디렉션될 프론트엔드 주소를 변경합니다.
-        String redirectUrl = "https://etch.it.kr/login?token=" + accessToken;
-
+        String redirectUrl = "https://etch.it.kr/Oauth?token=" + accessToken;
+        System.out.println("redirectUrl: " + redirectUrl);
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
