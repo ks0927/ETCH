@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @Table(name = "project_comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -43,6 +44,20 @@ public class CommentEntity {
 	@ManyToOne
 	@JoinColumn(name = "project_post")
 	private ProjectEntity project;
+
+	// soft-delete: setter 대신 우회
+	public void markAsDeleted() {
+		this.isDeleted = true;
+	}
+
+	// 삭제여부 검증하기 위한 getter
+	public Long getMemberId() {
+		return this.member.toMemberDTO().getId();
+	}
+
+	public Long getProjectId() {
+		return this.project.toProjectDTO().getId();
+	}
 
 	public static CommentEntity of(String content, MemberEntity member, ProjectEntity project) {
 

@@ -2,8 +2,10 @@ package com.ssafy.etch.comment.service;
 
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.ssafy.etch.comment.dto.CommentDeleteResponseDTO;
 import com.ssafy.etch.comment.dto.CommentListResponseDTO;
 import com.ssafy.etch.comment.dto.CommentRequestDTO;
 import com.ssafy.etch.comment.dto.CommentResponseDTO;
@@ -15,8 +17,10 @@ import com.ssafy.etch.project.entity.ProjectEntity;
 import com.ssafy.etch.project.repository.ProjectRepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class CommentServiceImpl implements CommentService {
 
 	private final CommentRepository commentRepository;
@@ -32,7 +36,7 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public CommentListResponseDTO getCommentsWithCountByProjectId(Long projectId) {
 		List<CommentResponseDTO> comments = commentRepository
-			.findAllByProjectIdOrderByCreatedAtDesc(projectId)
+			.findAllByProject_IdAndIsDeletedFalseOrderByCreatedAtDesc(projectId)
 			.stream()
 			.map(CommentEntity::toCommentDTO)
 			.map(CommentResponseDTO::from)
@@ -52,5 +56,32 @@ public class CommentServiceImpl implements CommentService {
 		);
 
 		return CommentResponseDTO.from(saved.toCommentDTO());
+	}
+
+	@Override
+	public CommentDeleteResponseDTO deleteComment(Long projectId, Long commentId, Long memberId) {
+
+		CommentEntity comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new EntityNotFoundException("댓글이 존재하지 않습니다."));
+
+		// 해당 프로젝트에 해당 댓글이 있는지 확인
+		if (!comment.getProjectId().equals(projectId)) {
+			throw new IllegalArgumentException("해당 프로젝트에 해당 댓글이 없습니다.");
+		}
+
+		// 삭제된 댓글에 대한 예외 처리
+		if (Boolean.TRUE.equals(comment.getIsDeleted())) {
+			throw new IllegalStateException("이미 삭제된 댓글입니다.");
+		}
+
+		// 본인 댓글인지 확인
+		if (!comment.getMemberId().equals(memberId)) {
+			throw new AccessDeniedException("본인 댓글만 삭제할 수 있습니다.");
+		}
+
+		// soft-delete
+		comment.markAsDeleted();
+
+		return new CommentDeleteResponseDTO(comment.getId(), true);
 	}
 }
