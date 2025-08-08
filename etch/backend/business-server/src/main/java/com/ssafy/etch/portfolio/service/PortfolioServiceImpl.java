@@ -52,19 +52,42 @@ public class PortfolioServiceImpl implements PortfolioService {
         PortfolioDTO portfolioDTO = portfolioRequestDTO.toPortfolioDTO().toBuilder().member(memberEntity).build();
         PortfolioEntity savedPortfolio = portfolioRepository.save(PortfolioEntity.from(portfolioDTO));
         List<Long> projectIds = portfolioRequestDTO.getProjectIds();
+        List<PortfolioProjectEntity> savedEntities = getSavedEntities(savedPortfolio, projectIds);
+
+        PortfolioEntity.updateProjectInfo(savedPortfolio, savedEntities);
+    }
+
+    @Override
+    @Transactional
+    public void updatePortfolio(Long memberId, Long portfolioId, PortfolioRequestDTO portfolioRequestDTO) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        PortfolioEntity portfolioEntity =portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        portfolioEntity.clear();
+        portfolioProjectRepository.deleteByPortfolioId(portfolioId);
+
+        List<Long> projectIds = portfolioRequestDTO.getProjectIds();
+        List<PortfolioProjectEntity> savedEntities = getSavedEntities(portfolioEntity, projectIds);
+
+        portfolioEntity.updateAll(portfolioRequestDTO, savedEntities);
+    }
+
+    private List<PortfolioProjectEntity> getSavedEntities(PortfolioEntity portfolioEntity, List<Long> projectIds) {
         List<PortfolioProjectEntity> savedEntities = new ArrayList<>();
 
         for (Long projectId : projectIds) {
             ProjectEntity projectEntity = projectRepository.findById(projectId).orElseThrow(()-> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
 
             PortfolioProjectEntity entity = PortfolioProjectEntity.builder()
-                    .portfolio(savedPortfolio)
+                    .portfolio(portfolioEntity)
                     .project(projectEntity)
                     .build();
             PortfolioProjectEntity saved = portfolioProjectRepository.save(entity);
             savedEntities.add(saved);
         }
-        PortfolioEntity.updateInfo(savedPortfolio, savedEntities);
+        return savedEntities;
     }
-
 }

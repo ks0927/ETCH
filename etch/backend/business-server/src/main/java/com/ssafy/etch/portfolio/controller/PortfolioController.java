@@ -36,4 +36,15 @@ public class PortfolioController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null, "포트폴리오 등록 성공"));
     }
+
+    @PutMapping("/{portfolioId}")
+    public ResponseEntity<ApiResponse<?>> updatePortfolio(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @RequestBody PortfolioRequestDTO portfolioRequestDTO,
+            @PathVariable Long portfolioId) {
+
+        portfolioService.updatePortfolio(oAuth2User.getId(), portfolioId, portfolioRequestDTO);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "포트폴리오 수정 성공"));
+    }
 }
