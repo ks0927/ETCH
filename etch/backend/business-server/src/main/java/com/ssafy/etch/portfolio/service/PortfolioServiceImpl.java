@@ -75,6 +75,22 @@ public class PortfolioServiceImpl implements PortfolioService {
         portfolioEntity.updateAll(portfolioRequestDTO, savedEntities);
     }
 
+    @Override
+    @Transactional
+    public void deletePortfolio(Long memberId, Long portfolioId) {
+        MemberEntity memberEntity = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        PortfolioEntity portfolioEntity =portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (memberEntity != portfolioEntity.toPortfolioDTO().getMember()) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        portfolioEntity.updateStatus();
+    }
+
     private List<PortfolioProjectEntity> getSavedEntities(PortfolioEntity portfolioEntity, List<Long> projectIds) {
         List<PortfolioProjectEntity> savedEntities = new ArrayList<>();
 
