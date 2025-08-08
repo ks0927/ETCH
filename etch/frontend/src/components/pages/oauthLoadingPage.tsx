@@ -1,33 +1,69 @@
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router";
+import { getMemberInfo } from "../../api/authApi";
+import useUserStore from "../../store/userStore";
+
 const OAuthLoadingPage = () => {
+  const { setMemberInfo } = useUserStore(); // Zustand 스토어에서 사용자 정보 설정 함수 가져오기
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // OAuth 리다이렉트 후 토큰 처리
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (token) {
+      // 1. Access token을 localStorage에 저장
+      localStorage.setItem("access_token", token);
+
+      const checkUser = async () => {
+        try {
+          const userInfo = await getMemberInfo();
+          console.log("사용자 정보:", userInfo);
+          // Zustand 스토어에 사용자 정보 저장
+          setMemberInfo(userInfo);
+
+          // 기존 유저 - 메인 페이지로
+          navigate("/", { replace: true });
+        } catch (error: any) {
+          // 신규 유저 추가 정보 페이지로
+          if (error.response.data.message === "사용자를 찾을 수 없습니다.") {
+            navigate("/additional-info", { replace: true });
+          } else {
+            // 기타 에러 - 로그인 페이지로
+            console.error("Error fetching member info:", error);
+            alert("오류가 발생했습니다. 다시 시도해주세요.");
+            navigate("/join", { replace: true });
+          }
+        }
+      };
+
+      checkUser();
+    }
+  }, [searchParams, navigate]);
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="max-w-xl mx-4 text-center">
-        {/* 로고 섹션 */}
         <div className="mb-8">
           <h1 className="mb-2 text-4xl font-bold text-gray-800">E:TCH</h1>
           <p className="text-lg text-gray-600">IT 취업의 새로운 시작</p>
         </div>
 
-        {/* 로딩 애니메이션 카드 */}
         <div className="p-12 mb-6 bg-white shadow-sm rounded-2xl min-h-[320px] min-w-[400px] flex flex-col justify-center">
-          {/* 메인 로딩 스피너 */}
           <div className="relative w-20 h-20 mx-auto mb-6">
-            {/* 회전하는 링 - 더 명확한 회전 효과 */}
             <div className="absolute inset-0 border-4 rounded-full border-brand-100 border-t-brand-500 animate-spin"></div>
-            {/* Google 아이콘 (간단한 G) */}
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-2xl font-bold text-brand-500">G</span>
             </div>
           </div>
 
-          {/* 로딩 메시지 */}
           <div className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-800">
               로그인 중...
             </h2>
             <p className="text-gray-600">잠시만 기다려 주세요</p>
 
-            {/* 점 애니메이션 */}
             <div className="flex justify-center pt-2 space-x-1">
               <div className="w-2 h-2 rounded-full bg-brand-500 animate-bounce"></div>
               <div

@@ -76,8 +76,8 @@ function AdditionalInfoPage() {
       );
 
       if (response.status === 200 || response.status === 201) {
-        alert("회원가입이 완료되었습니다!");
-        navigate("/", { replace: true });
+        alert("회원가입이 완료되었습니다! 로그인 해주세요!");
+        navigate("/login", { replace: true });
       }
     } catch (error) {
       console.error("회원가입 오류:", error);
