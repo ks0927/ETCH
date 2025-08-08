@@ -28,11 +28,11 @@ public class MemberController {
     private final JWTUtil jwtUtil;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<MemberDTO>> getMyInfo(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+    public ResponseEntity<ApiResponse<MemberResponseDTO>> getMyInfo(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
         if (oAuth2User == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid refresh token."));
         }
-        MemberDTO memberDTO = memberService.findById(oAuth2User.getId());
+        MemberResponseDTO memberDTO = MemberResponseDTO.from(memberService.findById(oAuth2User.getId()));
         return ResponseEntity.ok(ApiResponse.success(memberDTO));
     }
 
