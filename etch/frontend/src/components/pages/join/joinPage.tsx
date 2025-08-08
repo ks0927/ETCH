@@ -1,14 +1,7 @@
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import GoogleAuthButton from "../../molecules/googleAuthButton";
 
 function JoinPage() {
-  const navigate = useNavigate();
-
-  const handleGoogleAuth = () => {
-    // OAuth 로딩 페이지로 이동
-    navigate("/Oauth");
-  };
-
   return (
     <>
       <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
@@ -24,10 +17,7 @@ function JoinPage() {
           </div>
 
           <div className="mb-6">
-            <GoogleAuthButton
-              text="Google로 회원가입"
-              onClick={handleGoogleAuth}
-            />
+            <GoogleAuthButton text="Google로 회원가입" />
           </div>
 
           <div className="p-4 mb-6 border border-blue-100 rounded-lg bg-blue-50">
