@@ -114,4 +114,8 @@ public class PortfolioEntity {
     public void clear() {
         project.clear();
     }
+
+    public void updateStatus() {
+        isDeleted = true;
+    }
 }
