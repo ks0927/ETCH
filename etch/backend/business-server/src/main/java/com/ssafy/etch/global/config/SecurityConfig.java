@@ -43,68 +43,53 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-			.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+		http.cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-				@Override
-				public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			@Override
+			public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
-					CorsConfiguration configuration = new CorsConfiguration();
+				CorsConfiguration configuration = new CorsConfiguration();
 
-					configuration.setAllowedOrigins(List.of(
-						"http://localhost:3000",
-						"https://etch.it.kr"
-					));
-					configuration.setAllowCredentials(true);
-					configuration.setAllowedMethods(
-						Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 명시적으로 허용
-					configuration.setAllowedHeaders(
-						Arrays.asList("Authorization", "Content-Type", "X-Requested-With")); // 필요한 헤더만
-					configuration.setMaxAge(3600L);
+				configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://etch.it.kr"));
+				configuration.setAllowCredentials(true);
+				configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 명시적으로 허용
+				configuration.setAllowedHeaders(
+					Arrays.asList("Authorization", "Content-Type", "X-Requested-With")); // 필요한 헤더만
+				configuration.setMaxAge(3600L);
 
-					configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
+				configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
 
-					return configuration;
-				}
-			}));
+				return configuration;
+			}
+		}));
 		//csrf disable
-		http
-			.csrf((auth) -> auth.disable());
+		http.csrf((auth) -> auth.disable());
 
 		//Form 로그인 방식 disable
-		http
-			.formLogin((auth) -> auth.disable());
+		http.formLogin((auth) -> auth.disable());
 
 		//HTTP Basic 인증 방식 disable
-		http
-			.httpBasic((auth) -> auth.disable());
+		http.httpBasic((auth) -> auth.disable());
 
 		//JWTFilter 추가
-		http
-			.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
 		//oauth2
-		http
-			.oauth2Login((auth) -> auth
-				.userInfoEndpoint((userInfoEndpointConfig -> userInfoEndpointConfig
-					.userService(customOAuth2UserService)))
-				.successHandler(customSuccessHandler)
-			);
+		http.oauth2Login((auth) -> auth.userInfoEndpoint(
+				(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService)))
+			.successHandler(customSuccessHandler));
 
 		//경로별 인가 작업
-		http
-			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/**", "/signup", "/v3/api-docs/**",
-					"/swagger-ui/**",
-					"/swagger-ui.html").permitAll()
-				.requestMatchers("/user/**", "/auth/me").hasAnyRole("GUEST", "USER")
-				.anyRequest().authenticated());
+		http.authorizeHttpRequests(
+			(auth) -> auth.requestMatchers("/**", "/signup", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+				.permitAll()
+				.requestMatchers("/user/**", "/auth/me")
+				.hasAnyRole("GUEST", "USER")
+				.anyRequest()
+				.authenticated());
 
 		//세션 설정 : STATELESS
-		http
-			.sessionManagement((session) -> session
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			);
+		http.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		return http.build();
 	}
