@@ -51,9 +51,12 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         // 토큰에서 id와 role 추출
+        Long id = -1L;
         String email = jwtUtil.getEmail(accessToken);
         String role = jwtUtil.getRole(accessToken);
-        Long id = jwtUtil.getId(accessToken);
+        if("USER".equals(role)) {
+            id = jwtUtil.getId(accessToken);
+        }
 
         // MemberDTO 생성
         MemberDTO memberDTO = MemberDTO.builder()
