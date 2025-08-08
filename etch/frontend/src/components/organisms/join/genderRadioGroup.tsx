@@ -1,11 +1,13 @@
-import { useState } from "react";
 import RadioInput from "../../molecules/join/radioInput";
 
-function GenderRadioGroup() {
-  const [selectedGender, setSelectedGender] = useState("");
+interface GenderRadioGroupProps {
+  value: string;
+  onChange: (value: string) => void;
+}
 
-  const handleGenderChange = (value: string) => {
-    setSelectedGender(value);
+function GenderRadioGroup({ value, onChange }: GenderRadioGroupProps) {
+  const handleGenderChange = (selectedValue: string) => {
+    onChange(selectedValue);
   };
 
   return (
@@ -14,7 +16,7 @@ function GenderRadioGroup() {
         type="radio"
         name="gender"
         value="male"
-        checked={selectedGender === "male"}
+        checked={value === "male"}
         onChange={handleGenderChange}
         placeholder="남성"
       />
@@ -22,7 +24,7 @@ function GenderRadioGroup() {
         type="radio"
         name="gender"
         value="female"
-        checked={selectedGender === "female"}
+        checked={value === "female"}
         onChange={handleGenderChange}
         placeholder="여성"
       />

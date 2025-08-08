@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BirthDropdown from "../../molecules/join/birthDropdown";
 
-function BirthDateSelector() {
+interface BirthDateSelectorProps {
+  onChange: (value: string) => void;
+}
+
+function BirthDateSelector({ onChange }: BirthDateSelectorProps) {
   const [selectedDate, setSelectedDate] = useState({
     year: "",
     month: "",
@@ -33,6 +37,15 @@ function BirthDateSelector() {
   const handleDayChange = (value: string) => {
     setSelectedDate((prev) => ({ ...prev, day: value }));
   };
+
+  // 날짜가 변경될 때마다 부모에게 알림
+  useEffect(() => {
+    const { year, month, day } = selectedDate;
+    if (year && month && day) {
+      const formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      onChange(formattedDate);
+    }
+  }, [selectedDate, onChange]);
 
   return (
     <div className="flex gap-2">

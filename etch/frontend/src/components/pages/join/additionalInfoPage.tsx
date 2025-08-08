@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import axios from "axios";
 import NicknameInput from "../../molecules/join/nicknameInput";
 import TelInput from "../../molecules/join/telInput";
 import BirthDateSelector from "../../organisms/join/BirthDateSelector";
@@ -7,8 +9,12 @@ import ProfileImageUploader from "../../organisms/join/profileImageUploader";
 import CompletionButton from "../../molecules/join/completionButton";
 
 function AdditionalInfoPage() {
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [tel, setTel] = useState("");
+  const [birth, setBirth] = useState("");
+  const [gender, setGender] = useState("");
+  const [profile, setProfile] = useState("");
 
   const handleNicknameChange = (value: string) => {
     setNickname(value);
@@ -16,6 +22,66 @@ function AdditionalInfoPage() {
 
   const handleTelChange = (value: string) => {
     setTel(value);
+  };
+
+  const handleBirthChange = (value: string) => {
+    setBirth(value);
+  };
+
+  const handleGenderChange = (value: string) => {
+    setGender(value);
+  };
+
+  const handleProfileChange = (value: string) => {
+    setProfile(value);
+  };
+
+  const handleSubmit = async () => {
+    console.log("=== 디버깅 ===");
+    console.log("nickname:", nickname);
+    console.log("tel:", tel);
+    console.log("birth:", birth);
+    console.log("gender:", gender);
+    console.log("profile:", profile);
+
+    try {
+      const accessToken = localStorage.getItem("access_token");
+
+      if (!accessToken) {
+        alert("비정상적인 접근입니다.");
+        navigate("/join", { replace: true });
+        return;
+      }
+
+      const memberData = {
+        nickname,
+        phoneNumber: tel,
+        profile,
+        gender,
+        birth,
+      };
+
+      console.log("회원가입 데이터:", memberData);
+      console.log("Access Token:", accessToken);
+
+      const response = await axios.post(
+        "https://etch.it.kr/api/v1/members",
+        memberData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("회원가입이 완료되었습니다!");
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      alert("회원가입 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -44,14 +110,14 @@ function AdditionalInfoPage() {
             <p className="block mb-2 text-sm font-medium text-gray-700">
               *생년월일
             </p>
-            <BirthDateSelector />
+            <BirthDateSelector onChange={handleBirthChange} />
           </div>
 
           <div>
             <p className="block mb-2 text-sm font-medium text-gray-700">
               *성별
             </p>
-            <GenderRadioGroup />
+            <GenderRadioGroup value={gender} onChange={handleGenderChange} />
           </div>
 
           <div>
@@ -70,16 +136,11 @@ function AdditionalInfoPage() {
             <p className="block mb-2 text-sm font-medium text-gray-700">
               프로필 사진
             </p>
-            <ProfileImageUploader />
+            <ProfileImageUploader onChange={handleProfileChange} />
           </div>
 
           <div className="pt-4">
-            <CompletionButton
-              text="완료"
-              onClick={() => {
-                console.log("프로필 설정 완료");
-              }}
-            />
+            <CompletionButton text="완료" onClick={handleSubmit} />
           </div>
         </div>
       </div>
