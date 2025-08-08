@@ -6,7 +6,7 @@ function LatestCard({
   title,
   description,
   url,
-  publishedAt, // LocalDate는 문자열로 옴
+  publishedAt,
 }: NewsCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">

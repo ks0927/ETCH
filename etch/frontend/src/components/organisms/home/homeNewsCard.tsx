@@ -1,14 +1,14 @@
-import type { mockNewsData } from "../../../types/mock/mockNewsData";
+import type { News } from "../../../types/news";
 import NewsCard from "../../molecules/home/newsCard";
 
 interface Props {
-  mockNews: mockNewsData[];
+  newsData: News[];
 }
 
-function HomeNewsCard({ mockNews }: Props) {
+function HomeNewsCard({ newsData }: Props) {
   return (
     <div className="space-y-3">
-      {mockNews.slice(0, 5).map((news) => (
+      {newsData.slice(0, 5).map((news) => (
         <NewsCard {...news} type="news" />
       ))}
     </div>

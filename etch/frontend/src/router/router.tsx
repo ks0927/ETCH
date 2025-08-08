@@ -12,9 +12,7 @@ const NewsPage = lazy(
 const NewsLatestPage = lazy(
   () => import("../components/pages/news/newsLatestPage.tsx")
 );
-const NewsRecommendPage = lazy(
-  () => import("../components/pages/news/newsRecommendPage.tsx")
-);
+
 const JoinPage = lazy(() => import("../components/pages/join/joinPage.tsx"));
 const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
 const OAuthLoadingPage = lazy(
@@ -112,14 +110,7 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      {
-        path: "/news/recommend",
-        element: (
-          <Suspense fallback={<LoadingPage />}>
-            <NewsRecommendPage />
-          </Suspense>
-        ),
-      },
+
       {
         path: "/join",
         element: (
