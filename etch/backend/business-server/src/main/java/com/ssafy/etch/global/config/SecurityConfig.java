@@ -85,6 +85,7 @@ public class SecurityConfig {
 			(auth) -> auth.requestMatchers("/**", "/signup", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
 				.permitAll()
 				.requestMatchers(HttpMethod.POST, "/members/").hasAnyRole("GUEST")
+				.requestMatchers("/projects/**/comments/**").hasRole("USER")
 				.requestMatchers("/user/**", "/auth/me")
 				.hasAnyRole("GUEST", "USER")
 				.anyRequest()
