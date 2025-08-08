@@ -14,11 +14,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "project_comment")
-@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class CommentEntity {
 
 	@Id
@@ -41,6 +43,19 @@ public class CommentEntity {
 	@ManyToOne
 	@JoinColumn(name = "project_post")
 	private ProjectEntity project;
+
+	public static CommentEntity of(String content, MemberEntity member, ProjectEntity project) {
+
+		CommentEntity commentEntity = new CommentEntity();
+
+		commentEntity.content = content;
+		commentEntity.createdAt = LocalDate.now();
+		commentEntity.isDeleted = false;
+		commentEntity.member = member;
+		commentEntity.project = project;
+
+		return commentEntity;
+	}
 
 	public CommentDTO toCommentDTO() {
 		return CommentDTO.builder()
