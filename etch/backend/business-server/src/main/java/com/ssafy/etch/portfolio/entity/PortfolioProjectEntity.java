@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "portfolio_project")
+@Table(
+        name = "portfolio_project",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"portfolio_id", "project_id"})
+)
 public class PortfolioProjectEntity {
 
     @Id

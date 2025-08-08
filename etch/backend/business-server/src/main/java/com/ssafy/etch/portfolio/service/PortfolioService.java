@@ -8,4 +8,5 @@ import java.util.List;
 public interface PortfolioService {
     List<PortfolioListResponseDTO> getPortfolioList(Long memberId);
     void savePortfolio(Long memberId, PortfolioRequestDTO portfolioRequestDTO);
+    void updatePortfolio(Long memberId, Long portfolioId, PortfolioRequestDTO portfolioRequestDTO);
 }

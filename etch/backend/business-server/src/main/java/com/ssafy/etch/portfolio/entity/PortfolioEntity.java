@@ -2,6 +2,7 @@ package com.ssafy.etch.portfolio.entity;
 
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.portfolio.dto.PortfolioDTO;
+import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -93,7 +94,24 @@ public class PortfolioEntity {
         return portfolioEntity;
     }
 
-    public static void updateInfo(PortfolioEntity portfolioEntity, List<PortfolioProjectEntity> project) {
+    public static void updateProjectInfo(PortfolioEntity portfolioEntity, List<PortfolioProjectEntity> project) {
         portfolioEntity.project = project;
+    }
+
+    public void updateAll(PortfolioRequestDTO portfolioRequestDTO, List<PortfolioProjectEntity> newProject) {
+        name = portfolioRequestDTO.getName();
+        introduce = portfolioRequestDTO.getIntroduce();
+        githubUrl = portfolioRequestDTO.getGithubUrl();
+        linkedInUrl = portfolioRequestDTO.getLinkedInUrl();
+        blogUrl = portfolioRequestDTO.getBlogUrl();
+        techList = portfolioRequestDTO.getTechList();
+        education = portfolioRequestDTO.getEducation();
+        language = portfolioRequestDTO.getLanguage();
+        updatedAt = LocalDate.now();
+        project = newProject;
+    }
+
+    public void clear() {
+        project.clear();
     }
 }
