@@ -15,7 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.ssafy.etch.like.repository",
         "com.ssafy.etch.member.repository",
         "com.ssafy.etch.news.repository",
-        "com.ssafy.etch.project.repository"
+        "com.ssafy.etch.project.repository",
+        "com.ssafy.etch.portfolio.repository"
     }
 )
 @EnableElasticsearchRepositories(

@@ -4,6 +4,7 @@ import com.ssafy.etch.coverLetter.entity.CoverLetterEntity;
 import com.ssafy.etch.follow.entity.FollowEntity;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
+import com.ssafy.etch.portfolio.entity.PortfolioEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -54,6 +55,9 @@ public class MemberEntity {
 
     @OneToMany(mappedBy = "member")
     private List<CoverLetterEntity> coverLetterList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<PortfolioEntity>  portfolioList = new ArrayList<>();
 //    @OneToMany(mappedBy = "user")
 //    private List<ProjectEntity> projects = new ArrayList<>();
 //
