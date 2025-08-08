@@ -81,10 +81,6 @@ const router = createBrowserRouter([
         element: <DetailFavoriteCompany />,
       },
       {
-        path: "*",
-        element: <ErrorPage />,
-      },
-      {
         path: "/loading",
         element: <LoadingPage />,
       },

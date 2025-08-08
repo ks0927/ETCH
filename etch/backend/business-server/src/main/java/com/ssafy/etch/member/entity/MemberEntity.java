@@ -91,6 +91,7 @@ public class MemberEntity {
         memberEntity.birth = LocalDate.parse(memberDTO.getBirth());
         memberEntity.isDeleted = false;
         memberEntity.refreshToken = memberDTO.getRefreshToken();
+        memberEntity.role = MemberRole.valueOf(memberDTO.getRole());
         return memberEntity;
     }
 

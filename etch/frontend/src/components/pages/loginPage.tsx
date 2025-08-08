@@ -1,13 +1,36 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import { useEffect } from "react";
 import GoogleAuthButton from "../molecules/googleAuthButton";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const handleGoogleLogin = () => {
-    // OAuth 로딩 페이지로 이동
-    navigate("/Oauth");
-  };
+  // OAuth 리다이렉트 후 토큰 처리
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (token) {
+      // 1. Access token을 localStorage에 저장
+      localStorage.setItem("access_token", token);
+
+      // 2. 쿠키에서 refresh token 존재 확인
+      const hasRefreshToken = document.cookie
+        .split(";")
+        .some((cookie) => cookie.trim().startsWith("refresh_token="));
+
+      // 3. refresh token 유무에 따른 라우팅
+      if (hasRefreshToken) {
+        // 기존 유저 - 메인 페이지로
+        // replace - 현재 페이지를 교체
+        navigate("/", { replace: true });
+      } else {
+        // 신규 유저 - 추가 정보 페이지로
+        // replace - 현재 페이지를 교체
+        navigate("/additional-info", { replace: true });
+      }
+    }
+  }, [searchParams, navigate]);
 
   return (
     <>
@@ -22,10 +45,7 @@ function LoginPage() {
           </div>
 
           <div className="mb-6">
-            <GoogleAuthButton
-              text="Google로 로그인"
-              onClick={handleGoogleLogin}
-            />
+            <GoogleAuthButton text="Google로 로그인" />
           </div>
 
           <div className="text-sm text-center text-gray-600">
