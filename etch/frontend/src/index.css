@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-50: #e6f3ff;
+  --color-brand-100: #b3daff;
+  --color-brand-200: #80c1ff;
+  --color-brand-300: #4da8ff;
+  --color-brand-400: #1a8fff;
+  --color-brand-500: #007dfc; /* 메인 브랜드 색상 */
+  --color-brand-600: #0066cc;
+  --color-brand-700: #004d99;
+  --color-brand-800: #003366;
+  --color-brand-900: #001a33;
+}
