@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import Pagenation from "../../common/pagination";
 import AllLatestNews from "../../organisms/news/allLatestNews";
-import { fetchLatestNews } from "../../../api/newsApi";
+import { LatestNewsData } from "../../../api/newsApi";
 
 function NewsLatestPage() {
   const [latestNewsData, setLatestNewsData] = useState([]);
 
   useEffect(() => {
     const loadLatestNews = async () => {
-      const data = await fetchLatestNews();
+      const data = await LatestNewsData();
       setLatestNewsData(data);
     };
 

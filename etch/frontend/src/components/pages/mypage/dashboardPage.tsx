@@ -9,14 +9,14 @@ import {
 import { mockStatsData } from "../../../types/mock/mockStatsData";
 import AllRecommendNews from "../../organisms/news/allRecommendNews";
 import { useEffect, useState } from "react";
-import { fetchLatestNews } from "../../../api/newsApi";
+import { LatestNewsData } from "../../../api/newsApi";
 
 const DashboardPage = () => {
   const [latestNewsData, setLatestNewsData] = useState([]);
 
   useEffect(() => {
     const loadLatestNews = async () => {
-      const data = await fetchLatestNews();
+      const data = await LatestNewsData();
       setLatestNewsData(data);
     };
 

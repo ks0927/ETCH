@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import testImg from "../../assets/testImg.png";
 import { funcData } from "../../types/funcComponentData";
 import { mockJobs } from "../../types/mock/mockJobData";
-import { mockNews } from "../../types/mock/mockNewsData";
 import { mockProjectData } from "../../types/mock/mockProjectData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
 import HomeJobCard from "../organisms/home/homeJobCard";
@@ -10,8 +9,20 @@ import HomeNewsCard from "../organisms/home/homeNewsCard";
 import HomeProjectCard from "../organisms/home/homeProjectCard";
 import ProjectSVG from "../svg/projectSVG";
 import SeeMore from "../svg/seeMore";
+import { LatestNewsData } from "../../api/newsApi";
+import { useEffect, useState } from "react";
 
 function HomePage() {
+  const [latestNewsData, setLatestNewsData] = useState([]);
+
+  useEffect(() => {
+    const loadLatestNews = async () => {
+      const data = await LatestNewsData();
+      setLatestNewsData(data);
+    };
+
+    loadLatestNews();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -139,7 +150,7 @@ function HomePage() {
                     <SeeMore />
                   </Link>
                 </div>
-                <HomeNewsCard mockNews={mockNews} />
+                <HomeNewsCard newsData={latestNewsData} />
               </div>
             </div>
           </div>

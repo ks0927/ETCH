@@ -8,7 +8,7 @@ interface Props {
 function LatestNews({ newsData }: Props) {
   return (
     <div className="flex flex-col gap-4">
-      {newsData.slice(0, 4).map((news) => {
+      {newsData.slice(0, 8).map((news) => {
         // index 제거
         // 각 뉴스 항목 검증
         if (!news || !news.id) {
