@@ -92,6 +92,7 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 ### **UI/UX**
 
 👉👉👉[Figma 디자인 보러가기](https://www.figma.com/design/TXWdGbbCtAk1VeMvMFNkPu/PTJ-Design?node-id=0-1&t=cOqejurYRzlPfRZZ-1)👈👈👈
+
 [![Figma Thumbnail](assets/메인썸네일.png)](https://www.figma.com/design/TXWdGbbCtAk1VeMvMFNkPu/PTJ-Design?node-id=0-1&t=cOqejurYRzlPfRZZ-1)
 
 ### **ERD 설계**
