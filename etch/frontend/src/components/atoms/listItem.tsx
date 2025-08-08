@@ -25,7 +25,8 @@ export interface ChatMessageItemProps extends BaseListItemProps {
 export interface JobItemProps extends BaseListItemProps {
   company: string;
   location: string;
-  deadline: string;
+  opening_date: string;
+  expiration_date: string;
   tags: string[];
 }
 

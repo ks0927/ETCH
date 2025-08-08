@@ -8,9 +8,11 @@ interface RecommendedJobsProps {
 const RecommendedJobs = ({ jobs }: RecommendedJobsProps) => {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="border-b border-gray-200 p-6">
+      <div className="p-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold">추천 채용 공고</h3>
-        <p className="text-sm text-gray-500">당신의 관심사와 지원 이력을 바탕으로 추천드립니다</p>
+        <p className="text-sm text-gray-500">
+          당신의 관심사와 지원 이력을 바탕으로 추천드립니다
+        </p>
       </div>
       <div className="p-6">
         <div className="space-y-3">
@@ -20,7 +22,8 @@ const RecommendedJobs = ({ jobs }: RecommendedJobsProps) => {
               id={job.id}
               company={job.company}
               location={job.location}
-              deadline={job.deadline}
+              opening_date={job.opening_date}
+              expiration_date={job.expiration_date}
               tags={job.tags}
               onClick={(id) => console.log(`Job ${id} clicked`)}
             />

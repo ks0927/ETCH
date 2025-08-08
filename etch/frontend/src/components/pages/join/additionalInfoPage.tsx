@@ -69,6 +69,7 @@ function AdditionalInfoPage() {
         memberData,
         {
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
         }
