@@ -5,7 +5,8 @@ export default function JobListItem({
   id,
   company,
   location,
-  deadline,
+  opening_date,
+  expiration_date,
   tags,
   onClick
 }: JobItemProps) {
@@ -24,7 +25,8 @@ export default function JobListItem({
         </button>
       </div>
       <div className="mb-3">
-        <span className="text-sm text-gray-500">마감: {deadline}</span>
+        <div className="text-sm text-gray-500">시작일: {opening_date}</div>
+        <div className="text-sm text-gray-500">마감일: {expiration_date}</div>
       </div>
       <div className="flex flex-wrap gap-2">
         {tags.map(tag => (

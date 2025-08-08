@@ -17,7 +17,7 @@ function LoginPage() {
       // 2. 쿠키에서 refresh token 존재 확인
       const hasRefreshToken = document.cookie
         .split(";")
-        .some((cookie) => cookie.trim().startsWith("refresh_token="));
+        .some((cookie) => cookie.trim().startsWith("refresh"));
 
       // 3. refresh token 유무에 따른 라우팅
       if (hasRefreshToken) {

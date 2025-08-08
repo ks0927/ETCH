@@ -2,6 +2,7 @@ import { useState } from "react";
 import JobHeader from "../../organisms/job/jobHeader";
 import JobList from "../../organisms/job/jobList";
 import { mockJobList } from "../../../types/mock/mockJobListData";
+import CalendarView from "../../organisms/job/calendarView";
 
 export default function JobPage() {
   const [currentView, setCurrentView] = useState<"list" | "calendar">(
@@ -30,7 +31,9 @@ export default function JobPage() {
       {currentView === "list" && (
         <JobList jobs={mockJobList} onJobClick={handleJobClick} />
       )}
-      {currentView === "calendar" && <div>캘린더 뷰 (추후 구현)</div>}
+      {currentView === "calendar" && (
+        <CalendarView jobList={mockJobList} onEventClick={handleJobClick} />
+      )}
     </div>
   );
 }
