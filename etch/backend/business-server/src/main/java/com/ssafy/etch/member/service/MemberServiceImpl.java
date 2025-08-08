@@ -37,7 +37,7 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public MemberDTO registerNewMember(String email, MemberDTO memberDTO) {
         // role 설정
-        memberDTO = memberDTO.toBuilder().role("USER").email(email).build();
+        memberDTO = memberDTO.toBuilder().role("USER").refreshToken("").email(email).build();
         MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
         MemberEntity savedEntity = memberRepository.save(memberEntity);
         memberDTO = savedEntity.toMemberDTO();
