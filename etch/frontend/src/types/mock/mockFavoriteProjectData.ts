@@ -1,5 +1,5 @@
 import type { FavoriteProjectProps } from "../../components/atoms/list";
-import testImg from "../assets/testImg.png";
+import testImg from "../../assets/testImg.png";
 
 export const mockFavoriteProjectsData: FavoriteProjectProps[] = [
   {

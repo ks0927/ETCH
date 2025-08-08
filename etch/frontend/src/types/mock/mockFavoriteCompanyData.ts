@@ -1,5 +1,5 @@
 import type { FavoriteCompanyProps } from "../../components/atoms/list";
-import testImg from "../assets/samsung.png";
+import testImg from "../../assets/samsung.png";
 
 export const mockFavoriteCompanyData: FavoriteCompanyProps[] = [
   { id: 1, companyName: "삼성 전자", img: testImg },
