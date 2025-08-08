@@ -1,8 +1,19 @@
-import { mockNews } from "../../../types/mockNewsData";
+import { useEffect, useState } from "react";
 import Pagenation from "../../common/pagination";
 import AllLatestNews from "../../organisms/news/allLatestNews";
+import { fetchLatestNews } from "../../../api/newsApi";
 
 function NewsLatestPage() {
+  const [latestNewsData, setLatestNewsData] = useState([]);
+
+  useEffect(() => {
+    const loadLatestNews = async () => {
+      const data = await fetchLatestNews();
+      setLatestNewsData(data);
+    };
+
+    loadLatestNews();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-12">
@@ -30,7 +41,8 @@ function NewsLatestPage() {
               </h2>
             </div>
           </div>
-          <AllLatestNews newsData={mockNews} />
+
+          <AllLatestNews newsData={latestNewsData} />
         </section>
         <Pagenation />
       </div>

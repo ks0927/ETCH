@@ -1,5 +1,5 @@
-import { mockFavoriteProjectsData } from "../../../../types/mockFavoriteProjectData";
-import { mockProjectData2 } from "../../../../types/mockProjectData2";
+import { mockFavoriteProjectsData } from "../../../../types/mock/mockFavoriteProjectData";
+import { mockProjectData2 } from "../../../../types/mock/mockProjectData2";
 import DetailProjectList from "../../../organisms/mypage/favorite/detail/detailProjectList";
 
 function DetailFavoriteProject() {

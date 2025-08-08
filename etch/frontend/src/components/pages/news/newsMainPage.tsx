@@ -1,12 +1,21 @@
 import { Link } from "react-router";
-import { mockNews } from "../../../types/mockNewsData";
+import { useState, useEffect } from "react";
 import CompanyNews from "../../organisms/news/newsListCompany";
 import LatestNews from "../../organisms/news/newsListLatest";
-import RecommendNews from "../../organisms/news/newsListRecommend";
-import { mockCompany } from "../../../types/mockCompanyData";
-import SeeMore from "../../svg/seeMore";
+import { mockCompany } from "../../../types/mock/mockCompanyData";
+import { fetchLatestNews } from "../../../api/newsApi";
 
 function NewsPage() {
+  const [latestNewsData, setLatestNewsData] = useState([]);
+
+  useEffect(() => {
+    const loadLatestNews = async () => {
+      const data = await fetchLatestNews();
+      setLatestNewsData(data);
+    };
+
+    loadLatestNews();
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 섹션 */}
@@ -63,7 +72,6 @@ function NewsPage() {
           </div>
           <CompanyNews companyData={mockCompany} />
         </section>
-
         {/* 최신 뉴스 섹션 */}
         <section className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
@@ -107,11 +115,11 @@ function NewsPage() {
               </svg>
             </Link>
           </div>
-          <LatestNews newsData={mockNews} />
-        </section>
 
-        {/* 추천 뉴스 섹션 */}
-        <section className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
+          {/* 로딩/에러 상태 처리 */}
+          <LatestNews newsData={latestNewsData} />
+        </section>
+        {/* <section className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
             <div className="flex items-center space-x-3">
               <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -138,7 +146,7 @@ function NewsPage() {
             </Link>
           </div>
           <RecommendNews newsData={mockNews} />
-        </section>
+        </section> */}
       </div>
     </div>
   );

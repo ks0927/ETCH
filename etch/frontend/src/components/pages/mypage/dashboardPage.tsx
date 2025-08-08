@@ -1,11 +1,27 @@
 import StatsCards from "../../organisms/mypage/statsCards";
 import MyDocuments from "../../organisms/mypage/myDocuments";
 import RecommendedJobs from "../../organisms/mypage/recommendedJobs";
-import { mockJobList } from "../../../types/mockJobListData";
-import { mockCoverLetters, mockPortfolios } from "../../../types/mockDocumentsData";
-import { mockStatsData } from "../../../types/mockStatsData";
+import { mockJobList } from "../../../types/mock/mockJobListData";
+import {
+  mockCoverLetters,
+  mockPortfolios,
+} from "../../../types/mock/mockDocumentsData";
+import { mockStatsData } from "../../../types/mock/mockStatsData";
+import AllRecommendNews from "../../organisms/news/allRecommendNews";
+import { useEffect, useState } from "react";
+import { fetchLatestNews } from "../../../api/newsApi";
 
 const DashboardPage = () => {
+  const [latestNewsData, setLatestNewsData] = useState([]);
+
+  useEffect(() => {
+    const loadLatestNews = async () => {
+      const data = await fetchLatestNews();
+      setLatestNewsData(data);
+    };
+
+    loadLatestNews();
+  }, []);
   const recommendedJobs = mockJobList.slice(0, 3);
 
   return (
@@ -14,13 +30,16 @@ const DashboardPage = () => {
         <StatsCards stats={mockStatsData} />
       </div>
       <div>
-        <MyDocuments 
+        <MyDocuments
           coverLetters={mockCoverLetters}
           portfolios={mockPortfolios}
         />
       </div>
       <div>
         <RecommendedJobs jobs={recommendedJobs} />
+      </div>
+      <div>
+        <AllRecommendNews newsData={latestNewsData} />
       </div>
     </div>
   );

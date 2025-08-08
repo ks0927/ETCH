@@ -1,8 +1,8 @@
 import { Link } from "react-router";
-import { mockProjectData } from "../../../types/mockProjectData";
+import { mockProjectData } from "../../../types/mock/mockProjectData";
 import PlusSVG from "../../svg/plusSVG";
 import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
-import { mockProjectData2 } from "../../../types/mockProjectData2";
+import { mockProjectData2 } from "../../../types/mock/mockProjectData2";
 
 function MypageProjectPage() {
   return (

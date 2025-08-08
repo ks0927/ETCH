@@ -1,15 +1,21 @@
-import type { mockNewsData } from "../../../types/mockNewsData";
-import RecommendCard from "../../molecules/news/recommendList";
+import type { News } from "../../../types/news";
+import LatestCard from "../../molecules/news/latestList";
 interface Props {
-  newsData: mockNewsData[];
+  newsData: News[];
 }
 
 function AllLatestNews({ newsData }: Props) {
   return (
     <div className="flex flex-col gap-4">
-      {newsData.map((news, index) => (
-        <RecommendCard key={news.id || index} type="news" {...news} />
-      ))}
+      {newsData.slice(0, 10).map((news) => {
+        // index 제거
+        // 각 뉴스 항목 검증
+        if (!news || !news.id) {
+          return null;
+        }
+
+        return <LatestCard key={news.id} type="news" {...news} />;
+      })}
     </div>
   );
 }

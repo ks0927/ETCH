@@ -1,4 +1,4 @@
-import type { StatsCardData } from "../components/atoms/card";
+import type { StatsCardData } from "../../components/atoms/card";
 
 export const mockStatsData: StatsCardData[] = [
   {

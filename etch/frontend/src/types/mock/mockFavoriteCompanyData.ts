@@ -1,4 +1,4 @@
-import type { FavoriteCompanyProps } from "../components/atoms/list";
+import type { FavoriteCompanyProps } from "../../components/atoms/list";
 import testImg from "../assets/samsung.png";
 
 export const mockFavoriteCompanyData: FavoriteCompanyProps[] = [

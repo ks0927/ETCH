@@ -1,4 +1,4 @@
-import Samsung from "../assets/samsung.png";
+import Samsung from "../../assets/samsung.png";
 export interface mockCompanyData {
   companyName: string;
   like: number;

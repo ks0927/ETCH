@@ -1,4 +1,4 @@
-import type { ApplicationItemProps } from "../components/atoms/listItem";
+import type { ApplicationItemProps } from "../../components/atoms/listItem";
 
 export const mockApplications: ApplicationItemProps[] = [
   {
