@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.ssafy.etch.oauth.handler.CustomOAuth2FailureHandler;
 import com.ssafy.etch.oauth.handler.CustomSuccessHandler;
 import com.ssafy.etch.oauth.jwt.filter.JWTFilter;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
@@ -28,12 +29,14 @@ public class SecurityConfig {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final CustomSuccessHandler customSuccessHandler;
+	private final CustomOAuth2FailureHandler customOAuth2FailureHandler; // 추가
 	private final JWTUtil jwtUtil;
 
 	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
-		JWTUtil jwtUtil) {
+			CustomOAuth2FailureHandler customOAuth2FailureHandler, JWTUtil jwtUtil) { // 수정
 		this.customOAuth2UserService = customOAuth2UserService;
 		this.customSuccessHandler = customSuccessHandler;
+		this.customOAuth2FailureHandler = customOAuth2FailureHandler; // 추가
 		this.jwtUtil = jwtUtil;
 	}
 
@@ -76,9 +79,10 @@ public class SecurityConfig {
 		http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
 		//oauth2
-		http.oauth2Login((auth) -> auth.userInfoEndpoint(
+				http.oauth2Login((auth) -> auth.userInfoEndpoint(
 				(userInfoEndpointConfig -> userInfoEndpointConfig.userService(customOAuth2UserService)))
-			.successHandler(customSuccessHandler));
+			.successHandler(customSuccessHandler)
+			.failureHandler(customOAuth2FailureHandler));
 
 		//경로별 인가 작업
 		http.authorizeHttpRequests(

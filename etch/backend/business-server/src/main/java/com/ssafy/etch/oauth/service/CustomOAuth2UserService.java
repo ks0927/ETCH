@@ -38,6 +38,9 @@ public class CustomOAuth2UserService  extends DefaultOAuth2UserService {
         }
         // 이미 가입된 회원(USER)
         else {
+            if (existData.toMemberDTO().isDeleted()) {
+                throw new OAuth2AuthenticationException("탈퇴한 회원입니다.");
+            }
             return new CustomOAuth2User(existData.toMemberDTO());
         }
     }
