@@ -12,6 +12,11 @@ export interface ButtonProps {
   checked?: boolean; // 현재 버튼의 체크 유뮤
   css?: string; // 버튼의 css 형식
 }
+export interface StackButtonProps extends ButtonProps {
+  stack: ProjectStackEnum; // 어떤 카테고리인지
+  isSelected: boolean; // 선택 여부
+  onSelect: (stack: ProjectStackEnum) => void; // 클릭 시 실행
+}
 
 export interface AdditionalButtonProps extends ButtonProps {
   textColor?: string; //  버튼의 텍스트 색상
@@ -36,10 +41,4 @@ export interface CategoryButtonProps extends ButtonProps {
   category: ProjectCategoryEnum; // 어떤 카테고리인지
   isSelected: boolean; // 선택 여부
   onSelect: (category: ProjectCategoryEnum) => void; // 클릭 시 실행
-}
-
-export interface StackButtonProps extends ButtonProps {
-  stack: ProjectStackEnum; // 어떤 카테고리인지
-  isSelected: boolean; // 선택 여부
-  onSelect: (stack: ProjectStackEnum) => void; // 클릭 시 실행
 }

@@ -14,7 +14,7 @@ export interface JobCardProps extends BaseCardProps {
 
 export interface ProjectCardProps extends BaseCardProps {
   id: number;
-  img: string;
+  img?: string;
   content: string;
   title: string;
   stack: string[];

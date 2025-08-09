@@ -44,12 +44,14 @@ const ProfileCard = ({ userProfile }: ProfileCardProps) => {
           </div>
 
           <div className="space-y-2">
-            <ActionButton
-              text="포트폴리오 생성"
-              bgColor="bg-blue-600"
-              textColor="text-white"
-              onClick={() => console.log("포트폴리오 생성")}
-            />
+            <Link to={"/mypage/portfolios"}>
+              <ActionButton
+                text="포트폴리오 생성"
+                bgColor="bg-blue-600"
+                textColor="text-white"
+                onClick={() => console.log("포트폴리오 생성")}
+              />
+            </Link>
             <Link to="/mypage/coverletters" className="block w-full">
               <ActionButton
                 text="자기소개서 생성"

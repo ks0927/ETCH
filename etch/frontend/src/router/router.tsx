@@ -61,6 +61,9 @@ const MypageFollowerPage = lazy(
 const MypageFollowingPage = lazy(
   () => import("../components/pages/mypage/mypageFollowingPage.tsx")
 );
+const MypagePortfolioPage = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioPage.tsx")
+);
 const router = createBrowserRouter([
   {
     path: "/",
@@ -73,10 +76,6 @@ const router = createBrowserRouter([
             <HomePage />
           </Suspense>
         ),
-      },
-      {
-        path: "/test",
-        element: <DetailFavoriteCompany />,
       },
       {
         path: "*",
@@ -166,6 +165,14 @@ const router = createBrowserRouter([
           {
             path: "applications",
             element: <MypageApplicationsPage />,
+          },
+          {
+            path: "portfolios",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioPage />
+              </Suspense>
+            ),
           },
           {
             path: "favorites",
