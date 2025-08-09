@@ -1,5 +1,7 @@
 package com.ssafy.etch.file.entity;
 
+import static jakarta.persistence.FetchType.*;
+
 import com.ssafy.etch.project.entity.ProjectEntity;
 
 import jakarta.persistence.Entity;
@@ -25,7 +27,15 @@ public class FileEntity {
 	private String name;
 	private String url;
 
-	@ManyToOne
+	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "project_post_id")
 	private ProjectEntity project;
+
+	public static FileEntity of(ProjectEntity project, String name, String url) {
+		FileEntity f = new FileEntity();
+		f.project = project;
+		f.name = name;
+		f.url = url;
+		return f;
+	}
 }

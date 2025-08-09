@@ -20,7 +20,10 @@ public class ProjectDetailDTO {
 	private String content;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
-	private List<String> categories;
+
+	private String projectCategory; // 프로젝트 카테고리
+	private List<String> techCategories; // 기술 카테고리(BACKEND/FRONTEND)
+
 	private List<String> techCodes;
 	private List<String> fileUrls;
 	private String githubUrl;
@@ -30,7 +33,7 @@ public class ProjectDetailDTO {
 		ProjectDTO p,
 		Long likeCount,
 		Boolean likedByMe,
-		List<String> categories,
+		List<String> techCategories,
 		List<String> techCodes,
 		List<String> fileUrls
 	) {
@@ -46,7 +49,8 @@ public class ProjectDetailDTO {
 			.content(p.getContent())
 			.createdAt(p.getCreatedAt())
 			.updatedAt(p.getUpdatedAt())
-			.categories(categories)
+			.projectCategory(p.getCategory() == null ? null : p.getCategory().name())
+			.techCategories(techCategories)
 			.techCodes(techCodes)
 			.fileUrls(fileUrls)
 			.githubUrl(p.getGithubUrl())
