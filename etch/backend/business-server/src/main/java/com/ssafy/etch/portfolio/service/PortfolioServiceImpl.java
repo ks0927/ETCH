@@ -101,6 +101,9 @@ public class PortfolioServiceImpl implements PortfolioService {
         PortfolioEntity portfolioEntity = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
 
+        if(portfolioEntity.toPortfolioDTO().isDeleted()) {
+            throw new CustomException(ErrorCode.CONTENT_DELETED);
+        }
         if (!portfolioEntity.toPortfolioDTO().getMember().toMemberDTO().getId().equals(memberId)) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
