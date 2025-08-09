@@ -1,3 +1,6 @@
+import type { ProjectStackEnum } from "../../types/project/projecStackData";
+import type { ProjectCategoryEnum } from "../../types/project/projectCategroyData";
+
 export interface ButtonProps {
   text?: string; //  버튼 안의 text
   bgColor?: string; //  버튼의 색상
@@ -27,4 +30,16 @@ export interface NavButtonProps extends ButtonProps {
 export interface StatsButtonProps extends ButtonProps {
   count: number;
   label: string;
+}
+
+export interface CategoryButtonProps extends ButtonProps {
+  category: ProjectCategoryEnum; // 어떤 카테고리인지
+  isSelected: boolean; // 선택 여부
+  onSelect: (category: ProjectCategoryEnum) => void; // 클릭 시 실행
+}
+
+export interface StackButtonProps extends ButtonProps {
+  stack: ProjectStackEnum; // 어떤 카테고리인지
+  isSelected: boolean; // 선택 여부
+  onSelect: (stack: ProjectStackEnum) => void; // 클릭 시 실행
 }

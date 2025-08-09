@@ -3,7 +3,7 @@ import type { InputProps } from "../../atoms/input";
 function ProjectInput({
   type,
   value,
-  placeholder,
+  placeholderText: placeholder,
   onChange,
   onKeyEnter,
 }: InputProps) {

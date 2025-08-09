@@ -36,7 +36,7 @@ function HeaderSearch() {
       <HeaderInput
         value={keyword}
         type="text"
-        placeholder="검색어를 입력하세요"
+        placeholderText="검색어를 입력하세요"
         onChange={handleChange}
         onKeyEnter={handleKeyEnter} // 키보드 이벤트 핸들러 추가
       />

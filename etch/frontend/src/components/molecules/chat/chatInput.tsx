@@ -1,11 +1,11 @@
 import type { InputProps } from "../../atoms/input";
 
-export default function ChatInput({ 
-  value, 
+export default function ChatInput({
+  value,
   type = "text",
-  placeholder = "메시지를 입력하세요...", 
-  onChange, 
-  onKeyEnter
+  placeholderText: placeholder = "메시지를 입력하세요...",
+  onChange,
+  onKeyEnter,
 }: InputProps) {
   return (
     <input

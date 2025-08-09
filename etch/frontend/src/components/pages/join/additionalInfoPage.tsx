@@ -104,7 +104,7 @@ function AdditionalInfoPage() {
           <NicknameInput
             value={nickname}
             type="text"
-            placeholder="사용할 닉네임을 입력하세요"
+            placeholderText="사용할 닉네임을 입력하세요"
             onChange={handleNicknameChange}
           />
           <div>
@@ -128,7 +128,7 @@ function AdditionalInfoPage() {
             <TelInput
               value={tel}
               type="tel"
-              placeholder="01000000000"
+              placeholderText="01000000000"
               onChange={handleTelChange}
             />
           </div>

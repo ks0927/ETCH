@@ -18,7 +18,7 @@ function GenderRadioGroup({ value, onChange }: GenderRadioGroupProps) {
         value="male"
         checked={value === "male"}
         onChange={handleGenderChange}
-        placeholder="남성"
+        placeholderText="남성"
       />
       <RadioInput
         type="radio"
@@ -26,7 +26,7 @@ function GenderRadioGroup({ value, onChange }: GenderRadioGroupProps) {
         value="female"
         checked={value === "female"}
         onChange={handleGenderChange}
-        placeholder="여성"
+        placeholderText="여성"
       />
     </div>
   );

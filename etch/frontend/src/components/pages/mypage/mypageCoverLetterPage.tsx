@@ -37,7 +37,7 @@ function MyPageCoverLetterCreatePage() {
       <CoverLetterInfoSection
         value={coverLetterName}
         type="text"
-        placeholder="예: 네이버 백엔드 개발자 지원서"
+        placeholderText="예: 네이버 백엔드 개발자 지원서"
         onChange={setCoverLetterName}
       />
       <QuestionList

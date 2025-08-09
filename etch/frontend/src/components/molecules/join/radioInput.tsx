@@ -3,7 +3,7 @@ import type { RadioInputProps } from "../../atoms/input";
 function RadioInput({
   value,
   type,
-  placeholder,
+  placeholderText: placeholder,
   onChange,
   name,
   checked,
