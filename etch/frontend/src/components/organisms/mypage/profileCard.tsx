@@ -2,44 +2,35 @@ import { Link } from "react-router";
 import ProfileAvatar from "../../molecules/mypage/profileAvatar";
 import StatsButton from "../../molecules/mypage/statsButton";
 import ActionButton from "../../molecules/mypage/actionButton";
-import type { MockUserProfile } from "../../../types/mock/mockUserProfileData";
+import type { ProfileCardData } from "../../../hooks/useUserProfile";
 
 interface ProfileCardProps {
-  userProfile: MockUserProfile;
+  userProfile: ProfileCardData;
 }
 
 const ProfileCard = ({ userProfile }: ProfileCardProps) => {
-  const { name, description, imageUrl, followers, following } = userProfile;
+  const { nickname, profile, followersCount, followingCount } = userProfile;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
       <div className="p-6">
         <div className="space-y-4 text-center">
           <ProfileAvatar
-            src={imageUrl || ""}
-            alt={`${name}의 프로필`}
+            src={profile || ""}
+            alt={`${nickname}의 프로필`}
             onClick={() => console.log("프로필 편집")}
           />
 
           <div>
-            <h3 className="text-lg font-semibold">{name}</h3>
-            <p className="text-sm text-gray-500">{description}</p>
+            <h3 className="text-lg font-semibold">{nickname}</h3>
           </div>
 
           <div className="flex justify-center space-x-6 text-sm">
             <Link to="/mypage/followers">
-              <StatsButton
-                count={followers}
-                label="팔로워"
-                onClick={() => console.log("팔로워 보기")}
-              />
+              <StatsButton count={followersCount} label="팔로워" />
             </Link>
             <Link to="/mypage/following">
-              <StatsButton
-                count={following}
-                label="팔로잉"
-                onClick={() => console.log("팔로잉 보기")}
-              />
+              <StatsButton count={followingCount} label="팔로잉" />
             </Link>
           </div>
 
