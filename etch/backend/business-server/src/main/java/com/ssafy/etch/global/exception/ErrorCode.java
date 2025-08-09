@@ -19,7 +19,8 @@ public enum ErrorCode {
 	ACCESS_DENIED("AUTH_403", "해당 리소스에 대한 접근 권한이 없습니다."),
 	FILE_UPLOAD_FAILED("FILE_500", "파일 업로드에 실패했습니다."),
 	INVALID_FILE_EXTENSION("FILE_400", "잘못된 형식의 파일입니다."),
-    CONTENT_DELETED("CONTENT_404", "삭제된 컨텐츠입니다.");
+    CONTENT_DELETED("CONTENT_404", "삭제된 컨텐츠입니다."),
+	USER_WITHDRAWN("USER_410", "탈퇴한 사용자입니다.");
 	private final String code;
 	private final String message;
 }
