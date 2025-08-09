@@ -99,7 +99,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public List<JobLikeResponseDTO> getLikedJob(Long memberId) {
-        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.JOB);
         return jobRepository.findAllByIdIn(targetIds)
                 .stream()
                 .map(JobEntity::toJobDTO)
@@ -109,7 +109,7 @@ public class LikeServiceImpl implements LikeService {
 
     @Override
     public List<ProjectLikeResponseDTO> getLikedProject(Long memberId) {
-        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.COMPANY);
+        List<Long> targetIds = getLikedTargetIds(memberId, LikeType.PROJECT);
         return projectRepository.findAllByIdIn(targetIds)
                 .stream()
                 .map(ProjectEntity::toProjectDTO)
