@@ -30,6 +30,10 @@ public class MemberServiceImpl implements MemberService {
         MemberEntity memberEntity = memberRepository.findById(id)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (memberEntity.toMemberDTO().isDeleted()) {
+            throw new CustomException(ErrorCode.USER_WITHDRAWN);
+        }
+
         return memberEntity.toMemberDTO();
     }
 
