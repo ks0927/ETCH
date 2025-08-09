@@ -192,8 +192,8 @@ function ProjectWritePage() {
 
                 <ProjectWriteInput
                   inputText="GitHub URL"
-                  placeholderText="github.com/username/repository"
-                  type="text"
+                  placeholderText="http://github.com/username/repository"
+                  type="url"
                   value={projectData.githubUrl}
                   onChange={handleGithubUrlChange}
                 />
