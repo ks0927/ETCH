@@ -1,30 +1,22 @@
-import axios from "axios";
+import { authInstance } from "./instances"; // authInstance를 import
+import type { UserProfile } from "../types/userProfile"; // UserProfile 타입 import
 
-export const API_SERVER_HOST = "https://etch.it.kr";
+// API 응답을 위한 Wrapper 타입 정의 (다른 API 파일과 동일하게)
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string | null;
+}
 
-const apiClient = axios.create({
-  baseURL: `${API_SERVER_HOST}/api/v1`,
-});
+// 기존 API_SERVER_HOST와 apiClient 정의 및 인터셉터는 제거합니다.
+// authInstance가 이 역할을 대신합니다.
 
-// 요청 인터셉터 추가
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-export const getMemberInfo = async () => {
+export const getMemberInfo = async (): Promise<UserProfile> => {
   try {
-    const response = await apiClient.get("/members/me");
-    console.log("Member info:", response.data);
-    return response.data;
+    // authInstance를 사용하여 API 호출
+    const response = await authInstance.get<ApiResponse<UserProfile>>("/members/me");
+    console.log("Member info:", response.data.data); // 실제 데이터 로깅
+    return response.data.data; // 응답의 data 속성만 반환
   } catch (error) {
     throw error;
   }
