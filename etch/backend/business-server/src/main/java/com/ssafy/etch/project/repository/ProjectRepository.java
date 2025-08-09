@@ -2,6 +2,7 @@ package com.ssafy.etch.project.repository;
 
 import com.ssafy.etch.project.entity.ProjectEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,4 +20,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             "left join fetch pt.techCode " +
             "where p.member.id = :memberId")
     List<ProjectEntity> findAllByMemberId(@Param("memberId") Long memberId);
+
+    @Modifying
+    @Query("update ProjectEntity p set p.viewCount = p.viewCount + 1 where p.id = :id")
+    int increaseViewCount(@Param("id") Long id);
 }

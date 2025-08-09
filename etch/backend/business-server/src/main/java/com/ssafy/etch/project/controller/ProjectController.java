@@ -3,9 +3,11 @@ package com.ssafy.etch.project.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.project.dto.ProjectDetailDTO;
 import com.ssafy.etch.project.dto.ProjectListDTO;
 import com.ssafy.etch.project.service.ProjectService;
@@ -28,9 +30,12 @@ public class ProjectController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<ApiResponse<ProjectDetailDTO>> getProjectById(@PathVariable Long id) {
-		ProjectDetailDTO project = projectService.getProjectById(id);
+	public ResponseEntity<ApiResponse<ProjectDetailDTO>> getProjectById(
+		@PathVariable Long id,
+		@AuthenticationPrincipal CustomOAuth2User user) {
+		Long memberId = (user == null) ? null : user.getId();
+		ProjectDetailDTO project = projectService.getProjectById(id, memberId);
 
-		return  ResponseEntity.ok(ApiResponse.success(project));
+		return ResponseEntity.ok(ApiResponse.success(project));
 	}
 }
