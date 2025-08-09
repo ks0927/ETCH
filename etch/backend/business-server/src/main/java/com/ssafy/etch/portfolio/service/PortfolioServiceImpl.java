@@ -5,6 +5,7 @@ import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
 import com.ssafy.etch.portfolio.dto.PortfolioDTO;
+import com.ssafy.etch.portfolio.dto.PortfolioDetailResponseDTO;
 import com.ssafy.etch.portfolio.dto.PortfolioListResponseDTO;
 import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
 import com.ssafy.etch.portfolio.entity.PortfolioEntity;
@@ -78,17 +79,35 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     @Transactional
     public void deletePortfolio(Long memberId, Long portfolioId) {
-        MemberEntity memberEntity = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         PortfolioEntity portfolioEntity =portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
 
-        if (memberEntity != portfolioEntity.toPortfolioDTO().getMember()) {
+        if (!portfolioEntity.toPortfolioDTO().getMember().toMemberDTO().getId().equals(memberId)) {
             throw new CustomException(ErrorCode.ACCESS_DENIED);
         }
 
         portfolioEntity.updateStatus();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PortfolioDetailResponseDTO getPortfolioDetail(Long memberId, Long portfolioId) {
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        PortfolioEntity portfolioEntity = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (!portfolioEntity.toPortfolioDTO().getMember().toMemberDTO().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        PortfolioDTO portfolioDTO = portfolioEntity.toPortfolioDTO();
+
+        return PortfolioDetailResponseDTO.from(portfolioDTO);
     }
 
     private List<PortfolioProjectEntity> getSavedEntities(PortfolioEntity portfolioEntity, List<Long> projectIds) {
