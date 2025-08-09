@@ -5,9 +5,9 @@ import json
 import logging
 import sys
 from typing import Optional
-from dotenv import load_dotenv, find_dotenv
 
-load_dotenv(find_dotenv())
+from dotenv import load_dotenv, find_dotenv
+load_dotenv(find_dotenv(), override=True)
 
 def env_required(k: str) -> str:
     v = os.getenv(k)
@@ -29,7 +29,7 @@ MYSQL_USER     = env_required("MYSQL_USER")
 MYSQL_PASSWORD = env_required("MYSQL_PASSWORD")
 MYSQL_DB       = env_required("MYSQL_DB")
 MYSQL_CHARSET  = env_required("MYSQL_CHARSET")
-MYSQL_SSL_CA   = env_required("MYSQL_SSL_CA")          
+MYSQL_SSL_CA   = os.getenv("MYSQL_SSL_CA")   # ← 선택값(빈 값 허용)
 
 REDIS_HOST     = env_required("REDIS_HOST")
 REDIS_PORT     = env_int("REDIS_PORT")
@@ -42,18 +42,22 @@ logging.basicConfig(
 logger = logging.getLogger("cache_top10")
 
 def fetch_and_store_top10():
-    # MySQL 연결 (TLS)
-    conn = pymysql.connect(
-        host        = MYSQL_HOST,
-        port        = MYSQL_PORT,
-        user        = MYSQL_USER,
-        password    = MYSQL_PASSWORD,
-        database    = MYSQL_DB,
-        charset     = MYSQL_CHARSET,
-        autocommit  = True,
-        cursorclass = pymysql.cursors.DictCursor,
-        ssl         = {"ca": MYSQL_SSL_CA},            
+    # MySQL 연결 (TLS: 경로 있을 때만)
+    kw = dict(
+        host=MYSQL_HOST,
+        port=MYSQL_PORT,
+        user=MYSQL_USER,
+        password=MYSQL_PASSWORD,
+        database=MYSQL_DB,
+        charset=MYSQL_CHARSET,
+        autocommit=True,
+        cursorclass=pymysql.cursors.DictCursor,
     )
+    if MYSQL_SSL_CA:
+        kw["ssl"] = {"ca": MYSQL_SSL_CA}
+
+    conn = pymysql.connect(**kw)
+
     # Redis 연결
     r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
