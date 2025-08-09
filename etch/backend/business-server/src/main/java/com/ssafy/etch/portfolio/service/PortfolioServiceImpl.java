@@ -37,7 +37,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        return portfolioRepository.findAllByMember_Id(memberId)
+        return portfolioRepository.findAllByMember_IdAndIsDeletedIsFalse(memberId)
                 .stream()
                 .map(PortfolioEntity::toPortfolioDTO)
                 .map(PortfolioListResponseDTO::from)
@@ -64,7 +64,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PortfolioEntity portfolioEntity =portfolioRepository.findById(portfolioId)
+        PortfolioEntity portfolioEntity = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
 
         portfolioEntity.clear();
