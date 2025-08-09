@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface PortfolioRepository extends JpaRepository<PortfolioEntity, Long> {
     Optional<PortfolioEntity> findById(Long portfolioId);
-    List<PortfolioEntity> findAllByMember_Id(Long memberId);
+    List<PortfolioEntity> findAllByMember_IdAndIsDeletedIsFalse(Long memberId);
 }
