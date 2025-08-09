@@ -3,7 +3,7 @@ import type { InputProps } from "../../atoms/input";
 function HeaderInput({
   value,
   type,
-  placeholder,
+  placeholderText: placeholder,
   onChange,
   onKeyEnter,
 }: InputProps) {

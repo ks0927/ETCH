@@ -37,7 +37,7 @@ function ProjectListSearch() {
           <ProjectInput
             value={keyword}
             type="text"
-            placeholder="프로젝트, 기술 스택, 개발자 검색..."
+            placeholderText="프로젝트, 기술 스택, 개발자 검색..."
             onChange={handleChange}
             onKeyEnter={handleKeyEnter}
           />

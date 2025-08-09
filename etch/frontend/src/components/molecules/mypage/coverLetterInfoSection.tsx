@@ -4,7 +4,7 @@ const CoverLetterInfoSection = ({
   value,
   type,
   onChange,
-  placeholder = "예: 네이버 백엔드 개발자 지원서",
+  placeholderText: placeholder = "예: 네이버 백엔드 개발자 지원서",
 }: InputProps) => {
   return (
     <div className="mb-6 bg-white border border-gray-200 rounded-lg shadow-sm">

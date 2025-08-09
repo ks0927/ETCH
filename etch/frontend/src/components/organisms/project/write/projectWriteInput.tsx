@@ -1,29 +1,21 @@
-import { useState } from "react";
 import ProjectInput from "../../../molecules/project/projectInput";
-
-interface ProjectWriteInputProps {
-  inputText: string;
-  placeholderText?: string;
-}
+import type { InputProps } from "../../../atoms/input";
 
 function ProjectWriteInput({
   inputText,
   placeholderText = "",
-}: ProjectWriteInputProps) {
-  const [keyword, setKeyword] = useState<string>("");
-
-  const handleInputChange = (value: string) => {
-    setKeyword(value);
-  };
-
+  type,
+  value,
+  onChange,
+}: InputProps) {
   return (
     <div>
       <div>{inputText}</div>
       <ProjectInput
-        value={keyword}
-        type="text"
-        placeholder={placeholderText}
-        onChange={handleInputChange}
+        value={value}
+        type={type}
+        placeholderText={placeholderText}
+        onChange={onChange}
       />
     </div>
   );
