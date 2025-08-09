@@ -1,13 +1,14 @@
 import UserItem from "../../molecules/mypage/userItem";
-import type { UserData } from "../../../types/mock/mockFollowData";
+import type { UserProfile } from "../../../types/userProfile"; // UserProfile import
 
 interface UserListProps {
-  users: UserData[];
-  onChatClick: (userId: string) => void;
-  onFollowToggle: (userId: string) => void;
+  users: UserProfile[]; // 타입 변경
+  listType: 'followers' | 'following'; // 목록 타입을 받도록 추가
+  onChatClick: (userId: number) => void;
+  onFollowToggle: (userId: number) => void;
 }
 
-function UserList({ users, onChatClick, onFollowToggle }: UserListProps) {
+function UserList({ users, listType, onChatClick, onFollowToggle }: UserListProps) {
   if (users.length === 0) {
     return (
       <div className="text-center py-16 px-5 text-gray-600">
@@ -22,18 +23,17 @@ function UserList({ users, onChatClick, onFollowToggle }: UserListProps) {
     );
   }
 
+  // 팔로잉 목록일 경우에만 isFollowing과 canChat을 true로 설정
+  const isFollowingList = listType === 'following';
+
   return (
     <div>
       {users.map((user) => (
         <UserItem
           key={user.id}
-          id={user.id}
-          username={user.username}
-          displayName={user.displayName}
-          email={user.email}
-          avatar={user.avatar}
-          isFollowing={user.isFollowing}
-          canChat={user.canChat}
+          {...user} // user 객체의 모든 속성을 전달
+          isFollowing={isFollowingList}
+          canChat={isFollowingList} // 채팅 가능 여부도 팔로잉 상태에 따름
           onChatClick={onChatClick}
           onFollowToggle={onFollowToggle}
         />

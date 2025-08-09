@@ -4,10 +4,9 @@ import defaultProfile from "../../../assets/default-profile.png";
 
 function UserItem({
   id,
-  username,
-  displayName,
+  nickname,
   email,
-  avatar,
+  profile,
   isFollowing,
   canChat,
   onChatClick,
@@ -24,7 +23,7 @@ function UserItem({
   };
 
   const getAvatarSrc = () => {
-    return avatar || defaultProfile;
+    return profile || defaultProfile;
   };
 
   return (
@@ -33,7 +32,7 @@ function UserItem({
       <div className="w-12 h-12 rounded-full mr-4 flex-shrink-0 overflow-hidden">
         <img 
           src={getAvatarSrc()} 
-          alt={displayName} 
+          alt={nickname} 
           className="w-full h-full object-cover" 
         />
       </div>
@@ -41,10 +40,10 @@ function UserItem({
       {/* User Info */}
       <div className="flex-1 min-w-0">
         <a 
-          href={`/profile/${username}`} 
+          href={`/profile/${nickname}`} 
           className="block text-base font-semibold text-blue-600 hover:underline cursor-pointer mb-0.5"
         >
-          {displayName}
+          {nickname}
         </a>
         <div className="text-sm text-gray-600">
           {email}
