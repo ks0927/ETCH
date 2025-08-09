@@ -9,9 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "project_file")
+@Getter
+@NoArgsConstructor
 public class FileEntity {
 
 	@Id
@@ -22,6 +26,6 @@ public class FileEntity {
 	private String url;
 
 	@ManyToOne
-	@JoinColumn(name = "project_post")
+	@JoinColumn(name = "project_post_id")
 	private ProjectEntity project;
 }

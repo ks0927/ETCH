@@ -22,6 +22,8 @@ public class ProjectDTO {
     private LocalDate createdAt;
     private LocalDate updatedAt;
     private Boolean isDeleted;
+    private String githubUrl;
+    private Boolean isPublic;
     private MemberEntity member;
     private List<ProjectTechEntity> projectTechs;
     private List<CommentEntity> comments;

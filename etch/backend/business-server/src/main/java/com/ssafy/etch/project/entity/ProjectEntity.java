@@ -44,6 +44,12 @@ public class ProjectEntity {
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
 
+	@Column(name = "github_url")
+	private String githubUrl;
+
+	@Column(name = "is_public")
+	private Boolean isPublic;
+
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private MemberEntity member;
@@ -67,6 +73,8 @@ public class ProjectEntity {
 				.createdAt(createdAt)
 				.updatedAt(updatedAt)
 				.isDeleted(isDeleted)
+				.githubUrl(githubUrl)
+				.isPublic(isPublic)
 				.member(member)
 				.projectTechs(projectTechs)
 				.comments(comments)

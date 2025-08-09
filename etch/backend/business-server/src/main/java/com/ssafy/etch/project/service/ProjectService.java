@@ -7,5 +7,5 @@ import com.ssafy.etch.project.dto.ProjectListDTO;
 
 public interface ProjectService {
 	List<ProjectListDTO> getAllProjects();
-	ProjectDetailDTO getProjectById(long id);
+	ProjectDetailDTO getProjectById(long id, Long memberId);
 }

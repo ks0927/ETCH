@@ -10,15 +10,21 @@ public class ProjectListDTO {
 	private String title;
 	private String thumbnailUrl;
 	private Long viewCount;
+	private Long likeCount;
 	private String nickname;
 
-	public static ProjectListDTO from(ProjectDTO projectDTO) {
+	public static ProjectListDTO from(ProjectDTO p, Long likeCount) {
 		return ProjectListDTO.builder()
-			.id(projectDTO.getId())
-			.title(projectDTO.getTitle())
-			.thumbnailUrl(projectDTO.getThumbnailUrl())
-			.viewCount(projectDTO.getViewCount())
-			.nickname(projectDTO.getMember().toMemberDTO().getNickname())
+			.id(p.getId())
+			.title(p.getTitle())
+			.thumbnailUrl(p.getThumbnailUrl())
+			.viewCount(p.getViewCount())
+			.likeCount(likeCount)
+			.nickname(p.getMember().toMemberDTO().getNickname())
 			.build();
+	}
+
+	public static ProjectListDTO from(ProjectDTO p) {
+		return from(p, 0L);
 	}
 }
