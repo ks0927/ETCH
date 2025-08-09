@@ -4,6 +4,7 @@ import com.ssafy.etch.comment.entity.CommentEntity;
 import com.ssafy.etch.file.entity.FileEntity;
 import com.ssafy.etch.member.entity.MemberEntity;
 
+import com.ssafy.etch.project.entity.ProjectCategory;
 import com.ssafy.etch.project.entity.ProjectTechEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,6 +26,7 @@ public class ProjectDTO {
     private String githubUrl;
     private Boolean isPublic;
     private MemberEntity member;
+    private ProjectCategory category;
     private List<ProjectTechEntity> projectTechs;
     private List<CommentEntity> comments;
     private List<FileEntity> files;

@@ -1,4 +1,4 @@
-package com.ssafy.etch.project.entity;
+package com.ssafy.etch.tech.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -11,9 +11,9 @@ public class TechCodeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "tech_category", nullable = false)
     private String techCategory;
 
-    @Column(nullable = false)
+    @Column(name = "code_name", unique = true, nullable = false)
     private String codeName;
 }

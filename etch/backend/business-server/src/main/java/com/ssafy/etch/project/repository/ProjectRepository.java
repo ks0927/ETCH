@@ -24,4 +24,14 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     @Modifying
     @Query("update ProjectEntity p set p.viewCount = p.viewCount + 1 where p.id = :id")
     int increaseViewCount(@Param("id") Long id);
+
+    @Query("""
+      SELECT DISTINCT p
+      FROM ProjectEntity p
+      LEFT JOIN FETCH p.projectTechs pt
+      LEFT JOIN FETCH pt.techCode tc
+      WHERE p.id = :id
+    """)
+    Optional<ProjectEntity> findDetailById(@Param("id") Long id);
+
 }

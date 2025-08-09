@@ -2,15 +2,20 @@ package com.ssafy.etch.project.controller;
 
 import java.util.List;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import com.ssafy.etch.project.dto.ProjectCreateRequestDTO;
 import com.ssafy.etch.project.dto.ProjectDetailDTO;
 import com.ssafy.etch.project.dto.ProjectListDTO;
 import com.ssafy.etch.project.service.ProjectService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/projects")
@@ -37,5 +42,15 @@ public class ProjectController {
 		ProjectDetailDTO project = projectService.getProjectById(id, memberId);
 
 		return ResponseEntity.ok(ApiResponse.success(project));
+	}
+
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // consumes로 들어오는 데이터 정의
+	public ResponseEntity<ApiResponse<Long>> createProject(
+		@AuthenticationPrincipal(expression = "id") Long memberId,
+		@Valid @RequestPart("data")ProjectCreateRequestDTO data,
+		@RequestPart(value = "files", required = false) List<MultipartFile> files
+	) {
+		Long id = projectService.createProject(memberId, data, files == null ? List.of() : files);
+		return ResponseEntity.ok(ApiResponse.success(id));
 	}
 }
