@@ -28,4 +28,8 @@ public class PortfolioProjectEntity {
     @JoinColumn(name = "project_id", nullable = false)
     private ProjectEntity project;
 
+    public ProjectEntity getProject() {
+        return project;
+    }
+
 }

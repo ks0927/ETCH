@@ -2,6 +2,7 @@ package com.ssafy.etch.portfolio.controller;
 
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import com.ssafy.etch.portfolio.dto.PortfolioDetailResponseDTO;
 import com.ssafy.etch.portfolio.dto.PortfolioListResponseDTO;
 import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
 import com.ssafy.etch.portfolio.service.PortfolioService;
@@ -56,5 +57,15 @@ public class PortfolioController {
         portfolioService.deletePortfolio(oAuth2User.getId(), portfolioId);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "포트폴리오 삭제 완료"));
+    }
+
+    @GetMapping("/{portfolioId}")
+    public ResponseEntity<ApiResponse<PortfolioDetailResponseDTO>> getCoverLetter(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long portfolioId) {
+
+        PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.getPortfolioDetail(oAuth2User.getId(), portfolioId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(portfolioDetailResponseDTO, "포트폴리오 상세조회"));
     }
 }
