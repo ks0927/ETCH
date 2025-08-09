@@ -1,3 +1,5 @@
+import type { UserProfile } from "../../types/userProfile";
+
 // 리스트 아이템 기본 인터페이스
 export interface BaseListItemProps {
   id: string;
@@ -62,13 +64,9 @@ export interface DeadlineItemProps extends BaseListItemProps {
 }
 
 // 사용자 아이템 전용
-export interface UserItemProps extends BaseListItemProps {
-  username: string;
-  displayName: string;
-  email: string;
-  avatar?: string;
+export interface UserItemProps extends UserProfile {
   isFollowing: boolean;
   canChat: boolean;
-  onChatClick: (userId: string) => void;
-  onFollowToggle: (userId: string) => void;
+  onChatClick: (userId: number) => void;
+  onFollowToggle: (userId: number) => void;
 }
