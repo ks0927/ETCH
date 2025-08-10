@@ -30,7 +30,7 @@ pipeline {
                     agent any
                     steps {
                         // Gradle 캐시를 사용하도록 추가
-                        dir('etch/backend/business-server') {
+			dir('etch/backend/business-server') {
                             jobcacher(
                                 // 캐시를 저장하고 불러올 기본 브랜치 지정 (주 사용 브랜치로 설정)
                                 defaultBranch: 'dev', 
@@ -53,7 +53,7 @@ pipeline {
                     agent any
                     steps {
                         // Gradle 캐시를 사용하도록 추가
-                        dir('etch/backend/chat-server') {
+			dir('etch/backend/chat-server') {
                             jobcacher(
                                 defaultBranch: 'dev',
                                 caches: [
