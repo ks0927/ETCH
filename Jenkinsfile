@@ -29,10 +29,17 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
                     agent any
                     steps {
-                        dir('etch/backend/business-server') {
-                            echo "Building Business-Server..."
-                            sh 'chmod +x ./gradlew'
-                            sh './gradlew clean build'
+                        // Gradle 캐시를 사용하도록 wrap 블록 추가
+                        wrap([$class: 'CacheStep',
+                              caches: [[$class: 'GenericCache',
+                                        cacheId: 'gradle-cache',
+                                        cacheMaster: 'master',
+                                        path: '**/.gradle/caches/**, **/.gradle/wrapper/dists/**']]]) {
+                            dir('etch/backend/business-server') {
+                                echo "Building Business-Server with Gradle Cache..."
+                                sh 'chmod +x ./gradlew'
+                                sh './gradlew clean build test'
+                            }
                         }
                     }
                 }
@@ -40,10 +47,17 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
-                        dir('etch/backend/chat-server') {
-                            echo "Building Chat-Server..."
-                            sh 'chmod +x ./gradlew'
-                            sh './gradlew clean build -x test'
+                        // Gradle 캐시를 사용하도록 wrap 블록 추가
+                        wrap([$class: 'CacheStep',
+                              caches: [[$class: 'GenericCache',
+                                        cacheId: 'gradle-cache',
+                                        cacheMaster: 'master',
+                                        path: '**/.gradle/caches/**, **/.gradle/wrapper/dists/**']]]) {
+                            dir('etch/backend/chat-server') {
+                                echo "Building Chat-Server with Gradle Cache..."
+                                sh 'chmod +x ./gradlew'
+                                sh './gradlew clean build -x test'
+                            }
                         }
                     }
                 }
