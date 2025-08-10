@@ -181,18 +181,25 @@ pipeline {
         // 파이프라인의 성공/실패 여부와 관계없이 '항상' 실행됩니다.
         always {
             echo '파이프라인 실행이 완료되었습니다.'
-            // 작업 공간(Workspace)을 정리하여 다음 빌드에 영향을 주지 않도록 합니다.
             cleanWs()
         }
         // 파이프라인이 성공적으로 완료되었을 때만 실행됩니다.
         success {
             echo "빌드 성공!"
-            // 필요하다면 여기에 Slack 성공 알림 등을 추가할 수 있습니다.
+            // 성공 시 Mattermost로 알림을 보냅니다.
+            mattermostSend(
+                color: 'good', // 'good'은 초록색으로 표시됩니다.
+                message: "✅ **빌드 성공!**\n- **Job:** `${env.JOB_NAME}`\n- **Build:** `${env.BUILD_NUMBER}`\n- **URL:** `${env.BUILD_URL}`"
+            )
         }
         // 파이프라인이 실패했을 때만 실행됩니다.
         failure {
             echo "빌드 실패!"
-            // 필요하다면 여기에 Slack 실패 알림 등을 추가할 수 있습니다.
+            // 실패 시 Mattermost로 알림을 보냅니다.
+            mattermostSend(
+                color: 'danger', // 'danger'는 붉은색으로 표시됩니다.
+                message: "🚨 **빌드 실패!**\n- **Job:** `${env.JOB_NAME}`\n- **Build:** `${env.BUILD_NUMBER}`\n- **URL:** `${env.BUILD_URL}`"
+            )
         }
     }
 
