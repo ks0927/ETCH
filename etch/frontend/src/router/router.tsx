@@ -53,7 +53,8 @@ const DetailFavoriteProject = lazy(
 );
 
 const MypageCoverLetterPage = lazy(
-  () => import("../components/pages/mypage/mypageCoverLetterPage.tsx")
+  () =>
+    import("../components/pages/mypage/coverletter/mypageCoverLetterPage.tsx")
 );
 const MypageFollowerPage = lazy(
   () => import("../components/pages/mypage/mypageFollowerPage.tsx")
@@ -64,6 +65,19 @@ const MypageFollowingPage = lazy(
 const MypagePortfolioPage = lazy(
   () => import("../components/pages/mypage/mypagePortfolioPage.tsx")
 );
+const MyPageCoverLetterEditPage = lazy(
+  () =>
+    import(
+      "../components/pages/mypage/coverletter/MyPageCoverLetterEditPage.tsx"
+    )
+);
+const MyPageCoverLetterDetailPage = lazy(
+  () =>
+    import(
+      "../components/pages/mypage/coverletter/MyPageCoverLetterDetailPage.tsx"
+    )
+);
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -205,6 +219,22 @@ const router = createBrowserRouter([
           {
             path: "coverletters",
             element: <MypageCoverLetterPage />,
+          },
+          {
+            path: "cover-letter-edit/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MyPageCoverLetterEditPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "cover-letter-detail/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MyPageCoverLetterDetailPage />
+              </Suspense>
+            ),
           },
           {
             path: "followers",

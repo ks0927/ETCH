@@ -1,20 +1,73 @@
 import { useState } from "react";
 import TabToggle from "../../molecules/mypage/tabToggle";
 import DocumentItem from "../../molecules/mypage/documentItem";
-import type { MockDocumentItem } from "../../../types/mock/mockDocumentsData";
+import { useNavigate } from "react-router"; // Import useNavigate
+
+import type { CoverLetterListResponse } from "../../../types/coverLetter";
+import { deleteCoverLetter } from "../../../api/coverLetterApi"; // Import deleteCoverLetter API
+
+type PortfolioListResponse = any[];
 
 interface MyDocumentsProps {
-  coverLetters: MockDocumentItem[];
-  portfolios: MockDocumentItem[];
+  coverLetters: CoverLetterListResponse[];
+  portfolios: PortfolioListResponse;
+  refetchCoverLetters: () => void; // Add refetchCoverLetters prop
 }
 
-const MyDocuments = ({ coverLetters, portfolios }: MyDocumentsProps) => {
+const MyDocuments = ({
+  coverLetters,
+  portfolios,
+  refetchCoverLetters,
+}: MyDocumentsProps) => {
+  const navigate = useNavigate(); // Initialize useNavigate
   const [currentTab, setCurrentTab] = useState<"coverLetter" | "portfolio">(
     "coverLetter"
   );
 
   const currentDocuments =
     currentTab === "coverLetter" ? coverLetters : portfolios;
+
+  const handleDelete = async (id: string) => {
+    if (currentTab === "coverLetter") {
+      const confirmDelete = window.confirm(
+        "정말로 이 자기소개서를 삭제하시겠습니까?"
+      );
+      if (confirmDelete) {
+        try {
+          await deleteCoverLetter(Number(id)); // Convert id to Number for API call
+          alert("자기소개서가 성공적으로 삭제되었습니다.");
+          refetchCoverLetters(); // Refetch cover letters after successful deletion
+        } catch (error) {
+          console.error("자기소개서 삭제 실패:", error);
+          alert("자기소개서 삭제에 실패했습니다. 다시 시도해주세요.");
+        }
+      }
+    } else {
+      // Portfolio deletion logic (to be implemented later)
+      console.log(`Delete portfolio with ID: ${id}`);
+      alert("포트폴리오 삭제 기능은 아직 구현되지 않았습니다.");
+    }
+  };
+
+  const handleDocumentClick = (id: string) => {
+    if (currentTab === "coverLetter") {
+      navigate(`/mypage/cover-letter-detail/${id}`); // Navigate to detail page
+    } else {
+      // Portfolio detail logic (to be implemented later)
+      console.log(`View portfolio detail with ID: ${id}`);
+      alert("포트폴리오 상세 보기 기능은 아직 구현되지 않았습니다.");
+    }
+  };
+
+  const handleEditClick = (id: string) => {
+    if (currentTab === "coverLetter") {
+      navigate(`/mypage/cover-letter-edit/${id}`); // Navigate to edit page
+    } else {
+      // Portfolio edit logic (to be implemented later)
+      console.log(`Edit portfolio with ID: ${id}`);
+      alert("포트폴리오 수정 기능은 아직 구현되지 않았습니다.");
+    }
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -27,15 +80,25 @@ const MyDocuments = ({ coverLetters, portfolios }: MyDocumentsProps) => {
         </div>
 
         <div className="space-y-3">
-          {currentDocuments.map((doc) => (
-            <DocumentItem
-              key={doc.id}
-              id={doc.id.toString()}
-              title={doc.title}
-              date={doc.date}
-              onClick={(id) => console.log(`Document ${id} clicked`)}
-            />
-          ))}
+          {currentDocuments.length > 0 ? (
+            currentDocuments.map((doc) => (
+              <DocumentItem
+                key={doc.id}
+                id={doc.id.toString()}
+                title={currentTab === "coverLetter" ? doc.name : doc.title}
+                date={doc.date}
+                onClick={handleDocumentClick} // Use handleDocumentClick for main click
+                onDelete={handleDelete} // Pass the handleDelete function
+                onEdit={handleEditClick} // Pass the handleEditClick function
+              />
+            ))
+          ) : (
+            <p className="text-gray-500 text-center py-4">
+              {currentTab === "coverLetter"
+                ? "작성된 자기소개서가 없습니다."
+                : "작성된 포트폴리오가 없습니다."}
+            </p>
+          )}
         </div>
       </div>
     </div>

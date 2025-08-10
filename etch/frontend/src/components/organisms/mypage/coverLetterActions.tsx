@@ -3,9 +3,14 @@ import ActionButton from "../../molecules/mypage/actionButton";
 interface CoverLetterActionsProps {
   onCancel: () => void;
   onSubmit: () => void;
+  submitButtonText?: string; // Optional prop for custom submit button text
 }
 
-const CoverLetterActions = ({ onCancel, onSubmit }: CoverLetterActionsProps) => {
+const CoverLetterActions = ({
+  onCancel,
+  onSubmit,
+  submitButtonText,
+}: CoverLetterActionsProps) => {
   return (
     <div className="flex justify-center space-x-4">
       <ActionButton
@@ -15,7 +20,7 @@ const CoverLetterActions = ({ onCancel, onSubmit }: CoverLetterActionsProps) => 
         onClick={onCancel}
       />
       <ActionButton
-        text="자기소개서 생성하기"
+        text={submitButtonText || "자기소개서 생성하기"}
         bgColor="bg-blue-600"
         textColor="text-white"
         onClick={onSubmit}

@@ -35,7 +35,9 @@ export interface JobItemProps extends BaseListItemProps {
 // 마이페이지 대시보드 문서 아이템 전용
 export interface DocumentItemProps extends BaseListItemProps {
   title: string;
-  date: string;
+  date?: string;
+  onDelete?: (id: string) => void;
+  onEdit?: (id: string) => void; // Add onEdit prop
 }
 
 // 지원현황 아이템 전용
