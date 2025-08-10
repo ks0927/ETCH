@@ -33,12 +33,12 @@ pipeline {
                         dir('etch/backend/business-server') {
                             jobcacher(
                                 // 캐시를 저장하고 불러올 기본 브랜치 지정 (주 사용 브랜치로 설정)
-                                defaultBranch: 'dev',
+                                defaultBranch: 'dev,master',
                                 caches: [
                                     // .gradle/caches 디렉토리를 캐싱
-                                    [path: '.gradle/caches', id: 'gradle-caches'],
+                                    [$class: 'JobCache', path: '.gradle/caches', id: 'gradle-caches'],
                                     // .gradle/wrapper/dists 디렉토리를 캐싱
-                                    [path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
+                                    [$class: 'JobCache', path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
                                 ]
                             ) {
                                 echo "Building Business-Server with JobCacher..."
@@ -55,10 +55,10 @@ pipeline {
                         // Gradle 캐시를 사용하도록 추가
                         dir('etch/backend/chat-server') {
                             jobcacher(
-                                defaultBranch: 'dev',
+                                defaultBranch: 'dev,master',
                                 caches: [
-                                    [path: '.gradle/caches', id: 'gradle-caches'],
-                                    [path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
+                                    [$class: 'JobCache', path: '.gradle/caches', id: 'gradle-caches'],
+                                    [$class: 'JobCache', path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
                                 ]
                             ) {
                                 echo "Building Chat-Server with JobCacher..."
