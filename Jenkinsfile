@@ -29,22 +29,21 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
                     agent any
                     steps {
-                        // Gradle 캐시를 사용하도록 추가
                         dir('etch/backend/business-server') {
-                            jobcacher(
-                                // 캐시를 저장하고 불러올 기본 브랜치 지정 (주 사용 브랜치로 설정)
-                                defaultBranch: 'dev,master',
-                                caches: [
-                                    // .gradle/caches 디렉토리를 캐싱
-                                    [$class: 'JobCache', path: '.gradle/caches', id: 'gradle-caches'],
-                                    // .gradle/wrapper/dists 디렉토리를 캐싱
-                                    [$class: 'JobCache', path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
-                                ]
-                            ) {
-                                echo "Building Business-Server with JobCacher..."
-                                sh 'chmod +x ./gradlew'
-                                sh './gradlew clean build -x test'
+                            // [캐시 변경] Gradle 캐시 복원
+                            script {
+                                try {
+                                    unstash 'gradle-cache-business' 
+                                    echo "Gradle cache restored for Business-Server"
+                                } catch (e) {
+                                    echo "No Gradle cache found for Business-Server"
+                                }
                             }
+                            echo "Building Business-Server..."
+                            sh 'chmod +x ./gradlew'
+                            sh './gradlew clean build -x test'
+                            // [캐시 변경] Gradle 캐시 저장
+                            stash name: 'gradle-cache-business', includes: '.gradle/**'
                         }
                     }
                 }
@@ -52,19 +51,21 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
-                        // Gradle 캐시를 사용하도록 추가
                         dir('etch/backend/chat-server') {
-                            jobcacher(
-                                defaultBranch: 'dev,master',
-                                caches: [
-                                    [$class: 'JobCache', path: '.gradle/caches', id: 'gradle-caches'],
-                                    [$class: 'JobCache', path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
-                                ]
-                            ) {
-                                echo "Building Chat-Server with JobCacher..."
-                                sh 'chmod +x ./gradlew'
-                                sh './gradlew clean build -x test'
+                            // [캐시 변경] Gradle 캐시 복원
+                            script {
+                                try {
+                                    unstash 'gradle-cache-chat' 
+                                    echo "Gradle cache restored for Chat-Server"
+                                } catch (e) {
+                                    echo "No Gradle cache found for Chat-Server"
+                                }
                             }
+                            echo "Building Chat-Server..."
+                            sh 'chmod +x ./gradlew'
+                            sh './gradlew clean build -x test'
+                            // [캐시 변경] Gradle 캐시 저장
+                            stash name: 'gradle-cache-chat', includes: '.gradle/**'
                         }
                     }
                 }
@@ -94,7 +95,6 @@ pipeline {
                             echo "Packaging Business-Server Docker image..."
                             script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-business-server"
-                                //docker.build 명령어는 이미지 이름만 받으므로, 태그는 push 단계에서 지정합니다.
                                 def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
                                     customImage.push("${env.GIT_HASH}")
@@ -128,7 +128,7 @@ pipeline {
                     steps {
                         dir('etch/backend/batch-server') {
                             echo "Packaging Batch-Server Docker image..."
-                           script {
+                            script {
                                 def imageName = "${env.DOCKERHUB_USERNAME}/etch-batch-server"
                                 def customImage = docker.build(imageName)
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
@@ -177,7 +177,7 @@ pipeline {
             }
         }
 
-	// --- 3. [수정] 배포 스테이지 ---
+        // --- 3. [수정] 배포 스테이지 ---
         // 이제 모든 서비스가 자신만의 배포 스테이지를 가집니다.
         stage('Deploy Changed Services in Parallel') {
             parallel {
@@ -249,30 +249,24 @@ pipeline {
 
     // 이 블록은 stages 블록이 모두 끝난 후에 실행됩니다.
     post {
-        // 파이프라인의 성공/실패 여부와 관계없이 '항상' 실행됩니다.
         always {
             echo '파이프라인 실행이 완료되었습니다.'
             cleanWs()
         }
-        // 파이프라인이 성공적으로 완료되었을 때만 실행됩니다.
         success {
             echo "빌드 성공!"
-            // 성공 시 Mattermost로 알림을 보냅니다.
             mattermostSend(
-                color: 'good', // 'good'은 초록색으로 표시됩니다.
+                color: 'good',
                 message: "✅ **빌드 성공!**\n- **Job:** `${env.JOB_NAME}`\n- **Build:** `${env.BUILD_NUMBER}`\n- **URL:** `${env.BUILD_URL}`"
             )
         }
-        // 파이프라인이 실패했을 때만 실행됩니다.
         failure {
             echo "빌드 실패!"
-            // 실패 시 Mattermost로 알림을 보냅니다.
             mattermostSend(
-                color: 'danger', // 'danger'는 붉은색으로 표시됩니다.
+                color: 'danger',
                 message: "🚨 **빌드 실패!**\n- **Job:** `${env.JOB_NAME}`\n- **Build:** `${env.BUILD_NUMBER}`\n- **URL:** `${env.BUILD_URL}`"
             )
         }
     }
-
 }
 
