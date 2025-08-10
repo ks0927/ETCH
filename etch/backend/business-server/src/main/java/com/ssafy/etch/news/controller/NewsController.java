@@ -14,6 +14,13 @@ import com.ssafy.etch.news.dto.LatestNewsDTO;
 import com.ssafy.etch.news.dto.TopCompanyDTO;
 import com.ssafy.etch.news.service.NewsServiceImpl;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(
+	name = "News",
+	description = "News Controller 입니다."
+)
 @RestController
 @RequestMapping("/news")
 public class NewsController {
@@ -24,7 +31,10 @@ public class NewsController {
 		this.newsService = newsService;
 	}
 
-	// 특정 기업에 대한 기사 목록
+	@Operation(
+		summary = "특정 기업에 대한 기사 목록 조회 API",
+		description = "특정 기업에 대한 기사 목록을 확인할 수 있습니다."
+	)
 	@GetMapping("/companies/{companyId}")
 	public ResponseEntity<ApiResponse<List<CompanyNewsDTO>>> getNewsListByCompany(@PathVariable Long companyId) {
 		List<CompanyNewsDTO> list = newsService.getNewsByCompanyId(companyId);
@@ -32,7 +42,10 @@ public class NewsController {
 		return ResponseEntity.ok(ApiResponse.success(list));
 	}
 
-	// 최근 뉴스
+	@Operation(
+		summary = "최신 뉴스 조회 API",
+		description = "기업에 관계없이 최신순으로 정렬한 뉴스 목록을 제공합니다."
+	)
 	@GetMapping("/latest") 
 	public ResponseEntity<ApiResponse<List<LatestNewsDTO>>> getLatestNews() {
 		List<LatestNewsDTO> list = newsService.getLatestNews();
@@ -40,7 +53,10 @@ public class NewsController {
 		return ResponseEntity.ok(ApiResponse.success(list));
 	}
 
-	// top10
+	@Operation(
+		summary = "인기 TOP10 기업 조회 API",
+		description = "좋아요 기준으로 정렬된 인기 TOP10 기업 목록을 제공합니다."
+	)
 	@GetMapping("/top-companies")
 	public ResponseEntity<ApiResponse<List<TopCompanyDTO>>> getTopCompanies() {
 		List<TopCompanyDTO> list = newsService.getTopCompaniesFromRedis();
