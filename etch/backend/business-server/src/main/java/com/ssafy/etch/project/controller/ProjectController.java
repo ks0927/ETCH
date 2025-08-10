@@ -2,6 +2,7 @@ package com.ssafy.etch.project.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,5 +53,19 @@ public class ProjectController {
 	) {
 		Long id = projectService.createProject(memberId, data, files == null ? List.of() : files);
 		return ResponseEntity.ok(ApiResponse.success(id));
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<ApiResponse<Void>> deleteProject(
+		@PathVariable Long id,
+		@AuthenticationPrincipal CustomOAuth2User user
+	) {
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인이 필요합니다."));
+		}
+
+		projectService.deleteProject(id, user.getId());
+
+		return ResponseEntity.ok(ApiResponse.success(null));
 	}
 }

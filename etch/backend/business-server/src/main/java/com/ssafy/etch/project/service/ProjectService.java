@@ -12,4 +12,5 @@ public interface ProjectService {
 	List<ProjectListDTO> getAllProjects();
 	ProjectDetailDTO getProjectById(long id, Long memberId);
 	Long createProject(Long memberId, ProjectCreateRequestDTO req, List<MultipartFile> files);
+	void deleteProject(Long projectId, Long memberId);
 }

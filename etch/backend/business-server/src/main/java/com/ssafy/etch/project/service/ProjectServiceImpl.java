@@ -195,4 +195,21 @@ public class ProjectServiceImpl implements ProjectService {
 			}
 		}
 	}
+
+	// 삭제
+	@Override
+	@Transactional
+	public void deleteProject(Long projectId, Long memberId) {
+		if (memberId == null) {
+			throw new IllegalStateException("로그인이 필요합니다.");
+		}
+
+		int changed = projectRepository.softDelete(projectId, memberId);
+
+		// 쿼리 실행결과 == 0행 (삭제 못함)
+		if (changed == 0) {
+			// 다른 회원의 글이거나, 이미 삭제 했거나
+			throw new NoSuchElementException("삭제할 수 없습니다.");
+		}
+	}
 }
