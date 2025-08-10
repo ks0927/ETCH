@@ -14,6 +14,7 @@ import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.project.dto.ProjectCreateRequestDTO;
 import com.ssafy.etch.project.dto.ProjectDetailDTO;
 import com.ssafy.etch.project.dto.ProjectListDTO;
+import com.ssafy.etch.project.dto.ProjectUpdateRequestDTO;
 import com.ssafy.etch.project.service.ProjectService;
 
 import jakarta.validation.Valid;
@@ -31,28 +32,42 @@ public class ProjectController {
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getAllProjects() {
 		List<ProjectListDTO> list = projectService.getAllProjects();
-
 		return ResponseEntity.ok(ApiResponse.success(list));
 	}
 
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<ProjectDetailDTO>> getProjectById(
 		@PathVariable Long id,
-		@AuthenticationPrincipal CustomOAuth2User user) {
+		@AuthenticationPrincipal CustomOAuth2User user
+	) {
 		Long memberId = (user == null) ? null : user.getId();
 		ProjectDetailDTO project = projectService.getProjectById(id, memberId);
-
 		return ResponseEntity.ok(ApiResponse.success(project));
 	}
 
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // consumes로 들어오는 데이터 정의
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<Long>> createProject(
 		@AuthenticationPrincipal(expression = "id") Long memberId,
-		@Valid @RequestPart("data")ProjectCreateRequestDTO data,
-		@RequestPart(value = "files", required = false) List<MultipartFile> files
+		@Valid @RequestPart("data") ProjectCreateRequestDTO data,
+		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
+		@RequestPart(value = "images", required = false) List<MultipartFile> images,
+		@RequestPart(value = "pdf", required = false) MultipartFile pdf
 	) {
-		Long id = projectService.createProject(memberId, data, files == null ? List.of() : files);
+		Long id = projectService.createProject(memberId, data, thumbnail, images, pdf);
 		return ResponseEntity.ok(ApiResponse.success(id));
+	}
+
+	@PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<Void>> updateProject(
+		@PathVariable("id") Long projectId,
+		@AuthenticationPrincipal(expression = "id") Long memberId,
+		@Valid @RequestPart("data") ProjectUpdateRequestDTO data,
+		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
+		@RequestPart(value = "images",    required = false) List<MultipartFile> images,
+		@RequestPart(value = "pdf",       required = false) MultipartFile pdf
+	) {
+		projectService.updateProject(projectId, memberId, data, thumbnail, images, pdf);
+		return ResponseEntity.ok(ApiResponse.success(null));
 	}
 
 	@DeleteMapping("/{id}")
@@ -63,9 +78,7 @@ public class ProjectController {
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인이 필요합니다."));
 		}
-
 		projectService.deleteProject(id, user.getId());
-
 		return ResponseEntity.ok(ApiResponse.success(null));
 	}
 }
