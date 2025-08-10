@@ -1,10 +1,11 @@
 import { Link } from "react-router";
 import testImg from "../../assets/testImg.png";
 import { funcData } from "../../types/funcComponentData";
-import { mockJobs } from "../../types/mock/mockJobData";
+import { mockJobList } from "../../types/mock/mockJobListData";
 import { mockProjectData } from "../../types/mock/mockProjectData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
-import HomeJobCard from "../organisms/home/homeJobCard";
+import JobList from "../organisms/job/jobList";
+import JobDetailModal from "../organisms/job/jobDetailModal";
 import HomeNewsCard from "../organisms/home/homeNewsCard";
 import HomeProjectCard from "../organisms/home/homeProjectCard";
 import ProjectSVG from "../svg/projectSVG";
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react";
 
 function HomePage() {
   const [latestNewsData, setLatestNewsData] = useState([]);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadLatestNews = async () => {
@@ -23,6 +25,16 @@ function HomePage() {
 
     loadLatestNews();
   }, []);
+
+  const handleJobClick = (jobId: string) => {
+    setSelectedJobId(jobId);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedJobId(null);
+  };
+
+  const selectedJob = mockJobList.find(job => job.id === selectedJobId);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -93,7 +105,7 @@ function HomePage() {
                 <SeeMore />
               </Link>
             </div>
-            <HomeJobCard mockJobs={mockJobs} />
+            <JobList jobs={mockJobList.slice(0, 3)} onJobClick={handleJobClick} />
           </div>
         </div>
       </section>
@@ -174,6 +186,14 @@ function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 모달 */}
+      {selectedJob && (
+        <JobDetailModal
+          job={selectedJob}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }
