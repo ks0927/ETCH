@@ -18,8 +18,17 @@ import com.ssafy.etch.comment.service.CommentService;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+/**
+ * 댓글 관련 API
+ */
+@Tag(
+	name = "Comment",
+	description = "Comment controller 입니다."
+)
 @RestController
 @RequestMapping("/projects/{projectId}/comments")
 public class CommentController {
@@ -30,6 +39,10 @@ public class CommentController {
 		this.commentService = commentService;
 	}
 
+	@Operation(
+		summary = "특정 게시글에 대한 전체 댓글 조회 API",
+		description = "특정 게시글에 대한 댓글 전체 개수와 목록이 보여집니다."
+	)
 	@GetMapping
 	public ResponseEntity<ApiResponse<CommentListResponseDTO>> getAllCommentsByProjectId(@PathVariable Long projectId) {
 		CommentListResponseDTO result = commentService.getCommentsWithCountByProjectId(projectId);
@@ -37,6 +50,10 @@ public class CommentController {
 		return ResponseEntity.ok(ApiResponse.success(result));
 	}
 
+	@Operation(
+		summary = "댓글 등록 API",
+		description = "USER만 댓글을 등록할 수 있습니다."
+	)
 	@PostMapping
 	public ResponseEntity<ApiResponse<CommentResponseDTO>> registComment (
 		@PathVariable Long projectId,
@@ -48,6 +65,10 @@ public class CommentController {
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
+	@Operation(
+		summary = "댓글 삭제 API",
+		description = "USER 본인 댓글만 삭제할 수 있습니다."
+	)
 	@DeleteMapping("/{commentId}")
 	public ResponseEntity<ApiResponse<CommentDeleteResponseDTO>> deleteComment (
 		@PathVariable Long projectId,
