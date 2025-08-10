@@ -41,7 +41,7 @@ public class CoverLetterServiceImpl implements CoverLetterService {
         CoverLetterDTO coverLetterDTO = coverLetterRequestDTO.toCoverLetterDTO()
                 .toBuilder()
                 .member(memberEntity)
-//                .isDeleted(false)
+                .isDeleted(false)
                 .build();
         CoverLetterEntity entity = CoverLetterEntity.from(coverLetterDTO);
 
