@@ -29,14 +29,19 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/business-server/') } }
                     agent any
                     steps {
-                        // Gradle 캐시를 사용하도록 wrap 블록 추가
-                        wrap([$class: 'CacheStep',
-                              caches: [[$class: 'GenericCache',
-                                        cacheId: 'gradle-cache',
-                                        cacheMaster: 'master',
-                                        path: '**/.gradle/caches/**, **/.gradle/wrapper/dists/**']]]) {
-                            dir('etch/backend/business-server') {
-                                echo "Building Business-Server with Gradle Cache..."
+                        // Gradle 캐시를 사용하도록 추가
+                        dir('etch/backend/business-server') {
+                            jobcacher(
+                                // 캐시를 저장하고 불러올 기본 브랜치 지정 (주 사용 브랜치로 설정)
+                                defaultBranch: 'dev', 
+                                caches: [
+                                    // .gradle/caches 디렉토리를 캐싱
+                                    [path: '.gradle/caches', id: 'gradle-caches'],
+                                    // .gradle/wrapper/dists 디렉토리를 캐싱
+                                    [path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
+                                ]
+                            ) {
+                                echo "Building Business-Server with JobCacher..."
                                 sh 'chmod +x ./gradlew'
                                 sh './gradlew clean build -x test'
                             }
@@ -47,14 +52,16 @@ pipeline {
                     when { expression { env.CHANGED_FILES.contains('etch/backend/chat-server/') } }
                     agent any
                     steps {
-                        // Gradle 캐시를 사용하도록 wrap 블록 추가
-                        wrap([$class: 'CacheStep',
-                              caches: [[$class: 'GenericCache',
-                                        cacheId: 'gradle-cache',
-                                        cacheMaster: 'master',
-                                        path: '**/.gradle/caches/**, **/.gradle/wrapper/dists/**']]]) {
-                            dir('etch/backend/chat-server') {
-                                echo "Building Chat-Server with Gradle Cache..."
+                        // Gradle 캐시를 사용하도록 추가
+                        dir('etch/backend/chat-server') {
+                            jobcacher(
+                                defaultBranch: 'dev',
+                                caches: [
+                                    [path: '.gradle/caches', id: 'gradle-caches'],
+                                    [path: '.gradle/wrapper/dists', id: 'gradle-wrapper']
+                                ]
+                            ) {
+                                echo "Building Chat-Server with JobCacher..."
                                 sh 'chmod +x ./gradlew'
                                 sh './gradlew clean build -x test'
                             }
