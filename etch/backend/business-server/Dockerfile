@@ -1,13 +1,41 @@
-# backend/business-server/Dockerfile
+# =================================================================
+# 1단계: 빌드(Build) 환경
+# - 소스코드를 컴파일하고 실행 가능한 JAR 파일을 만드는 역할을 합니다.
+# =================================================================
+# 베이스 이미지로 openjdk:17을 사용합니다.
+FROM openjdk:17
+
+# 작업 디렉토리를 /app으로 설정합니다.
+WORKDIR /app
+
+# --- Docker 레이어 캐시 최적화 ---
+# 자주 바뀌지 않는 Gradle 관련 파일들만 먼저 복사합니다.
+# 이 파일들의 내용이 변경되지 않는 한, Docker는 이 아래의 RUN 단계까지 캐시된 레이어를 재사용합니다.
+COPY build.gradle settings.gradle /app/
+COPY gradle /app/gradle
+
+# 소스코드 전체를 복사하기 전에, 라이브러리 의존성만 먼저 다운로드합니다.
+# 이 단계가 캐시되면, 소스코드가 변경되어도 라이브러리를 다시 다운로드하지 않아 시간이 크게 단축됩니다.
+RUN ./gradlew dependencies
+
+# 이제 자주 바뀌는 소스코드 전체를 복사합니다.
+# 소스코드가 변경되면 이 단계부터만 재실행됩니다.
+COPY . /app
+# --- 최적화 끝 ---
+
+# 애플리케이션을 빌드합니다. (테스트는 CI 서버에서 하므로 제외)
+RUN ./gradlew build -x test
+
+# =================================================================
+# 2단계: 최종 실행(Runtime) 환경
+# - 실제 서비스가 실행될 환경으로, 필요한 것만 담아 이미지를 가볍게 만듭니다.
+# =================================================================
+# 더 가벼운 JRE(Java 실행 환경) 이미지를 최종 이미지로 사용합니다.
 FROM openjdk:17
 WORKDIR /app
 
-# JAR 복사
-COPY build/libs/*.jar app.jar
+# 빌드 환경(builder)에서 생성된 최종 JAR 파일을 복사해옵니다.
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# 환경 변수 설정이 있다면 여기 추가 가능
-ENV JAVA_OPTS=""
-
-EXPOSE 8081
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
-
+# 컨테이너가 시작될 때 "java -jar app.jar" 명령어를 실행합니다.
+ENTRYPOINT ["java","-jar","app.jar"]

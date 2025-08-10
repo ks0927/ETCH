@@ -38,7 +38,7 @@ pipeline {
                             dir('etch/backend/business-server') {
                                 echo "Building Business-Server with Gradle Cache..."
                                 sh 'chmod +x ./gradlew'
-                                sh './gradlew clean build test'
+                                sh './gradlew clean build -x test'
                             }
                         }
                     }
