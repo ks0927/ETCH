@@ -66,7 +66,7 @@ public class SecurityConfig {
 				return configuration;
 			}
 		}));
-		//csrf disable
+		//csrf disable.
 		http.csrf((auth) -> auth.disable());
 
 		//Form 로그인 방식 disable
