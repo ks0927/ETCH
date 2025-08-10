@@ -99,7 +99,6 @@ public class MemberEntity {
         return memberEntity;
     }
 
-
     public static void updateRefreshToken(MemberEntity memberEntity, String refreshToken) {
         memberEntity.refreshToken = refreshToken;
     }
@@ -112,4 +111,7 @@ public class MemberEntity {
         memberEntity.profile = memberRequestDTO.getProfile();
     }
 
+    public Long getId() {
+        return id;
+    }
 }

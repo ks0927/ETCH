@@ -4,6 +4,7 @@ import static jakarta.persistence.FetchType.*;
 
 import com.ssafy.etch.project.entity.ProjectEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,17 +26,42 @@ public class FileEntity {
 	private Long id;
 
 	private String name;
-	private String url;
+
+	@Column(name = "file_url")
+	private String fileUrl; // 사진/파일 url (PDF도 여기 저장)
+
+	@Column(name = "is_pdf")
+	private boolean isPdf; // true: pdf, false: image
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "project_post_id")
 	private ProjectEntity project;
 
-	public static FileEntity of(ProjectEntity project, String name, String url) {
+	public static FileEntity image(ProjectEntity p, String name, String fileUrl) {
+		FileEntity f = new FileEntity();
+		f.project = p;
+		f.name = name;
+		f.fileUrl = fileUrl;
+		f.isPdf = false;
+		return f;
+	}
+
+	public static FileEntity pdf(ProjectEntity p, String name, String fileUrl) {
+		FileEntity f = new FileEntity();
+		f.project = p;
+		f.name = name;
+		f.fileUrl = fileUrl;
+		f.isPdf = true;
+		return f;
+	}
+
+	public static FileEntity of(ProjectEntity project, String name, String fileUrl) {
 		FileEntity f = new FileEntity();
 		f.project = project;
 		f.name = name;
-		f.url = url;
+		f.fileUrl = fileUrl;
 		return f;
 	}
+
+	public void setProject(ProjectEntity project) { this.project = project; }
 }

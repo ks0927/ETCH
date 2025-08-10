@@ -34,7 +34,10 @@ public class ProjectEntity {
 	private String content;
 
 	@Column(name = "thumbnail_url")
-	private String thumbnailUrl;
+	private String thumbnailUrl; // s3
+
+	@Column(name = "youtube_url", length = 500)
+	private String youtubeUrl; // 영상 업로드용 유튜브 링크
 
 	@Column(name = "view_count")
 	private Long viewCount;
@@ -65,29 +68,29 @@ public class ProjectEntity {
 	private List<CommentEntity> comments;
 
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
-	private List<FileEntity> files = new ArrayList<>();
+	private List<FileEntity> files = new ArrayList<>(); // 본문 이미지/파일들 (PNG/JPG, PDF 등)
 
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProjectTechEntity> projectTechs = new ArrayList<>();
 
 	public ProjectDTO toProjectDTO() {
 		return ProjectDTO.builder()
-				.id(id)
-				.title(title)
-				.content(content)
-				.thumbnailUrl(thumbnailUrl)
-				.viewCount(viewCount)
-				.createdAt(createdAt)
-				.updatedAt(updatedAt)
-				.isDeleted(isDeleted)
-				.githubUrl(githubUrl)
-				.isPublic(isPublic)
-				.member(member)
-				.category(category)
-				.projectTechs(projectTechs)
-				.comments(comments)
-				.files(files)
-				.build();
+			.id(id)
+			.title(title)
+			.content(content)
+			.thumbnailUrl(thumbnailUrl)
+			.viewCount(viewCount)
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.isDeleted(isDeleted)
+			.githubUrl(githubUrl)
+			.isPublic(isPublic)
+			.member(member)
+			.category(category)
+			.projectTechs(projectTechs)
+			.comments(comments)
+			.files(files)
+			.build();
 	}
 
 	@Builder
@@ -108,6 +111,7 @@ public class ProjectEntity {
 	public void hit() { this.viewCount = this.viewCount + 1; }
 
 	public void changeThumbnail(String url) { this.thumbnailUrl = url; }
+	public void changeYoutubeUrl(String url) { this.youtubeUrl = url; }
 
 	public void change(String title, String content, ProjectCategory category,
 		String githubUrl, Boolean isPublic) {
@@ -121,6 +125,12 @@ public class ProjectEntity {
 
 	public void addFile(FileEntity file) {
 		this.files.add(file);
+		file.setProject(this);
+	}
+
+	public void removeFile(FileEntity file) {
+		this.files.remove(file);
+		file.setProject(null);
 	}
 
 	public void addProjectTech(ProjectTechEntity link) {

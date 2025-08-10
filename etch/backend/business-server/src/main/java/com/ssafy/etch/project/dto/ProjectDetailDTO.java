@@ -26,6 +26,7 @@ public class ProjectDetailDTO {
 
 	private List<String> techCodes;
 	private List<String> fileUrls;
+	private String pdfUrl;
 	private String githubUrl;
 	private Boolean isPublic;
 
@@ -35,7 +36,8 @@ public class ProjectDetailDTO {
 		Boolean likedByMe,
 		List<String> techCategories,
 		List<String> techCodes,
-		List<String> fileUrls
+		List<String> fileUrls,
+		String pdfUrl
 	) {
 		return ProjectDetailDTO.builder()
 			.id(p.getId())
@@ -53,6 +55,7 @@ public class ProjectDetailDTO {
 			.techCategories(techCategories)
 			.techCodes(techCodes)
 			.fileUrls(fileUrls)
+			.pdfUrl(pdfUrl)
 			.githubUrl(p.getGithubUrl())
 			.isPublic(p.getIsPublic())
 			.build();

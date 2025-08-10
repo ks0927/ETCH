@@ -73,4 +73,19 @@ public class S3Service {
 		amazonS3.deleteObject(new DeleteObjectRequest(bucket, fileName));
 		System.out.println(bucket);
 	}
+
+	public void deleteFileByUrl(String fileUrl) {
+		String key = extractKeyFromUrl(fileUrl);
+		deleteFile(key);
+	}
+
+	private String extractKeyFromUrl(String url) {
+		// "버킷명/" 을 찾아 그 뒤를 key로 사용
+		int idx = url.indexOf("/" + bucket + "/");
+		if (idx >= 0) {
+			return url.substring(idx + bucket.length() + 2);
+		}
+
+		return url.substring(url.lastIndexOf('/') + 1);
+	}
 }
