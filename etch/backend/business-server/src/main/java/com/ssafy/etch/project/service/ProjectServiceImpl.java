@@ -1,5 +1,7 @@
 package com.ssafy.etch.project.service;
 
+import static org.springframework.data.domain.Sort.Direction.*;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import com.ssafy.etch.project.repository.ProjectTechRepository;
 import com.ssafy.etch.tech.entity.TechCodeEntity;
 import com.ssafy.etch.tech.repository.TechCodeRepository;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -104,15 +107,34 @@ public class ProjectServiceImpl implements ProjectService {
 
 		// 인기, 조회수, 최신 정렬(기본은 인기순) - formula 필드
 		Sort sortOption = switch (effectiveSort) {
-			case "views"  -> Sort.by(Sort.Direction.DESC, "viewCount").and(Sort.by(Sort.Direction.DESC, "createdAt"));
-			case "latest" -> Sort.by(Sort.Direction.DESC, "createdAt");
-			default -> Sort.by(Sort.Direction.DESC, "popularityScore").and(Sort.by(Sort.Direction.DESC, "createdAt"));
+			case "views"  -> Sort.by(DESC, "viewCount").and(Sort.by(DESC, "createdAt"));
+			case "latest" -> Sort.by(DESC, "createdAt");
+			default -> Sort.by(DESC, "popularityScore").and(Sort.by(DESC, "createdAt"));
 		};
 
 		Pageable pageable = PageRequest.of(pageIndex, size, sortOption);
 
 		return projectRepository.findByIsDeletedFalseAndIsPublicTrue(pageable)
 			.stream()
+			.map(ProjectEntity::toProjectDTO)
+			.map(dto -> {
+				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
+				return ProjectListDTO.from(dto, likeCount);
+			})
+			.toList();
+	}
+
+	// 다른 사람의 공개 프로젝트 목록 조회
+	@Override
+	public List<ProjectListDTO> getPublicProjectByUser(Long memberId, int page, int pageSize) {
+		int pageIndex = Math.max(0, page - 1);
+		int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
+
+		Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(DESC, "createdAt"));
+
+		Page<ProjectEntity> pageData = projectRepository.findByMemberIdAndIsPublicTrueAndIsDeletedFalse(memberId, pageable);
+
+		return pageData.stream()
 			.map(ProjectEntity::toProjectDTO)
 			.map(dto -> {
 				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
