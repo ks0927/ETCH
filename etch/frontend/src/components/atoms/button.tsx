@@ -13,6 +13,7 @@ export interface ButtonProps {
   textColor?: string; //  버튼의 텍스트 색상
   checked?: boolean; // 현재 버튼의 체크 유뮤
   css?: string; // 버튼의 css 형식
+  disabled?: boolean; // 버튼 비활성화 상태
 }
 
 // ID 기반으로 수정된 StackButtonProps

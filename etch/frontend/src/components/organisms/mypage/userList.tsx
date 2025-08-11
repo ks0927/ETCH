@@ -4,11 +4,13 @@ import type { UserProfile } from "../../../types/userProfile"; // UserProfile im
 interface UserListProps {
   users: UserProfile[]; // 타입 변경
   listType: 'followers' | 'following'; // 목록 타입을 받도록 추가
+  followStatus?: {[key: number]: boolean}; // 개별 팔로우 상태
+  loadingUsers?: {[key: number]: boolean}; // 개별 로딩 상태
   onChatClick: (userId: number) => void;
   onFollowToggle: (userId: number) => void;
 }
 
-function UserList({ users, listType, onChatClick, onFollowToggle }: UserListProps) {
+function UserList({ users, listType, followStatus, loadingUsers, onChatClick, onFollowToggle }: UserListProps) {
   if (users.length === 0) {
     return (
       <div className="text-center py-16 px-5 text-gray-600">
@@ -23,21 +25,26 @@ function UserList({ users, listType, onChatClick, onFollowToggle }: UserListProp
     );
   }
 
-  // 팔로잉 목록일 경우에만 isFollowing과 canChat을 true로 설정
-  const isFollowingList = listType === 'following';
-
   return (
     <div>
-      {users.map((user) => (
-        <UserItem
-          key={user.id}
-          {...user} // user 객체의 모든 속성을 전달
-          isFollowing={isFollowingList}
-          canChat={isFollowingList} // 채팅 가능 여부도 팔로잉 상태에 따름
-          onChatClick={onChatClick}
-          onFollowToggle={onFollowToggle}
-        />
-      ))}
+      {users.map((user) => {
+        // followStatus가 있으면 개별 상태 사용, 없으면 기본 로직 사용
+        const isFollowing = followStatus ? (followStatus[user.id] ?? false) : (listType === 'following');
+        const isLoading = loadingUsers ? (loadingUsers[user.id] ?? false) : false;
+        const canChat = isFollowing; // 팔로우하고 있는 경우에만 채팅 가능
+
+        return (
+          <UserItem
+            key={user.id}
+            {...user} // user 객체의 모든 속성을 전달
+            isFollowing={isFollowing}
+            isLoading={isLoading}
+            canChat={canChat}
+            onChatClick={onChatClick}
+            onFollowToggle={onFollowToggle}
+          />
+        );
+      })}
     </div>
   );
 }

@@ -32,3 +32,21 @@ export const getCountFollows = async (userId: number): Promise<Follows> => {
   );
   return response.data.data;
 };
+
+// 특정 사용자를 팔로우하고 있는지 확인
+export const checkFollowExists = async (userId: number): Promise<boolean> => {
+  const response = await authInstance.get<ApiResponse<boolean>>(
+    `/follows/exists/${userId}`
+  );
+  return response.data.data;
+};
+
+// 특정 사용자를 팔로우
+export const followUser = async (userId: number): Promise<void> => {
+  await authInstance.post(`/follows/${userId}`);
+};
+
+// 특정 사용자를 언팔로우
+export const unfollowUser = async (userId: number): Promise<void> => {
+  await authInstance.delete(`/follows/${userId}`);
+};

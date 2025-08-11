@@ -8,6 +8,7 @@ function UserItem({
   email,
   profile,
   isFollowing,
+  isLoading = false,
   canChat,
   onChatClick,
   onFollowToggle,
@@ -19,7 +20,9 @@ function UserItem({
   };
 
   const handleFollowClick = () => {
-    onFollowToggle(id);
+    if (!isLoading) {
+      onFollowToggle(id);
+    }
   };
 
   const getAvatarSrc = () => {
@@ -70,13 +73,16 @@ function UserItem({
         {/* Follow Button */}
         <button
           onClick={handleFollowClick}
+          disabled={isLoading}
           className={`px-4 py-2 rounded-md border text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-            isFollowing
+            isLoading
+              ? "bg-gray-400 text-white border-gray-400 cursor-not-allowed"
+              : isFollowing
               ? "bg-green-600 text-white border-green-600/40 hover:bg-red-600 hover:border-red-600/40"
               : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50 hover:border-gray-300"
           }`}
         >
-          {isFollowing ? "Following" : "Follow"}
+          {isLoading ? "처리중..." : (isFollowing ? "Following" : "Follow")}
         </button>
       </div>
     </div>

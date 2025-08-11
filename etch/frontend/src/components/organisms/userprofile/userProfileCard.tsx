@@ -9,6 +9,7 @@ interface UserProfileCardProps {
   followersCount: number;
   followingCount: number;
   isFollowing: boolean;
+  isFollowLoading?: boolean;
   onFollowClick: () => void;
   onChatClick: () => void;
 }
@@ -20,6 +21,7 @@ const UserProfileCard = ({
   followersCount,
   followingCount,
   isFollowing,
+  isFollowLoading = false,
   onFollowClick,
   onChatClick,
 }: UserProfileCardProps) => {
@@ -55,16 +57,17 @@ const UserProfileCard = ({
           {/* 액션 버튼들 */}
           <div className="space-y-3">
             <ActionButton
-              text={isFollowing ? "언팔로우" : "팔로우"}
-              bgColor={isFollowing ? "bg-gray-600" : "bg-blue-600"}
+              text={isFollowLoading ? "처리중..." : (isFollowing ? "언팔로우" : "팔로우")}
+              bgColor={isFollowLoading ? "bg-gray-400" : (isFollowing ? "bg-gray-600" : "bg-blue-600")}
               textColor="text-white"
-              onClick={onFollowClick}
+              onClick={isFollowLoading ? undefined : onFollowClick}
             />
             <ActionButton
               text="💬 채팅하기"
               bgColor="border border-gray-300 bg-transparent"
               textColor="text-gray-700"
               onClick={onChatClick}
+              disabled={!isFollowing}
             />
           </div>
         </div>

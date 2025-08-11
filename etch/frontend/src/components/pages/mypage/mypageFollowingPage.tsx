@@ -1,15 +1,43 @@
 import UserList from "../../organisms/mypage/userList";
 import { useFollowList } from "../../../hooks/useFollowList";
+import { followUser, unfollowUser } from "../../../api/followApi";
+import { useState } from "react";
 
 function MypageFollowingPage() {
   const { userList, isLoading, error } = useFollowList('following');
+  const [unfollowedUsers, setUnfollowedUsers] = useState<Set<number>>(new Set());
+  const [loadingUsers, setLoadingUsers] = useState<{[key: number]: boolean}>({});
 
   const handleChatClick = (userId: number) => {
     console.log(`채팅 시작: ${userId}`);
   };
 
-  const handleFollowToggle = (userId: number) => {
-    console.log(`팔로우 토글: ${userId}`);
+  const handleFollowToggle = async (userId: number) => {
+    if (loadingUsers[userId]) return;
+
+    setLoadingUsers(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      const isCurrentlyFollowing = !unfollowedUsers.has(userId);
+      
+      if (isCurrentlyFollowing) {
+        await unfollowUser(userId);
+        setUnfollowedUsers(prev => new Set([...prev, userId]));
+        console.log("언팔로우 성공:", userId);
+      } else {
+        await followUser(userId);
+        setUnfollowedUsers(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+        console.log("팔로우 성공:", userId);
+      }
+    } catch (error) {
+      console.error("팔로우/언팔로우 실패:", error);
+    } finally {
+      setLoadingUsers(prev => ({ ...prev, [userId]: false }));
+    }
   };
 
   if (isLoading) {
@@ -32,6 +60,11 @@ function MypageFollowingPage() {
       <UserList
         users={userList}
         listType="following"
+        followStatus={userList.reduce((acc, user) => {
+          acc[user.id] = !unfollowedUsers.has(user.id); // 언팔로우한 사용자가 아니면 팔로잉 상태
+          return acc;
+        }, {} as {[key: number]: boolean})}
+        loadingUsers={loadingUsers}
         onChatClick={handleChatClick}
         onFollowToggle={handleFollowToggle}
       />

@@ -1,21 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import UserProfileCard from "../organisms/userprofile/userProfileCard";
 import UserProjectList from "../organisms/userprofile/userProjectList";
 import { useUserProfile } from "../../hooks/useUserProfile";
+import { checkFollowExists, followUser, unfollowUser } from "../../api/followApi";
 import { mockProjectData } from "../../types/mock/mockProjectData"; // 임시 데이터
 
 function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   // URL에서 가져온 userId를 숫자로 변환하여 API 호출
   const targetUserId = userId ? parseInt(userId, 10) : undefined;
   const { profileData, isLoading, error } = useUserProfile(targetUserId);
 
-  const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    console.log(isFollowing ? "언팔로우" : "팔로우", userId);
+  // 팔로우 상태 확인
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      if (!targetUserId) return;
+      
+      try {
+        const followExists = await checkFollowExists(targetUserId);
+        setIsFollowing(followExists);
+      } catch (error) {
+        console.error("팔로우 상태 확인 실패:", error);
+      }
+    };
+
+    checkFollowStatus();
+  }, [targetUserId]);
+
+  const handleFollowClick = async () => {
+    if (!targetUserId || isFollowLoading) return;
+
+    setIsFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await unfollowUser(targetUserId);
+        setIsFollowing(false);
+        console.log("언팔로우 성공:", userId);
+      } else {
+        await followUser(targetUserId);
+        setIsFollowing(true);
+        console.log("팔로우 성공:", userId);
+      }
+    } catch (error) {
+      console.error("팔로우/언팔로우 실패:", error);
+    } finally {
+      setIsFollowLoading(false);
+    }
   };
 
   const handleChatClick = () => {
@@ -58,6 +92,7 @@ function UserProfilePage() {
               followersCount={profileData.followerCount}
               followingCount={profileData.followingCount}
               isFollowing={isFollowing}
+              isFollowLoading={isFollowLoading}
               onFollowClick={handleFollowClick}
               onChatClick={handleChatClick}
             />
