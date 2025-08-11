@@ -1,5 +1,6 @@
 package com.ssafy.etch.oauth.handler;
 
+import com.ssafy.etch.global.service.FastApiService;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
@@ -19,10 +20,12 @@ import java.io.IOException;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final FastApiService  fastApiService;
 
-    public CustomSuccessHandler(JWTUtil jwtUtil, MemberRepository memberRepository) {
+    public CustomSuccessHandler(JWTUtil jwtUtil, MemberRepository memberRepository, FastApiService fastApiService) {
         this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
+        this.fastApiService = fastApiService;
     }
 
     @Override
@@ -46,6 +49,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             memberRepository.findById(id).ifPresent(memberEntity -> MemberEntity.updateRefreshToken(memberEntity, refreshToken));
 
             response.addCookie(CookieUtil.createCookie("refresh", refreshToken));
+
+            fastApiService.requestRecommendList(id);
         } else if ("GUEST".equals(role)) {
             accessToken = jwtUtil.createJwt("access", email, role, null, 30 * 60 * 1000L); // 30분                                               │
         }
