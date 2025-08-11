@@ -10,14 +10,15 @@ import lombok.Getter;
 @Getter
 public class ProjectDetailDTO {
 	private Long id;
+	private String title;
+	private String content;
 	private String thumbnailUrl;
+	private String youtubeUrl;
 	private Long viewCount;
 	private Long likeCount; 
 	private Boolean likedByMe; // 내가 좋아요 눌렀는지 여부
 	private String nickname;
 	private String profileUrl;
-	private String title;
-	private String content;
 	private LocalDate createdAt;
 	private LocalDate updatedAt;
 
@@ -32,7 +33,6 @@ public class ProjectDetailDTO {
 
 	public static ProjectDetailDTO from(
 		ProjectDTO p,
-		Long likeCount,
 		Boolean likedByMe,
 		List<String> techCategories,
 		List<String> techCodes,
@@ -42,8 +42,9 @@ public class ProjectDetailDTO {
 		return ProjectDetailDTO.builder()
 			.id(p.getId())
 			.thumbnailUrl(p.getThumbnailUrl())
+			.youtubeUrl(p.getYoutubeUrl())
 			.viewCount(p.getViewCount())
-			.likeCount(likeCount)
+			.likeCount(p.getLikeCount() != null ? p.getLikeCount().longValue() : 0L)
 			.likedByMe(likedByMe)
 			.nickname(p.getMember().toMemberDTO().getNickname())
 			.profileUrl(p.getMember().toMemberDTO().getProfile())
