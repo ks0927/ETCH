@@ -220,7 +220,7 @@ pipeline {
                     steps {
                         echo "Deploying [batch-server] via recreate..."
                         sshagent(credentials: ['jenkins-ssh-key']) {
-                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull batch-server && docker-compose up -d --force-recreate --no-deps batch-server'"
+                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull batch-server && docker-compose up -d --force-recreate batch-server'"
                         }
                     }
                 }
@@ -231,7 +231,7 @@ pipeline {
                     steps {
                         echo "Deploying [recommend-server] via recreate..."
                         sshagent(credentials: ['jenkins-ssh-key']) {
-                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull recommend-server && docker-compose up -d --force-recreate --no-deps recommend-server'"
+                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull recommend-server && docker-compose up -d --force-recreate recommend-server'"
                         }
                     }
                 }
