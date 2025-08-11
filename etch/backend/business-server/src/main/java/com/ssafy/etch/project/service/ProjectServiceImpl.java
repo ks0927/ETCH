@@ -119,7 +119,7 @@ public class ProjectServiceImpl implements ProjectService {
 			.map(ProjectEntity::toProjectDTO)
 			.map(dto -> {
 				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
-				return ProjectListDTO.from(dto, likeCount);
+				return ProjectListDTO.from(dto);
 			})
 			.toList();
 	}
@@ -138,7 +138,7 @@ public class ProjectServiceImpl implements ProjectService {
 			.map(ProjectEntity::toProjectDTO)
 			.map(dto -> {
 				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
-				return ProjectListDTO.from(dto, likeCount);
+				return ProjectListDTO.from(dto);
 			})
 			.toList();
 	}
@@ -187,7 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
 			.findFirst()
 			.orElse(null);
 
-		return ProjectDetailDTO.from(p, likeCount, likedByMe, techCategories, techCodes, imageUrls, pdfUrl);
+		return ProjectDetailDTO.from(p, likedByMe, techCategories, techCodes, imageUrls, pdfUrl);
 	}
 
 	// 등록
