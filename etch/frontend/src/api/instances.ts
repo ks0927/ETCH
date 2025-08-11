@@ -5,6 +5,7 @@ import useUserStore from "../store/userStore"; // useUserStore import
 // 인증이 필요 없는 경우를 위한 기본 인스턴스
 export const defaultInstance = axios.create({
   baseURL: BASE_API,
+  withCredentials: true, // 쿠키를 포함한 요청을 허용
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,6 +14,7 @@ export const defaultInstance = axios.create({
 // 인증이 필요한 경우를 위한 인스턴스
 export const authInstance = axios.create({
   baseURL: BASE_API,
+  withCredentials: true, // 쿠키를 포함한 요청을 허용
   headers: {
     "Content-Type": "application/json",
   },
@@ -73,7 +75,7 @@ authInstance.interceptors.response.use(
         console.error("토큰 갱신 실패:", refreshError);
         // 리프레시 토큰 만료 또는 재발급 실패 시 로그아웃 처리
         useUserStore.getState().logout(); // Zustand의 logout 함수 호출
-        window.location.href = '/login'; // 로그인 페이지로 리다이렉트
+        window.location.href = "/login"; // 로그인 페이지로 리다이렉트
         return Promise.reject(refreshError);
       }
     }

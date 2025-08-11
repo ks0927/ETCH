@@ -7,9 +7,10 @@ import BookmarkSVG from "../../svg/bookmarkSVG";
 interface CalendarViewProps {
   jobList: JobItemProps[];
   onEventClick?: (jobId: string) => void;
+  onDateRangeChange?: (startDate: Date, endDate: Date) => void;
 }
 
-function CalendarView({ jobList, onEventClick }: CalendarViewProps) {
+function CalendarView({ jobList, onEventClick, onDateRangeChange }: CalendarViewProps) {
   const convertJobsToEvents = (jobs: JobItemProps[]) => {
     const events = [];
 
@@ -60,6 +61,44 @@ function CalendarView({ jobList, onEventClick }: CalendarViewProps) {
     if (onEventClick) {
       const originalId = clickInfo.event.extendedProps.originalId;
       onEventClick(originalId);
+    }
+  };
+
+  const handleDatesSet = (dateInfo: any) => {
+    // dateInfo.start: 달력에서 보이는 첫 번째 날짜 (7월 27일)
+    // dateInfo.end: 달력에서 보이는 마지막 날짜 + 1 (9월 7일)
+    const startDate = new Date(dateInfo.start);
+    const endDate = new Date(dateInfo.end);
+    endDate.setDate(endDate.getDate() - 1); // end는 다음날이므로 1일 빼기
+    
+    // 여러 날짜 타입에 대응 가능한 포맷 함수
+    const formatDate = (date: Date | string) => {
+      if (typeof date === 'string') {
+        // 이미 "YYYY-MM-DD" 형태라면 그대로 반환
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+          return date;
+        }
+        // 다른 문자열 형태라면 Date 객체로 변환 후 처리
+        date = new Date(date);
+      }
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    console.log('달력 범위 변경:', {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
+      startDateObj: startDate,
+      endDateObj: endDate,
+      rawStart: dateInfo.start,
+      rawEnd: dateInfo.end
+    });
+    
+    if (onDateRangeChange) {
+      onDateRangeChange(startDate, endDate);
     }
   };
 
@@ -157,6 +196,7 @@ function CalendarView({ jobList, onEventClick }: CalendarViewProps) {
         }}
         events={events}
         eventClick={handleEventClick}
+        datesSet={handleDatesSet}
         height="auto"
         locale="ko"
         displayEventTime={false}
