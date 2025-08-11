@@ -37,12 +37,14 @@ public class ProjectController {
 
 	@Operation(
 		summary = "프로젝트 목록 조회 API",
-		description = "모든 프로젝트를 조회할 수 있는 목록을 제공합니다."
+		description = "인기순, 최신순, 조회수순 중 선택하여 프로젝트 목록을 페이지 단위로 조회할 수 있습니다."
 	)
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getAllProjects() {
-		List<ProjectListDTO> list = projectService.getAllProjects();
-		return ResponseEntity.ok(ApiResponse.success(list));
+	public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getAllProjects(
+		@RequestParam(defaultValue = "popular") String sort, // 기본: 인기순, 페이지당 9개 플젝으로 셋팅
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "9") int pageSize) {
+		return ResponseEntity.ok(ApiResponse.success(projectService.getAllProjects(sort, page, pageSize)));
 	}
 
 	@Operation(

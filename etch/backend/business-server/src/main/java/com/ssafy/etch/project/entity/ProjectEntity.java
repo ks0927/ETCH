@@ -73,6 +73,38 @@ public class ProjectEntity {
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProjectTechEntity> projectTechs = new ArrayList<>();
 
+	// liked_content table에서 PROJECT 타입만 카운트해서 likeCount로 보여주기
+	@org.hibernate.annotations.Formula("""
+		(SELECT COUNT(1)
+		 FROM liked_content lc
+		 WHERE lc.type = 'PROJECT'
+		 AND lc.targetId = id)
+		""")
+	private Integer likeCount;
+
+	// 댓글 수
+	@org.hibernate.annotations.Formula("""
+		(SELECT COUNT(1)
+		 FROM project_comment c
+		 WHERE c.project_post = id
+		 AND c.is_deleted = 0)
+	""")
+	private Integer commentCount;
+
+	// 인기점수 계산: 좋아요*4 + 댓글*3 + 조회수*2,
+	@org.hibernate.annotations.Formula("""
+		(
+			(SELECT COUNT(1)
+			 FROM liked_content lc
+			 WHERE lc.type = 'PROJECT' AND lc.targetId = id) * 4
+		  + (SELECT COUNT(1)
+		  	 FROM project_comment c
+		  	 WHERE c.project_post = id) * 3
+		  + COALESCE(view_count, 0) * 2
+		)
+	""")
+	private Double popularityScore;
+
 	public ProjectDTO toProjectDTO() {
 		return ProjectDTO.builder()
 			.id(id)
