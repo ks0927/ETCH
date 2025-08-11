@@ -1,70 +1,116 @@
 import axios from "axios";
 import { BASE_API } from "./BASE_API";
-import type { ProjectData } from "../types/project/projectDatas";
 import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
+import type { ProjectData } from "../types/project/projectDatas";
 
-// 프로젝트 생성 응답 타입 (서버에서 받는 데이터)
-export interface ProjectResponse
-  extends Omit<ProjectData, "category" | "uploadedFiles"> {
-  id: number;
-  category: ProjectCategoryEnum; // 빈 문자열이 아닌 실제 카테고리
-  fileUrls: string[]; // File[] 대신 URL 문자열 배열
-  createdAt: string;
-  updatedAt: string;
+// 프로젝트 생성 요청 데이터 타입 (백엔드 DTO에 맞춤)
+export interface ProjectCreateRequestData {
+  title: string;
+  content: string;
+  category: ProjectCategoryEnum;
+  youtubeUrl?: string;
+  githubUrl?: string;
+  isPublic: boolean;
+  techStacks: string[]; // ProjectTechEnum[]을 string[]로 변환
 }
 
-// 프로젝트 생성
-export async function createProject(projectData: ProjectData) {
-  const formData = new FormData();
-
-  formData.append("title", projectData.title);
-  formData.append("content", projectData.content);
-  formData.append("githubUrl", projectData.githubUrl);
-  formData.append("category", projectData.category);
-  formData.append("isPublic", projectData.isPublic.toString());
-  formData.append("stack", JSON.stringify(projectData.stack));
-
-  projectData.uploadedFiles.forEach((file) => {
-    formData.append("files", file);
-  });
-
-  const res = await axios.post(`${BASE_API}/projects`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  return res.data.data;
-}
-
-// 프로젝트 목록 조회
-export async function getProjects(
-  page = 1,
-  limit = 10,
-  category?: ProjectCategoryEnum
+// 프로젝트 생성 API
+export async function createProject(
+  projectData: ProjectData,
+  thumbnailFile?: File,
+  imageFiles?: File[],
+  pdfFile?: File
 ) {
-  const params: {
-    page: number;
-    limit: number;
-    category?: ProjectCategoryEnum;
-  } = { page, limit };
+  try {
+    const formData = new FormData();
 
-  if (category) {
-    params.category = category;
+    // 1. 프로젝트 데이터 JSON으로 변환하여 추가
+    const requestData: ProjectCreateRequestData = {
+      title: projectData.title,
+      content: projectData.content,
+      category: projectData.category as ProjectCategoryEnum,
+      youtubeUrl: projectData.youtubeUrl || undefined,
+      githubUrl: projectData.githubUrl || undefined,
+      isPublic: projectData.isPublic,
+      techStacks: projectData.projectTechs.map((tech) => tech.toString()),
+    };
+
+    // JSON 데이터를 Blob으로 변환하여 추가
+    const dataBlob = new Blob([JSON.stringify(requestData)], {
+      type: "application/json",
+    });
+    formData.append("data", dataBlob);
+
+    // 2. 썸네일 파일 추가 (선택적)
+    if (thumbnailFile) {
+      formData.append("thumbnail", thumbnailFile);
+    }
+
+    // 3. 이미지 파일들 추가 (선택적)
+    if (imageFiles && imageFiles.length > 0) {
+      imageFiles.forEach((file) => {
+        formData.append("images", file);
+      });
+    }
+
+    // 4. PDF 파일 추가 (선택적)
+    if (pdfFile) {
+      formData.append("pdf", pdfFile);
+    }
+
+    const response = await axios.post(`${BASE_API}/projects`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data.data; // 생성된 프로젝트 ID 반환
+  } catch (error) {
+    console.error("프로젝트 생성 실패:", error);
+    throw error;
   }
-
-  const res = await axios.get(`${BASE_API}/projects`, { params });
-  return res.data.data;
 }
 
-// 프로젝트 상세 조회
+// 파일 타입별로 분류하는 유틸리티 함수
+export function categorizeFiles(files: File[]) {
+  let thumbnailFile: File | undefined;
+  const imageFiles: File[] = [];
+  let pdfFile: File | undefined;
+
+  files.forEach((file, index) => {
+    if (file.type.startsWith("image/")) {
+      if (index === 0) {
+        // 첫 번째 이미지를 썸네일로 설정
+        thumbnailFile = file;
+      } else {
+        // 나머지 이미지들
+        imageFiles.push(file);
+      }
+    } else if (file.type === "application/pdf") {
+      pdfFile = file;
+    }
+  });
+
+  return { thumbnailFile, imageFiles, pdfFile };
+}
+
+// 프로젝트 생성 (파일 자동 분류 포함)
+export async function createProjectWithFiles(projectData: ProjectData) {
+  const { thumbnailFile, imageFiles, pdfFile } = categorizeFiles(
+    projectData.files
+  );
+
+  return await createProject(projectData, thumbnailFile, imageFiles, pdfFile);
+}
+
+// 프로젝트 목록 조회 API
+export async function getAllProjects() {
+  const response = await axios.get(`${BASE_API}/projects`);
+  return response.data.data;
+}
+
+// 프로젝트 상세 조회 API
 export async function getProjectById(id: number) {
-  const res = await axios.get(`${BASE_API}/projects/${id}`);
-  return res.data.data;
-}
-
-// 프로젝트 삭제
-export async function deleteProject(id: number) {
-  const res = await axios.delete(`${BASE_API}/projects/${id}`);
-  return res.data;
+  const response = await axios.get(`${BASE_API}/projects/${id}`);
+  return response.data.data;
 }

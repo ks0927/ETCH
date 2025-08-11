@@ -8,28 +8,32 @@ import ProjectIsPublic from "../../organisms/project/write/projectIsPublic";
 import CategorySVG from "../../svg/categorySVG";
 import IsPublicSVG from "../../svg/isPublicSVG";
 import ProjectSVG from "../../svg/projectSVG";
-import { ProjectState } from "../../../types/project/projectDatas";
+import {
+  ProjectState,
+  type ProjectData,
+} from "../../../types/project/projectDatas";
 import ProjectCategory from "../../organisms/project/write/projectCategory";
 import ProjectWriteInput from "../../organisms/project/write/projectWriteInput";
 import ProjectStack from "../../organisms/project/write/projectStack";
 import {
-  ProejctWriteStackData,
-  type ProjectStackEnum,
+  ProejctWriteTechData,
+  type ProjectTechEnum,
 } from "../../../types/project/projecStackData";
 import ProjectWriteSubmitButton from "../../organisms/project/write/projectWriteSubmitButton";
 import ProjectFileUpload from "../../organisms/project/write/projectFileUpload";
 import StackSVG from "../../svg/stackSVG";
+import { createProjectWithFiles } from "../../../api/projectApi";
 
 function ProjectWritePage() {
-  const [projectData, setProjectData] = useState({
+  const [projectData, setProjectData] = useState<ProjectData>({
     ...ProjectState,
-    stack: [] as ProjectStackEnum[], // 배열로 변경
+    // projectTechs를 빈 배열로 초기화 (타입에 맞게)
   });
 
   const handleFileUpload = (newFiles: File[]) => {
     setProjectData((prev) => ({
       ...prev,
-      uploadedFiles: [...prev.uploadedFiles, ...newFiles].slice(0, 5), // 최대 5개까지
+      files: [...prev.files, ...newFiles].slice(0, 5), // 최대 5개까지
     }));
 
     console.log("파일 추가 됨");
@@ -38,7 +42,7 @@ function ProjectWritePage() {
   const handleFileRemove = (index: number) => {
     setProjectData((prev) => ({
       ...prev,
-      uploadedFiles: prev.uploadedFiles.filter((_, i) => i !== index),
+      files: prev.files.filter((_, i) => i !== index),
     }));
     console.log("파일 제거 됨");
   };
@@ -62,9 +66,9 @@ function ProjectWritePage() {
   };
 
   // 기술 스택 변경 핸들러 (중복 선택 가능)
-  const handleStacksChange = (stack: ProjectStackEnum) => {
+  const handleStacksChange = (stack: ProjectTechEnum) => {
     setProjectData((prev) => {
-      const currentStacks = prev.stack;
+      const currentStacks = prev.projectTechs; // stack -> projectTechs
       const isSelected = currentStacks.includes(stack);
 
       let newStacks;
@@ -80,7 +84,7 @@ function ProjectWritePage() {
 
       return {
         ...prev,
-        stack: newStacks,
+        projectTechs: newStacks, // stack -> projectTechs
       };
     });
   };
@@ -88,17 +92,80 @@ function ProjectWritePage() {
   // 프로젝트 제출 핸들러
   const handleSubmit = async () => {
     try {
-      // API 호출 로직
-      console.log("제출할 데이터:", projectData);
+      // 유효성 검사
+      if (!projectData.title.trim()) {
+        alert("프로젝트 제목을 입력해주세요.");
+        return;
+      }
+
+      if (!projectData.content.trim()) {
+        alert("프로젝트 설명을 입력해주세요.");
+        return;
+      }
+
+      if (!projectData.category) {
+        alert("프로젝트 카테고리를 선택해주세요.");
+        return;
+      }
+
+      console.log("=== 제출할 데이터 상세 ===");
+      console.log("title:", projectData.title);
+      console.log("content:", projectData.content);
+      console.log("category:", projectData.category);
+      console.log("youtubeUrl:", projectData.youtubeUrl);
+      console.log("githubUrl:", projectData.githubUrl);
+      console.log("isPublic:", projectData.isPublic);
+      console.log("projectTechs:", projectData.projectTechs);
+      console.log("files:", projectData.files);
+      console.log("전체 projectData:", projectData);
 
       // 실제 API 호출
-      // const response = await createProject(projectData);
+      const projectId = await createProjectWithFiles(projectData);
+
+      console.log("프로젝트 생성 성공! ID:", projectId);
 
       // 성공 처리
+      alert("프로젝트가 성공적으로 등록되었습니다!");
+
+      // 프로젝트 상세 페이지로 이동하거나 목록 페이지로 이동
+      // navigate(`/projects/${projectId}`); // react-router 사용 시
+      // 또는
+      // window.location.href = `/projects/${projectId}`;
     } catch (error) {
       // 에러 처리
       console.error("프로젝트 생성 실패:", error);
+
+      // 에러 메시지 추출
+      let errorMessage = "프로젝트 등록 중 오류가 발생했습니다.";
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      // axios 에러인 경우
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const axiosError = error as {
+          response?: {
+            data?: { message?: string };
+          };
+        };
+        if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      }
+
+      alert(errorMessage);
     }
+  };
+
+  // 시연 영상 URL 변경 핸들러
+  const handleVideoUrlChange = (value: string) => {
+    setProjectData((prev) => ({
+      ...prev,
+      youtubeUrl: value, // videoUrl -> youtubeUrl
+    }));
+
+    console.log("현재 유튜브 주소 : ", value);
   };
 
   // GitHub URL 변경 핸들러
@@ -150,11 +217,11 @@ function ProjectWritePage() {
           <section>
             {/* 파일 업로드 섹션 */}
             <ProjectFileUpload
-              uploadedFiles={projectData.uploadedFiles}
+              uploadedFiles={projectData.files} // files로 수정
               onFileUpload={handleFileUpload}
               onFileRemove={handleFileRemove}
-              maxFiles={5}
-              maxFileSize={5 * 1024 * 1024}
+              maxFiles={10}
+              maxFileSize={10 * 1024 * 1024}
               acceptedTypes={["image/png", "image/jpeg", "application/pdf"]}
             />
           </section>
@@ -191,6 +258,14 @@ function ProjectWritePage() {
                 />
 
                 <ProjectWriteInput
+                  inputText="시연 영상 URL"
+                  placeholderText="http://www.youtube.com/yourvideo"
+                  type="url"
+                  value={projectData.youtubeUrl} // youtubeUrl로 수정
+                  onChange={handleVideoUrlChange}
+                />
+
+                <ProjectWriteInput
                   inputText="GitHub URL"
                   placeholderText="http://github.com/username/repository"
                   type="url"
@@ -215,8 +290,8 @@ function ProjectWritePage() {
               </div>
               <div></div>
               <ProjectStack
-                isStackData={ProejctWriteStackData}
-                isSelect={projectData.stack} // 이제 배열
+                isStackData={ProejctWriteTechData}
+                isSelect={projectData.projectTechs} // stack -> projectTechs
                 onStackChange={handleStacksChange}
               />
             </div>

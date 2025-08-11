@@ -1,4 +1,4 @@
-import type { ProjectStackEnum } from "../../types/project/projecStackData";
+import type { ProjectTechEnum } from "../../types/project/projecStackData";
 import type { ProjectCategoryEnum } from "../../types/project/projectCategroyData";
 
 export interface ButtonProps {
@@ -13,9 +13,9 @@ export interface ButtonProps {
   css?: string; // 버튼의 css 형식
 }
 export interface StackButtonProps extends ButtonProps {
-  stack: ProjectStackEnum; // 어떤 카테고리인지
+  stack: ProjectTechEnum; // 어떤 카테고리인지
   isSelected: boolean; // 선택 여부
-  onSelect: (stack: ProjectStackEnum) => void; // 클릭 시 실행
+  onSelect: (stack: ProjectTechEnum) => void; // 클릭 시 실행
 }
 
 export interface AdditionalButtonProps extends ButtonProps {

@@ -1,13 +1,13 @@
 import type {
-  ProejctStackData,
-  ProjectStackEnum,
+  ProejctTechData,
+  ProjectTechEnum,
 } from "../../../../types/project/projecStackData";
 import ProjectStackButton from "../../../molecules/project/projectStackButton";
 
 interface ProjectStackProps {
-  isStackData: ProejctStackData[];
-  isSelect: ProjectStackEnum[]; // 배열로 받음
-  onStackChange: (stack: ProjectStackEnum) => void; // 개별 스택을 전달
+  isStackData: ProejctTechData[];
+  isSelect: ProjectTechEnum[]; // 배열로 받음
+  onStackChange: (stack: ProjectTechEnum) => void; // 개별 스택을 전달
 }
 
 function ProjectStack({
