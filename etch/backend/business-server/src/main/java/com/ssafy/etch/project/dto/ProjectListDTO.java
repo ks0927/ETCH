@@ -12,19 +12,17 @@ public class ProjectListDTO {
 	private Long viewCount;
 	private Long likeCount;
 	private String nickname;
+	private Boolean isPublic;
 
-	public static ProjectListDTO from(ProjectDTO p, Long likeCount) {
+	public static ProjectListDTO from(ProjectDTO p) {
 		return ProjectListDTO.builder()
 			.id(p.getId())
 			.title(p.getTitle())
 			.thumbnailUrl(p.getThumbnailUrl())
 			.viewCount(p.getViewCount())
-			.likeCount(likeCount)
+			.likeCount(p.getLikeCount() != null ? p.getLikeCount().longValue() : 0L)
 			.nickname(p.getMember().toMemberDTO().getNickname())
+			.isPublic(p.getIsPublic())
 			.build();
-	}
-
-	public static ProjectListDTO from(ProjectDTO p) {
-		return from(p, 0L);
 	}
 }

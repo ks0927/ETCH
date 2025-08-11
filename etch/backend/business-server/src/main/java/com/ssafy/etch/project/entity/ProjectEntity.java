@@ -42,6 +42,7 @@ public class ProjectEntity {
 	@Column(name = "view_count")
 	private Long viewCount;
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "category")
 	private ProjectCategory category;
 
@@ -65,7 +66,7 @@ public class ProjectEntity {
 	private MemberEntity member;
 
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
-	private List<CommentEntity> comments;
+	private List<CommentEntity> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = LAZY)
 	private List<FileEntity> files = new ArrayList<>(); // 본문 이미지/파일들 (PNG/JPG, PDF 등)
@@ -99,7 +100,7 @@ public class ProjectEntity {
 			 WHERE lc.type = 'PROJECT' AND lc.targetId = id) * 4
 		  + (SELECT COUNT(1)
 		  	 FROM project_comment c
-		  	 WHERE c.project_post = id) * 3
+		  	 WHERE c.project_post = id AND c.is_deleted = 0) * 3
 		  + COALESCE(view_count, 0) * 2
 		)
 	""")
@@ -111,6 +112,7 @@ public class ProjectEntity {
 			.title(title)
 			.content(content)
 			.thumbnailUrl(thumbnailUrl)
+			.youtubeUrl(youtubeUrl)
 			.viewCount(viewCount)
 			.createdAt(createdAt)
 			.updatedAt(updatedAt)
@@ -122,6 +124,9 @@ public class ProjectEntity {
 			.projectTechs(projectTechs)
 			.comments(comments)
 			.files(files)
+			.likeCount(this.likeCount)
+			.commentCount(this.commentCount)
+			.popularityScore(this.popularityScore)
 			.build();
 	}
 
