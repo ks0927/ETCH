@@ -1,5 +1,6 @@
 package com.ssafy.etch.follow.controller;
 
+import com.ssafy.etch.follow.dto.FollowCountResponseDTO;
 import com.ssafy.etch.follow.service.FollowService;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
@@ -43,6 +44,13 @@ public class FollowController {
     @GetMapping("/following")
     public ResponseEntity<ApiResponse<List<MemberResponseDTO>>> getFollowingList(@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
         List<MemberResponseDTO> result = followService.getFollowingList(oAuth2User.getId());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ApiResponse<FollowCountResponseDTO>> getFollowCount(
+            @PathVariable Long memberId) {
+        FollowCountResponseDTO result = followService.getFollowCountInfo(memberId);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
