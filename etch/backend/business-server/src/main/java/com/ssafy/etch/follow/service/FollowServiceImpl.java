@@ -90,4 +90,14 @@ public class FollowServiceImpl implements FollowService {
                 .followingCount(followingCnt)
                 .build();
     }
+
+    @Override
+    public Boolean isFollowed(Long fromMemberId, Long toMemberId) {
+        MemberEntity fromMember = memberRepository.findById(fromMemberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        MemberEntity toMember = memberRepository.findById(toMemberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return followRepository.existsByFollowerAndFollowing(fromMember, toMember);
+    }
 }

@@ -53,4 +53,12 @@ public class FollowController {
         FollowCountResponseDTO result = followService.getFollowCountInfo(memberId);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
+
+    @GetMapping("/exists/{memberId}")
+    public ResponseEntity<ApiResponse<Boolean>> isFollowed(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long memberId ) {
+        Boolean result = followService.isFollowed(oAuth2User.getId(), memberId);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
 }
