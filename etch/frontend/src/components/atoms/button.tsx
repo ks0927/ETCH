@@ -1,5 +1,7 @@
-import type { ProjectTechEnum } from "../../types/project/projecStackData";
+// atoms/button/index.ts 에서 StackButtonProps 수정
+
 import type { ProjectCategoryEnum } from "../../types/project/projectCategroyData";
+import type { ProjectTechEnum } from "../../types/project/projecTechData";
 
 export interface ButtonProps {
   text?: string; //  버튼 안의 text
@@ -12,10 +14,13 @@ export interface ButtonProps {
   checked?: boolean; // 현재 버튼의 체크 유뮤
   css?: string; // 버튼의 css 형식
 }
+
+// ID 기반으로 수정된 StackButtonProps
 export interface StackButtonProps extends ButtonProps {
-  stack: ProjectTechEnum; // 어떤 카테고리인지
+  id: number; // 기술 스택 ID 추가
+  stack: ProjectTechEnum; // 표시용 (기존 유지)
   isSelected: boolean; // 선택 여부
-  onSelect: (stack: ProjectTechEnum) => void; // 클릭 시 실행
+  onSelect: (id: number) => void; // ID를 전달하도록 변경
 }
 
 export interface AdditionalButtonProps extends ButtonProps {
