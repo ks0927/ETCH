@@ -23,7 +23,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     @Query("select distinct p from ProjectEntity p " +
             "left join fetch p.projectTechs pt " +
             "left join fetch pt.techCode " +
-            "where p.member.id = :memberId and p.isDeleted = false")
+            "where p.member.id = :memberId order by p.createdAt desc")
     List<ProjectEntity> findAllByMemberId(@Param("memberId") Long memberId);
 
     Page<ProjectEntity> findByIsDeletedFalseAndIsPublicTrue(Pageable pageable);
