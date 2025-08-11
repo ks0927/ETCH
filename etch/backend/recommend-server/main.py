@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from typing import List
 import uvicorn  
 from es import fetch_and_tokenize_all, tokenize_user_liked_items
-from mysql import get_liked_items
+from mysql_utils import get_liked_items
 from cbf import rank_content_by_similarity
-from redis import store_recommendations
+from redis_utils import store_recommendations
 
 app = FastAPI()
 
