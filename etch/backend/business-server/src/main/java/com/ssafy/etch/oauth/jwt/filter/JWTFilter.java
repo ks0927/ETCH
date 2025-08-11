@@ -25,6 +25,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // "/auth/reissue" 경로로 오는 요청은 필터를 건너뛰도록 처리
+        if (request.getRequestURI().equals("/auth/reissue")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 헤더에서 "access" 토큰을 찾음
         String accessToken = extractToken(request);
 
