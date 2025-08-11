@@ -60,16 +60,6 @@ def _db():
             )
     return pymysql.connect(**kw)
 
-
-def _get_company_id(conn, name: str) -> int:
-    sql = "SELECT id FROM company WHERE name=%s"
-    with conn.cursor() as cur:
-        cur.execute(sql, (name,))
-        row = cur.fetchone()
-        if not row:
-            raise ValueError(f"Company not found: {name}")
-        return int(row["id"])
-
 def _fetch_from_newsapi(company_name: str) -> List[Dict]:
     headers = {"X-Api-Key": NEWSAPI_KEY} if NEWSAPI_KEY else {}
     params = {
@@ -87,7 +77,7 @@ def _fetch_from_newsapi(company_name: str) -> List[Dict]:
     data = resp.json()
     return data.get("articles", []) or []
 
-def _insert_articles(conn, company_id: int, articles: List[Dict]) -> int:
+def _insert_articles(conn, company_id: int, company_name: str, articles: List[Dict]) -> int:
     """
     bulk insert + ON DUPLICATE KEY UPDATE 로 중복 방지
     """
@@ -110,24 +100,38 @@ def _insert_articles(conn, company_id: int, articles: List[Dict]) -> int:
             dt = None
 
         rows.append((
-            company_id, title, desc, thumbnail_url, url, dt
+            company_id, company_name, title, desc, thumbnail_url, url, dt
         ))
 
     if not rows:
         return 0
 
     sql = """
-    INSERT INTO news (company_id, title, description, thumbnail_url, url, published_at)
-    VALUES (%s, %s, %s, %s, %s, %s)
+    INSERT INTO news (company_id, company_name, title, description, thumbnail_url, url, published_at)
+    VALUES (%s, %s, %s, %s, %s, %s, %s)
     ON DUPLICATE KEY UPDATE
+      company_name=VALUES(company_name),
       title=VALUES(title),
       description=VALUES(description),
       thumbnail_url=VALUES(thumbnail_url),
       published_at=VALUES(published_at)
     """
+
+    assert len(rows[0]) == sql.count("%s"), f"placeholders({sql.count('%s')}) != rowlen({len(rows[0])})"
+    
     with conn.cursor() as cur:
         cur.executemany(sql, rows)
+        affected = cur.rowcount
     return cur.rowcount
+
+def _get_company(conn, name: str) -> Dict:
+    sql = "SELECT id, name FROM company WHERE name = %s"
+    with conn.cursor() as cur:
+        cur.execute(sql, (name,))
+        row = cur.fetchone()
+        if not row:
+            raise ValueError(f"Company not found: {name}")
+        return {"id": row["id"], "name": row["name"]}
 
 def fetch_and_store(company_name: str) -> int:
     """
@@ -135,9 +139,11 @@ def fetch_and_store(company_name: str) -> int:
     """
     conn = _db()
     try:
-        cid = _get_company_id(conn, company_name)
-        articles = _fetch_from_newsapi(company_name)
-        cnt = _insert_articles(conn, cid, articles)
+        company = _get_company(conn, company_name)
+        cid = company["id"]
+        cname = company["name"]
+        articles = _fetch_from_newsapi(cname)
+        cnt = _insert_articles(conn, cid, cname, articles)
         conn.commit()
         logger.info("Stored %s articles for %s", cnt, company_name)
         return cnt
