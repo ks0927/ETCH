@@ -1,23 +1,44 @@
-import type { ProjectStackEnum } from "./projecStackData";
+import type { ProjectTechEnum } from "./projecStackData";
 import type { ProjectCategoryEnum } from "./projectCategroyData";
 
 export interface ProjectData {
+  id: number;
   title: string;
   content: string;
+  thumbnailUrl: string;
+  youtubeUrl: string;
+  viewCount: number;
   category: ProjectCategoryEnum | "";
-  stack: ProjectStackEnum[];
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
   githubUrl: string;
   isPublic: boolean;
-  uploadedFiles: File[];
+  member: {
+    id: number;
+    // 필요한 멤버 정보 추가
+  };
+  files: File[];
+  projectTechs: ProjectTechEnum[];
 }
 
-// 초기 상태값
+// 초기 상태값 - ProjectData 인터페이스에 맞게 수정
 export const ProjectState: ProjectData = {
+  id: 0,
   title: "",
   content: "",
-  category: "",
-  stack: [],
+  thumbnailUrl: "",
+  youtubeUrl: "",
+  viewCount: 0,
+  category: "", // 빈 문자열을 타입으로 캐스팅
+  createdAt: "",
+  updatedAt: "",
+  isDeleted: false,
   githubUrl: "",
-  isPublic: false,
-  uploadedFiles: [],
+  isPublic: true,
+  member: {
+    id: 0,
+  },
+  files: [],
+  projectTechs: [],
 };

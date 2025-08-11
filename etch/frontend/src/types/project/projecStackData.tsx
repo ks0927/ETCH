@@ -1,4 +1,4 @@
-export type ProjectStackEnum =
+export type ProjectTechEnum =
   | "HTML"
   | "CSS"
   | "JavaScript"
@@ -30,12 +30,12 @@ export type ProjectStackEnum =
   | "SQL"
   | "NoSQL";
 
-export interface ProejctStackData {
-  stack: ProjectStackEnum;
+export interface ProejctTechData {
+  stack: ProjectTechEnum;
   text: string;
 }
 
-export const ProejctWriteStackData: ProejctStackData[] = [
+export const ProejctWriteTechData: ProejctTechData[] = [
   "HTML",
   "CSS",
   "JavaScript",
@@ -67,6 +67,6 @@ export const ProejctWriteStackData: ProejctStackData[] = [
   "SQL",
   "NoSQL",
 ].map((item) => ({
-  stack: item as ProjectStackEnum,
+  stack: item as ProjectTechEnum,
   text: item,
 }));
