@@ -1,13 +1,16 @@
 import type { StackButtonProps } from "../../atoms/button";
 
 function ProjectStackButton({
+  id,
   text,
   isSelected,
   onSelect,
-  stack,
 }: StackButtonProps) {
   return (
-    <div className="group cursor-pointer" onClick={() => onSelect(stack)}>
+    <div
+      className="group cursor-pointer relative"
+      onClick={() => onSelect(id)} // ID를 전달
+    >
       <div
         className={`border rounded-lg p-4 sm:p-6 text-center transition-all duration-200 group-hover:shadow-md ${
           isSelected
@@ -31,10 +34,6 @@ function ProjectStackButton({
           </div>
         )}
 
-        {/* 아이콘 영역 (추후 추가 가능) */}
-        {/* 아이콘 영역 */}
-
-        {/* 텍스트 영역 */}
         <div
           className={`text-sm sm:text-base font-medium transition-colors duration-200 ${
             isSelected
