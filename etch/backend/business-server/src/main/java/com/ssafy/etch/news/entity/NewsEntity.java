@@ -35,6 +35,9 @@ public class NewsEntity {
 	@Column(length = 1024, nullable = false)
 	private String url;
 
+	@Column(name = "company_name")
+	private String companyName;
+
 	@Column(name = "published_at")
 	private LocalDate publishedAt;
 

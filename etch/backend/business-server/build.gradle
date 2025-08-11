@@ -51,6 +51,8 @@ dependencies {
     //Spring Security의 테스트 기능을 사용하기 위해 아래 의존성을 추가합니다.
     testImplementation 'org.springframework.security:spring-security-test'
 
+    // fastapi
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {
