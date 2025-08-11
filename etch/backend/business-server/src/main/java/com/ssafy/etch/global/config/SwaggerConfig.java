@@ -22,7 +22,7 @@ public class SwaggerConfig {
 			.version("v1.0.0")
 			.description("프로젝트 API에 대한 명세서입니다.");
 
-		//server url prefix!!!!!.!!!!
+		//server url prefix!!.!!!!
 		Server server = new Server().url("/api/v1");
 
 		return new OpenAPI()
