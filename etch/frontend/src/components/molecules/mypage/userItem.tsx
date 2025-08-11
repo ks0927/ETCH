@@ -8,6 +8,7 @@ function UserItem({
   email,
   profile,
   isFollowing,
+  isLoading = false,
   canChat,
   onChatClick,
   onFollowToggle,
@@ -19,7 +20,9 @@ function UserItem({
   };
 
   const handleFollowClick = () => {
-    onFollowToggle(id);
+    if (!isLoading) {
+      onFollowToggle(id);
+    }
   };
 
   const getAvatarSrc = () => {
@@ -27,31 +30,29 @@ function UserItem({
   };
 
   return (
-    <div className="flex items-center px-8 py-5 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-200">
+    <div className="flex items-center px-8 py-5 transition-colors duration-200 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
       {/* Avatar */}
-      <div className="w-12 h-12 rounded-full mr-4 flex-shrink-0 overflow-hidden">
-        <img 
-          src={getAvatarSrc()} 
-          alt={nickname} 
-          className="w-full h-full object-cover" 
+      <div className="flex-shrink-0 w-12 h-12 mr-4 overflow-hidden rounded-full">
+        <img
+          src={getAvatarSrc()}
+          alt={nickname}
+          className="object-cover w-full h-full"
         />
       </div>
 
       {/* User Info */}
       <div className="flex-1 min-w-0">
-        <a 
-          href={`/profile/${nickname}`} 
+        <a
+          href={`/profile/${id}`}
           className="block text-base font-semibold text-blue-600 hover:underline cursor-pointer mb-0.5"
         >
           {nickname}
         </a>
-        <div className="text-sm text-gray-600">
-          {email}
-        </div>
+        <div className="text-sm text-gray-600">{email}</div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         {/* Chat Button */}
         <button
           onClick={handleChatClick}
@@ -72,13 +73,16 @@ function UserItem({
         {/* Follow Button */}
         <button
           onClick={handleFollowClick}
+          disabled={isLoading}
           className={`px-4 py-2 rounded-md border text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-            isFollowing
+            isLoading
+              ? "bg-gray-400 text-white border-gray-400 cursor-not-allowed"
+              : isFollowing
               ? "bg-green-600 text-white border-green-600/40 hover:bg-red-600 hover:border-red-600/40"
               : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50 hover:border-gray-300"
           }`}
         >
-          {isFollowing ? "Following" : "Follow"}
+          {isLoading ? "처리중..." : (isFollowing ? "Following" : "Follow")}
         </button>
       </div>
     </div>

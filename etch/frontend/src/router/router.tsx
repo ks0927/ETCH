@@ -77,6 +77,9 @@ const MyPageCoverLetterDetailPage = lazy(
       "../components/pages/mypage/coverletter/MyPageCoverLetterDetailPage.tsx"
     )
 );
+const UserProfilePage = lazy(
+  () => import("../components/pages/userProfilePage.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -159,6 +162,10 @@ const router = createBrowserRouter([
       {
         path: "/jobs",
         element: <JobPage />,
+      },
+      {
+        path: "profile/:userId",
+        element: <UserProfilePage />,
       },
       {
         path: "/mypage",

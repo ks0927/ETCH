@@ -1,26 +1,29 @@
 import { useState, useEffect } from "react";
 import useUserStore from "../store/userStore";
 import { getMemberById } from "../api/memberApi";
-import { getFollowers, getFollowings } from "../api/followApi";
+import { getCountFollows } from "../api/followApi";
 import type { UserProfile } from "../types/userProfile";
 
 export interface ProfileCardData extends UserProfile {
-  followersCount: number;
+  followerCount: number;
   followingCount: number;
 }
 
-export const useUserProfile = () => {
+export const useUserProfile = (userId?: number) => {
   const { memberInfo } = useUserStore();
   const [profileData, setProfileData] = useState<ProfileCardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // --- 1. 훅 시작 시점의 memberInfo 확인 ---
-    console.log("[useUserProfile] 훅 시작, memberInfo:", memberInfo);
+  // userId가 주어지면 그것을 사용, 없으면 본인 ID 사용
+  const targetUserId = userId || memberInfo?.id;
 
-    if (!memberInfo?.id) {
-      console.log("[useUserProfile] memberInfo.id 없음, 로직 중단.");
+  useEffect(() => {
+    // --- 1. 훅 시작 시점의 targetUserId 확인 ---
+    console.log("[useUserProfile] 훅 시작, targetUserId:", targetUserId);
+
+    if (!targetUserId) {
+      console.log("[useUserProfile] targetUserId 없음, 로직 중단.");
       setIsLoading(false);
       return;
     }
@@ -28,26 +31,23 @@ export const useUserProfile = () => {
     const fetchUserProfile = async () => {
       setIsLoading(true);
       try {
-        console.log(`[useUserProfile] API 호출 시작 (ID: ${memberInfo.id})`);
-        const [memberData, followers, followings] = await Promise.all([
-          getMemberById(memberInfo.id),
-          getFollowers(),
-          getFollowings(),
+        console.log(`[useUserProfile] API 호출 시작 (ID: ${targetUserId})`);
+        const [memberData, follows] = await Promise.all([
+          getMemberById(targetUserId),
+          getCountFollows(targetUserId),
         ]);
-        
+
         // --- 2. API 성공 시 데이터 확인 ---
-        console.log("[useUserProfile] API 성공:", { memberData, followers, followings });
+        console.log("[useUserProfile] API 성공:", { memberData, follows });
 
         const finalData = {
           ...memberData,
-          followersCount: followers.length,
-          followingCount: followings.length,
+          ...follows,
         };
 
         setProfileData(finalData);
         // --- 3. 최종 데이터 확인 ---
         console.log("[useUserProfile] 최종 profileData:", finalData);
-
       } catch (err) {
         // --- 4. 에러 발생 시 에러 내용 확인 ---
         console.error("[useUserProfile] API 호출 실패:", err);
@@ -58,8 +58,7 @@ export const useUserProfile = () => {
     };
 
     fetchUserProfile();
-  }, [memberInfo?.id]);
+  }, [targetUserId]);
 
   return { profileData, isLoading, error };
 };
-

@@ -68,6 +68,7 @@ export interface DeadlineItemProps extends BaseListItemProps {
 // 사용자 아이템 전용
 export interface UserItemProps extends UserProfile {
   isFollowing: boolean;
+  isLoading?: boolean;
   canChat: boolean;
   onChatClick: (userId: number) => void;
   onFollowToggle: (userId: number) => void;
