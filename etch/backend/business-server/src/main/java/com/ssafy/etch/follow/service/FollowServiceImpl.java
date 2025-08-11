@@ -1,5 +1,6 @@
 package com.ssafy.etch.follow.service;
 
+import com.ssafy.etch.follow.dto.FollowCountResponseDTO;
 import com.ssafy.etch.follow.dto.FollowDTO;
 import com.ssafy.etch.follow.entity.FollowEntity;
 import com.ssafy.etch.follow.repository.FollowRepository;
@@ -74,5 +75,19 @@ public class FollowServiceImpl implements FollowService {
                 .map(FollowDTO::getFollowing)
                 .map(MemberResponseDTO::from)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public FollowCountResponseDTO getFollowCountInfo(Long memberId) {
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        long followerCnt = followRepository.countByFollowing(member);
+        long followingCnt = followRepository.countByFollower(member);
+
+        return FollowCountResponseDTO.builder()
+                .followerCount(followerCnt)
+                .followingCount(followingCnt)
+                .build();
     }
 }
