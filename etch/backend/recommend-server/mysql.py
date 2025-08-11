@@ -1,23 +1,20 @@
 import pymysql
 from pymysql.cursors import DictCursor
+import os
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수 로드
+load_dotenv()
 
 def get_liked_items(user_id: int):
     conn = pymysql.connect(
-        host='localhost',
-        port=3306,
-        user='ssafy',
-        password='ssafy1234',
-        db='test',
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        db=os.getenv("DB_NAME"),
         charset='utf8mb4'
     )
-    # conn = pymysql.connect(
-    #     host='ssafy-mysql-db.mysql.database.azure.com',
-    #     port=3306,
-    #     user='S13P12A402',
-    #     password='mmPPHmgIAU',
-    #     db='S13P12A402',
-    #     charset='utf8mb4'
-    # )
     print("Connected to MySQL database successfully.")
     
     results_by_type = {

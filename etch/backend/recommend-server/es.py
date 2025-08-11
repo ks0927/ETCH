@@ -1,8 +1,16 @@
 import requests
 from typing import Dict, List, Any
+import os
+from dotenv import load_dotenv
 
-ES_URL = "http://localhost:9200"
-ES_AUTH = ('elastic', '123456')  # 필요 시 변경
+# .env 파일에서 환경 변수 로드
+load_dotenv()
+
+ES_URL = os.getenv("ES_HOST")
+ES_USER = os.getenv("ES_USER")
+ES_PASSWORD = os.getenv("ES_PASSWORD")
+ES_AUTH = (ES_USER, ES_PASSWORD) if ES_USER and ES_PASSWORD else None
+
 HEADERS = {"Content-Type": "application/json"}
 ANALYZER_NAME = "my_nori_analyzer"  # 인덱스 설정과 일치해야 함
 
