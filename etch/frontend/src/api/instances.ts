@@ -50,15 +50,15 @@ authInstance.interceptors.response.use(
     // 401 에러이고, 재시도한 요청이 아닐 경우에만 토큰 갱신 시도
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true; // 재시도 플래그 설정 (무한 루프 방지)
-
+      console.log("토큰 갱신 시도 중...");
       try {
         // '/auth/reissue' API 호출 (defaultInstance 사용)
         // Refresh Token은 쿠키로 자동 전송되므로, 요청 본문은 비워둡니다.
         const reissueResponse = await defaultInstance.post("/auth/reissue", {});
-
+        console.log("토큰 갱신 성공:", reissueResponse);
         // 응답 헤더에서 새로운 Access Token 추출 (Axios는 헤더 이름을 소문자로 정규화합니다.)
         const newAccessToken = reissueResponse.headers["authorization"];
-
+        console.log("새로운 Access Token:", newAccessToken);
         if (!newAccessToken) {
           throw new Error("새로운 Access Token이 갱신 응답 헤더에 없습니다.");
         }

@@ -9,7 +9,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ userProfile }: ProfileCardProps) => {
-  const { nickname, profile, followersCount, followingCount } = userProfile;
+  const { nickname, profile, followerCount, followingCount } = userProfile;
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -27,7 +27,7 @@ const ProfileCard = ({ userProfile }: ProfileCardProps) => {
 
           <div className="flex justify-center space-x-6 text-sm">
             <Link to="/mypage/followers">
-              <StatsButton count={followersCount} label="팔로워" />
+              <StatsButton count={followerCount} label="팔로워" />
             </Link>
             <Link to="/mypage/following">
               <StatsButton count={followingCount} label="팔로잉" />
