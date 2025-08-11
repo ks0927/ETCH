@@ -27,6 +27,9 @@ import com.ssafy.etch.project.repository.ProjectTechRepository;
 import com.ssafy.etch.tech.entity.TechCodeEntity;
 import com.ssafy.etch.tech.repository.TechCodeRepository;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +51,8 @@ public class ProjectServiceImpl implements ProjectService {
 	private static final Set<String> ALLOWED_IMAGE_EXT = Set.of(".jpg", ".png");
 	private static final long MAX_SIZE = 5L * 1024 * 1024; // 5MB
 	private static final int MAX_IMAGES = 4; // 썸네일 제외 본문 이미지 최대 4장
+
+	private static final int MAX_PAGE_SIZE = 9;
 
 	public ProjectServiceImpl(ProjectRepository projectRepository,
 		LikeRepository likeRepository,
@@ -92,8 +97,21 @@ public class ProjectServiceImpl implements ProjectService {
 
 	// 목록 조회
 	@Override
-	public List<ProjectListDTO> getAllProjects() {
-		return projectRepository.findAll()
+	public List<ProjectListDTO> getAllProjects(String sort, int page, int pageSize) {
+		final String effectiveSort = (sort == null || sort.isBlank()) ? "popular" : sort.toLowerCase();
+		final int pageIndex = Math.max(0, page - 1);
+		final int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
+
+		// 인기, 조회수, 최신 정렬(기본은 인기순) - formula 필드
+		Sort sortOption = switch (effectiveSort) {
+			case "views"  -> Sort.by(Sort.Direction.DESC, "viewCount").and(Sort.by(Sort.Direction.DESC, "createdAt"));
+			case "latest" -> Sort.by(Sort.Direction.DESC, "createdAt");
+			default -> Sort.by(Sort.Direction.DESC, "popularityScore").and(Sort.by(Sort.Direction.DESC, "createdAt"));
+		};
+
+		Pageable pageable = PageRequest.of(pageIndex, size, sortOption);
+
+		return projectRepository.findByIsDeletedFalseAndIsPublicTrue(pageable)
 			.stream()
 			.map(ProjectEntity::toProjectDTO)
 			.map(dto -> {

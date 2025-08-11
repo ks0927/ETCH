@@ -1,6 +1,9 @@
 package com.ssafy.etch.project.repository;
 
 import com.ssafy.etch.project.entity.ProjectEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +25,8 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
             "left join fetch pt.techCode " +
             "where p.member.id = :memberId and p.isDeleted = false")
     List<ProjectEntity> findAllByMemberId(@Param("memberId") Long memberId);
+
+    Page<ProjectEntity> findByIsDeletedFalseAndIsPublicTrue(Pageable pageable);
 
     @Modifying
     @Query("update ProjectEntity p set p.viewCount = p.viewCount + 1 where p.id = :id and p.isDeleted = false")
