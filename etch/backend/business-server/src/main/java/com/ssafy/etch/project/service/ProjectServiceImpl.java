@@ -153,7 +153,7 @@ public class ProjectServiceImpl implements ProjectService {
 		Page<ProjectListDTO> dtoPage = pageData.map(projectEntity -> {
 			ProjectDTO projectDTO = projectEntity.toProjectDTO();
 
-			// 코드 수정 고려
+			// 코드 수정 고려.
 			long likeCount = likeRepository.countByTargetIdAndType(projectDTO.getId(), LikeType.PROJECT);
 
 			return ProjectListDTO.builder()
