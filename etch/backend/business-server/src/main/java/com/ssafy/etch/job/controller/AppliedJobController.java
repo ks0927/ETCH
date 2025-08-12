@@ -39,4 +39,15 @@ public class AppliedJobController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list, "지원공고 목록 조회 완료"));
     }
 
+    @PutMapping("/{appliedJobId}")
+    public ResponseEntity<ApiResponse<?>> updateAppliedJob(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable("appliedJobId") Long appliedJobId,
+            @RequestBody AppliedJobUpdateRequestDTO requestDTO) {
+
+        appliedJobService.updateAppliedJobStatus(oAuth2User.getId(), appliedJobId, requestDTO.getStatus());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "지원 공고 상태 변경 완료"));
+    }
+
 }
