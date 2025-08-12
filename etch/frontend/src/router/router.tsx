@@ -28,6 +28,9 @@ const ProjectListPage = lazy(
 const ProjectWritePage = lazy(
   () => import("../components/pages/project/projectWritePage.tsx")
 );
+const ProjectUpdatePage = lazy(
+  () => import("../components/pages/project/projectUpdatePage.tsx")
+);
 const JobPage = lazy(() => import("../components/pages/job/jobPage.tsx"));
 const MyPageLayout = lazy(() => import("../layout/mypageLayout.tsx"));
 const DashboardPage = lazy(
@@ -157,7 +160,19 @@ const router = createBrowserRouter([
       },
       {
         path: "/projects/write",
-        element: <ProjectWritePage />,
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <ProjectWritePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/projects/:id/edit",
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <ProjectUpdatePage />
+          </Suspense>
+        ),
       },
       {
         path: "/jobs",
