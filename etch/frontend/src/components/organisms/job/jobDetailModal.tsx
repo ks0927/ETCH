@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import type { JobItemProps } from "../../atoms/listItem";
 import JobDetailTabs from "../../molecules/job/jobDetailTabs";
 import JobDetailTabContent from "../../molecules/job/jobDetailTabContent";
+import { useJobDetail } from "../../../hooks/useJobDetail";
+import { applyJob } from "../../../api/appliedJobApi";
 
 interface JobDetailModalProps {
   job: JobItemProps;
@@ -12,13 +14,43 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"details" | "company" | "news">(
     "details"
   );
+  const [isApplying, setIsApplying] = useState(false);
+
+  // 새로운 useJobDetail hook 사용
+  const {
+    jobDetail,
+    companyInfo,
+    companyNews,
+    isLoading,
+    jobError,
+    companyError,
+    newsError,
+  } = useJobDetail(job.id, job.companyId);
+
+  // 지원하기 버튼 핸들러
+  const handleApplyJob = async () => {
+    try {
+      setIsApplying(true);
+      await applyJob(Number(job.id));
+      alert("마이페이지의 지원현황에 추가되었습니다!");
+    } catch (error: any) {
+      console.error("지원하기 실패:", error);
+      if (error.response?.data.message === "이미 지원한 공고입니다.") {
+        alert("이미 지원한 공고입니다.");
+      } else {
+        alert("지원하기에 실패했습니다. 다시 시도해주세요.");
+      }
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   // 모달 열릴 때 body 스크롤 막기
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, []);
 
@@ -36,8 +68,12 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
       <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* 헤더 - 파란색 그라데이션 */}
         <div className="relative px-6 py-4 text-white bg-gradient-to-r from-blue-500 to-blue-600">
-          <h2 className="text-xl font-bold">{job.company}</h2>
-          <p className="mt-1 text-blue-100">{job.location}</p>
+          <h2 className="text-xl font-bold">{job.companyName}</h2>
+          <p className="mt-1 text-blue-100">
+            {Array.isArray(job.regions)
+              ? job.regions.join(", ")
+              : "위치 정보 없음"}
+          </p>
           <button
             onClick={onClose}
             className="absolute text-2xl text-white top-4 right-6 hover:text-blue-100"
@@ -51,11 +87,30 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
 
         {/* 탭 컨텐츠 */}
         <div className="max-h-[60vh] overflow-y-auto">
-          <JobDetailTabContent activeTab={activeTab} job={job} />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="text-lg text-gray-600">
+                데이터를 불러오는 중...
+              </div>
+            </div>
+          ) : (
+            <JobDetailTabContent
+              activeTab={activeTab}
+              job={job}
+              jobDetail={jobDetail}
+              companyInfo={companyInfo}
+              companyNews={companyNews}
+              errors={{
+                jobError,
+                companyError,
+                newsError,
+              }}
+            />
+          )}
         </div>
 
         {/* 푸터 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800"
@@ -66,8 +121,16 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
             <button className="flex items-center gap-2 px-4 py-2 text-pink-600 border border-pink-200 rounded-lg hover:bg-pink-50">
               ❤️ 관심기업 등록
             </button>
-            <button className="px-6 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-              📝 지원하기
+            <button
+              onClick={handleApplyJob}
+              disabled={isApplying}
+              className={`px-6 py-2 text-white rounded-lg ${
+                isApplying
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {isApplying ? "⏳ 지원 중..." : "📝 지원하기"}
             </button>
           </div>
         </div>

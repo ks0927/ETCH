@@ -3,7 +3,10 @@ interface JobDetailTabsProps {
   onTabChange: (tab: "details" | "company" | "news") => void;
 }
 
-export default function JobDetailTabs({ activeTab, onTabChange }: JobDetailTabsProps) {
+export default function JobDetailTabs({
+  activeTab,
+  onTabChange,
+}: JobDetailTabsProps) {
   const tabs = [
     { id: "details", label: "공고상세" },
     { id: "company", label: "기업정보" },
@@ -11,7 +14,7 @@ export default function JobDetailTabs({ activeTab, onTabChange }: JobDetailTabsP
   ] as const;
 
   return (
-    <div className="flex border-b bg-gray-50">
+    <div className="flex border-b border-gray-200 bg-gray-50">
       {tabs.map((tab) => (
         <button
           key={tab.id}
