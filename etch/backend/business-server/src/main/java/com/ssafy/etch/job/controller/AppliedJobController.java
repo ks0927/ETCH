@@ -5,6 +5,7 @@ import com.ssafy.etch.job.dto.AppliedJobUpdateRequestDTO;
 import com.ssafy.etch.job.dto.AppliedJobListResponseDTO;
 import com.ssafy.etch.job.service.AppliedJobService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +14,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(
+        name = "AppliedJobs",
+        description = "AppliedJobs Controller 입니다."
+)
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/appliedJob")
+@RequestMapping("/appliedJobs")
 public class AppliedJobController {
 
     private final AppliedJobService appliedJobService;
