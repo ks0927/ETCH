@@ -24,6 +24,7 @@ function ProjectModalCard({
   githubUrl,
   isPublic,
   member,
+  nickname,
   files,
   projectTechs,
   likeCount: initialLikeCount, // props 이름 변경
@@ -210,9 +211,7 @@ function ProjectModalCard({
             }}
           />
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">
-              {member.nickname}
-            </h2>
+            <h2 className="text-sm font-semibold text-gray-900">{nickname}</h2>
             {/* 수정되면 updatedAt 으로 변경 */}
             <p className="text-xs text-gray-500">
               {createdAt === updatedAt

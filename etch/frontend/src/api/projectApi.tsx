@@ -200,3 +200,17 @@ export async function unlikeProject(projectId: number) {
     throw error;
   }
 }
+export async function getMyProjects() {
+  try {
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(`${BASE_API}/projects/my`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("내 프로젝트 조회 실패:", error);
+    throw error;
+  }
+}
