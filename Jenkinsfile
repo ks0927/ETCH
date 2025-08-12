@@ -209,7 +209,7 @@ pipeline {
                     steps {
                         echo "Deploying [chat-server] via recreate..."
                         sshagent(credentials: ['jenkins-ssh-key']) {
-                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull chat-server && docker-compose up -d --force-recreate --no-deps chat-server'"
+                            sh "ssh -o StrictHostKeyChecking=no ubuntu@i13a402.p.ssafy.io 'cd ~/app && docker-compose pull chat-server && docker-compose up -d --force-recreate chat-server'"
                         }
                     }
                 }
