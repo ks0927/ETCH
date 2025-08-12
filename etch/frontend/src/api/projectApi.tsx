@@ -176,12 +176,21 @@ export async function getProjectById(id: number) {
   }
 }
 
-// projectApi.tsx에서 수정
+// projectApi.tsx에 수정/추가
 export async function likeProject(projectId: number) {
   try {
-    const response = await axios.post(`${BASE_API}/likes/projects`, {
-      targetId: projectId, // LikeRequestDTO에 맞는 필드명
-    });
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.post(
+      `${BASE_API}/likes/projects`,
+      {
+        targetId: projectId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("좋아요 추가 실패:", error);
@@ -191,12 +200,34 @@ export async function likeProject(projectId: number) {
 
 export async function unlikeProject(projectId: number) {
   try {
+    const token = localStorage.getItem("accessToken");
     const response = await axios.delete(
-      `${BASE_API}/likes/projects/${projectId}`
+      `${BASE_API}/likes/projects/${projectId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {
     console.error("좋아요 취소 실패:", error);
+    throw error;
+  }
+}
+
+// 내가 좋아요한 프로젝트 목록 조회 API 추가
+export async function getLikedProjects() {
+  try {
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(`${BASE_API}/likes/projects`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("좋아요한 프로젝트 조회 실패:", error);
     throw error;
   }
 }

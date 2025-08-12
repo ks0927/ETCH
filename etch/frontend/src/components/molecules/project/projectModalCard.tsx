@@ -1,4 +1,5 @@
 import type { ProjectCardProps } from "../../atoms/card";
+import noImg from "../../../assets/noImg.png";
 import { useState } from "react";
 import LikeSVG from "../../svg/likeSVG";
 import ViewSVG from "../../svg/viewSVG";
@@ -172,7 +173,8 @@ function ProjectModalCard({
       });
     }
 
-    return images.length > 0 ? images : ["/placeholder-image.jpg"];
+    // 이미지가 없으면 noImg 기본 이미지 반환
+    return images.length > 0 ? images : [noImg];
   };
 
   // 카테고리 enum을 한글로 변환

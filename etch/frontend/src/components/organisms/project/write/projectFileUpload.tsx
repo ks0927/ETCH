@@ -252,7 +252,6 @@ function ProjectFileUpload({
             </p>
           </div>
         </div>
-
         <div
           className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
             disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"

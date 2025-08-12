@@ -131,24 +131,36 @@ function ProjectWritePage() {
         return;
       }
 
+      // 썸네일이 없으면 기본 이미지 사용 여부 확인
+      if (!thumbnailFile) {
+        const useDefault = confirm(
+          "썸네일 이미지가 없습니다. 기본 이미지를 사용하시겠습니까?"
+        );
+        if (!useDefault) {
+          alert("썸네일 이미지를 업로드해주세요.");
+          return;
+        }
+      }
+
       // 파일 분류
-      const { thumbnailFile, imageFiles } = categorizeFiles(projectData.files);
+      const { imageFiles } = categorizeFiles(projectData.files);
 
       // ProjectInputData 형태로 API 호출
       const projectInput: ProjectInputData = {
         title: projectData.title,
         content: projectData.content,
         projectCategory: projectData.projectCategory as ProjectCategoryEnum,
-        techCodeIds: projectData.projectTechs, // number[] 그대로 사용
+        techCodeIds: projectData.projectTechs,
         githubUrl: projectData.githubUrl || "",
         youtubeUrl: projectData.youtubeUrl || "",
         isPublic: projectData.isPublic,
-        thumbnailFile,
+        thumbnailFile: thumbnailFile || undefined, // 없으면 undefined
         imageFiles,
       };
 
       console.log("=== 제출할 데이터 ===");
       console.log("projectInput:", projectInput);
+      console.log("썸네일 파일:", thumbnailFile ? thumbnailFile.name : "없음");
 
       // API 호출
       const projectId = await createProject(projectInput);
