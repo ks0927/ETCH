@@ -42,27 +42,53 @@ function ProjectModalCard({
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
-  // 좋아요 토글 핸들러
+  // 로그인 상태 확인 함수
+  const isLoggedIn = (): boolean => {
+    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    return !!token;
+  };
+
+  // 좋아요 토글 핸들러 수정
   const handleLikeToggle = async () => {
     if (isLiking) return;
+
+    // 로그인 체크 - 키 이름 수정
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      alert("로그인이 필요한 기능입니다.");
+      return;
+    }
 
     try {
       setIsLiking(true);
 
       if (isLiked) {
         // 좋아요 취소
-        await unlikeProject(id); // API 구현 필요
+        await unlikeProject(id);
         setCurrentLikeCount((prev) => prev - 1);
         setIsLiked(false);
       } else {
         // 좋아요 추가
-        await likeProject(id); // API 구현 필요
+        await likeProject(id);
         setCurrentLikeCount((prev) => prev + 1);
         setIsLiked(true);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("좋아요 처리 실패:", error);
-      alert("좋아요 처리 중 오류가 발생했습니다.");
+
+      // Error 타입인지 확인
+      if (error instanceof Error) {
+        if (error.message?.includes("로그인")) {
+          // 로그인 관련 에러
+          alert(error.message);
+        } else {
+          // 기타 에러
+          alert("좋아요 처리 중 오류가 발생했습니다.");
+        }
+      } else {
+        // Error 타입이 아닌 경우
+        alert("좋아요 처리 중 오류가 발생했습니다.");
+      }
     } finally {
       setIsLiking(false);
     }
@@ -74,8 +100,18 @@ function ProjectModalCard({
     window.location.href = `/projects/edit/${id}`;
   };
 
-  // 삭제 버튼 클릭 핸들러
+  // 삭제 버튼 클릭 핸들러 수정
   const handleDelete = async () => {
+    // 로그인 체크 - 키 이름 수정
+    const token = localStorage.getItem("access_token");
+    console.log("토큰:", token); // 디버깅용
+    console.log("토큰 존재 여부:", !!token); // 디버깅용
+
+    if (!token) {
+      alert("로그인이 필요한 기능입니다.");
+      return;
+    }
+
     if (!confirm("정말로 이 프로젝트를 삭제하시겠습니까?")) {
       return;
     }
@@ -92,9 +128,21 @@ function ProjectModalCard({
 
       // 페이지 새로고침 또는 목록으로 이동
       window.location.reload();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("프로젝트 삭제 실패:", error);
-      alert("프로젝트 삭제 중 오류가 발생했습니다.");
+
+      // Error 타입인지 확인
+      if (error instanceof Error) {
+        if (error.message?.includes("로그인")) {
+          alert(error.message);
+        } else if (error.message?.includes("권한")) {
+          alert("본인이 작성한 프로젝트만 삭제할 수 있습니다.");
+        } else {
+          alert(error.message || "프로젝트 삭제 중 오류가 발생했습니다.");
+        }
+      } else {
+        alert("프로젝트 삭제 중 오류가 발생했습니다.");
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -223,15 +271,18 @@ function ProjectModalCard({
           </div>
         </div>
         <div className="flex items-center gap-1.5 text-sm text-gray-600">
-          {/* 좋아요 버튼 - 클릭 가능하게 수정 */}
+          {/* 좋아요 버튼 - 로그인 상태 확인 */}
           <button
             onClick={handleLikeToggle}
-            disabled={isLiking}
+            disabled={isLiking || !isLoggedIn()}
             className={`flex items-center gap-1.5 text-sm transition-colors duration-200 ${
-              isLiked
+              !isLoggedIn()
+                ? "text-gray-400 cursor-not-allowed"
+                : isLiked
                 ? "text-red-500 hover:text-red-600"
                 : "text-gray-600 hover:text-red-500"
             } ${isLiking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            title={!isLoggedIn() ? "로그인이 필요합니다" : ""}
           >
             <div
               className={`transition-transform duration-200 ${
@@ -256,7 +307,7 @@ function ProjectModalCard({
             alt={`${title} - 이미지 ${currentImageIndex + 1}`}
             className="w-full h-64 object-cover transition-all duration-300"
             onError={(e) => {
-              e.currentTarget.src = "/placeholder-image.jpg";
+              e.currentTarget.src = noImg;
             }}
           />
 
@@ -345,7 +396,7 @@ function ProjectModalCard({
                   alt={`썸네일 ${index + 1}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/placeholder-image.jpg";
+                    e.currentTarget.src = noImg;
                   }}
                 />
               </button>
@@ -480,8 +531,8 @@ function ProjectModalCard({
         </div>
       </section>
 
-      {/* 수정/삭제 버튼 (작성자만 보이도록) */}
-      {isAuthor && (
+      {/* 수정/삭제 버튼 (로그인한 작성자만 보이도록) */}
+      {isLoggedIn() && isAuthor && (
         <section className="pt-4 border-t border-gray-100">
           <div className="flex gap-3 justify-end">
             <button
@@ -526,6 +577,23 @@ function ProjectModalCard({
                 />
               </svg>
               {isDeleting ? "삭제 중..." : "프로젝트 삭제"}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
+      {!isLoggedIn() && (
+        <section className="pt-4 border-t border-gray-100">
+          <div className="text-center py-4">
+            <p className="text-gray-500 text-sm mb-3">
+              프로젝트를 관리하려면 로그인이 필요합니다
+            </p>
+            <button
+              onClick={() => (window.location.href = "/login")}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              로그인하기
             </button>
           </div>
         </section>
