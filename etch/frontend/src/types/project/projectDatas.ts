@@ -38,16 +38,19 @@ export interface ProjectData {
   githubUrl: string;
   isPublic: boolean;
   likeCount: number;
+  commentCount?: number; // 추가
+  popularityScore?: number; // 추가
   nickname: string;
   member: {
     id: number;
+    nickname?: string; // 추가하면 좋음
     // 필요한 멤버 정보 추가
   };
   files: File[]; // 기존 방식 유지
   projectTechs: number[]; // ID 배열로 변경
 }
 
-// 백엔드 API 호출용 입력 데이터 타입
+// 백엔드 API 호출용 입력 데이터 타입 (중복 제거)
 export interface ProjectInputData {
   title: string;
   content: string;
@@ -77,6 +80,8 @@ export const ProjectState: ProjectData = {
   youtubeUrl: "",
   viewCount: 0,
   likeCount: 0,
+  commentCount: 0, // 추가
+  popularityScore: 0, // 추가
   projectCategory: "", // 빈 문자열을 타입으로 캐스팅
   createdAt: "",
   updatedAt: "",
@@ -90,27 +95,6 @@ export const ProjectState: ProjectData = {
   files: [], // 기존 방식
   projectTechs: [], // 빈 number 배열
 };
-
-// 백엔드 API 호출용 입력 데이터 타입
-export interface ProjectInputData {
-  title: string;
-  content: string;
-  projectCategory: ProjectCategoryEnum;
-  githubUrl?: string;
-  youtubeUrl?: string;
-  isPublic: boolean;
-  techCodeIds: number[]; // 백엔드로 보낼 때는 ID 배열
-
-  // 파일 관련
-  thumbnailFile?: File;
-  imageFiles?: File[];
-  pdfFile?: File;
-
-  // 수정시에만 사용
-  removeThumbnail?: boolean;
-  removeFileIds?: number[];
-  removePdf?: boolean;
-}
 
 // 프로젝트 입력 초기 상태
 export const ProjectInputState: ProjectInputData = {

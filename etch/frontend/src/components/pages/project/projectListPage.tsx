@@ -47,22 +47,28 @@ function ProjectListPage() {
     loadProjects();
   }, []);
 
-  // 필터링 및 정렬된 프로젝트를 계산하는 함수
-  // 필터링 및 정렬된 프로젝트를 계산하는 함수
+  // 필터링 및 정렬된 프로젝트를 계산하는 함수 (인기순 추가)
   const getFilteredProjects = (): ProjectData[] => {
     console.log("=== 필터링 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
+    console.log("선택된 정렬:", selectedSort); // 정렬 로그 추가
 
     // 첫 번째 프로젝트의 전체 구조 확인
     if (projects.length > 0) {
       console.log("첫 번째 프로젝트 전체 구조:", projects[0]);
       console.log("프로젝트 키들:", Object.keys(projects[0]));
+
+      // 정렬 관련 필드 확인
+      console.log("정렬 필드 확인:");
+      console.log("- popularityScore:", projects[0].popularityScore);
+      console.log("- likeCount:", projects[0].likeCount);
+      console.log("- viewCount:", projects[0].viewCount);
     }
 
     let filtered = [...projects];
 
-    // 0. 공개된 프로젝트만 필터링 (isPublic이 1인 것만)
+    // 0. 공개된 프로젝트만 필터링 (isPublic이 true인 것만)
     filtered = filtered.filter((project) => {
       console.log(`프로젝트 "${project.title}": isPublic=${project.isPublic}`);
       return project.isPublic; // true인 것만 통과
@@ -122,8 +128,10 @@ function ProjectListPage() {
       console.log("선택된 카테고리:", selectedCategory);
     }
 
-    // 3. 정렬 적용
+    // 3. 정렬 적용 (인기순 추가)
     if (selectedSort) {
+      console.log("정렬 적용:", selectedSort);
+
       filtered.sort((a, b) => {
         switch (selectedSort) {
           case "LATEST": // 최신순
@@ -131,19 +139,53 @@ function ProjectListPage() {
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
 
-          case "VIEWS": // 조회순 (viewCount 높은순)
-            return a.viewCount - b.viewCount;
+          case "VIEWS": // 조회순 (viewCount 높은순) - 버그 수정
+            return (b.viewCount || 0) - (a.viewCount || 0); // b - a로 수정 (높은순)
 
-          // case "POPULAR": { // 인기순 (likeCount 추가될 때 사용)
-          //   const aLikes = a.likeCount || 0;
-          //   const bLikes = b.likeCount || 0;
-          //   return bLikes - aLikes;
-          // }
+          case "POPULAR": {
+            // 인기순 (popularityScore 높은순)
+            const aScore = a.popularityScore || 0;
+            const bScore = b.popularityScore || 0;
+            console.log(
+              `인기도 비교: "${a.title}"(${aScore}) vs "${b.title}"(${bScore})`
+            );
+            return bScore - aScore; // 높은 점수가 앞으로
+          }
+
+          case "LIKES": {
+            // 좋아요순 (likeCount 높은순)
+            const aLikes = a.likeCount || 0;
+            const bLikes = b.likeCount || 0;
+            return bLikes - aLikes; // 높은 좋아요가 앞으로
+          }
 
           default:
             return 0;
         }
       });
+
+      // 정렬 결과 확인
+      if (filtered.length > 0) {
+        console.log(`${selectedSort} 정렬 결과 (상위 3개):`);
+        filtered.slice(0, 3).forEach((project, index) => {
+          let value = "";
+          switch (selectedSort) {
+            case "LATEST":
+              value = project.createdAt;
+              break;
+            case "VIEWS":
+              value = `${project.viewCount || 0}회`;
+              break;
+            case "POPULAR":
+              value = `${project.popularityScore || 0}점`;
+              break;
+            case "LIKES":
+              value = `${project.likeCount || 0}개`;
+              break;
+          }
+          console.log(`${index + 1}. ${project.title}: ${value}`);
+        });
+      }
     }
 
     console.log("=== 필터링 완료 ===");

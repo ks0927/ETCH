@@ -11,8 +11,12 @@ interface Props {
 function ProjectListCard({ projects }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
 
-  // 프로젝트를 역순으로 정렬 (최신순)
-  const sortedProjects = [...projects].reverse();
+  // ❌ 삭제된 부분: 강제 역순 정렬 제거
+  // const sortedProjects = [...projects].reverse();
+
+  // ✅ 수정된 부분: 부모에서 이미 정렬된 projects를 그대로 사용
+  const sortedProjects = projects; // 부모 컴포넌트에서 이미 정렬된 상태로 전달받음
+
   const hasMore = sortedProjects.length > visibleCount;
 
   // 모달 상태 관리
