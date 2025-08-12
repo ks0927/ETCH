@@ -38,7 +38,7 @@ function ProjectCard({
           src={thumbnailUrl || noImg}
           alt="카드 이미지"
           onError={(e) => {
-            e.currentTarget.src = "/placeholder-image.jpg";
+            e.currentTarget.src = noImg;
           }}
         />
       </section>
