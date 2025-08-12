@@ -1,19 +1,21 @@
 import { useState } from "react";
-import type { ProjectCardProps } from "../../../../atoms/card";
 import ProjectModal from "../../../../common/projectModal";
 import MyProjectCard from "../../../../molecules/mypage/project/myProjectCard";
+import type { ProjectData } from "../../../../../types/project/projectDatas";
 
 interface Props {
-  mockProjects: ProjectCardProps[];
+  mockProjects: ProjectData[]; // 🎯 타입 변경
+  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 추가
 }
 
-function MypageProjectList({ mockProjects }: Props) {
+function MypageProjectList({ mockProjects, onProjectUpdate }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
   const hasMore = mockProjects.length > visibleCount;
 
-  // 모달 상태 관리
-  const [selectedProject, setSelectedProject] =
-    useState<ProjectCardProps | null>(null);
+  // 🎯 모달 상태를 ProjectData로 변경
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const visibleProjects = mockProjects.slice(0, visibleCount);
@@ -35,6 +37,13 @@ function MypageProjectList({ mockProjects }: Props) {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProject(null);
+  };
+
+  // 🎯 프로젝트 업데이트 핸들러 추가
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setSelectedProject(updatedProject); // 모달 내 프로젝트 상태 업데이트
+    // 부모 컴포넌트에도 알림
+    onProjectUpdate?.(updatedProject);
   };
 
   return (
@@ -70,9 +79,13 @@ function MypageProjectList({ mockProjects }: Props) {
         </div>
       )}
 
-      {/* 프로젝트 모달 */}
+      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
       {isModalOpen && selectedProject && (
-        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
+        <ProjectModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectUpdate={handleProjectUpdate} // 추가
+        />
       )}
     </div>
   );

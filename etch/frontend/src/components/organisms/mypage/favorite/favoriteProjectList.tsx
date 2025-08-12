@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { FavoriteProjectProps } from "../../../atoms/list";
 import FavoriteProject from "../../../molecules/mypage/favorite/favoriteProject";
-import type { ProjectCardProps } from "../../../atoms/card";
+import type { ProjectData } from "../../../../types/project/projectDatas"; // 🎯 ProjectCardProps 대신 ProjectData 사용
 import ProjectModal from "../../../common/projectModal";
 import SeeMore from "../../../svg/seeMore";
 import { Link } from "react-router";
@@ -11,12 +11,10 @@ interface Props {
   titleText: string;
   subText: string;
   sliceCount: number;
-  // API에서 데이터를 가져오므로 props는 선택적으로 변경
   favoriteData?: FavoriteProjectProps[];
-  mockProjects?: ProjectCardProps[];
+  mockProjects?: ProjectData[]; // 🎯 타입 변경
 }
 
-// 좋아요한 프로젝트 API 응답 타입
 interface LikedProjectResponse {
   id: number;
   title: string;
@@ -25,7 +23,7 @@ interface LikedProjectResponse {
   thumbnailUrl: string;
   viewCount: number;
   likeCount: number;
-  // 필요한 다른 필드들...
+  likedByMe?: boolean; // 🎯 추가
 }
 
 function FavoriteProjectList({
@@ -36,13 +34,14 @@ function FavoriteProjectList({
   mockProjects: propMockProjects,
 }: Props) {
   const [favoriteData, setFavoriteData] = useState<FavoriteProjectProps[]>([]);
-  const [mockProjects, setMockProjects] = useState<ProjectCardProps[]>([]);
+  const [mockProjects, setMockProjects] = useState<ProjectData[]>([]); // 🎯 타입 변경
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 모달 상태 관리
-  const [selectedProject, setSelectedProject] =
-    useState<ProjectCardProps | null>(null);
+  // 🎯 모달 상태를 ProjectData로 변경
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -50,16 +49,13 @@ function FavoriteProjectList({
       try {
         setLoading(true);
 
-        // props로 데이터가 전달되면 그것을 사용, 아니면 API 호출
         if (propFavoriteData && propMockProjects) {
           setFavoriteData(propFavoriteData);
           setMockProjects(propMockProjects);
         } else {
-          // API에서 좋아요한 프로젝트 목록 가져오기
           const likedProjects: LikedProjectResponse[] =
             await getLikedProjects();
 
-          // FavoriteProjectProps 형태로 변환
           const convertedFavoriteData: FavoriteProjectProps[] =
             likedProjects.map((project) => ({
               id: project.id,
@@ -71,30 +67,29 @@ function FavoriteProjectList({
               likeCount: project.likeCount,
             }));
 
-          // ProjectCardProps 형태로 변환 (모달용)
-          const convertedMockProjects: ProjectCardProps[] = likedProjects.map(
+          // 🎯 ProjectData 형태로 변환 (필수 필드들 모두 포함)
+          const convertedMockProjects: ProjectData[] = likedProjects.map(
             (project) => ({
-              type: "project" as const,
               id: project.id,
               title: project.title,
               content: project.content || "좋아요한 프로젝트입니다",
               thumbnailUrl: project.thumbnailUrl,
               youtubeUrl: "",
               viewCount: project.viewCount,
-              projectCategory: "" as const,
+              projectCategory: "",
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               isDeleted: false,
               githubUrl: "",
               isPublic: true,
-              nickname: "",
-              member: { id: 1 },
+              likeCount: project.likeCount,
+              likedByMe: true, // 🎯 좋아요한 프로젝트이므로 true
+              nickname: project.nickname,
+              commentCount: 0,
+              popularityScore: 0,
+              member: { id: 1, nickname: project.nickname },
               files: [],
               projectTechs: [],
-              likeCount: project.likeCount,
-              writerImg: "",
-              commentCount: 0,
-              comments: [],
             })
           );
 
@@ -104,7 +99,6 @@ function FavoriteProjectList({
       } catch (error) {
         console.error("좋아요한 프로젝트 로딩 실패:", error);
         setError("좋아요한 프로젝트를 불러오는데 실패했습니다.");
-        // 에러 시 빈 배열로 설정
         setFavoriteData([]);
         setMockProjects([]);
       } finally {
@@ -118,13 +112,11 @@ function FavoriteProjectList({
   // 카드 클릭 핸들러
   const handleCardClick = async (projectId: number) => {
     try {
-      // 상세 정보를 API에서 가져오기
       const detailProject = await getProjectById(projectId);
       setSelectedProject(detailProject);
       setIsModalOpen(true);
     } catch (error) {
       console.error("프로젝트 상세 정보 로딩 실패:", error);
-      // 실패 시 기존 데이터로 모달 열기
       const project = mockProjects.find((p) => p.id === projectId);
       if (project) {
         setSelectedProject(project);
@@ -139,7 +131,17 @@ function FavoriteProjectList({
     setSelectedProject(null);
   };
 
-  // 로딩 상태
+  // 🎯 프로젝트 업데이트 핸들러 추가
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setSelectedProject(updatedProject);
+    // 목록에서도 업데이트
+    setMockProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit">
@@ -158,7 +160,6 @@ function FavoriteProjectList({
 
   return (
     <div className="bg-white rounded-xl space-y-3 shadow-sm border border-gray-100 p-6 h-fit">
-      {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900 mb-1">
@@ -173,14 +174,12 @@ function FavoriteProjectList({
         </div>
       </div>
 
-      {/* Error State */}
       {error && (
         <div className="text-center py-4">
           <p className="text-red-500 text-sm">{error}</p>
         </div>
       )}
 
-      {/* List Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {favoriteData.length > 0 ? (
           favoriteData
@@ -212,9 +211,13 @@ function FavoriteProjectList({
         )}
       </div>
 
-      {/* 프로젝트 모달 */}
+      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
       {isModalOpen && selectedProject && (
-        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
+        <ProjectModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectUpdate={handleProjectUpdate}
+        />
       )}
     </div>
   );
