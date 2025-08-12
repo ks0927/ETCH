@@ -58,6 +58,7 @@ export interface CompanyCardProps extends BaseCardProps {
   like: number;
   companyName: string;
   img?: string;
+  rank?: number;
 }
 
 export interface StatsCardData extends BaseCardProps {
