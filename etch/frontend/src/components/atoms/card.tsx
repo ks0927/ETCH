@@ -28,10 +28,10 @@ export interface ProjectCardProps extends BaseCardProps {
   isDeleted: boolean; // 추가 (ProjectData에 있음)
   githubUrl: string;
   isPublic: boolean;
+  nickname: string;
   member: {
     // ProjectData와 일치
     id: number;
-    nickname: string;
   };
   files: File[]; // ProjectData와 일치
   projectTechs: number[]; // ProjectData와 일치

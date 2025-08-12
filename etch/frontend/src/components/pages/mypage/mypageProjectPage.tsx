@@ -1,10 +1,116 @@
 import { Link } from "react-router";
-import { mockProjectData } from "../../../types/mock/mockProjectData";
+import { useState, useEffect } from "react";
 import PlusSVG from "../../svg/plusSVG";
 import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
-import { mockProjectData2 } from "../../../types/mock/mockProjectData2";
+import { getAllProjects } from "../../../api/projectApi";
+import type { ProjectCardProps } from "../../atoms/card";
+
+// API 응답 타입 (ProjectListDTO)
+interface ApiProjectResponse {
+  id: number;
+  title: string;
+  thumbnailUrl: string;
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  isPublic: boolean;
+}
 
 function MypageProjectPage() {
+  const [myProjects, setMyProjects] = useState<ProjectCardProps[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMyProjects = async () => {
+      try {
+        setLoading(true);
+
+        // 현재 사용자 정보 (실제로는 인증된 사용자에서 가져와야 함)
+        const currentUserNickname = "test2"; // 임시
+
+        const allProjects: ApiProjectResponse[] = await getAllProjects();
+
+        // 현재 사용자가 작성한 프로젝트만 필터링하고 ProjectCardProps 형태로 변환
+        const userProjects: ProjectCardProps[] = allProjects
+          .filter(
+            (project: ApiProjectResponse) =>
+              project.nickname === currentUserNickname
+          )
+          .map((project: ApiProjectResponse) => ({
+            // BaseCardProps
+            type: "project" as const,
+
+            // ProjectCardProps 필수 필드들
+            id: project.id,
+            title: project.title,
+            content: "프로젝트 상세 내용을 확인해보세요", // API에 없으므로 기본값
+            thumbnailUrl: project.thumbnailUrl,
+            youtubeUrl: "", // API에 없으므로 기본값
+            viewCount: project.viewCount,
+            projectCategory: "" as const, // API에 없으므로 기본값
+            createdAt: new Date().toISOString(), // API에 없으므로 현재 시간
+            updatedAt: new Date().toISOString(), // API에 없으므로 현재 시간
+            isDeleted: false, // API에 없으므로 기본값
+            githubUrl: "", // API에 없으므로 기본값
+            isPublic: project.isPublic,
+            nickname: project.nickname,
+            member: {
+              id: 1, // 임시값
+            },
+            files: [], // API에 없으므로 빈 배열
+            projectTechs: [], // API에 없으므로 빈 배열
+
+            // UI용 추가 필드들
+            likeCount: project.likeCount,
+            writerImg: "", // 선택적 필드
+            commentCount: 0, // 선택적 필드
+            comments: [], // 선택적 필드
+          }));
+
+        setMyProjects(userProjects);
+      } catch (error) {
+        console.error("내 프로젝트 로딩 실패:", error);
+        setError("프로젝트를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#007DFC] mx-auto mb-4"></div>
+          <p className="text-gray-600">프로젝트를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            오류가 발생했습니다
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -27,7 +133,19 @@ function MypageProjectPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-gray-500">
-                    총 {mockProjectData.length}개 프로젝트
+                    총 {myProjects.length}개 프로젝트
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm text-gray-500">
+                    공개: {myProjects.filter((p) => p.isPublic).length}개
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                  <span className="text-sm text-gray-500">
+                    비공개: {myProjects.filter((p) => !p.isPublic).length}개
                   </span>
                 </div>
               </div>
@@ -46,9 +164,9 @@ function MypageProjectPage() {
 
         {/* 프로젝트 목록 */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {mockProjectData.length > 0 ? (
+          {myProjects.length > 0 ? (
             <div className="p-6">
-              <MypageProjectList mockProjects={mockProjectData2} />
+              <MypageProjectList mockProjects={myProjects} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20">

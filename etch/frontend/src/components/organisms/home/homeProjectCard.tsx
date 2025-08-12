@@ -41,7 +41,7 @@ function HomeProjectCard({ projects: propProjects }: Props) {
             thumbnailUrl: p.thumbnailUrl,
             viewCount: p.viewCount,
             likeCount: p.likeCount || 0,
-            nickname: p.member?.nickname || "익명",
+            nickname: p.nickname,
             isPublic: p.isPublic,
           }));
           setProjects(convertedProjects);
