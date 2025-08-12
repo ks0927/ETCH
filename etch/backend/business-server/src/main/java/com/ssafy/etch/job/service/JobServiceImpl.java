@@ -2,7 +2,6 @@ package com.ssafy.etch.job.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -31,19 +30,15 @@ public class JobServiceImpl implements JobService {
 
 	@Override
 	public List<JobResponseDTO> getJobsByDate(LocalDate startDate, LocalDate endDate) {
-		LocalDateTime startInclusive = startDate.atStartOfDay();                 // yyyy-MM-dd 00:00:00
+		LocalDateTime startInclusive = startDate.atStartOfDay();       // yyyy-MM-dd 00:00:00
 		LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
 
+		// ✅ 순서: startInclusive, endExclusive
 		List<JobEntity> jobEntityList = jobRepository
-			.findJobsStartingOrEndingInPeriod(
-				endExclusive, startInclusive
-			);
-		List<JobResponseDTO> jobResponseDTOList = new ArrayList<>();
-		for (JobEntity jobEntity : jobEntityList) {
-			JobDTO jobDTO = jobEntity.toJobDTO();
-			jobResponseDTOList.add(JobResponseDTO.from(jobDTO));
-		}
+			.findJobsStartingOrEndingInPeriod(startInclusive, endExclusive);
 
-		return jobResponseDTOList;
+		return jobEntityList.stream()
+			.map(e -> JobResponseDTO.from(e.toJobDTO()))
+			.toList();
 	}
 }

@@ -16,11 +16,10 @@ public interface JobRepository extends JpaRepository<JobEntity, Long> {
 	@Query("""
 		    SELECT j FROM JobEntity j
 		    WHERE
-		        (j.openingDate BETWEEN :start AND :end)
-		        OR (j.expirationDate BETWEEN :start AND :end)
+		      (j.openingDate    >= :startInclusive AND j.openingDate    < :endExclusive)
+		      OR
+		      (j.expirationDate >= :startInclusive AND j.expirationDate < :endExclusive)
 		""")
-	List<JobEntity> findJobsStartingOrEndingInPeriod(
-		@Param("start") LocalDateTime start,
-		@Param("end") LocalDateTime end
-	);
+	List<JobEntity> findJobsStartingOrEndingInPeriod(@Param("startInclusive") LocalDateTime startInclusive,
+		@Param("endExclusive") LocalDateTime endExclusive);
 }
