@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 # .env 파일에서 환경 변수 로드
 load_dotenv()
 
+
 def get_liked_items(user_id: int):
     conn = pymysql.connect(
         host=os.getenv("DB_HOST"),
@@ -13,7 +14,8 @@ def get_liked_items(user_id: int):
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         db=os.getenv("DB_NAME"),
-        charset='utf8mb4'
+        charset='utf8mb4',
+        ssl={'ca': os.getenv("DB_SSL_CA")}  # CA 인증서 경로
     )
     print("Connected to MySQL database successfully.")
     
