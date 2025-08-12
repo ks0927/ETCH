@@ -1,6 +1,7 @@
 package com.ssafy.etch.member.controller;
 
 import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
@@ -137,7 +138,7 @@ public class MemberController {
         description = "다른 사람의 공개된 프로젝트 목록 조회"
     )
     @GetMapping("/{id}/projects")
-    public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getPublicProjectByUser(
+    public ResponseEntity<ApiResponse<PageResponseDTO<ProjectListDTO>>> getPublicProjectByUser(
         @PathVariable("id") Long id,
         @AuthenticationPrincipal CustomOAuth2User user,
         @RequestParam(defaultValue = "1") int page,
@@ -147,7 +148,7 @@ public class MemberController {
                 .body(ApiResponse.error("로그인이 필요합니다."));
         }
 
-        List<ProjectListDTO> list = projectService.getPublicProjectByUser(id, page, pageSize);
+        PageResponseDTO<ProjectListDTO> list = projectService.getPublicProjectByUser(id, page, pageSize);
 
         return ResponseEntity.ok(ApiResponse.success(list));
     }

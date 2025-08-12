@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
 import com.ssafy.etch.news.dto.TopCompanyDTO;
@@ -38,13 +39,11 @@ public class NewsController {
 		description = "특정 기업에 대한 기사 목록을 확인할 수 있습니다."
 	)
 	@GetMapping("/companies/{companyId}")
-	public ResponseEntity<ApiResponse<List<CompanyNewsDTO>>> getNewsListByCompany(
+	public ResponseEntity<ApiResponse<PageResponseDTO<CompanyNewsDTO>>> getNewsListByCompany(
 		@PathVariable Long companyId,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int pageSize) {
-		List<CompanyNewsDTO> list = newsService.getNewsByCompanyId(companyId, page, pageSize);
-
-		return ResponseEntity.ok(ApiResponse.success(list));
+		return ResponseEntity.ok(ApiResponse.success(newsService.getNewsByCompanyId(companyId, page, pageSize)));
 	}
 
 	@Operation(
@@ -52,7 +51,7 @@ public class NewsController {
 		description = "기업에 관계없이 최신순으로 정렬한 뉴스 목록을 제공합니다."
 	)
 	@GetMapping("/latest") 
-	public ResponseEntity<ApiResponse<List<LatestNewsDTO>>> getLatestNews(
+	public ResponseEntity<ApiResponse<PageResponseDTO<LatestNewsDTO>>> getLatestNews(
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int pageSize) {
 		return ResponseEntity.ok(ApiResponse.success(newsService.getLatestNews(page, pageSize)));
