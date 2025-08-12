@@ -1,4 +1,3 @@
-import type { Company } from "../../types/companyData";
 import type { CommentProps } from "./comment";
 import type { ProjectCategoryEnum } from "../../types/project/projectCategroyData";
 
@@ -49,12 +48,11 @@ export interface ProjectCardProps extends BaseCardProps {
 
 export interface NewsCardProps extends BaseCardProps {
   id: number;
-  thumbnailUrl: string;
+  thumbnailUrl?: string; // ✅ optional로 변경
   title: string;
-  description: string;
+  description?: string; // ✅ optional로 변경 (News 타입과 일치)
   url: string;
   publishedAt: string;
-  company: Company;
 }
 
 export interface CompanyCardProps extends BaseCardProps {
