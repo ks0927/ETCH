@@ -1,7 +1,7 @@
 import type { JobItemProps } from "../../atoms/listItem";
 import type { Job } from "../../../types/job";
 import type { Company } from "../../../types/companyData";
-import type { News } from "../../../types/news";
+import type { News } from "../../../types/newsTypes";
 
 interface JobDetailTabContentProps {
   activeTab: "details" | "company" | "news";
@@ -273,7 +273,7 @@ export default function JobDetailTabContent({
                           {news.description}
                         </p>
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{news.company.name}</span>
+                          <span>{news.company?.name || "회사명 없음"}</span>
                           <span>
                             {new Date(news.publishedAt).toLocaleDateString()}
                           </span>

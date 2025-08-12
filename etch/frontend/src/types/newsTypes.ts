@@ -1,4 +1,5 @@
 // types/newsTypes.ts
+import type { Company } from "./companyData";
 
 // 회사 정보 타입 (CompanyEntity에 해당)
 
@@ -10,6 +11,7 @@ export interface News {
   description?: string; // TEXT 타입이므로 optional
   url: string;
   publishedAt: string; // LocalDate -> ISO 8601 문자열 형태
+  company?: Company; // 회사 정보 (optional)
 }
 
 // 페이지네이션된 뉴스 데이터 타입
