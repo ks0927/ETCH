@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import com.ssafy.etch.file.entity.FileEntity;
 import com.ssafy.etch.file.repository.FileRepository;
+import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.global.service.S3Service;
 import com.ssafy.etch.like.entity.LikeType;
 import com.ssafy.etch.like.repository.LikeRepository;
@@ -100,7 +101,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 	// 목록 조회
 	@Override
-	public List<ProjectListDTO> getAllProjects(String sort, int page, int pageSize) {
+	public PageResponseDTO<ProjectListDTO> getAllProjects(String sort, int page, int pageSize) {
 		final String effectiveSort = (sort == null || sort.isBlank()) ? "popular" : sort.toLowerCase();
 		final int pageIndex = Math.max(0, page - 1);
 		final int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
@@ -114,19 +115,34 @@ public class ProjectServiceImpl implements ProjectService {
 
 		Pageable pageable = PageRequest.of(pageIndex, size, sortOption);
 
-		return projectRepository.findByIsDeletedFalseAndIsPublicTrue(pageable)
-			.stream()
-			.map(ProjectEntity::toProjectDTO)
-			.map(dto -> {
-				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
-				return ProjectListDTO.from(dto);
-			})
-			.toList();
+		// DB에서 프로젝트 목록을 페이지 단위로 조회
+		Page<ProjectEntity> projectPage = projectRepository.findByIsDeletedFalseAndIsPublicTrue(pageable);
+
+		Page<ProjectListDTO> dtoPage = projectPage.map(projectEntity -> {
+			ProjectDTO projectDTO = projectEntity.toProjectDTO();
+
+			// 코드 수정 고려
+			long likeCount = likeRepository.countByTargetIdAndType(projectDTO.getId(), LikeType.PROJECT);
+
+			return ProjectListDTO.builder()
+				.id(projectDTO.getId())
+				.title(projectDTO.getTitle())
+				.thumbnailUrl(projectDTO.getThumbnailUrl())
+				.viewCount(projectDTO.getViewCount())
+				.likeCount(likeCount)
+				.nickname(projectDTO.getMember().toMemberDTO().getNickname())
+				.isPublic(projectDTO.getIsPublic())
+				.popularityScore(projectDTO.getPopularityScore())
+				.build();
+		});
+
+		return new PageResponseDTO<>(dtoPage);
 	}
 
 	// 다른 사람의 공개 프로젝트 목록 조회
 	@Override
-	public List<ProjectListDTO> getPublicProjectByUser(Long memberId, int page, int pageSize) {
+	@Transactional(readOnly = true)
+	public PageResponseDTO<ProjectListDTO> getPublicProjectByUser(Long memberId, int page, int pageSize) {
 		int pageIndex = Math.max(0, page - 1);
 		int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
 
@@ -134,13 +150,25 @@ public class ProjectServiceImpl implements ProjectService {
 
 		Page<ProjectEntity> pageData = projectRepository.findByMemberIdAndIsPublicTrueAndIsDeletedFalse(memberId, pageable);
 
-		return pageData.stream()
-			.map(ProjectEntity::toProjectDTO)
-			.map(dto -> {
-				long likeCount = likeRepository.countByTargetIdAndType(dto.getId(), LikeType.PROJECT);
-				return ProjectListDTO.from(dto);
-			})
-			.toList();
+		Page<ProjectListDTO> dtoPage = pageData.map(projectEntity -> {
+			ProjectDTO projectDTO = projectEntity.toProjectDTO();
+
+			// 코드 수정 고려
+			long likeCount = likeRepository.countByTargetIdAndType(projectDTO.getId(), LikeType.PROJECT);
+
+			return ProjectListDTO.builder()
+				.id(projectDTO.getId())
+				.title(projectDTO.getTitle())
+				.thumbnailUrl(projectDTO.getThumbnailUrl())
+				.viewCount(projectDTO.getViewCount())
+				.likeCount(likeCount)
+				.nickname(projectDTO.getMember().toMemberDTO().getNickname())
+				.isPublic(projectDTO.getIsPublic())
+				.popularityScore(projectDTO.getPopularityScore())
+				.build();
+		});
+
+		return new PageResponseDTO<>(dtoPage);
 	}
 
 	// 상세 조회

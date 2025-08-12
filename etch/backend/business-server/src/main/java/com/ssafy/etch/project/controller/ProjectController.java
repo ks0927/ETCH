@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.project.dto.ProjectCreateRequestDTO;
 import com.ssafy.etch.project.dto.ProjectDetailDTO;
@@ -40,7 +41,7 @@ public class ProjectController {
 		description = "인기순, 최신순, 조회수순 중 선택하여 프로젝트 목록을 페이지 단위로 조회할 수 있습니다."
 	)
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getAllProjects(
+	public ResponseEntity<ApiResponse<PageResponseDTO<ProjectListDTO>>> getAllProjects(
 		@RequestParam(defaultValue = "popular") String sort, // 기본: 인기순, 페이지당 9개 플젝으로 셋팅
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "9") int pageSize) {

@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
 import com.ssafy.etch.news.dto.RecommendNewsDTO;
@@ -25,43 +27,37 @@ public class NewsServiceImpl implements NewsService {
 
 	private final NewsRepository newsRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
-
 	private static final int MAX_PAGE_SIZE = 10;
-	private final ProjectRepository projectRepository;
 
-	public NewsServiceImpl(NewsRepository newsRepository, RedisTemplate<String, Object> redisTemplate,
-		ProjectRepository projectRepository) {
+	public NewsServiceImpl(NewsRepository newsRepository, RedisTemplate<String, Object> redisTemplate) {
 		this.newsRepository = newsRepository;
 		this.redisTemplate = redisTemplate;
-		this.projectRepository = projectRepository;
 	}
 
 	@Override
-	public List<LatestNewsDTO> getLatestNews(int page, int pageSize) {
+	public PageResponseDTO<LatestNewsDTO> getLatestNews(int page, int pageSize) {
 		final int pageIndex = Math.max(0, page - 1);
 		final int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
 
 		Pageable pageable = PageRequest.of(pageIndex, size);
 
-		return newsRepository.findAllByOrderByPublishedAtDesc(pageable)
-			.stream()
-			.map(NewsEntity::toNewsDTO)
-			.map(LatestNewsDTO::from)
-			.toList();
+		Page<NewsEntity> newsEntityPage = newsRepository.findAllByOrderByPublishedAtDesc(pageable);
+		Page<LatestNewsDTO> dtoPage = newsEntityPage.map(newsEntity -> LatestNewsDTO.from(newsEntity.toNewsDTO()));
+
+		return new PageResponseDTO<>(dtoPage);
 	}
 
 	@Override
-	public List<CompanyNewsDTO> getNewsByCompanyId(Long companyId, int page, int pageSize) {
+	public PageResponseDTO<CompanyNewsDTO> getNewsByCompanyId(Long companyId, int page, int pageSize) {
 		final int pageIndex = Math.max(0, page - 1);
 		final int size = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
 
 		Pageable pageable = PageRequest.of(pageIndex, size);
 
-		return newsRepository.findAllByCompanyIdOrderByPublishedAtDesc(companyId, pageable)
-			.stream()
-			.map(NewsEntity::toNewsDTO)
-			.map(CompanyNewsDTO::from)
-			.toList();
+		Page<NewsEntity> newsEntityPage = newsRepository.findAllByCompanyIdOrderByPublishedAtDesc(companyId, pageable);
+		Page<CompanyNewsDTO> dtoPage = newsEntityPage.map(newsEntity -> CompanyNewsDTO.from(newsEntity.toNewsDTO()));
+
+		return new PageResponseDTO<>(dtoPage);
 	}
 
 	@Override

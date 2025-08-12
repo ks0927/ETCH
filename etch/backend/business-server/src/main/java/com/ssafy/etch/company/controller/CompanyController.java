@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ssafy.etch.company.dto.CompanyInfoDTO;
 import com.ssafy.etch.company.service.CompanyService;
+import com.ssafy.etch.global.response.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,10 +35,10 @@ public class CompanyController {
 		description = "특정 기업에 대한 정보를 확인할 수 있습니다."
 	)
 	@GetMapping("/{companyId}")
-	public ResponseEntity<CompanyInfoDTO> getCompanyInfo(@PathVariable Long companyId) {
+	public ResponseEntity<ApiResponse<CompanyInfoDTO>> getCompanyInfo(@PathVariable Long companyId) {
 		CompanyInfoDTO companyInfo = companyService.getCompanyInfo(companyId);
 
-		return ResponseEntity.ok(companyInfo);
+		return ResponseEntity.ok(ApiResponse.success(companyInfo));
 	}
 
 }
