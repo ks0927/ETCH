@@ -6,6 +6,8 @@ import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
 import com.ssafy.etch.member.service.MemberService;
+import com.ssafy.etch.news.dto.RecommendNewsDTO;
+import com.ssafy.etch.news.service.NewsService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
 import com.ssafy.etch.project.dto.ProjectListDTO;
@@ -35,6 +37,7 @@ public class MemberController {
     private final MemberService memberService;
     private final JWTUtil jwtUtil;
     private final ProjectService projectService;
+    private final NewsService newsService;
 
     @Operation(
         summary = "마이페이지 API",
@@ -130,7 +133,7 @@ public class MemberController {
     }
 
     @Operation(
-        summary = "다른 사람 프로젝트 목록 조회",
+        summary = "다른 사람 프로젝트 목록 조회 API",
         description = "다른 사람의 공개된 프로젝트 목록 조회"
     )
     @GetMapping("/{id}/projects")
@@ -145,6 +148,23 @@ public class MemberController {
         }
 
         List<ProjectListDTO> list = projectService.getPublicProjectByUser(id, page, pageSize);
+
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
+    @Operation(
+        summary = "추천 기사 목록 조회 API",
+        description = "사용자 맞춤 추천 기사 목록 조회"
+    )
+    @GetMapping("/me/recommend-news")
+    public ResponseEntity<ApiResponse<List<RecommendNewsDTO>>> getRecommendNewsList(
+      @AuthenticationPrincipal CustomOAuth2User user
+    ) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인 후 사용 가능합니다."));
+        }
+
+        List<RecommendNewsDTO> list = newsService.getRecommendNewsFromRedis(user.getId());
 
         return ResponseEntity.ok(ApiResponse.success(list));
     }

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
+import com.ssafy.etch.news.dto.RecommendNewsDTO;
 import com.ssafy.etch.news.dto.TopCompanyDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
@@ -69,4 +72,42 @@ public class NewsServiceImpl implements NewsService {
 		return result;
 	}
 
+	/**
+	 * redis에서 기사 ID 목록 가져와서,
+	 * 이 ID들을 DB에서 조회하고,
+	 * 기사 정보들 가져와서 프론트로 던져줌
+	 */
+	@Override
+	public List<RecommendNewsDTO> getRecommendNewsFromRedis(Long userId) {
+		// userId로 redis에서 추천 기사ID 목록 조회
+		String redisKey = "recommendations_data_user_" + userId;
+		List<Object> recommendedIdObject = redisTemplate.opsForList().range(redisKey, 0, -1);
+
+		if (recommendedIdObject == null || recommendedIdObject.isEmpty()) return Collections.emptyList();
+
+		// 조회된 Id 목록을 Long 타입 리스트로 변환
+		List<Long> recommendedIds = recommendedIdObject.stream()
+			.map(obj -> Long.valueOf(String.valueOf(obj)))
+			.collect(Collectors.toList());
+
+		// Id 리스트를 통해 DB에서 뉴스 데이터 조회
+		Map<Long, NewsEntity> newsEntityMap = newsRepository.findAllById(recommendedIds).stream()
+			.collect(Collectors.toMap(NewsEntity::getId, Function.identity()));
+
+		// NewsEntity -> RecommendNewsDTO 반환
+		List<RecommendNewsDTO> result = recommendedIds.stream()
+			.map(newsEntityMap::get) // Map에서 NewsEntity 찾기
+			.filter(java.util.Objects::nonNull) // DB에 없는 ID가 있을 경우를 대비해 null 체크
+			.map(newsEntity -> RecommendNewsDTO.builder() // DTO로 변환
+				.id(newsEntity.getId())
+				.thumbnailUrl(newsEntity.getThumbnailUrl())
+				.title(newsEntity.getTitle())
+				.description(newsEntity.getDescription())
+				.url(newsEntity.getUrl())
+				.publishedAt(newsEntity.getPublishedAt())
+				.build())
+			.collect(Collectors.toList());
+
+		return result;
+	}
 }
