@@ -133,10 +133,8 @@ export async function updateProject(
 }
 
 // 프로젝트 삭제 API
-// projectApi.tsx - 모든 API 함수에서 토큰 키 수정
 export async function deleteProject(projectId: number) {
   try {
-    // accessToken → access_token으로 변경
     const token = localStorage.getItem("access_token");
 
     if (!token) {
@@ -152,7 +150,7 @@ export async function deleteProject(projectId: number) {
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        localStorage.removeItem("access_token"); // 키 이름 수정
+        localStorage.removeItem("access_token");
         throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
       } else if (error.response?.status === 403) {
         throw new Error("삭제 권한이 없습니다.");
@@ -167,7 +165,7 @@ export async function deleteProject(projectId: number) {
 
 export async function likeProject(projectId: number) {
   try {
-    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       throw new Error("로그인이 필요합니다.");
@@ -188,7 +186,7 @@ export async function likeProject(projectId: number) {
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        localStorage.removeItem("access_token"); // 키 이름 수정
+        localStorage.removeItem("access_token");
         throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
       }
     }
@@ -199,7 +197,7 @@ export async function likeProject(projectId: number) {
 
 export async function unlikeProject(projectId: number) {
   try {
-    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       throw new Error("로그인이 필요합니다.");
@@ -217,7 +215,7 @@ export async function unlikeProject(projectId: number) {
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        localStorage.removeItem("access_token"); // 키 이름 수정
+        localStorage.removeItem("access_token");
         throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
       }
     }
@@ -226,98 +224,94 @@ export async function unlikeProject(projectId: number) {
   }
 }
 
+// 🔥 페이지네이션 적용: 좋아요한 프로젝트 조회
 export async function getLikedProjects() {
   try {
-    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const token = localStorage.getItem("access_token");
     const response = await axios.get(`${BASE_API}/likes/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data.data;
+
+    console.log("좋아요한 프로젝트 응답:", response.data);
+
+    // 페이지네이션 응답에서 content 배열 추출
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return data; // 기존 배열 방식이면 그대로
+    } else if (data && typeof data === "object" && "content" in data) {
+      return data.content || []; // 페이지네이션이면 content 추출
+    }
+
+    return [];
   } catch (error) {
     console.error("좋아요한 프로젝트 조회 실패:", error);
     throw error;
   }
 }
 
+// 🔥 페이지네이션 적용: 내 프로젝트 조회
 export async function getMyProjects() {
   try {
-    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const token = localStorage.getItem("access_token");
     const response = await axios.get(`${BASE_API}/projects/my`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data.data;
+
+    console.log("내 프로젝트 응답:", response.data);
+
+    // 페이지네이션 응답에서 content 배열 추출
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return data; // 기존 배열 방식이면 그대로
+    } else if (data && typeof data === "object" && "content" in data) {
+      return data.content || []; // 페이지네이션이면 content 추출
+    }
+
+    return [];
   } catch (error) {
     console.error("내 프로젝트 조회 실패:", error);
     throw error;
   }
 }
 
+// 🔥 페이지네이션 적용: 프로젝트 목록 조회 API
 export async function getAllProjects() {
   try {
-    // 🎯 토큰 추가하여 likedByMe 정보 받기
     const token = localStorage.getItem("access_token");
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
     const response = await axios.get(`${BASE_API}/projects`, { headers });
     console.log("백엔드 응답 원본:", response.data);
     console.log("프로젝트 데이터:", response.data.data);
-    console.log("첫 번째 프로젝트:", response.data.data[0]);
 
-    // likedByMe 필드가 포함되었는지 확인
-    if (response.data.data.length > 0) {
-      console.log("likedByMe 필드 확인:", response.data.data[0].likedByMe);
+    // 🔥 페이지네이션 응답에서 content 배열 추출
+    const pageData = response.data.data;
+    const projects = pageData.content || [];
+
+    console.log("첫 번째 프로젝트:", projects[0]);
+
+    if (projects.length > 0) {
+      console.log("likedByMe 필드 확인:", projects[0].likedByMe);
     }
 
-    return response.data.data;
+    return projects; // ✅ 배열 반환
   } catch (error) {
     console.error("프로젝트 목록 조회 실패:", error);
     throw error;
   }
 }
-// 프로젝트 상세 조회 API (디버깅 버전)
+
+// 프로젝트 상세 조회 API (단일 객체이므로 페이지네이션 적용 안됨)
 export async function getProjectById(id: number) {
   try {
-    const token = localStorage.getItem("accessToken");
-    console.log("=== 프로젝트 상세 조회 디버깅 ===");
-    console.log("토큰 존재:", !!token);
-    console.log("프로젝트 ID:", id);
-
+    const token = localStorage.getItem("access_token");
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    console.log("요청 헤더:", headers);
 
-    const response = await axios.get(`${BASE_API}/projects/${id}`, {
-      headers,
-    });
-
-    console.log("=== 백엔드 응답 전체 ===");
-    console.log("전체 응답:", response.data);
-    console.log("프로젝트 데이터:", response.data.data);
-
-    // 좋아요 관련 필드들 확인
-    const projectData = response.data.data;
-    console.log("=== 좋아요 관련 필드 확인 ===");
-    console.log("likeCount:", projectData.likeCount);
-    console.log("isLiked:", projectData.isLiked); // 이 필드가 있는지 확인
-    console.log("isLikedByCurrentUser:", projectData.isLikedByCurrentUser); // 다른 이름일 수도
-    console.log("liked:", projectData.liked); // 또 다른 가능한 이름
-    console.log("userLiked:", projectData.userLiked); // 또 다른 가능한 이름
-    console.log();
-    // 모든 키 확인
-    console.log("=== 프로젝트 데이터의 모든 키 ===");
-    console.log("모든 키:", Object.keys(projectData));
-
-    // 좋아요와 관련된 키만 필터링
-    const likeRelatedKeys = Object.keys(projectData).filter(
-      (key) =>
-        key.toLowerCase().includes("like") ||
-        key.toLowerCase().includes("liked")
-    );
-    console.log("좋아요 관련 키들:", likeRelatedKeys);
-
+    const response = await axios.get(`${BASE_API}/projects/${id}`, { headers });
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
@@ -325,21 +319,30 @@ export async function getProjectById(id: number) {
   }
 }
 
-// 특정 사용자의 공개 프로젝트만 조회하는 API
+// 🔥 페이지네이션 적용: 특정 사용자의 공개 프로젝트 조회
 export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(
       `${BASE_API}/projects/user/${userId}/public`
     );
-    console.log("사용자 공개 프로젝트:", response.data.data);
-    return response.data.data;
+    console.log("사용자 공개 프로젝트 응답:", response.data);
+
+    // 페이지네이션 응답에서 content 배열 추출
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return data; // 기존 배열 방식이면 그대로
+    } else if (data && typeof data === "object" && "content" in data) {
+      return data.content || []; // 페이지네이션이면 content 추출
+    }
+
+    return [];
   } catch (error) {
     console.error("사용자 공개 프로젝트 조회 실패:", error);
     throw error;
   }
 }
 
-// 또는 쿼리 파라미터 방식
+// 🔥 페이지네이션 적용: 쿼리 파라미터 방식 사용자 프로젝트 조회
 export async function getUserProjects(
   userId: number,
   isPublicOnly: boolean = false
@@ -354,8 +357,17 @@ export async function getUserProjects(
     const response = await axios.get(
       `${BASE_API}/projects?${params.toString()}`
     );
-    console.log("사용자 프로젝트:", response.data.data);
-    return response.data.data;
+    console.log("사용자 프로젝트 응답:", response.data);
+
+    // 페이지네이션 응답에서 content 배열 추출
+    const data = response.data.data;
+    if (Array.isArray(data)) {
+      return data; // 기존 배열 방식이면 그대로
+    } else if (data && typeof data === "object" && "content" in data) {
+      return data.content || []; // 페이지네이션이면 content 추출
+    }
+
+    return [];
   } catch (error) {
     console.error("사용자 프로젝트 조회 실패:", error);
     throw error;

@@ -11,9 +11,10 @@ import ProjectSVG from "../svg/projectSVG";
 import SeeMore from "../svg/seeMore";
 import { LatestNewsData } from "../../api/newsApi";
 import { useEffect, useState } from "react";
+import type { News } from "../../types/newsTypes";
 
 function HomePage() {
-  const [latestNewsData, setLatestNewsData] = useState([]);
+  const [latestNewsData, setLatestNewsData] = useState<News[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
   useEffect(() => {

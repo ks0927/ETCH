@@ -1,4 +1,4 @@
-import type { News } from "../../../types/news";
+import type { News } from "../../../types/newsTypes";
 import RecommendCard from "../../molecules/news/recommendList";
 interface Props {
   newsData: News[];

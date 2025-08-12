@@ -1,31 +1,77 @@
 import { useState, useEffect } from "react";
 import CompanyNews from "../../organisms/news/newsListCompany";
 import LatestNews from "../../organisms/news/newsListLatest";
-import { LatestNewsData, TopCompaniesData } from "../../../api/newsApi";
+import { getLatestNewsPaginated, TopCompaniesData } from "../../../api/newsApi";
 import type { TopCompany } from "../../../types/topCompanies";
-import Pagenation from "../../common/pagination";
+import type { NewsPageData } from "../../../types/newsTypes";
+import Pagination from "../../common/pagination";
 import BuildingSVG from "../../svg/buildingSVG";
 
+// 페이지네이션 데이터 타입은 이제 별도 파일에서 import
+
 function NewsPage() {
-  const [latestNewsData, setLatestNewsData] = useState([]);
   const [topCompaniesData, setTopCompaniesData] = useState<TopCompany[]>([]);
+  const [newsPageData, setNewsPageData] = useState<NewsPageData>({
+    content: [],
+    totalPages: 0,
+    totalElements: 0,
+    currentPage: 1,
+    isLast: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // 뉴스 데이터 로드 함수
+  const loadNewsData = async (page: number = 1) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // 페이지네이션된 뉴스 데이터 요청 (page는 0부터 시작)
+      const data = await getLatestNewsPaginated(page, 10);
+
+      setNewsPageData({
+        content: data.content,
+        totalPages: data.totalPages,
+        totalElements: data.totalElements,
+        currentPage: data.currentPage,
+        isLast: data.isLast,
+      });
+    } catch (error) {
+      console.error("뉴스 데이터 로딩 실패:", error);
+      setError("뉴스 데이터를 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    console.log("=== 페이지 변경 핸들러 ===");
+    console.log("클릭된 페이지:", page);
+    console.log("현재 페이지 상태:", newsPageData.currentPage);
+    loadNewsData(page);
+  };
 
   useEffect(() => {
-    const loadNewsData = async () => {
+    const loadInitialData = async () => {
       try {
-        const [latestData, companiesData] = await Promise.all([
-          LatestNewsData(),
+        // 상위 기업 데이터와 첫 페이지 뉴스 데이터 병렬 로드
+        const [companiesData] = await Promise.all([
           TopCompaniesData(),
+          loadNewsData(1), // 첫 페이지 로드
         ]);
-        setLatestNewsData(latestData);
+
         setTopCompaniesData(companiesData);
       } catch (error) {
-        console.error("뉴스 데이터 로딩 실패:", error);
+        console.error("초기 데이터 로딩 실패:", error);
+        setError("데이터를 불러오는데 실패했습니다.");
       }
     };
 
-    loadNewsData();
+    loadInitialData();
   }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 섹션 */}
@@ -70,6 +116,7 @@ function NewsPage() {
           </div>
           <CompanyNews companyData={topCompaniesData} />
         </section>
+
         {/* 최신 뉴스 섹션 */}
         <section className="p-6 bg-white shadow-sm rounded-2xl sm:p-8">
           <div className="flex flex-col mb-6 space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
@@ -96,9 +143,32 @@ function NewsPage() {
           </div>
 
           {/* 로딩/에러 상태 처리 */}
-          <LatestNews newsData={latestNewsData} />
+          {loading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-gray-500">뉴스를 불러오는 중...</div>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-red-500">{error}</div>
+            </div>
+          )}
+
+          {!loading && !error && <LatestNews newsData={newsPageData.content} />}
         </section>
-        <Pagenation />
+
+        {/* 페이지네이션 */}
+        {!loading && !error && newsPageData.totalPages > 0 && (
+          <Pagination
+            currentPage={newsPageData.currentPage}
+            totalPages={newsPageData.totalPages}
+            totalElements={newsPageData.totalElements}
+            isLast={newsPageData.isLast}
+            onPageChange={handlePageChange}
+            itemsPerPage={10}
+          />
+        )}
       </div>
     </div>
   );
