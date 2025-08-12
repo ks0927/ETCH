@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import PlusSVG from "../../svg/plusSVG";
 import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
 import { getAllProjects } from "../../../api/projectApi";
-import type { ProjectCardProps } from "../../atoms/card";
+import type { ProjectData } from "../../../types/project/projectDatas";
 
 // API 응답 타입 (ProjectListDTO)
 interface ApiProjectResponse {
@@ -14,10 +14,11 @@ interface ApiProjectResponse {
   likeCount: number;
   nickname: string;
   isPublic: boolean;
+  likedByMe?: boolean; // 🎯 추가
 }
 
 function MypageProjectPage() {
-  const [myProjects, setMyProjects] = useState<ProjectCardProps[]>([]);
+  const [myProjects, setMyProjects] = useState<ProjectData[]>([]); // 🎯 타입 변경
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,41 +32,37 @@ function MypageProjectPage() {
 
         const allProjects: ApiProjectResponse[] = await getAllProjects();
 
-        // 현재 사용자가 작성한 프로젝트만 필터링하고 ProjectCardProps 형태로 변환
-        const userProjects: ProjectCardProps[] = allProjects
+        // 🎯 현재 사용자가 작성한 프로젝트만 필터링하고 ProjectData 형태로 변환
+        const userProjects: ProjectData[] = allProjects
           .filter(
             (project: ApiProjectResponse) =>
               project.nickname === currentUserNickname
           )
           .map((project: ApiProjectResponse) => ({
-            // BaseCardProps
-            type: "project" as const,
-
-            // ProjectCardProps 필수 필드들
+            // ProjectData 필수 필드들
             id: project.id,
             title: project.title,
             content: "프로젝트 상세 내용을 확인해보세요", // API에 없으므로 기본값
             thumbnailUrl: project.thumbnailUrl,
             youtubeUrl: "", // API에 없으므로 기본값
             viewCount: project.viewCount,
-            projectCategory: "" as const, // API에 없으므로 기본값
+            projectCategory: "", // API에 없으므로 기본값
             createdAt: new Date().toISOString(), // API에 없으므로 현재 시간
             updatedAt: new Date().toISOString(), // API에 없으므로 현재 시간
             isDeleted: false, // API에 없으므로 기본값
             githubUrl: "", // API에 없으므로 기본값
             isPublic: project.isPublic,
+            likeCount: project.likeCount,
+            likedByMe: project.likedByMe || false, // 🎯 추가
             nickname: project.nickname,
+            commentCount: 0, // 기본값
+            popularityScore: 0, // 기본값
             member: {
               id: 1, // 임시값
+              nickname: project.nickname,
             },
             files: [], // API에 없으므로 빈 배열
             projectTechs: [], // API에 없으므로 빈 배열
-
-            // UI용 추가 필드들
-            likeCount: project.likeCount,
-            writerImg: "", // 선택적 필드
-            commentCount: 0, // 선택적 필드
-            comments: [], // 선택적 필드
           }));
 
         setMyProjects(userProjects);
@@ -79,6 +76,15 @@ function MypageProjectPage() {
 
     fetchMyProjects();
   }, []);
+
+  // 🎯 프로젝트 업데이트 핸들러 추가
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setMyProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
+  };
 
   if (loading) {
     return (
@@ -166,7 +172,11 @@ function MypageProjectPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {myProjects.length > 0 ? (
             <div className="p-6">
-              <MypageProjectList mockProjects={myProjects} />
+              {/* 🎯 onProjectUpdate 전달 */}
+              <MypageProjectList
+                mockProjects={myProjects}
+                onProjectUpdate={handleProjectUpdate}
+              />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20">
