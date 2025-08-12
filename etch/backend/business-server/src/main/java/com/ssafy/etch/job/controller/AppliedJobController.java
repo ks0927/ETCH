@@ -1,0 +1,33 @@
+package com.ssafy.etch.job.controller;
+
+import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.job.dto.AppliedJobUpdateRequestDTO;
+import com.ssafy.etch.job.dto.AppliedJobListResponseDTO;
+import com.ssafy.etch.job.service.AppliedJobService;
+import com.ssafy.etch.oauth.dto.CustomOAuth2User;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/appliedJob")
+public class AppliedJobController {
+
+    private final AppliedJobService appliedJobService;
+
+    @PostMapping("/{jobId}")
+    public ResponseEntity<ApiResponse<?>> createAppliedJob(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long jobId) {
+
+        appliedJobService.createAppliedJob(oAuth2User.getId(), jobId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null, "지원 공고에 추가되었습니다."));
+    }
+
+}
