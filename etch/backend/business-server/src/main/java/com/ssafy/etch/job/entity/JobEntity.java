@@ -56,7 +56,7 @@ public class JobEntity {
 	@Column(name = "updated_at")
 	private LocalDate updatedAt;
 
-	@Column(name = "external_job_id", unique = true)
+	@Column(name = "external_job_id", unique = true, nullable = false)
 	private String externalJobId;
 
 	@ManyToOne
