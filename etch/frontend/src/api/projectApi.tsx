@@ -3,7 +3,7 @@ import { BASE_API } from "./BASE_API";
 import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
 import type { ProjectInputData } from "../types/project/projectDatas";
 
-// 백엔드 요청 타입
+// 백엔드 요청 타입 (기존 유지)
 export interface ProjectCreateRequestData {
   title: string;
   content: string;
@@ -12,20 +12,6 @@ export interface ProjectCreateRequestData {
   githubUrl?: string;
   youtubeUrl?: string;
   isPublic: boolean;
-}
-
-// 프로젝트 수정 요청 타입
-export interface ProjectUpdateRequestData {
-  title: string;
-  content: string;
-  category: ProjectCategoryEnum;
-  techCodeIds: number[];
-  githubUrl?: string;
-  youtubeUrl?: string;
-  isPublic: boolean;
-  removeThumbnail?: boolean;
-  removeFileIds?: number[];
-  removePdf?: boolean;
 }
 
 // 토큰을 안전하게 가져오는 유틸리티 함수
@@ -76,7 +62,7 @@ function getAuthToken(): string | null {
   return token;
 }
 
-// 프로젝트 생성 API
+// 프로젝트 생성 API - ProjectInputData 사용
 export async function createProject(projectInput: ProjectInputData) {
   try {
     const token = getAuthToken();
@@ -173,28 +159,24 @@ export async function updateProject(
 
     const formData = new FormData();
 
-    // 백엔드 요청 데이터 구조에 맞춤
-    const requestData: ProjectUpdateRequestData = {
+    const requestData = {
       title: projectInput.title,
       content: projectInput.content,
-      category: projectInput.projectCategory, // 백엔드는 category로 받음
+      category: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
-      githubUrl: projectInput.githubUrl || "",
-      youtubeUrl: projectInput.youtubeUrl || "",
+      githubUrl: projectInput.githubUrl || null,
+      youtubeUrl: projectInput.youtubeUrl || null,
       isPublic: projectInput.isPublic,
-      // 수정용 필드들
-      removeThumbnail: projectInput.removeThumbnail || false,
-      removeFileIds: projectInput.removeFileIds || [],
-      removePdf: projectInput.removePdf || false,
+      removeThumbnail: projectInput.removeThumbnail,
+      removeFileIds: projectInput.removeFileIds,
+      removePdf: projectInput.removePdf,
     };
 
-    // JSON을 Blob으로 변환
     const dataBlob = new Blob([JSON.stringify(requestData)], {
       type: "application/json",
     });
     formData.append("data", dataBlob);
 
-    // 파일들 추가
     if (projectInput.thumbnailFile) {
       formData.append("thumbnail", projectInput.thumbnailFile);
     }
@@ -209,29 +191,6 @@ export async function updateProject(
       formData.append("pdf", projectInput.pdfFile);
     }
 
-    console.log("=== FormData 내용 확인 ===");
-    console.log("Request data:", requestData);
-
-    // FormData 내용을 타입 안전하게 확인
-    const formDataKeys: string[] = [];
-    formData.forEach((value, key) => {
-      formDataKeys.push(key);
-
-      // FormDataEntryValue는 string | File 타입
-      if (typeof value === "string") {
-        console.log(`${key}: (string) ${value.substring(0, 100)}...`);
-      } else {
-        // File 타입인 경우
-        console.log(
-          `${key}: (${value.constructor.name}) ${
-            value.name || "unnamed"
-          }, size: ${value.size}`
-        );
-      }
-    });
-
-    console.log("FormData keys:", formDataKeys);
-
     const response = await axios.put(
       `${BASE_API}/projects/${projectId}`,
       formData,
@@ -245,19 +204,6 @@ export async function updateProject(
     return response.data;
   } catch (error) {
     console.error("프로젝트 수정 실패:", error);
-    if (axios.isAxiosError(error)) {
-      console.error("Response status:", error.response?.status);
-      console.error("Response data:", error.response?.data);
-
-      if (error.response?.status === 401) {
-        localStorage.removeItem("access_token");
-        throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
-      } else if (error.response?.status === 403) {
-        throw new Error("수정 권한이 없습니다.");
-      } else if (error.response?.status === 404) {
-        throw new Error("수정할 프로젝트를 찾을 수 없습니다.");
-      }
-    }
     throw error;
   }
 }
@@ -292,41 +238,6 @@ export async function deleteProject(projectId: number) {
   }
 }
 
-// 프로젝트 상세 조회
-export async function getProjectById(id: number) {
-  try {
-    const token = getAuthToken();
-
-    const config = token
-      ? {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      : {};
-
-    const response = await axios.get(`${BASE_API}/projects/${id}`, config);
-    return response.data.data;
-  } catch (error) {
-    console.error("프로젝트 상세 조회 실패:", error);
-
-    // 401 오류 시 토큰 제거하고 재시도
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
-      localStorage.removeItem("access_token");
-
-      try {
-        const response = await axios.get(`${BASE_API}/projects/${id}`);
-        return response.data.data;
-      } catch (retryError) {
-        console.error("재시도 실패:", retryError);
-        throw retryError;
-      }
-    }
-
-    throw error;
-  }
-}
-
-// 좋아요 추가
 export async function likeProject(projectId: number) {
   try {
     const token = getAuthToken();
@@ -358,7 +269,6 @@ export async function likeProject(projectId: number) {
   }
 }
 
-// 좋아요 취소
 export async function unlikeProject(projectId: number) {
   try {
     const token = getAuthToken();
@@ -387,7 +297,6 @@ export async function unlikeProject(projectId: number) {
   }
 }
 
-// 좋아요한 프로젝트 목록 조회
 export async function getLikedProjects() {
   try {
     const token = getAuthToken();
@@ -411,7 +320,6 @@ export async function getLikedProjects() {
   }
 }
 
-// 내 프로젝트 목록 조회
 export async function getMyProjects() {
   try {
     const token = getAuthToken();
@@ -435,7 +343,7 @@ export async function getMyProjects() {
   }
 }
 
-// 전체 프로젝트 목록 조회 (정렬 기능 포함)
+// 최신순으로 기본 정렬하는 프로젝트 목록 조회
 export async function getAllProjects(sort: string = "latest") {
   try {
     const token = getAuthToken();
@@ -448,7 +356,7 @@ export async function getAllProjects(sort: string = "latest") {
 
     // 정렬 파라미터 추가
     const response = await axios.get(
-      `${BASE_API}/projects?sort=${sort}`,
+      `${BASE_API}/projects?sort=${sort}&pageSize=50`, // pageSize=50 추가
       config
     );
 
@@ -482,7 +390,39 @@ export async function getAllProjects(sort: string = "latest") {
   }
 }
 
-// 사용자의 공개 프로젝트 조회
+export async function getProjectById(id: number) {
+  try {
+    const token = getAuthToken();
+
+    const config = token
+      ? {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      : {};
+
+    const response = await axios.get(`${BASE_API}/projects/${id}`, config);
+    return response.data.data;
+  } catch (error) {
+    console.error("프로젝트 상세 조회 실패:", error);
+
+    // 401 오류 시 토큰 제거하고 재시도
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
+      localStorage.removeItem("access_token");
+
+      try {
+        const response = await axios.get(`${BASE_API}/projects/${id}`);
+        return response.data.data;
+      } catch (retryError) {
+        console.error("재시도 실패:", retryError);
+        throw retryError;
+      }
+    }
+
+    throw error;
+  }
+}
+
 export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(
@@ -503,7 +443,6 @@ export async function getUserPublicProjects(userId: number) {
   }
 }
 
-// 사용자 프로젝트 조회 (공개/비공개 필터링 가능)
 export async function getUserProjects(
   userId: number,
   isPublicOnly: boolean = false
