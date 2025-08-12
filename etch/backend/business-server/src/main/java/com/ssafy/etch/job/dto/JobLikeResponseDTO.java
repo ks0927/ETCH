@@ -1,6 +1,7 @@
 package com.ssafy.etch.job.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,9 @@ import lombok.Getter;
 public class JobLikeResponseDTO {
 	private Long id;
 	private String title;
+	private String companyName;
+	private List<String> regions;
+	private List<String> jobCategories;
 	private LocalDateTime openingDate;
 	private LocalDateTime expirationDate;
 
