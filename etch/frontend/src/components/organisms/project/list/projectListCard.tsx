@@ -66,7 +66,7 @@ function ProjectListCard({ projects }: Props) {
                 type="project"
                 id={project.id}
                 title={project.title}
-                content={project.content}
+                nickname={project.nickname}
                 viewCount={project.viewCount}
                 likeCount={project.likeCount}
                 thumbnailUrl={project.thumbnailUrl}

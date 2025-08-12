@@ -31,12 +31,13 @@ export interface ProjectCardProps extends BaseCardProps {
   member: {
     // ProjectData와 일치
     id: number;
+    nickname: string;
   };
   files: File[]; // ProjectData와 일치
   projectTechs: number[]; // ProjectData와 일치
 
   // 추가 필드들 (UI용)
-  likeCount?: number;
+  likeCount: number;
   writerImg?: string;
   commentCount?: number;
   comments?: CommentProps[];

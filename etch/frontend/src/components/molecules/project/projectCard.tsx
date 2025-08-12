@@ -5,21 +5,21 @@ import ViewSVG from "../../svg/viewSVG";
 interface Props {
   id: number;
   title: string;
-  content: string;
   thumbnailUrl?: string;
   type: "project";
   viewCount: number;
   likeCount: number;
+  nickname: string;
   onCardClick: (id: number) => void;
 }
 
 function ProjectCard({
   id,
   title,
-  content,
   thumbnailUrl,
   onCardClick,
   viewCount,
+  nickname,
   likeCount,
 }: Props) {
   const handleClick = () => {
@@ -46,7 +46,7 @@ function ProjectCard({
           {title || "제목 없음"}
         </div>
         <div className="text-sm sm:text-base text-gray-600 line-clamp-2">
-          {content || "내용 없음"}
+          {nickname || "작성자 없음"}
         </div>
       </section>
       <section className="p-3 sm:p-4 flex items-center justify-between">

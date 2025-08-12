@@ -5,7 +5,13 @@ interface Props extends ProjectCardProps {
   type: "project";
 }
 
-function MyProjectCard({ id, title, content, img, onCardClick }: Props) {
+function MyProjectCard({
+  id,
+  title,
+  content,
+  thumbnailUrl,
+  onCardClick,
+}: Props) {
   const handleClick = () => {
     onCardClick(id);
   };
@@ -18,7 +24,7 @@ function MyProjectCard({ id, title, content, img, onCardClick }: Props) {
       <section className="w-full h-36">
         <img
           className="w-full object-cover h-full"
-          src={img}
+          src={thumbnailUrl}
           alt="카드 이미지"
         />
       </section>

@@ -38,6 +38,7 @@ export interface ProjectData {
   githubUrl: string;
   isPublic: boolean;
   likeCount: number;
+  nickname: string;
   member: {
     id: number;
     // 필요한 멤버 정보 추가
@@ -82,6 +83,7 @@ export const ProjectState: ProjectData = {
   isDeleted: false,
   githubUrl: "",
   isPublic: true,
+  nickname: "",
   member: {
     id: 1,
   },

@@ -186,7 +186,6 @@ function ProjectModalCard({
   const hasMultipleImages = images.length > 1;
   const techNames = convertTechIdsToNames(projectTechs);
   const displayWriterImg = writerImg || "/placeholder-avatar.jpg";
-  const writerName = member?.id ? `사용자 ${member.id}` : "익명";
 
   // 캐러셀 네비게이션
   const nextImage = () => {
@@ -212,7 +211,7 @@ function ProjectModalCard({
           />
           <div>
             <h2 className="text-sm font-semibold text-gray-900">
-              {writerName}
+              {member.nickname}
             </h2>
             {/* 수정되면 updatedAt 으로 변경 */}
             <p className="text-xs text-gray-500">
