@@ -1,11 +1,6 @@
 // types/newsTypes.ts
 
 // 회사 정보 타입 (CompanyEntity에 해당)
-export interface Company {
-  id: number;
-  name: string;
-  // 필요한 경우 다른 회사 필드들 추가
-}
 
 // 뉴스 타입 (NewsEntity/NewsDTO에 해당)
 export interface News {
@@ -15,7 +10,6 @@ export interface News {
   description?: string; // TEXT 타입이므로 optional
   url: string;
   publishedAt: string; // LocalDate -> ISO 8601 문자열 형태
-  company: Company; // 회사 정보 객체
 }
 
 // 페이지네이션된 뉴스 데이터 타입

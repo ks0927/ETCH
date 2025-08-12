@@ -4,9 +4,10 @@ import ProjectListCard from "../../organisms/project/list/projectListCard";
 import { ProjectSidebarType } from "../../../types/projectSidebarType";
 import ProjectListSidebar from "../../organisms/project/list/projectListSidebar";
 import ProjectListSearch from "../../organisms/project/list/projectListSearch";
+import Pagination from "../../common/pagination";
 import type { ProjectData } from "../../../types/project/projectDatas";
 import { getAllProjects } from "../../../api/projectApi";
-import { getCategoryFromNumber } from "../../../types/project/projectCategroyData"; // 헬퍼 함수 임포트
+import { getCategoryFromNumber } from "../../../types/project/projectCategroyData";
 
 // API 호출 함수 (실제 구현)
 const fetchProjects = async (): Promise<ProjectData[]> => {
@@ -27,7 +28,11 @@ function ProjectListPage() {
   // 필터 상태 관리
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [selectedSort, setSelectedSort] = useState<string>(""); // 정렬 상태 추가
+  const [selectedSort, setSelectedSort] = useState<string>("");
+
+  // 🔥 페이지네이션 상태 추가
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6); // 한 페이지에 6개 (2x3 그리드)
 
   // 컴포넌트 마운트 시 프로젝트 데이터 로드
   useEffect(() => {
@@ -55,32 +60,17 @@ function ProjectListPage() {
     );
   };
 
-  // 필터링 및 정렬된 프로젝트를 계산하는 함수 (인기순 추가)
+  // 필터링된 프로젝트를 계산하는 함수
   const getFilteredProjects = (): ProjectData[] => {
     console.log("=== 필터링 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
-    console.log("선택된 정렬:", selectedSort); // 정렬 로그 추가
-
-    // 첫 번째 프로젝트의 전체 구조 확인
-    if (projects.length > 0) {
-      console.log("첫 번째 프로젝트 전체 구조:", projects[0]);
-      console.log("프로젝트 키들:", Object.keys(projects[0]));
-
-      // 정렬 관련 필드 확인
-      console.log("정렬 필드 확인:");
-      console.log("- popularityScore:", projects[0].popularityScore);
-      console.log("- likeCount:", projects[0].likeCount);
-      console.log("- viewCount:", projects[0].viewCount);
-    }
+    console.log("선택된 정렬:", selectedSort);
 
     let filtered = [...projects];
 
-    // 0. 공개된 프로젝트만 필터링 (isPublic이 true인 것만)
-    filtered = filtered.filter((project) => {
-      console.log(`프로젝트 "${project.title}": isPublic=${project.isPublic}`);
-      return project.isPublic; // true인 것만 통과
-    });
+    // 0. 공개된 프로젝트만 필터링
+    filtered = filtered.filter((project) => project.isPublic);
 
     // 1. 검색어 필터링
     if (searchTerm.trim()) {
@@ -98,108 +88,69 @@ function ProjectListPage() {
     // 2. 카테고리 필터링
     if (selectedCategory && selectedCategory !== "ALL") {
       filtered = filtered.filter((project) => {
-        console.log(
-          `프로젝트 "${project.title}": projectCategory=${
-            project.projectCategory
-          } (타입: ${typeof project.projectCategory})`
-        );
-
-        // projectCategory가 문자열이라면 직접 비교
         if (
           typeof project.projectCategory === "string" &&
           project.projectCategory !== ""
         ) {
-          const match = project.projectCategory === selectedCategory;
-          console.log(
-            `  문자열 비교: "${project.projectCategory}" === "${selectedCategory}" ? ${match}`
-          );
-          return match;
+          return project.projectCategory === selectedCategory;
         }
 
-        // projectCategory가 숫자라면 변환해서 비교
         if (typeof project.projectCategory === "number") {
           const projectCategoryEnum = getCategoryFromNumber(
             project.projectCategory
           );
-          const match = projectCategoryEnum === selectedCategory;
-          console.log(
-            `  숫자 변환 비교: ${project.projectCategory} → "${projectCategoryEnum}" === "${selectedCategory}" ? ${match}`
-          );
-          return match;
+          return projectCategoryEnum === selectedCategory;
         }
 
-        // 그 외의 경우 (undefined, null 등)
-        console.log(`  유효하지 않은 카테고리 값: ${project.projectCategory}`);
         return false;
       });
-      console.log("필터링 결과:", filtered);
-      console.log("선택된 카테고리:", selectedCategory);
     }
 
-    // 3. 정렬 적용 (인기순 추가)
+    // 3. 정렬 적용
     if (selectedSort) {
-      console.log("정렬 적용:", selectedSort);
-
       filtered.sort((a, b) => {
         switch (selectedSort) {
-          case "LATEST": // 최신순
+          case "LATEST":
             return (
               new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
-
-          case "VIEWS": // 조회순 (viewCount 높은순) - 버그 수정
-            return (b.viewCount || 0) - (a.viewCount || 0); // b - a로 수정 (높은순)
-
-          case "POPULAR": {
-            // 인기순 (popularityScore 높은순)
-            const aScore = a.popularityScore || 0;
-            const bScore = b.popularityScore || 0;
-            console.log(
-              `인기도 비교: "${a.title}"(${aScore}) vs "${b.title}"(${bScore})`
-            );
-            return bScore - aScore; // 높은 점수가 앞으로
-          }
-
-          case "LIKES": {
-            // 좋아요순 (likeCount 높은순)
-            const aLikes = a.likeCount || 0;
-            const bLikes = b.likeCount || 0;
-            return bLikes - aLikes; // 높은 좋아요가 앞으로
-          }
-
+          case "VIEWS":
+            return (b.viewCount || 0) - (a.viewCount || 0);
+          case "POPULAR":
+            return (b.popularityScore || 0) - (a.popularityScore || 0);
+          case "LIKES":
+            return (b.likeCount || 0) - (a.likeCount || 0);
           default:
             return 0;
         }
       });
-
-      // 정렬 결과 확인
-      if (filtered.length > 0) {
-        console.log(`${selectedSort} 정렬 결과 (상위 3개):`);
-        filtered.slice(0, 3).forEach((project, index) => {
-          let value = "";
-          switch (selectedSort) {
-            case "LATEST":
-              value = project.createdAt;
-              break;
-            case "VIEWS":
-              value = `${project.viewCount || 0}회`;
-              break;
-            case "POPULAR":
-              value = `${project.popularityScore || 0}점`;
-              break;
-            case "LIKES":
-              value = `${project.likeCount || 0}개`;
-              break;
-          }
-          console.log(`${index + 1}. ${project.title}: ${value}`);
-        });
-      }
     }
 
     console.log("=== 필터링 완료 ===");
-    console.log("공개된 프로젝트 수:", filtered.length);
+    console.log("필터링된 프로젝트 수:", filtered.length);
     return filtered;
   };
+
+  // 🔥 페이지네이션 계산
+  const filteredProjects = getFilteredProjects();
+  const totalElements = filteredProjects.length;
+  const totalPages = Math.ceil(totalElements / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProjects = filteredProjects.slice(startIndex, endIndex);
+  const isLast = currentPage === totalPages;
+
+  // 🔥 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // 페이지 변경 시 스크롤을 상단으로 이동
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // 🔥 필터/검색 시 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, selectedSort]);
 
   // 검색 핸들러
   const handleSearch = (searchTermValue: string) => {
@@ -212,13 +163,10 @@ function ProjectListPage() {
     setSelectedCategory(category);
   };
 
-  // 정렬 핸들러 추가
+  // 정렬 핸들러
   const handleSortChange = (sortType: string) => {
     setSelectedSort(sortType);
   };
-
-  // 필터링된 프로젝트 가져오기
-  const filteredProjects = getFilteredProjects();
 
   if (loading) {
     return (
@@ -291,11 +239,44 @@ function ProjectListPage() {
               <ProjectListSearch onSearch={handleSearch} />
             </section>
 
-            {/* 프로젝트 카드 섹션 */}
+            {/* 🔥 검색 결과 정보 */}
+            {(searchTerm || selectedCategory !== "ALL") && (
+              <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-blue-800">
+                    <span className="font-medium">{totalElements}개</span>의
+                    프로젝트를 찾았습니다
+                    {searchTerm && (
+                      <span className="ml-2">
+                        (검색어: <strong>"{searchTerm}"</strong>)
+                      </span>
+                    )}
+                    {selectedCategory !== "ALL" && (
+                      <span className="ml-2">
+                        (카테고리: <strong>{selectedCategory}</strong>)
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSearchTerm("");
+                      setSelectedCategory("ALL");
+                      setSelectedSort("");
+                    }}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                  >
+                    필터 초기화
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {/* 🔥 프로젝트 카드 섹션 - 2열 그리드 */}
+            {/* 🔥 프로젝트 카드 섹션 */}
             <section>
-              {filteredProjects.length > 0 ? (
+              {currentProjects.length > 0 ? (
                 <ProjectListCard
-                  projects={filteredProjects}
+                  projects={currentProjects}
                   onProjectUpdate={handleProjectUpdate}
                 />
               ) : (
@@ -312,6 +293,18 @@ function ProjectListPage() {
                 </div>
               )}
             </section>
+
+            {/* 🔥 페이지네이션 */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalElements={totalElements}
+                isLast={isLast}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+              />
+            )}
           </div>
         </div>
       </div>
