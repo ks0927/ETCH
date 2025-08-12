@@ -296,7 +296,7 @@ export async function getProjectById(id: number) {
     console.log("isLikedByCurrentUser:", projectData.isLikedByCurrentUser); // 다른 이름일 수도
     console.log("liked:", projectData.liked); // 또 다른 가능한 이름
     console.log("userLiked:", projectData.userLiked); // 또 다른 가능한 이름
-
+    console.log();
     // 모든 키 확인
     console.log("=== 프로젝트 데이터의 모든 키 ===");
     console.log("모든 키:", Object.keys(projectData));
