@@ -4,12 +4,19 @@ import com.ssafy.etch.project.dto.ProjectListDTO;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 @Builder
 @Getter
 public class PortfolioDetailResponseDTO {
+
+    private static final String ITEM_DELIMITER = "\\|";
+    private static final String FIELD_DELIMITER = "\\^";
+
     private Long id;
     private String name;
     private String introduce;
@@ -17,8 +24,8 @@ public class PortfolioDetailResponseDTO {
     private String linkedInUrl;
     private String blogUrl;
     private String techList;
-    private String education;
-    private String language;
+    private List<EduAndActDTO> education;
+    private List<CertAndLangDTO> language;
     private List<ProjectListDTO> projectList;
 
     public static PortfolioDetailResponseDTO from(PortfolioDTO portfolioDTO) {
@@ -30,11 +37,45 @@ public class PortfolioDetailResponseDTO {
                 .linkedInUrl(portfolioDTO.getLinkedInUrl())
                 .blogUrl(portfolioDTO.getBlogUrl())
                 .techList(portfolioDTO.getTechList())
-                .education(portfolioDTO.getEducation())
-                .language(portfolioDTO.getLanguage())
+                .education(parseDelimitedString(
+                        portfolioDTO.getEducation(),
+                        info -> EduAndActDTO.builder()
+                                .name(getValue(info, 0))
+                                .description(getValue(info, 1))
+                                .startDate(parseDate(info, 2))
+                                .endDate(parseDate(info, 3))
+                                .build()
+                ))
+                .language(parseDelimitedString(
+                        portfolioDTO.getLanguage(),
+                        info -> CertAndLangDTO.builder()
+                                .name(getValue(info, 0))
+                                .date(parseDate(info, 1))
+                                .certificateIssuer(getValue(info, 2))
+                                .build()
+                ))
                 .projectList(portfolioDTO.getProject().stream()
-                        .map(portfolioProjectEntity -> ProjectListDTO.from(portfolioProjectEntity.getProject().toProjectDTO()))
-                        .collect(Collectors.toList()))
+                        .map(p -> ProjectListDTO.from(p.getProject().toProjectDTO()))
+                        .toList())
                 .build();
+    }
+
+    private static <T> List<T> parseDelimitedString(String source, Function<String[], T> mapper) {
+        if (source == null || source.isBlank()) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(source.split(ITEM_DELIMITER))
+                .map(segment -> mapper.apply(segment.split(FIELD_DELIMITER, -1)))
+                .toList();
+    }
+
+    private static String getValue(String[] info, int index) {
+        return info.length > index && !info[index].isBlank() ? info[index] : null;
+    }
+
+    private static LocalDate parseDate(String[] info, int index) {
+        return info.length > index && !info[index].isBlank()
+                ? LocalDate.parse(info[index])
+                : null;
     }
 }
