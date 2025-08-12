@@ -1,5 +1,5 @@
 import type { FavoriteProjectProps } from "../../../../atoms/list";
-import noImg from "../../../../assets/noImg.png"; // noImg import 추가
+import noImg from "../../../../../assets/noImg.png"; // noImg import 추가
 
 interface Props extends FavoriteProjectProps {
   onCardClick?: (projectId: number) => void;
