@@ -13,14 +13,89 @@ function ProjectFileUpload({
   uploadedFiles, // 부모로부터 받는 파일 목록
   onFileUpload,
   onFileRemove,
+  thumbnailFile, // 썸네일 파일
+  onThumbnailUpload, // 썸네일 업로드 핸들러
+  onThumbnailRemove, // 썸네일 제거 핸들러
   maxFiles, // 부모에서 정의한 값 사용 (기본값 제거)
   maxFileSize, // 부모에서 정의한 값 사용 (기본값 제거)
   acceptedTypes, // 부모에서 정의한 값 사용 (기본값 제거)
   disabled = false, // 이것만 기본값 유지 (선택적 prop)
 }: ProjectFileUploadProps) {
+  // ProjectFileUpload 컴포넌트 내부에 로그 추가
+
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
+  // 썸네일 파일 유효성 검사
+  const validateThumbnailFile = (
+    file: File
+  ): { isValid: boolean; error?: string } => {
+    // 이미지 파일인지 확인
+    if (!file.type.startsWith("image/")) {
+      return { isValid: false, error: "이미지 파일만 업로드할 수 있습니다." };
+    }
+
+    // 파일 크기 검사
+    if (file.size > maxFileSize) {
+      return {
+        isValid: false,
+        error: `파일 크기가 너무 큽니다. (최대 ${(
+          maxFileSize /
+          1024 /
+          1024
+        ).toFixed(1)}MB)`,
+      };
+    }
+
+    return { isValid: true };
+  };
+
+  // 썸네일 드래그 앤 드롭 처리
+  const handleThumbnailDrop = (e: DragEvent<HTMLDivElement>): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    if (!disabled && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const validation = validateThumbnailFile(file);
+
+      if (validation.isValid) {
+        onThumbnailUpload(file);
+      } else {
+        alert(validation.error);
+      }
+    }
+  };
+
+  // 썸네일 클릭 업로드
+  const handleThumbnailClick = (): void => {
+    if (!disabled) {
+      thumbnailInputRef.current?.click();
+    }
+  };
+
+  const handleThumbnailInput = (e: ChangeEvent<HTMLInputElement>): void => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const validation = validateThumbnailFile(file);
+
+      if (validation.isValid) {
+        onThumbnailUpload(file);
+      } else {
+        alert(validation.error);
+      }
+
+      // input 값 초기화
+      e.target.value = "";
+    }
+  };
+
+  // 썸네일 제거
+  const removeThumbnail = (): void => {
+    onThumbnailRemove();
+  };
   // 파일 유효성 검사 (부모로부터 받은 설정값 사용)
   const validateFiles = (files: FileList | File[]): FileValidationResult => {
     const fileArray = Array.from(files);
@@ -143,8 +218,6 @@ function ProjectFileUpload({
   // 파일 타입에 따른 아이콘 반환
   const getFileIcon = (fileType: string): string => {
     if (fileType.startsWith("image/")) return "🖼️";
-    if (fileType === "application/pdf") return "📄";
-    if (fileType.startsWith("text/")) return "📝";
     return "📄";
   };
 
@@ -154,9 +227,6 @@ function ProjectFileUpload({
       "image/jpeg": "JPG",
       "image/png": "PNG",
       "image/gif": "GIF",
-      "image/webp": "WebP",
-      "application/pdf": "PDF",
-      "text/plain": "TXT",
     };
 
     const displayTypes = acceptedTypes
@@ -167,6 +237,130 @@ function ProjectFileUpload({
 
   return (
     <div className="bg-white rounded-lg sm:rounded-xl border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+      {/* 썸네일 업로드 섹션 */}
+      <section className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-purple-600 text-xl">🖼️</span>
+          </div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+              썸네일 이미지
+            </h2>
+            <p className="text-sm text-gray-600">
+              프로젝트를 대표할 썸네일 이미지를 업로드해주세요.
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all duration-200 ${
+            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          } ${
+            isDragOver
+              ? "border-purple-400 bg-purple-50"
+              : "border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400"
+          }`}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDragOver={handleDragOver}
+          onDrop={handleThumbnailDrop}
+          onClick={handleThumbnailClick}
+        >
+          <div className="flex flex-col items-center space-y-3">
+            <div
+              className={`w-10 h-10 sm:w-12 sm:h-12 ${
+                isDragOver
+                  ? "text-purple-500"
+                  : disabled
+                  ? "text-gray-300"
+                  : "text-gray-400"
+              }`}
+            >
+              <UploadSVG />
+            </div>
+
+            <div
+              className={`text-sm sm:text-base font-medium ${
+                disabled ? "text-gray-400" : "text-gray-700"
+              }`}
+            >
+              {disabled
+                ? "썸네일 업로드가 비활성화되어 있습니다"
+                : "썸네일 이미지를 드래그하여 업로드하세요"}
+            </div>
+
+            {!disabled && (
+              <>
+                <div className="text-xs text-gray-500">
+                  또는 클릭해서 이미지를 선택하세요
+                </div>
+                <div className="text-xs text-gray-400">
+                  JPG, PNG, GIF, WebP (최대{" "}
+                  {(maxFileSize / 1024 / 1024).toFixed(1)}MB)
+                </div>
+
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                  <ProjectButton
+                    text="썸네일 선택"
+                    bgColor="bg-purple-600"
+                    textColor="text-white"
+                    css="cursor-pointer px-4 py-2 rounded-md font-medium text-xs hover:bg-purple-700 transition-colors duration-200"
+                    onClick={handleThumbnailClick}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* 썸네일 전용 파일 인풋 */}
+          <input
+            ref={thumbnailInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleThumbnailInput}
+            disabled={disabled}
+          />
+        </div>
+
+        {/* 업로드된 썸네일 표시 */}
+        {thumbnailFile && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between bg-purple-50 p-3 rounded-lg border border-purple-200">
+              <div className="flex items-center space-x-3 flex-1 min-w-0">
+                <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center flex-shrink-0">
+                  <span className="text-purple-600">🖼️</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="text-sm font-medium text-gray-900 truncate"
+                      title={thumbnailFile.name}
+                    >
+                      {thumbnailFile.name}
+                    </div>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      썸네일
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {formatFileSize(thumbnailFile.size)} • {thumbnailFile.type}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={removeThumbnail}
+                className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50 transition-colors flex-shrink-0"
+                title="썸네일 제거"
+              >
+                제거
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
       <section>
         <div className="mb-6"></div>
         <div className="flex items-center gap-3 mb-4">
@@ -182,6 +376,19 @@ function ProjectFileUpload({
             </p>
           </div>
         </div>
+
+        {/* 파일 업로드 안내 (썸네일 관련 내용 제거) */}
+        {uploadedFiles.length === 0 && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600">💡</span>
+              <p className="text-sm text-blue-800 font-medium">
+                프로젝트와 관련된 파일들을 업로드해주세요.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div
           className={`border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-all duration-200 ${
             disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
@@ -228,7 +435,7 @@ function ProjectFileUpload({
                 </div>
                 {/* 서브 텍스트 */}
                 <div className="text-sm text-gray-400">
-                  첫 사진은 썸네일로 적용됩니다.
+                  프로젝트 관련 파일들을 업로드해주세요
                 </div>
 
                 {/* 지원 파일 형식 안내 (부모 설정 기반) */}
@@ -333,6 +540,13 @@ function ProjectFileUpload({
             <div className="text-sm text-gray-700 flex items-start">
               <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
               <div>
+                <span className="font-medium">썸네일 이미지:</span> 첫 번째
+                이미지가 프로젝트 대표 이미지로 사용됩니다
+              </div>
+            </div>
+            <div className="text-sm text-gray-700 flex items-start">
+              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+              <div>
                 <span className="font-medium">README.md파일:</span> 프로젝트
                 설명, 설치 방법 포함
               </div>
@@ -349,12 +563,6 @@ function ProjectFileUpload({
               <div>
                 <span className="font-medium">스크린샷:</span> UI/UX를 보여주는
                 이미지들
-              </div>
-            </div>
-            <div className="text-sm text-gray-700 flex items-start">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-              <div>
-                <span className="font-medium">기타 문서:</span> 설계/API 문서 등
               </div>
             </div>
           </div>

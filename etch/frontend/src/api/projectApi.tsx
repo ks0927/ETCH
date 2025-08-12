@@ -23,7 +23,7 @@ export async function createProject(projectInput: ProjectInputData) {
     const requestData: ProjectCreateRequestData = {
       title: projectInput.title,
       content: projectInput.content,
-      category: projectInput.category,
+      category: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
       githubUrl: projectInput.githubUrl || undefined,
       youtubeUrl: projectInput.youtubeUrl || undefined,
@@ -85,7 +85,7 @@ export async function updateProject(
     const requestData = {
       title: projectInput.title,
       content: projectInput.content,
-      category: projectInput.category,
+      category: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
       githubUrl: projectInput.githubUrl || undefined,
       youtubeUrl: projectInput.youtubeUrl || undefined,
@@ -133,9 +133,17 @@ export async function updateProject(
 }
 
 // 프로젝트 삭제 API
+// projectApi.tsx의 deleteProject 함수 수정
 export async function deleteProject(projectId: number) {
   try {
-    const response = await axios.delete(`${BASE_API}/projects/${projectId}`);
+    // 토큰 가져오기 (localStorage, sessionStorage, 쿠키 등에서)
+    const token = localStorage.getItem("accessToken"); // 실제 토큰 저장 방식에 맞게 수정
+
+    const response = await axios.delete(`${BASE_API}/projects/${projectId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // 토큰 추가
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("프로젝트 삭제 실패:", error);
@@ -147,6 +155,9 @@ export async function deleteProject(projectId: number) {
 export async function getAllProjects() {
   try {
     const response = await axios.get(`${BASE_API}/projects`);
+    console.log("백엔드 응답 원본:", response.data); // 전체 응답 구조
+    console.log("프로젝트 데이터:", response.data.data); // 실제 프로젝트 배열
+    console.log("첫 번째 프로젝트:", response.data.data[0]); // 개별 프로젝트 구조
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 목록 조회 실패:", error);
@@ -161,6 +172,31 @@ export async function getProjectById(id: number) {
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
+    throw error;
+  }
+}
+
+// projectApi.tsx에서 수정
+export async function likeProject(projectId: number) {
+  try {
+    const response = await axios.post(`${BASE_API}/likes/projects`, {
+      targetId: projectId, // LikeRequestDTO에 맞는 필드명
+    });
+    return response.data;
+  } catch (error) {
+    console.error("좋아요 추가 실패:", error);
+    throw error;
+  }
+}
+
+export async function unlikeProject(projectId: number) {
+  try {
+    const response = await axios.delete(
+      `${BASE_API}/likes/projects/${projectId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("좋아요 취소 실패:", error);
     throw error;
   }
 }

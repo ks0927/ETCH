@@ -4,7 +4,7 @@ interface LikeSVGProps {
   className?: string;
 }
 
-function LikeSVG({ isLiked = false, size = 24, className = "" }: LikeSVGProps) {
+function LikeSVG({ isLiked = false, size = 22, className = "" }: LikeSVGProps) {
   return (
     <svg
       width={size}

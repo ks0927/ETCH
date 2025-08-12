@@ -18,6 +18,11 @@ export interface MemberData {
   email?: string;
 }
 
+export interface ProjectModalData extends ProjectData {
+  type: "project"; // CardType 추가
+  onCardClick?: (id: number) => void;
+}
+
 // 프론트엔드에서 사용할 메인 ProjectData (ID 기반으로 수정)
 export interface ProjectData {
   id: number;
@@ -26,12 +31,13 @@ export interface ProjectData {
   thumbnailUrl: string;
   youtubeUrl: string;
   viewCount: number;
-  category: ProjectCategoryEnum | "";
+  projectCategory: ProjectCategoryEnum | "";
   createdAt: string;
   updatedAt: string;
   isDeleted: boolean;
   githubUrl: string;
   isPublic: boolean;
+  likeCount: number;
   member: {
     id: number;
     // 필요한 멤버 정보 추가
@@ -44,7 +50,7 @@ export interface ProjectData {
 export interface ProjectInputData {
   title: string;
   content: string;
-  category: ProjectCategoryEnum;
+  projectCategory: ProjectCategoryEnum;
   githubUrl?: string;
   youtubeUrl?: string;
   isPublic: boolean;
@@ -69,14 +75,15 @@ export const ProjectState: ProjectData = {
   thumbnailUrl: "",
   youtubeUrl: "",
   viewCount: 0,
-  category: "", // 빈 문자열을 타입으로 캐스팅
+  likeCount: 0,
+  projectCategory: "", // 빈 문자열을 타입으로 캐스팅
   createdAt: "",
   updatedAt: "",
   isDeleted: false,
   githubUrl: "",
   isPublic: true,
   member: {
-    id: 0,
+    id: 1,
   },
   files: [], // 기존 방식
   projectTechs: [], // 빈 number 배열
@@ -86,7 +93,7 @@ export const ProjectState: ProjectData = {
 export interface ProjectInputData {
   title: string;
   content: string;
-  category: ProjectCategoryEnum;
+  projectCategory: ProjectCategoryEnum;
   githubUrl?: string;
   youtubeUrl?: string;
   isPublic: boolean;
@@ -107,7 +114,7 @@ export interface ProjectInputData {
 export const ProjectInputState: ProjectInputData = {
   title: "",
   content: "",
-  category: "" as ProjectCategoryEnum,
+  projectCategory: "" as ProjectCategoryEnum,
   githubUrl: "",
   youtubeUrl: "",
   isPublic: true,
