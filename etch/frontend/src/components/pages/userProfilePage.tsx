@@ -1,117 +1,144 @@
-import { useState } from "react";
-import type { ProjectData } from "../../types/project/projectDatas"; // 🎯 타입 변경
-import MyProjectCard from "../molecules/mypage/project/myProjectCard";
-import ProjectModal from "../common/projectModal";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router";
+import type { ProjectData } from "../../types/project/projectDatas";
+import { getUserPublicProjects } from "../../api/projectApi";
+import UserProfileCard from "../organisms/userprofile/userProfileCard";
+import UserProjectList from "../organisms/userprofile/userProjectList";
 
-interface UserProjectListProps {
-  projects: ProjectData[]; // 🎯 타입 변경
-  userName: string;
-  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 추가
-}
+// UserProfilePage는 props를 받지 않고, URL 파라미터만 사용
+function UserProfilePage() {
+  const { userId } = useParams<{ userId: string }>(); // URL에서 userId 추출
 
-function UserProjectList({
-  projects,
-  userName,
-  onProjectUpdate,
-}: UserProjectListProps) {
-  const [visibleCount, setVisibleCount] = useState(8); // 다른 사용자 프로필에서는 8개만 먼저 보여주기
-  const hasMore = projects.length > visibleCount;
+  // 상태 관리
+  const [userProjects, setUserProjects] = useState<ProjectData[]>([]);
+  const [userName, setUserName] = useState<string>("");
+  const [userProfile, setUserProfile] = useState({
+    nickname: "",
+    email: "",
+    profile: "",
+    followersCount: 0,
+    followingCount: 0,
+    isFollowing: false,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 🎯 모달 상태를 ProjectData로 변경
-  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
-    null
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // 사용자 데이터 로딩
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!userId) return;
 
-  const visibleProjects = projects.slice(0, visibleCount);
+      try {
+        setLoading(true);
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 8);
-  };
+        // 🎯 실제 API 사용하여 사용자 공개 프로젝트 로딩
+        const projects = await getUserPublicProjects(Number(userId));
+        setUserProjects(projects);
 
-  // 카드 클릭 핸들러
-  const handleCardClick = (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId);
-    if (project) {
-      setSelectedProject(project);
-      setIsModalOpen(true);
-    }
-  };
+        // 프로젝트에서 사용자 이름 추출 (첫 번째 프로젝트의 nickname 사용)
+        if (projects.length > 0) {
+          setUserName(projects[0].nickname || "사용자");
+        }
 
-  // 모달 닫기 핸들러
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProject(null);
-  };
+        // 임시 프로필 데이터 (실제 사용자 프로필 API가 있다면 교체)
+        const mockUserInfo = {
+          nickname: projects.length > 0 ? projects[0].nickname : "사용자",
+          email: "user@example.com", // 실제 API에서 가져와야 함
+          profile: "", // 실제 API에서 가져와야 함
+          followersCount: 10, // 실제 API에서 가져와야 함
+          followingCount: 5, // 실제 API에서 가져와야 함
+          isFollowing: false, // 실제 API에서 가져와야 함
+        };
 
-  // 🎯 프로젝트 업데이트 핸들러 추가
+        setUserProfile(mockUserInfo);
+      } catch (err) {
+        console.error("사용자 데이터 로딩 실패:", err);
+        setError("사용자 정보를 불러오는데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [userId]);
+
+  // 프로젝트 업데이트 핸들러
   const handleProjectUpdate = (updatedProject: ProjectData) => {
-    setSelectedProject(updatedProject); // 모달 내 프로젝트 상태 업데이트
-    // 부모 컴포넌트에도 알림
-    onProjectUpdate?.(updatedProject);
+    setUserProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
   };
+
+  // 팔로우/언팔로우 핸들러
+  const handleFollowClick = () => {
+    // 팔로우/언팔로우 API 호출
+    console.log("팔로우/언팔로우");
+  };
+
+  // 채팅 핸들러
+  const handleChatClick = () => {
+    // 채팅 기능
+    console.log("채팅하기");
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">사용자 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            오류가 발생했습니다
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">공개 프로젝트</h2>
-        <span className="text-sm text-gray-500">총 {projects.length}개</span>
-      </div>
-
-      {/* 프로젝트가 없는 경우 */}
-      {projects.length === 0 && (
-        <div className="py-12 text-center bg-white border border-gray-200 rounded-lg">
-          <div className="mb-2 text-lg text-gray-500">📂</div>
-          <p className="text-gray-600">
-            {userName}님이 공개한 프로젝트가 없습니다.
-          </p>
-        </div>
-      )}
-
-      {/* 프로젝트 카드 그리드 */}
-      {projects.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {visibleProjects.map((project) => (
-            <MyProjectCard
-              key={project.id}
-              {...project}
-              type="project"
-              onCardClick={handleCardClick}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* 왼쪽: 사용자 프로필 카드 */}
+          <div className="lg:col-span-1">
+            <UserProfileCard
+              userId={userId || ""}
+              nickname={userProfile.nickname}
+              email={userProfile.email}
+              profile={userProfile.profile}
+              followersCount={userProfile.followersCount}
+              followingCount={userProfile.followingCount}
+              isFollowing={userProfile.isFollowing}
+              onFollowClick={handleFollowClick}
+              onChatClick={handleChatClick}
             />
-          ))}
-        </div>
-      )}
+          </div>
 
-      {/* 더보기 버튼 */}
-      {hasMore && (
-        <div className="pt-4 text-center">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
-          >
-            더 많은 프로젝트 보기
-          </button>
+          {/* 오른쪽: 사용자 프로젝트 목록 */}
+          <div className="lg:col-span-3">
+            <UserProjectList
+              projects={userProjects}
+              userName={userName}
+              onProjectUpdate={handleProjectUpdate}
+            />
+          </div>
         </div>
-      )}
-
-      {/* 모든 프로젝트를 다 보여준 경우 */}
-      {!hasMore && projects.length > 8 && (
-        <div className="pt-4 text-center text-gray-500">
-          모든 공개 프로젝트를 확인했습니다 ({projects.length}개)
-        </div>
-      )}
-
-      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
-      {isModalOpen && selectedProject && (
-        <ProjectModal
-          project={selectedProject}
-          onClose={handleCloseModal}
-          onProjectUpdate={handleProjectUpdate} // 추가
-        />
-      )}
+      </div>
     </div>
   );
 }
 
-export default UserProjectList;
+export default UserProfilePage;
