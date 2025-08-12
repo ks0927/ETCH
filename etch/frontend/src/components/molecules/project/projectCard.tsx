@@ -1,11 +1,27 @@
-import type { ProjectCardProps } from "../../atoms/card";
+import LikeSVG from "../../svg/likeSVG";
+import ViewSVG from "../../svg/viewSVG";
 
-interface Props extends ProjectCardProps {
-  onCardClick: (id: number) => void; // 부모 컴포넌트에서 모달 상태를 관리
+// 필요한 필드만 선택적으로 받는 인터페이스
+interface Props {
+  id: number;
+  title: string;
+  thumbnailUrl?: string;
   type: "project";
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  onCardClick: (id: number) => void;
 }
 
-function ProjectCard({ id, title, content, img, onCardClick }: Props) {
+function ProjectCard({
+  id,
+  title,
+  thumbnailUrl,
+  onCardClick,
+  viewCount,
+  nickname,
+  likeCount,
+}: Props) {
   const handleClick = () => {
     onCardClick(id);
   };
@@ -18,16 +34,31 @@ function ProjectCard({ id, title, content, img, onCardClick }: Props) {
       <section className="w-full h-36">
         <img
           className="w-full object-cover h-full"
-          src={img}
+          src={thumbnailUrl || "/placeholder-image.jpg"}
           alt="카드 이미지"
+          onError={(e) => {
+            e.currentTarget.src = "/placeholder-image.jpg";
+          }}
         />
       </section>
       <section className="p-3 sm:p-4">
         <div className="text-lg sm:text-xl lg:text-2xl font-bold line-clamp-2 text-gray-800 mb-2">
-          {title}
+          {title || "제목 없음"}
         </div>
         <div className="text-sm sm:text-base text-gray-600 line-clamp-2">
-          {content}
+          {nickname || "작성자 없음"}
+        </div>
+      </section>
+      <section className="p-3 sm:p-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <LikeSVG />
+            <span>{likeCount || 0}</span>
+          </div>
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <ViewSVG />
+            <span>{viewCount || 0}</span>
+          </div>
         </div>
       </section>
     </div>

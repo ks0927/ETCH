@@ -2,7 +2,6 @@ import { Link } from "react-router";
 import testImg from "../../assets/testImg.png";
 import { funcData } from "../../types/funcComponentData";
 import { mockJobList } from "../../types/mock/mockJobListData";
-import { mockProjectData } from "../../types/mock/mockProjectData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
 import JobList from "../organisms/job/jobList";
 import JobDetailModal from "../organisms/job/jobDetailModal";
@@ -34,7 +33,7 @@ function HomePage() {
     setSelectedJobId(null);
   };
 
-  const selectedJob = mockJobList.find(job => job.id === selectedJobId);
+  const selectedJob = mockJobList.find((job) => job.id === selectedJobId);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -105,7 +104,10 @@ function HomePage() {
                 <SeeMore />
               </Link>
             </div>
-            <JobList jobs={mockJobList.slice(0, 3)} onJobClick={handleJobClick} />
+            <JobList
+              jobs={mockJobList.slice(0, 3)}
+              onJobClick={handleJobClick}
+            />
           </div>
         </div>
       </section>
@@ -130,7 +132,7 @@ function HomePage() {
                     <SeeMore />
                   </Link>
                 </div>
-                <HomeProjectCard mockProjects={mockProjectData} />
+                <HomeProjectCard />
               </div>
             </div>
 
@@ -189,10 +191,7 @@ function HomePage() {
 
       {/* 모달 */}
       {selectedJob && (
-        <JobDetailModal
-          job={selectedJob}
-          onClose={handleCloseModal}
-        />
+        <JobDetailModal job={selectedJob} onClose={handleCloseModal} />
       )}
     </div>
   );

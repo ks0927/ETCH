@@ -1,4 +1,4 @@
-import type { ProjectTechData } from "../../../../types/project/projecTechData";
+import type { ProjectTechData } from "../../../../types/project/projectTechData";
 import ProjectStackButton from "../../../molecules/project/projectStackButton";
 
 interface ProjectStackProps {

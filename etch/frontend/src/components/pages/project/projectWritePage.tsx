@@ -21,7 +21,8 @@ import ProjectFileUpload from "../../organisms/project/write/projectFileUpload";
 import StackSVG from "../../svg/stackSVG";
 import { createProject } from "../../../api/projectApi";
 import { useNavigate } from "react-router";
-import { ProjectWriteTechData } from "../../../types/project/projecTechData";
+import { ProjectWriteTechData } from "../../../types/project/projectTechData";
+import ProjectWriteText from "../../organisms/project/write/projectWriteText";
 
 // 기존 ProjectData 사용 (단순하게!)
 function ProjectWritePage() {
@@ -29,11 +30,23 @@ function ProjectWritePage() {
   const [projectData, setProjectData] = useState<ProjectData>({
     ...ProjectState,
   });
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+
+  // 2. 썸네일 핸들러들
+  const handleThumbnailUpload = (file: File) => {
+    setThumbnailFile(file);
+    console.log("썸네일 업로드됨:", file.name);
+  };
+
+  const handleThumbnailRemove = () => {
+    setThumbnailFile(null);
+    console.log("썸네일 제거됨");
+  };
 
   const handleFileUpload = (newFiles: File[]) => {
     setProjectData((prev) => ({
       ...prev,
-      files: [...prev.files, ...newFiles].slice(0, 5),
+      files: [...prev.files, ...newFiles].slice(0, 11),
     }));
     console.log("파일 추가됨");
   };
@@ -86,7 +99,6 @@ function ProjectWritePage() {
   const categorizeFiles = (files: File[]) => {
     let thumbnailFile: File | undefined;
     const imageFiles: File[] = [];
-    let pdfFile: File | undefined;
 
     files.forEach((file, index) => {
       if (file.type.startsWith("image/")) {
@@ -95,12 +107,10 @@ function ProjectWritePage() {
         } else {
           imageFiles.push(file);
         }
-      } else if (file.type === "application/pdf") {
-        pdfFile = file;
       }
     });
 
-    return { thumbnailFile, imageFiles, pdfFile };
+    return { thumbnailFile, imageFiles };
   };
 
   const handleSubmit = async () => {
@@ -116,28 +126,25 @@ function ProjectWritePage() {
         return;
       }
 
-      if (!projectData.category) {
+      if (!projectData.projectCategory) {
         alert("프로젝트 카테고리를 선택해주세요.");
         return;
       }
 
       // 파일 분류
-      const { thumbnailFile, imageFiles, pdfFile } = categorizeFiles(
-        projectData.files
-      );
+      const { thumbnailFile, imageFiles } = categorizeFiles(projectData.files);
 
       // ProjectInputData 형태로 API 호출
       const projectInput: ProjectInputData = {
         title: projectData.title,
         content: projectData.content,
-        category: projectData.category as ProjectCategoryEnum,
+        projectCategory: projectData.projectCategory as ProjectCategoryEnum,
         techCodeIds: projectData.projectTechs, // number[] 그대로 사용
         githubUrl: projectData.githubUrl || "",
         youtubeUrl: projectData.youtubeUrl || "",
         isPublic: projectData.isPublic,
         thumbnailFile,
         imageFiles,
-        pdfFile,
       };
 
       console.log("=== 제출할 데이터 ===");
@@ -174,7 +181,7 @@ function ProjectWritePage() {
   const handleCategoryChange = (category: ProjectCategoryEnum) => {
     setProjectData((prev) => ({
       ...prev,
-      category,
+      projectCategory: category,
     }));
     console.log("현재 카테고리 스택 ID:", category);
   };
@@ -210,9 +217,12 @@ function ProjectWritePage() {
               uploadedFiles={projectData.files}
               onFileUpload={handleFileUpload}
               onFileRemove={handleFileRemove}
-              maxFiles={5}
+              thumbnailFile={thumbnailFile}
+              onThumbnailUpload={handleThumbnailUpload}
+              onThumbnailRemove={handleThumbnailRemove}
+              maxFiles={10}
               maxFileSize={5 * 1024 * 1024}
-              acceptedTypes={["image/png", "image/jpeg", "application/pdf"]}
+              acceptedTypes={["image/png", "image/jpeg"]}
             />
           </section>
 
@@ -238,10 +248,8 @@ function ProjectWritePage() {
                   value={projectData.title}
                   onChange={handleTitleChange}
                 />
-                <ProjectWriteInput
+                <ProjectWriteText
                   inputText="프로젝트 설명"
-                  placeholderText="프로젝트 설명을 입력해주세요"
-                  type="text"
                   value={projectData.content}
                   onChange={handleContentChange}
                 />
@@ -301,7 +309,7 @@ function ProjectWritePage() {
               </div>
               <ProjectCategory
                 isCategoryData={ProjectWriteCategoryData}
-                isSelect={projectData.category}
+                isSelect={projectData.projectCategory}
                 onCategoryChange={handleCategoryChange}
               />
             </div>
