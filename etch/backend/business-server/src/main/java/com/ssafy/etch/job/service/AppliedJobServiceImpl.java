@@ -47,4 +47,20 @@ public class AppliedJobServiceImpl implements AppliedJobService {
 
         appliedJobRepository.save(appliedJob);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AppliedJobListResponseDTO> getAppliedJobList(Long memberId) {
+        return appliedJobRepository.findByMember_Id(memberId).stream()
+                .map(AppliedJobEntity::toAppliedJobDTO)
+                .map(appliedJobDTO -> AppliedJobListResponseDTO.builder()
+                        .id(appliedJobDTO.getId())
+                        .title(appliedJobDTO.getJob().toJobDTO().getTitle())
+                        .companyName(appliedJobDTO.getJob().toJobDTO().getCompanyName())
+                        .openingDate(appliedJobDTO.getJob().toJobDTO().getOpeningDate())
+                        .closingDate(appliedJobDTO.getJob().toJobDTO().getExpirationDate())
+                        .status(appliedJobDTO.getStatus().name())
+                        .build())
+                .toList();
+    }
 }
