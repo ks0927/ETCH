@@ -1,4 +1,5 @@
 import type { ProjectCardProps } from "../../../atoms/card";
+import noImg from "../../../../assets/noImg.png"; // noImg import 추가
 
 interface Props extends ProjectCardProps {
   onCardClick: (id: number) => void; // 부모 컴포넌트에서 모달 상태를 관리
@@ -24,8 +25,11 @@ function MyProjectCard({
       <section className="w-full h-36">
         <img
           className="w-full object-cover h-full"
-          src={thumbnailUrl}
+          src={thumbnailUrl || noImg} // thumbnailUrl이 없으면 noImg 사용
           alt="카드 이미지"
+          onError={(e) => {
+            e.currentTarget.src = noImg; // 이미지 로딩 실패시에도 noImg 사용
+          }}
         />
       </section>
       <section className="p-3 sm:p-4">

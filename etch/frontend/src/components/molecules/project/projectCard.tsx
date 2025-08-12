@@ -1,5 +1,6 @@
 import LikeSVG from "../../svg/likeSVG";
 import ViewSVG from "../../svg/viewSVG";
+import noImg from "../../../assets/noImg.png";
 
 // 필요한 필드만 선택적으로 받는 인터페이스
 interface Props {
@@ -34,7 +35,7 @@ function ProjectCard({
       <section className="w-full h-36">
         <img
           className="w-full object-cover h-full"
-          src={thumbnailUrl || "/placeholder-image.jpg"}
+          src={thumbnailUrl || noImg}
           alt="카드 이미지"
           onError={(e) => {
             e.currentTarget.src = "/placeholder-image.jpg";

@@ -1,9 +1,3 @@
-import { mockFavoriteCompanyData } from "../../../types/mock/mockFavoriteCompanyData";
-import { mockFavoriteJobs } from "../../../types/mock/mockFavoriteJobData";
-import { mockFavoriteProjectsData } from "../../../types/mock/mockFavoriteProjectData";
-import { mockProjectData } from "../../../types/mock/mockProjectData";
-import FavoriteCompanyList from "../../organisms/mypage/favorite/favoriteCompanyList";
-import FavoriteJobList from "../../organisms/mypage/favorite/favoriteJobList";
 import FavoriteProjectList from "../../organisms/mypage/favorite/favoriteProjectList";
 
 function MypageFavoritePage() {
@@ -12,18 +6,18 @@ function MypageFavoritePage() {
       {/* 상단 영역: 관심 기업과 관심 공고 */}
       <div className="flex flex-col lg:flex-row gap-6 mb-8">
         <div className="flex-1">
-          <FavoriteCompanyList
+          {/* <FavoriteCompanyList
             titleText="관심 기업"
             subText="팔로우한 기업들"
-            favoriteData={mockFavoriteCompanyData}
-          />
+            // favoriteData prop 제거 - 컴포넌트 내부에서 API 호출
+          /> */}
         </div>
         <div className="flex-1">
-          <FavoriteJobList
+          {/* <FavoriteJobList
             titleText="관심 공고"
             subText="북마크한 채용공고"
-            favoriteData={mockFavoriteJobs}
-          />
+            // favoriteData prop 제거 - 컴포넌트 내부에서 API 호출
+          /> */}
         </div>
       </div>
 
@@ -33,8 +27,7 @@ function MypageFavoritePage() {
           titleText="관심 프로젝트"
           subText="좋아요한 프로젝트"
           sliceCount={4}
-          favoriteData={mockFavoriteProjectsData}
-          mockProjects={mockProjectData}
+          // favoriteData, mockProjects props 제거 - 컴포넌트 내부에서 API 호출
         />
       </div>
     </div>

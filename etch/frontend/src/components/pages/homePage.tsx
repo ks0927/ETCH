@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import testImg from "../../assets/testImg.png";
+import noImg from "../../assets/noImg.png";
 import { funcData } from "../../types/funcComponentData";
 import { mockJobList } from "../../types/mock/mockJobListData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
@@ -68,7 +68,7 @@ function HomePage() {
           </div>
           <div className="flex-1 max-w-lg">
             <img
-              src={testImg}
+              src={noImg}
               alt="메인 이미지"
               className="w-full h-auto rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
             />
