@@ -56,6 +56,9 @@ public class JobEntity {
 	@Column(name = "updated_at")
 	private LocalDate updatedAt;
 
+	@Column(name = "external_job_id", unique = true)
+	private String externalJobId;
+
 	@ManyToOne
 	@JoinColumn(name = "company_id", nullable = false)
 	private CompanyEntity company;
