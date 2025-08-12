@@ -1,4 +1,4 @@
-import type { News } from "../../../types/news";
+import type { News } from "../../../types/newsTypes";
 import LatestCard from "../../molecules/news/latestList";
 
 interface Props {
