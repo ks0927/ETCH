@@ -1,28 +1,38 @@
 import { useState, useEffect } from "react";
 import CompanyNews from "../../organisms/news/newsListCompany";
 import LatestNews from "../../organisms/news/newsListLatest";
-import { mockCompany } from "../../../types/mock/mockCompanyData";
-import { LatestNewsData } from "../../../api/newsApi";
+import { LatestNewsData, TopCompaniesData } from "../../../api/newsApi";
+import type { TopCompany } from "../../../types/topCompanies";
 import Pagenation from "../../common/pagination";
+import BuildingSVG from "../../svg/buildingSVG";
 
 function NewsPage() {
   const [latestNewsData, setLatestNewsData] = useState([]);
+  const [topCompaniesData, setTopCompaniesData] = useState<TopCompany[]>([]);
 
   useEffect(() => {
-    const loadLatestNews = async () => {
-      const data = await LatestNewsData();
-      setLatestNewsData(data);
+    const loadNewsData = async () => {
+      try {
+        const [latestData, companiesData] = await Promise.all([
+          LatestNewsData(),
+          TopCompaniesData(),
+        ]);
+        setLatestNewsData(latestData);
+        setTopCompaniesData(companiesData);
+      } catch (error) {
+        console.error("뉴스 데이터 로딩 실패:", error);
+      }
     };
 
-    loadLatestNews();
+    loadNewsData();
   }, []);
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 섹션 */}
       <section className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8 sm:py-8">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+            <div className="flex items-center justify-center w-8 h-8 bg-white rounded-lg">
               <svg
                 className="w-5 h-5 text-blue-500"
                 fill="none"
@@ -37,46 +47,34 @@ function NewsPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
               뉴스
             </h1>
           </div>
-          <p className="mt-2 text-sm sm:text-base text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 sm:text-base">
             최신 IT 뉴스와 기업 정보를 한눈에 확인하세요
           </p>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-12">
+      <div className="px-4 py-6 mx-auto space-y-8 max-w-7xl sm:px-6 lg:px-8 sm:py-8 sm:space-y-12">
         {/* 주요 기업 섹션 */}
-        <section className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
+        <section className="p-6 bg-white shadow-sm rounded-2xl sm:p-8">
+          <div className="flex items-center mb-6 space-x-3">
+            <div className="flex items-center justify-center w-6 h-6 bg-purple-100 rounded-full">
+              <BuildingSVG className="w-4 h-4 text-purple-600" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-              주요 기업
+            <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
+              인기 기업
             </h2>
           </div>
-          <CompanyNews companyData={mockCompany} />
+          <CompanyNews companyData={topCompaniesData} />
         </section>
         {/* 최신 뉴스 섹션 */}
-        <section className="bg-white rounded-2xl shadow-sm p-6 sm:p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
+        <section className="p-6 bg-white shadow-sm rounded-2xl sm:p-8">
+          <div className="flex flex-col mb-6 space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+              <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
                 <svg
                   className="w-4 h-4 text-green-600"
                   fill="none"
@@ -91,7 +89,7 @@ function NewsPage() {
                   />
                 </svg>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-gray-900 sm:text-2xl">
                 최신 뉴스
               </h2>
             </div>
