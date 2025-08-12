@@ -9,13 +9,18 @@ import type { ProjectData } from "../../../types/project/projectDatas";
 import { getAllProjects } from "../../../api/projectApi";
 import { getCategoryFromNumber } from "../../../types/project/projectCategroyData";
 
-// API 호출 함수 (실제 구현)
-const fetchProjects = async (): Promise<ProjectData[]> => {
+// API 호출 함수 (실제 구현) - 정렬 파라미터 추가
+const fetchProjects = async (
+  sort: string = "latest"
+): Promise<ProjectData[]> => {
   try {
-    const data = await getAllProjects();
+    console.log("🔄 프로젝트 조회 시작 - 정렬:", sort);
+    const data = await getAllProjects(sort);
+    console.log("✅ 받아온 프로젝트:", data);
+    console.log("✅ 프로젝트 개수:", data.length);
     return data;
   } catch (error) {
-    console.error("프로젝트 데이터 fetch 에러:", error);
+    console.error("❌ 프로젝트 데이터 fetch 에러:", error);
     throw error;
   }
 };
@@ -28,7 +33,7 @@ function ProjectListPage() {
   // 필터 상태 관리
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [selectedSort, setSelectedSort] = useState<string>("");
+  const [selectedSort, setSelectedSort] = useState<string>("LATEST"); // 기본값을 LATEST로 설정
 
   // 🔥 페이지네이션 상태 추가
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,7 +44,8 @@ function ProjectListPage() {
     const loadProjects = async () => {
       try {
         setLoading(true);
-        const projectData = await fetchProjects();
+        // 최신순으로 데이터 로드
+        const projectData = await fetchProjects("latest");
         setProjects(projectData);
       } catch (err) {
         setError("프로젝트 데이터를 불러오는데 실패했습니다.");
@@ -50,7 +56,52 @@ function ProjectListPage() {
     };
 
     loadProjects();
-  }, []);
+  }, []); // 의존성 배열에서 selectedSort 제거 (무한 루프 방지)
+
+  // 정렬이 변경될 때 서버에서 새로 데이터 가져오기
+  useEffect(() => {
+    if (selectedSort) {
+      const reloadProjects = async () => {
+        try {
+          setLoading(true);
+          let serverSort = "latest"; // 기본값
+
+          // UI 정렬 값을 서버 API 파라미터로 변환
+          switch (selectedSort) {
+            case "LATEST":
+              serverSort = "latest";
+              break;
+            case "POPULAR":
+              serverSort = "popular";
+              break;
+            case "VIEWS":
+              serverSort = "views";
+              break;
+            case "LIKES":
+              serverSort = "likes";
+              break;
+            default:
+              serverSort = "latest";
+          }
+
+          console.log(
+            "🔄 정렬 변경으로 재조회:",
+            selectedSort,
+            "->",
+            serverSort
+          );
+          const projectData = await fetchProjects(serverSort);
+          setProjects(projectData);
+        } catch (err) {
+          console.error("정렬 변경 시 데이터 로드 실패:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      reloadProjects();
+    }
+  }, [selectedSort]); // selectedSort가 변경될 때만 실행
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
@@ -60,12 +111,11 @@ function ProjectListPage() {
     );
   };
 
-  // 필터링된 프로젝트를 계산하는 함수
+  // 필터링된 프로젝트를 계산하는 함수 (정렬 제거 - 서버에서 처리)
   const getFilteredProjects = (): ProjectData[] => {
     console.log("=== 필터링 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
-    console.log("선택된 정렬:", selectedSort);
 
     let filtered = [...projects];
 
@@ -106,25 +156,7 @@ function ProjectListPage() {
       });
     }
 
-    // 3. 정렬 적용
-    if (selectedSort) {
-      filtered.sort((a, b) => {
-        switch (selectedSort) {
-          case "LATEST":
-            return (
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-          case "VIEWS":
-            return (b.viewCount || 0) - (a.viewCount || 0);
-          case "POPULAR":
-            return (b.popularityScore || 0) - (a.popularityScore || 0);
-          case "LIKES":
-            return (b.likeCount || 0) - (a.likeCount || 0);
-          default:
-            return 0;
-        }
-      });
-    }
+    // 정렬은 서버에서 이미 처리되므로 제거
 
     console.log("=== 필터링 완료 ===");
     console.log("필터링된 프로젝트 수:", filtered.length);
@@ -165,7 +197,23 @@ function ProjectListPage() {
 
   // 정렬 핸들러
   const handleSortChange = (sortType: string) => {
+    console.log("정렬 변경:", sortType);
     setSelectedSort(sortType);
+  };
+
+  // 새로고침 버튼 핸들러 추가
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const projectData = await fetchProjects("latest");
+      setProjects(projectData);
+      console.log("🔄 수동 새로고침 완료");
+    } catch (err) {
+      setError("프로젝트 데이터를 불러오는데 실패했습니다.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -231,6 +279,12 @@ function ProjectListPage() {
                     새 프로젝트 등록
                   </button>
                 </Link>
+                <button
+                  onClick={handleRefresh}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+                >
+                  🔄 새로고침
+                </button>
               </div>
             </section>
 
@@ -261,7 +315,7 @@ function ProjectListPage() {
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedCategory("ALL");
-                      setSelectedSort("");
+                      setSelectedSort("LATEST");
                     }}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
@@ -271,7 +325,21 @@ function ProjectListPage() {
               </section>
             )}
 
-            {/* 🔥 프로젝트 카드 섹션 - 2열 그리드 */}
+            {/* 🔥 현재 상태 디버깅 정보 (개발용) */}
+            <section className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
+              <div className="text-yellow-800">
+                <strong>디버그 정보:</strong> 전체 {projects.length}개 프로젝트,
+                필터링 후 {filteredProjects.length}개, 현재 정렬: {selectedSort}
+                ,
+                {projects.length > 0 && (
+                  <span>
+                    {" "}
+                    최신 프로젝트: {projects[0]?.title} (ID: {projects[0]?.id})
+                  </span>
+                )}
+              </div>
+            </section>
+
             {/* 🔥 프로젝트 카드 섹션 */}
             <section>
               {currentProjects.length > 0 ? (

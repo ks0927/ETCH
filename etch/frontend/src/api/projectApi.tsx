@@ -14,26 +14,58 @@ export interface ProjectCreateRequestData {
   isPublic: boolean;
 }
 
+// 토큰을 안전하게 가져오는 유틸리티 함수
+function getAuthToken(): string | null {
+  // 먼저 정상적인 키로 시도
+  let token = localStorage.getItem("access_token");
+
+  // 찾지 못했다면 localStorage를 순회해서 access_token이 포함된 키 찾기
+  if (!token) {
+    console.log(
+      "정상 키로 토큰을 찾을 수 없습니다. localStorage 전체 검색 중..."
+    );
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      console.log(`키 확인: "${key}"`);
+
+      if (
+        key &&
+        (key.includes("access_token") || key.trim() === "access_token")
+      ) {
+        token = localStorage.getItem(key);
+        console.log(
+          `토큰 발견! 키: "${key}", 토큰: ${token?.substring(0, 50)}...`
+        );
+
+        if (token) {
+          // 정상적인 키로 다시 저장하고 잘못된 키는 제거
+          localStorage.setItem("access_token", token);
+          if (key !== "access_token") {
+            localStorage.removeItem(key);
+            console.log(
+              `잘못된 키 "${key}" 제거하고 "access_token"으로 저장했습니다.`
+            );
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  if (token) {
+    console.log(`최종 토큰: ${token.substring(0, 50)}...`);
+  } else {
+    console.log("토큰을 찾을 수 없습니다.");
+  }
+
+  return token;
+}
+
 // 프로젝트 생성 API - ProjectInputData 사용
 export async function createProject(projectInput: ProjectInputData) {
   try {
-    // 토큰 디버깅
-    const token = localStorage.getItem("access_token");
-    console.log("=== 토큰 디버깅 ===");
-    console.log("localStorage의 모든 키:", Object.keys(localStorage));
-    console.log("access_token 값:", token);
-    console.log("토큰 타입:", typeof token);
-    console.log("토큰 길이:", token?.length);
-
-    // 다른 가능한 토큰 키들도 확인
-    console.log("accessToken:", localStorage.getItem("accessToken"));
-    console.log("token:", localStorage.getItem("token"));
-    console.log("authToken:", localStorage.getItem("authToken"));
-
-    if (!token) {
-      console.error("토큰이 없습니다. localStorage 전체 내용:", localStorage);
-      throw new Error("로그인이 필요합니다.");
-    }
+    const token = getAuthToken();
 
     const formData = new FormData();
 
@@ -69,21 +101,46 @@ export async function createProject(projectInput: ProjectInputData) {
       formData.append("pdf", projectInput.pdfFile);
     }
 
-    console.log("=== 요청 헤더 확인 ===");
-    console.log("Authorization 헤더:", `Bearer ${token}`);
+    // 토큰이 있으면 헤더에 포함
+    const config = token
+      ? {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      : {};
 
-    const response = await axios.post(`${BASE_API}/projects`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const response = await axios.post(
+        `${BASE_API}/projects`,
+        formData,
+        config
+      );
+      return response.data.data;
+    } catch (authError) {
+      // 401 오류인 경우 인증 없이 재시도 (개발용)
+      if (axios.isAxiosError(authError) && authError.response?.status === 401) {
+        console.warn("⚠️ 인증 실패. 개발 환경에서 인증 없이 재시도합니다.");
+        console.log("실제 환경에서는 로그인이 필요합니다.");
 
-    return response.data.data;
+        // 토큰 없이 재시도
+        const retryResponse = await axios.post(
+          `${BASE_API}/projects`,
+          formData
+        );
+        return retryResponse.data.data;
+      }
+      throw authError;
+    }
   } catch (error) {
     console.error("프로젝트 생성 실패:", error);
     if (axios.isAxiosError(error)) {
       console.error("Response status:", error.response?.status);
       console.error("Response data:", error.response?.data);
+
+      if (error.response?.status === 401) {
+        throw new Error("로그인이 필요합니다. 로그인 페이지로 이동해주세요.");
+      }
     }
     throw error;
   }
@@ -95,7 +152,7 @@ export async function updateProject(
   projectInput: ProjectInputData
 ) {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -154,7 +211,7 @@ export async function updateProject(
 // 프로젝트 삭제 API
 export async function deleteProject(projectId: number) {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -183,7 +240,7 @@ export async function deleteProject(projectId: number) {
 
 export async function likeProject(projectId: number) {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -214,7 +271,7 @@ export async function likeProject(projectId: number) {
 
 export async function unlikeProject(projectId: number) {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -242,7 +299,7 @@ export async function unlikeProject(projectId: number) {
 
 export async function getLikedProjects() {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     const response = await axios.get(`${BASE_API}/likes/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -265,7 +322,7 @@ export async function getLikedProjects() {
 
 export async function getMyProjects() {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     const response = await axios.get(`${BASE_API}/projects/my`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -286,18 +343,22 @@ export async function getMyProjects() {
   }
 }
 
-export async function getAllProjects() {
+// 최신순으로 기본 정렬하는 프로젝트 목록 조회
+export async function getAllProjects(sort: string = "latest") {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
 
-    // 토큰이 있으면 헤더에 포함, 없으면 헤더 없이 요청
     const config = token
       ? {
           headers: { Authorization: `Bearer ${token}` },
         }
       : {};
 
-    const response = await axios.get(`${BASE_API}/projects`, config);
+    // 정렬 파라미터 추가
+    const response = await axios.get(
+      `${BASE_API}/projects?sort=${sort}`,
+      config
+    );
 
     console.log("getAllProjects 응답:", response.data);
 
@@ -315,7 +376,7 @@ export async function getAllProjects() {
 
       // 토큰 없이 재시도
       try {
-        const response = await axios.get(`${BASE_API}/projects`);
+        const response = await axios.get(`${BASE_API}/projects?sort=${sort}`);
         const pageData = response.data.data;
         const projects = pageData.content || [];
         return projects;
@@ -331,7 +392,7 @@ export async function getAllProjects() {
 
 export async function getProjectById(id: number) {
   try {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
 
     const config = token
       ? {
