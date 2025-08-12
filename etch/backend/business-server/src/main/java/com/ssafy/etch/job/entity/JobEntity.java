@@ -68,6 +68,7 @@ public class JobEntity {
 			.id(id)
 			.title(title)
 			.companyName(companyName)
+			.companyId(company.getId())
 			.region(region)
 			.industry(industry)
 			.jobCategory(jobCategory)

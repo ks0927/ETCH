@@ -11,6 +11,7 @@ import lombok.Getter;
 public class JobDTO {
 	private Long id;
 	private String title;
+	private Long companyId;
 	private String companyName;
 	private String region;
 	private String industry;
