@@ -16,7 +16,7 @@ import java.util.List;
 
 @Tag(
         name = "AppliedJobs",
-        description = "AppliedJobs Controller 입니다."
+        description = "AppliedJobs Controller 입니다. "
 )
 @RestController
 @RequiredArgsConstructor
