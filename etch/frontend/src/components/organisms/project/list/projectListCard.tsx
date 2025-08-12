@@ -6,17 +6,12 @@ import { getProjectById } from "../../../../api/projectApi.tsx";
 
 interface Props {
   projects: ProjectData[];
+  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 업데이트 콜백 추가
 }
 
-function ProjectListCard({ projects }: Props) {
+function ProjectListCard({ projects, onProjectUpdate }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
-
-  // ❌ 삭제된 부분: 강제 역순 정렬 제거
-  // const sortedProjects = [...projects].reverse();
-
-  // ✅ 수정된 부분: 부모에서 이미 정렬된 projects를 그대로 사용
-  const sortedProjects = projects; // 부모 컴포넌트에서 이미 정렬된 상태로 전달받음
-
+  const sortedProjects = projects;
   const hasMore = sortedProjects.length > visibleCount;
 
   // 모달 상태 관리
@@ -34,7 +29,6 @@ function ProjectListCard({ projects }: Props) {
   // 카드 클릭 핸들러
   const handleCardClick = async (projectId: number) => {
     try {
-      // 상세 데이터를 별도로 호출
       const detailProject = await getProjectById(projectId);
       setSelectedProject(detailProject);
       setIsModalOpen(true);
@@ -43,15 +37,24 @@ function ProjectListCard({ projects }: Props) {
     }
   };
 
-  // 모달 닫기 핸들러
+  // 🎯 모달 닫기 시 프로젝트 데이터 업데이트
   const handleCloseModal = () => {
+    // 선택된 프로젝트가 변경되었다면 부모 컴포넌트에 알림
+    if (selectedProject && onProjectUpdate) {
+      onProjectUpdate(selectedProject);
+    }
+
     setIsModalOpen(false);
     setSelectedProject(null);
   };
 
+  // 🎯 모달에서 프로젝트 업데이트 핸들러
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setSelectedProject(updatedProject);
+  };
+
   return (
     <div className="space-y-8">
-      {/* 프로젝트가 없는 경우 */}
       {projects.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 text-6xl mb-4">📂</div>
@@ -62,7 +65,6 @@ function ProjectListCard({ projects }: Props) {
         </div>
       ) : (
         <>
-          {/* 프로젝트 카드 그리드 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {visibleProjects.map((project) => (
               <ProcjectCard
@@ -79,7 +81,6 @@ function ProjectListCard({ projects }: Props) {
             ))}
           </div>
 
-          {/* 더보기 버튼 */}
           {hasMore && (
             <div className="flex justify-center pt-4">
               <button
@@ -91,7 +92,6 @@ function ProjectListCard({ projects }: Props) {
             </div>
           )}
 
-          {/* 모든 프로젝트를 다 보여준 경우 */}
           {!hasMore && projects.length > 10 && (
             <div className="text-center text-gray-500 pt-4">
               모든 프로젝트를 확인했습니다 ({projects.length}개)
@@ -100,9 +100,13 @@ function ProjectListCard({ projects }: Props) {
         </>
       )}
 
-      {/* 프로젝트 모달 */}
+      {/* 🎯 모달에 업데이트 핸들러 전달 */}
       {isModalOpen && selectedProject && (
-        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
+        <ProjectModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectUpdate={handleProjectUpdate} // 프로젝트 업데이트 핸들러 전달
+        />
       )}
     </div>
   );

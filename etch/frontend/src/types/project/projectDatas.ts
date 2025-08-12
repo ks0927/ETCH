@@ -41,6 +41,7 @@ export interface ProjectData {
   commentCount?: number; // 추가
   popularityScore?: number; // 추가
   nickname: string;
+  likedByMe: boolean;
   member: {
     id: number;
     nickname?: string; // 추가하면 좋음
@@ -86,6 +87,7 @@ export const ProjectState: ProjectData = {
   createdAt: "",
   updatedAt: "",
   isDeleted: false,
+  likedByMe: false,
   githubUrl: "",
   isPublic: true,
   nickname: "",
