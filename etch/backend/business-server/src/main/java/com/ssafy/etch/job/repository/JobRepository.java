@@ -5,13 +5,22 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.ssafy.etch.job.entity.JobEntity;
 
 public interface JobRepository extends JpaRepository<JobEntity, Long> {
 	List<JobEntity> findAllByIdIn(Collection<Long> ids);
 
-	List<JobEntity> findByOpeningDateLessThanAndExpirationDateGreaterThanEqual(
-		LocalDateTime openingDate, LocalDateTime expirationDate
+	@Query("""
+		    SELECT j FROM JobEntity j
+		    WHERE
+		        (j.openingDate BETWEEN :start AND :end)
+		        OR (j.expirationDate BETWEEN :start AND :end)
+		""")
+	List<JobEntity> findJobsStartingOrEndingInPeriod(
+		@Param("start") LocalDateTime start,
+		@Param("end") LocalDateTime end
 	);
 }
