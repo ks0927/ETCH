@@ -1,5 +1,6 @@
 package com.ssafy.etch.project.controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
@@ -31,9 +33,11 @@ import jakarta.validation.Valid;
 public class ProjectController {
 
 	private final ProjectService projectService;
+	private final ObjectMapper objectMapper;
 
-	public ProjectController(ProjectService projectService) {
+	public ProjectController(ProjectService projectService, ObjectMapper objectMapper) {
 		this.projectService = projectService;
+		this.objectMapper = objectMapper;
 	}
 
 	@Operation(
@@ -68,12 +72,23 @@ public class ProjectController {
 	)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<Long>> createProject(
-		@AuthenticationPrincipal(expression = "id") Long memberId,
-		@Valid @RequestPart("data") ProjectCreateRequestDTO data,
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@RequestPart("data") MultipartFile dataFile,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
 		@RequestPart(value = "images", required = false) List<MultipartFile> images,
 		@RequestPart(value = "pdf", required = false) MultipartFile pdf
-	) {
+	) throws IOException {
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(ApiResponse.error("로그인이 필요합니다."));
+		}
+
+		// MultipartFile의 내용(byte[])을 String으로 변환
+		String dataStr = new String(dataFile.getBytes());
+		// String을 DTO 객체로 변환
+		ProjectCreateRequestDTO data = objectMapper.readValue(dataStr, ProjectCreateRequestDTO.class);
+
+		Long memberId = user.getId();
 		Long id = projectService.createProject(memberId, data, thumbnail, images, pdf);
 		return ResponseEntity.ok(ApiResponse.success(id));
 	}

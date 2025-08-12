@@ -334,7 +334,7 @@ public class ProjectServiceImpl implements ProjectService {
 			throw new NoSuchElementException("삭제된 프로젝트 입니다.");
 		}
 
-		if (!p.getMember().getId().equals(memberId)) {
+		if (!p.getMember().toMemberDTO().getId().equals(memberId)) {
 			throw new AccessDeniedException("본인만 수정할 수 있습니다.");
 		}
 
