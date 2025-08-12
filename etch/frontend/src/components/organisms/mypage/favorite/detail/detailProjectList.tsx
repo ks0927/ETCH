@@ -1,15 +1,20 @@
 import { useState } from "react";
 import type { FavoriteProjectProps } from "../../../../atoms/list";
 import FavoriteProjectCard from "../../../../molecules/mypage/favorite/detail/favoriteProjectCard";
-import type { ProjectCardProps } from "../../../../atoms/card";
 import ProjectModal from "../../../../common/projectModal";
+import type { ProjectData } from "../../../../../types/project/projectDatas";
 
 interface Props {
   favoriteData: FavoriteProjectProps[];
-  mockProjects: ProjectCardProps[];
+  mockProjects: ProjectData[]; // 🎯 타입 변경
+  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 추가
 }
 
-function DetailProjectList({ favoriteData, mockProjects }: Props) {
+function DetailProjectList({
+  favoriteData,
+  mockProjects,
+  onProjectUpdate,
+}: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
   const hasMore = favoriteData.length > visibleCount;
 
@@ -19,9 +24,10 @@ function DetailProjectList({ favoriteData, mockProjects }: Props) {
     setVisibleCount((prev) => prev + 10);
   };
 
-  // 모달 상태 관리
-  const [selectedProject, setSelectedProject] =
-    useState<ProjectCardProps | null>(null);
+  // 🎯 모달 상태를 ProjectData로 변경
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 카드 클릭 핸들러
@@ -39,6 +45,13 @@ function DetailProjectList({ favoriteData, mockProjects }: Props) {
     setSelectedProject(null);
   };
 
+  // 🎯 프로젝트 업데이트 핸들러 추가
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setSelectedProject(updatedProject); // 모달 내 프로젝트 상태 업데이트
+    // 부모 컴포넌트에도 알림
+    onProjectUpdate?.(updatedProject);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       {/* Project Cards Grid */}
@@ -50,9 +63,13 @@ function DetailProjectList({ favoriteData, mockProjects }: Props) {
         ))}
       </div>
 
-      {/* 프로젝트 모달 - 원래 있던 그대로 유지 */}
+      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
       {isModalOpen && selectedProject && (
-        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
+        <ProjectModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectUpdate={handleProjectUpdate} // 추가
+        />
       )}
 
       {/* 더보기 버튼 */}
