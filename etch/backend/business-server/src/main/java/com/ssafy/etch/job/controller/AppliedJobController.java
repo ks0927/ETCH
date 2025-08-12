@@ -3,6 +3,7 @@ package com.ssafy.etch.job.controller;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.job.dto.AppliedJobUpdateRequestDTO;
 import com.ssafy.etch.job.dto.AppliedJobListResponseDTO;
+import com.ssafy.etch.job.entity.ApplyStatusType;
 import com.ssafy.etch.job.service.AppliedJobService;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Tag(
         name = "AppliedJobs",
@@ -63,6 +65,11 @@ public class AppliedJobController {
         appliedJobService.deleteAppliedJob(oAuth2User.getId(), appliedJobId);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "지원 공고가 삭제되었습니다."));
+    }
+
+    @GetMapping("/codeList")
+    public ResponseEntity<ApiResponse<Map<ApplyStatusType, String>>> getCodeList() {
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(ApplyStatusType.getStatusDescriptionMap()));
     }
 
 }
