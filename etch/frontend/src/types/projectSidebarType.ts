@@ -32,10 +32,10 @@ export const ProjectSidebarType: ProjectSidebarInventory[] = [
     value: "VIEWS",
     checked: false,
   },
-  // {
-  //   type: "sort",
-  //   list: "인기순",
-  //   value: "POPULAR",
-  //   checked: false,
-  // },
+  {
+    type: "sort",
+    list: "인기순",
+    value: "POPULAR",
+    checked: false,
+  },
 ];
