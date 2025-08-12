@@ -1,10 +1,11 @@
 package com.ssafy.etch.job.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.ssafy.etch.company.entity.CompanyEntity;
-
 import com.ssafy.etch.job.dto.JobDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,11 +26,29 @@ public class JobEntity {
 	@Column(nullable = false)
 	private String title;
 
+	@Column(name = "company_name")
+	private String companyName;
+
+	@Column(name = "region")
+	private String region;
+
+	@Column(name = "industry")
+	private String industry;
+
+	@Column(name = "job_category")
+	private String jobCategory;
+
+	@Column(name = "work_type")
+	private String workType;
+
+	@Column(name = "education_level")
+	private String educationLevel;
+
 	@Column(name = "opening_date")
-	private LocalDate openingDate;
+	private LocalDateTime openingDate;
 
 	@Column(name = "expiration_date")
-	private LocalDate expirationDate;
+	private LocalDateTime expirationDate;
 
 	@Column(name = "created_at")
 	private LocalDate createdAt;
@@ -43,12 +62,18 @@ public class JobEntity {
 
 	public JobDTO toJobDTO() {
 		return JobDTO.builder()
-				.id(id)
-				.title(title)
-				.openingDate(openingDate)
-				.expirationDate(expirationDate)
-				.createdAt(createdAt)
-				.updatedAt(updatedAt)
-				.build();
+			.id(id)
+			.title(title)
+			.companyName(companyName)
+			.region(region)
+			.industry(industry)
+			.jobCategory(jobCategory)
+			.workType(workType)
+			.educationLevel(educationLevel)
+			.openingDate(openingDate)
+			.expirationDate(expirationDate)
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.build();
 	}
 }

@@ -22,8 +22,8 @@ public class JobDocument {
 	@Field(type = FieldType.Text, analyzer = "nori")
 	private String companyName; // 검색어 대상
 
-	@Field(type = FieldType.Keyword)
-	private String industry;
+	@Field(type = FieldType.Text, analyzer = "nori")
+	private List<String> industries;
 
 	@Field(type = FieldType.Text, analyzer = "nori")
 	private List<String> regions; // 지역 필터, 검색 대상 (다중 가능)
@@ -38,11 +38,8 @@ public class JobDocument {
 	private String educationLevel; // 필터
 
 	@Field(type = FieldType.Date)
-	private LocalDateTime postingDate;
+	private LocalDateTime openingDate;
 
 	@Field(type = FieldType.Date)
-	private LocalDateTime applyStartDate;
-
-	@Field(type = FieldType.Date)
-	private LocalDateTime applyEndDate;
+	private LocalDateTime expirationDate;
 }
