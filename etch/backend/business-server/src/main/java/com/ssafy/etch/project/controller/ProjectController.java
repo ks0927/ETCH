@@ -90,6 +90,7 @@ public class ProjectController {
 
 		Long memberId = user.getId();
 		Long id = projectService.createProject(memberId, data, thumbnail, images, pdf);
+
 		return ResponseEntity.ok(ApiResponse.success(id));
 	}
 
@@ -100,13 +101,22 @@ public class ProjectController {
 	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<Void>> updateProject(
 		@PathVariable("id") Long projectId,
-		@AuthenticationPrincipal(expression = "id") Long memberId,
-		@Valid @RequestPart("data") ProjectUpdateRequestDTO data,
+		@AuthenticationPrincipal CustomOAuth2User user,
+		@RequestPart("data") MultipartFile dataFile,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
 		@RequestPart(value = "images",    required = false) List<MultipartFile> images,
 		@RequestPart(value = "pdf",       required = false) MultipartFile pdf
-	) {
+	) throws IOException {
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인이 필요합니다."));
+		}
+
+		String dataStr = new String(dataFile.getBytes());
+		ProjectUpdateRequestDTO data = objectMapper.readValue(dataStr, ProjectUpdateRequestDTO.class);
+
+		Long memberId = user.getId();
 		projectService.updateProject(projectId, memberId, data, thumbnail, images, pdf);
+
 		return ResponseEntity.ok(ApiResponse.success(null));
 	}
 
