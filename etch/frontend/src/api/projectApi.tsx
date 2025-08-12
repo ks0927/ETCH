@@ -245,3 +245,41 @@ export async function getMyProjects() {
     throw error;
   }
 }
+// projectApi.tsx에 추가할 함수 (권장)
+
+// 특정 사용자의 공개 프로젝트만 조회하는 API
+export async function getUserPublicProjects(userId: number) {
+  try {
+    const response = await axios.get(
+      `${BASE_API}/projects/user/${userId}/public`
+    );
+    console.log("사용자 공개 프로젝트:", response.data.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("사용자 공개 프로젝트 조회 실패:", error);
+    throw error;
+  }
+}
+
+// 또는 쿼리 파라미터 방식
+export async function getUserProjects(
+  userId: number,
+  isPublicOnly: boolean = false
+) {
+  try {
+    const params = new URLSearchParams();
+    params.append("userId", userId.toString());
+    if (isPublicOnly) {
+      params.append("isPublic", "true");
+    }
+
+    const response = await axios.get(
+      `${BASE_API}/projects?${params.toString()}`
+    );
+    console.log("사용자 프로젝트:", response.data.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("사용자 프로젝트 조회 실패:", error);
+    throw error;
+  }
+}
