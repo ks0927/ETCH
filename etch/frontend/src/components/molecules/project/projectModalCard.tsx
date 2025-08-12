@@ -240,7 +240,7 @@ function ProjectModalCard({
   const images = getAllImages();
   const hasMultipleImages = images.length > 1;
   const techNames = convertTechIdsToNames(projectTechs);
-  const displayWriterImg = writerImg || "/placeholder-avatar.jpg";
+  const displayWriterImg = writerImg || noImg;
 
   // 캐러셀 네비게이션
   const nextImage = () => {
@@ -261,7 +261,7 @@ function ProjectModalCard({
             alt="작성자"
             className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-50"
             onError={(e) => {
-              e.currentTarget.src = "/placeholder-avatar.jpg";
+              e.currentTarget.src = noImg;
             }}
           />
           <div>
