@@ -133,20 +133,125 @@ export async function updateProject(
 }
 
 // 프로젝트 삭제 API
-// projectApi.tsx의 deleteProject 함수 수정
+// projectApi.tsx - 모든 API 함수에서 토큰 키 수정
 export async function deleteProject(projectId: number) {
   try {
-    // 토큰 가져오기 (localStorage, sessionStorage, 쿠키 등에서)
-    const token = localStorage.getItem("accessToken"); // 실제 토큰 저장 방식에 맞게 수정
+    // accessToken → access_token으로 변경
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
+    }
 
     const response = await axios.delete(`${BASE_API}/projects/${projectId}`, {
       headers: {
-        Authorization: `Bearer ${token}`, // 토큰 추가
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
-  } catch (error) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("access_token"); // 키 이름 수정
+        throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      } else if (error.response?.status === 403) {
+        throw new Error("삭제 권한이 없습니다.");
+      } else if (error.response?.status === 404) {
+        throw new Error("삭제할 프로젝트를 찾을 수 없습니다.");
+      }
+    }
     console.error("프로젝트 삭제 실패:", error);
+    throw error;
+  }
+}
+
+export async function likeProject(projectId: number) {
+  try {
+    const token = localStorage.getItem("access_token"); // 키 이름 수정
+
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
+    }
+
+    const response = await axios.post(
+      `${BASE_API}/likes/projects`,
+      {
+        targetId: projectId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("access_token"); // 키 이름 수정
+        throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      }
+    }
+    console.error("좋아요 추가 실패:", error);
+    throw error;
+  }
+}
+
+export async function unlikeProject(projectId: number) {
+  try {
+    const token = localStorage.getItem("access_token"); // 키 이름 수정
+
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
+    }
+
+    const response = await axios.delete(
+      `${BASE_API}/likes/projects/${projectId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("access_token"); // 키 이름 수정
+        throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      }
+    }
+    console.error("좋아요 취소 실패:", error);
+    throw error;
+  }
+}
+
+export async function getLikedProjects() {
+  try {
+    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const response = await axios.get(`${BASE_API}/likes/projects`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("좋아요한 프로젝트 조회 실패:", error);
+    throw error;
+  }
+}
+
+export async function getMyProjects() {
+  try {
+    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const response = await axios.get(`${BASE_API}/projects/my`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("내 프로젝트 조회 실패:", error);
     throw error;
   }
 }
@@ -175,77 +280,6 @@ export async function getProjectById(id: number) {
     throw error;
   }
 }
-
-// projectApi.tsx에 수정/추가
-export async function likeProject(projectId: number) {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.post(
-      `${BASE_API}/likes/projects`,
-      {
-        targetId: projectId,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("좋아요 추가 실패:", error);
-    throw error;
-  }
-}
-
-export async function unlikeProject(projectId: number) {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.delete(
-      `${BASE_API}/likes/projects/${projectId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("좋아요 취소 실패:", error);
-    throw error;
-  }
-}
-
-// 내가 좋아요한 프로젝트 목록 조회 API 추가
-export async function getLikedProjects() {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.get(`${BASE_API}/likes/projects`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error("좋아요한 프로젝트 조회 실패:", error);
-    throw error;
-  }
-}
-export async function getMyProjects() {
-  try {
-    const token = localStorage.getItem("accessToken");
-    const response = await axios.get(`${BASE_API}/projects/my`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data.data;
-  } catch (error) {
-    console.error("내 프로젝트 조회 실패:", error);
-    throw error;
-  }
-}
-// projectApi.tsx에 추가할 함수 (권장)
 
 // 특정 사용자의 공개 프로젝트만 조회하는 API
 export async function getUserPublicProjects(userId: number) {
