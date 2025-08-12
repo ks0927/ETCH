@@ -50,4 +50,14 @@ public class AppliedJobController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "지원 공고 상태 변경 완료"));
     }
 
+    @DeleteMapping("/{appliedJobId}")
+    public ResponseEntity<ApiResponse<?>> deleteAppliedJob(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable("appliedJobId") Long appliedJobId) {
+
+        appliedJobService.deleteAppliedJob(oAuth2User.getId(), appliedJobId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "지원 공고가 삭제되었습니다."));
+    }
+
 }

@@ -9,4 +9,5 @@ public interface AppliedJobService {
     void createAppliedJob(Long memberId, Long jobId);
     List<AppliedJobListResponseDTO> getAppliedJobList(Long memberId);
     void updateAppliedJobStatus(Long memberId, Long appliedJobId, ApplyStatusType status);
+    void deleteAppliedJob(Long memberId, Long appliedJobId);
 }

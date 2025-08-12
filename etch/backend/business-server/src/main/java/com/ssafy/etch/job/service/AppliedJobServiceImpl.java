@@ -77,4 +77,17 @@ public class AppliedJobServiceImpl implements AppliedJobService {
         appliedJob.updateStatus(status);
         appliedJobRepository.save(appliedJob);
     }
+
+    @Override
+    @Transactional
+    public void deleteAppliedJob(Long memberId, Long appliedJobId) {
+        AppliedJobEntity appliedJob = appliedJobRepository.findById(appliedJobId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (!appliedJob.toAppliedJobDTO().getMember().toMemberDTO().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        appliedJobRepository.delete(appliedJob);
+    }
 }
