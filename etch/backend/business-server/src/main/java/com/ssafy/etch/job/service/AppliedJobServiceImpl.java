@@ -63,4 +63,18 @@ public class AppliedJobServiceImpl implements AppliedJobService {
                         .build())
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public void updateAppliedJobStatus(Long memberId, Long appliedJobId, ApplyStatusType status) {
+        AppliedJobEntity appliedJob = appliedJobRepository.findById(appliedJobId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
+
+        if (!appliedJob.toAppliedJobDTO().getMember().toMemberDTO().getId().equals(memberId)) {
+            throw new CustomException(ErrorCode.ACCESS_DENIED);
+        }
+
+        appliedJob.updateStatus(status);
+        appliedJobRepository.save(appliedJob);
+    }
 }
