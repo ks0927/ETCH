@@ -10,6 +10,7 @@ import {
   likeProject,
   unlikeProject,
 } from "../../../api/projectApi";
+import { useNavigate } from "react-router";
 
 function ProjectModalCard({
   id,
@@ -34,6 +35,7 @@ function ProjectModalCard({
   onLike,
   onClose,
 }: ProjectCardProps & { onClose?: () => void }) {
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -89,10 +91,17 @@ function ProjectModalCard({
     }
   };
 
-  // 수정 버튼 클릭 핸들러
+  // 수정 버튼 클릭 핸들러 - React Router를 사용하도록 수정
   const handleEdit = () => {
-    // 프로젝트 수정 페이지로 이동
-    window.location.href = `/projects/edit/${id}`;
+    console.log("프로젝트 수정 페이지로 이동:", id);
+
+    // 모달 닫기 (부모 컴포넌트에서 onClose를 제공한 경우)
+    if (onClose) {
+      onClose();
+    }
+
+    // React Router를 사용해서 수정 페이지로 이동
+    navigate(`/projects/${id}/edit`);
   };
 
   // 삭제 버튼 클릭 핸들러 수정
@@ -585,7 +594,7 @@ function ProjectModalCard({
               프로젝트를 관리하려면 로그인이 필요합니다
             </p>
             <button
-              onClick={() => (window.location.href = "/login")}
+              onClick={() => navigate("/login")}
               className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
             >
               로그인하기
