@@ -30,4 +30,13 @@ public class AppliedJobController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null, "지원 공고에 추가되었습니다."));
     }
 
+    @GetMapping("/list")
+    public ResponseEntity<ApiResponse<?>> getAppliedJobList(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
+
+        List<AppliedJobListResponseDTO> list = appliedJobService.getAppliedJobList(oAuth2User.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(list, "지원공고 목록 조회 완료"));
+    }
+
 }

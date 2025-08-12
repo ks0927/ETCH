@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface AppliedJobService {
     void createAppliedJob(Long memberId, Long jobId);
+    List<AppliedJobListResponseDTO> getAppliedJobList(Long memberId);
 }
