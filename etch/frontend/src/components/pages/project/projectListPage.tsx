@@ -47,6 +47,14 @@ function ProjectListPage() {
     loadProjects();
   }, []);
 
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setProjects((prevProjects) =>
+      prevProjects.map((project) =>
+        project.id === updatedProject.id ? updatedProject : project
+      )
+    );
+  };
+
   // 필터링 및 정렬된 프로젝트를 계산하는 함수 (인기순 추가)
   const getFilteredProjects = (): ProjectData[] => {
     console.log("=== 필터링 시작 ===");
@@ -286,7 +294,10 @@ function ProjectListPage() {
             {/* 프로젝트 카드 섹션 */}
             <section>
               {filteredProjects.length > 0 ? (
-                <ProjectListCard projects={filteredProjects} />
+                <ProjectListCard
+                  projects={filteredProjects}
+                  onProjectUpdate={handleProjectUpdate}
+                />
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-400 text-6xl mb-4">📂</div>

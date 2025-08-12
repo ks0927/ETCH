@@ -256,13 +256,22 @@ export async function getMyProjects() {
   }
 }
 
-// 프로젝트 목록 조회 API
 export async function getAllProjects() {
   try {
-    const response = await axios.get(`${BASE_API}/projects`);
-    console.log("백엔드 응답 원본:", response.data); // 전체 응답 구조
-    console.log("프로젝트 데이터:", response.data.data); // 실제 프로젝트 배열
-    console.log("첫 번째 프로젝트:", response.data.data[0]); // 개별 프로젝트 구조
+    // 🎯 토큰 추가하여 likedByMe 정보 받기
+    const token = localStorage.getItem("access_token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+    const response = await axios.get(`${BASE_API}/projects`, { headers });
+    console.log("백엔드 응답 원본:", response.data);
+    console.log("프로젝트 데이터:", response.data.data);
+    console.log("첫 번째 프로젝트:", response.data.data[0]);
+
+    // likedByMe 필드가 포함되었는지 확인
+    if (response.data.data.length > 0) {
+      console.log("likedByMe 필드 확인:", response.data.data[0].likedByMe);
+    }
+
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 목록 조회 실패:", error);
