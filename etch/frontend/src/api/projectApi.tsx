@@ -17,6 +17,24 @@ export interface ProjectCreateRequestData {
 // 프로젝트 생성 API - ProjectInputData 사용
 export async function createProject(projectInput: ProjectInputData) {
   try {
+    // 토큰 디버깅
+    const token = localStorage.getItem("access_token");
+    console.log("=== 토큰 디버깅 ===");
+    console.log("localStorage의 모든 키:", Object.keys(localStorage));
+    console.log("access_token 값:", token);
+    console.log("토큰 타입:", typeof token);
+    console.log("토큰 길이:", token?.length);
+
+    // 다른 가능한 토큰 키들도 확인
+    console.log("accessToken:", localStorage.getItem("accessToken"));
+    console.log("token:", localStorage.getItem("token"));
+    console.log("authToken:", localStorage.getItem("authToken"));
+
+    if (!token) {
+      console.error("토큰이 없습니다. localStorage 전체 내용:", localStorage);
+      throw new Error("로그인이 필요합니다.");
+    }
+
     const formData = new FormData();
 
     // 1. 프로젝트 데이터
@@ -25,11 +43,12 @@ export async function createProject(projectInput: ProjectInputData) {
       content: projectInput.content,
       category: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
-      githubUrl: projectInput.githubUrl || undefined,
-      youtubeUrl: projectInput.youtubeUrl || undefined,
+      githubUrl: projectInput.githubUrl,
+      youtubeUrl: projectInput.youtubeUrl,
       isPublic: projectInput.isPublic,
     };
 
+    // Blob을 사용하여 JSON을 올바른 Content-Type으로 전송
     const dataBlob = new Blob([JSON.stringify(requestData)], {
       type: "application/json",
     });
@@ -50,25 +69,22 @@ export async function createProject(projectInput: ProjectInputData) {
       formData.append("pdf", projectInput.pdfFile);
     }
 
-    // FormData 디버깅
-    console.log("=== FormData 내용 확인 ===");
-    console.log("requestData:", requestData);
-
-    // FormData 내용 로깅
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
+    console.log("=== 요청 헤더 확인 ===");
+    console.log("Authorization 헤더:", `Bearer ${token}`);
 
     const response = await axios.post(`${BASE_API}/projects`, formData, {
-      // Content-Type 헤더 제거 (axios가 자동으로 설정하도록)
-      // headers: {
-      //   "Content-Type": "multipart/form-data",
-      // },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
-    return response.data.data; // 프로젝트 ID 반환
+    return response.data.data;
   } catch (error) {
     console.error("프로젝트 생성 실패:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Response status:", error.response?.status);
+      console.error("Response data:", error.response?.data);
+    }
     throw error;
   }
 }
@@ -79,16 +95,20 @@ export async function updateProject(
   projectInput: ProjectInputData
 ) {
   try {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
+    }
+
     const formData = new FormData();
 
-    // 1. 프로젝트 데이터 (수정용)
     const requestData = {
       title: projectInput.title,
       content: projectInput.content,
       category: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
-      githubUrl: projectInput.githubUrl || undefined,
-      youtubeUrl: projectInput.youtubeUrl || undefined,
+      githubUrl: projectInput.githubUrl || null,
+      youtubeUrl: projectInput.youtubeUrl || null,
       isPublic: projectInput.isPublic,
       removeThumbnail: projectInput.removeThumbnail,
       removeFileIds: projectInput.removeFileIds,
@@ -100,7 +120,6 @@ export async function updateProject(
     });
     formData.append("data", dataBlob);
 
-    // 2. 파일들
     if (projectInput.thumbnailFile) {
       formData.append("thumbnail", projectInput.thumbnailFile);
     }
@@ -120,7 +139,7 @@ export async function updateProject(
       formData,
       {
         headers: {
-          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -136,7 +155,6 @@ export async function updateProject(
 export async function deleteProject(projectId: number) {
   try {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -166,7 +184,6 @@ export async function deleteProject(projectId: number) {
 export async function likeProject(projectId: number) {
   try {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -198,7 +215,6 @@ export async function likeProject(projectId: number) {
 export async function unlikeProject(projectId: number) {
   try {
     const token = localStorage.getItem("access_token");
-
     if (!token) {
       throw new Error("로그인이 필요합니다.");
     }
@@ -224,7 +240,6 @@ export async function unlikeProject(projectId: number) {
   }
 }
 
-// 🔥 페이지네이션 적용: 좋아요한 프로젝트 조회
 export async function getLikedProjects() {
   try {
     const token = localStorage.getItem("access_token");
@@ -234,14 +249,11 @@ export async function getLikedProjects() {
       },
     });
 
-    console.log("좋아요한 프로젝트 응답:", response.data);
-
-    // 페이지네이션 응답에서 content 배열 추출
     const data = response.data.data;
     if (Array.isArray(data)) {
-      return data; // 기존 배열 방식이면 그대로
+      return data;
     } else if (data && typeof data === "object" && "content" in data) {
-      return data.content || []; // 페이지네이션이면 content 추출
+      return data.content || [];
     }
 
     return [];
@@ -251,7 +263,6 @@ export async function getLikedProjects() {
   }
 }
 
-// 🔥 페이지네이션 적용: 내 프로젝트 조회
 export async function getMyProjects() {
   try {
     const token = localStorage.getItem("access_token");
@@ -261,14 +272,11 @@ export async function getMyProjects() {
       },
     });
 
-    console.log("내 프로젝트 응답:", response.data);
-
-    // 페이지네이션 응답에서 content 배열 추출
     const data = response.data.data;
     if (Array.isArray(data)) {
-      return data; // 기존 배열 방식이면 그대로
+      return data;
     } else if (data && typeof data === "object" && "content" in data) {
-      return data.content || []; // 페이지네이션이면 content 추출
+      return data.content || [];
     }
 
     return [];
@@ -278,61 +286,93 @@ export async function getMyProjects() {
   }
 }
 
-// 🔥 페이지네이션 적용: 프로젝트 목록 조회 API
 export async function getAllProjects() {
   try {
     const token = localStorage.getItem("access_token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    const response = await axios.get(`${BASE_API}/projects`, { headers });
-    console.log("백엔드 응답 원본:", response.data);
-    console.log("프로젝트 데이터:", response.data.data);
+    // 토큰이 있으면 헤더에 포함, 없으면 헤더 없이 요청
+    const config = token
+      ? {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      : {};
 
-    // 🔥 페이지네이션 응답에서 content 배열 추출
+    const response = await axios.get(`${BASE_API}/projects`, config);
+
+    console.log("getAllProjects 응답:", response.data);
+
     const pageData = response.data.data;
     const projects = pageData.content || [];
 
-    console.log("첫 번째 프로젝트:", projects[0]);
-
-    if (projects.length > 0) {
-      console.log("likedByMe 필드 확인:", projects[0].likedByMe);
-    }
-
-    return projects; // ✅ 배열 반환
+    return projects;
   } catch (error) {
     console.error("프로젝트 목록 조회 실패:", error);
+
+    // 401 오류 시 토큰 제거하고 재시도
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
+      localStorage.removeItem("access_token");
+
+      // 토큰 없이 재시도
+      try {
+        const response = await axios.get(`${BASE_API}/projects`);
+        const pageData = response.data.data;
+        const projects = pageData.content || [];
+        return projects;
+      } catch (retryError) {
+        console.error("재시도 실패:", retryError);
+        throw retryError;
+      }
+    }
+
     throw error;
   }
 }
 
-// 프로젝트 상세 조회 API (단일 객체이므로 페이지네이션 적용 안됨)
 export async function getProjectById(id: number) {
   try {
     const token = localStorage.getItem("access_token");
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    const response = await axios.get(`${BASE_API}/projects/${id}`, { headers });
+    const config = token
+      ? {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      : {};
+
+    const response = await axios.get(`${BASE_API}/projects/${id}`, config);
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
+
+    // 401 오류 시 토큰 제거하고 재시도
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
+      localStorage.removeItem("access_token");
+
+      try {
+        const response = await axios.get(`${BASE_API}/projects/${id}`);
+        return response.data.data;
+      } catch (retryError) {
+        console.error("재시도 실패:", retryError);
+        throw retryError;
+      }
+    }
+
     throw error;
   }
 }
 
-// 🔥 페이지네이션 적용: 특정 사용자의 공개 프로젝트 조회
 export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(
       `${BASE_API}/projects/user/${userId}/public`
     );
-    console.log("사용자 공개 프로젝트 응답:", response.data);
 
-    // 페이지네이션 응답에서 content 배열 추출
     const data = response.data.data;
     if (Array.isArray(data)) {
-      return data; // 기존 배열 방식이면 그대로
+      return data;
     } else if (data && typeof data === "object" && "content" in data) {
-      return data.content || []; // 페이지네이션이면 content 추출
+      return data.content || [];
     }
 
     return [];
@@ -342,7 +382,6 @@ export async function getUserPublicProjects(userId: number) {
   }
 }
 
-// 🔥 페이지네이션 적용: 쿼리 파라미터 방식 사용자 프로젝트 조회
 export async function getUserProjects(
   userId: number,
   isPublicOnly: boolean = false
@@ -357,14 +396,12 @@ export async function getUserProjects(
     const response = await axios.get(
       `${BASE_API}/projects?${params.toString()}`
     );
-    console.log("사용자 프로젝트 응답:", response.data);
 
-    // 페이지네이션 응답에서 content 배열 추출
     const data = response.data.data;
     if (Array.isArray(data)) {
-      return data; // 기존 배열 방식이면 그대로
+      return data;
     } else if (data && typeof data === "object" && "content" in data) {
-      return data.content || []; // 페이지네이션이면 content 추출
+      return data.content || [];
     }
 
     return [];
