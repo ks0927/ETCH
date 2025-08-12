@@ -1,7 +1,7 @@
 // atoms/button/index.ts 에서 StackButtonProps 수정
 
 import type { ProjectCategoryEnum } from "../../types/project/projectCategroyData";
-import type { ProjectTechEnum } from "../../types/project/projecTechData";
+import type { ProjectTechEnum } from "../../types/project/projectTechData";
 
 export interface ButtonProps {
   text?: string; //  버튼 안의 text
