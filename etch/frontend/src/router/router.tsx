@@ -165,7 +165,11 @@ const router = createBrowserRouter([
       },
       {
         path: "profile/:userId",
-        element: <UserProfilePage />,
+        element: (
+          <Suspense fallback={<LoadingPage />}>
+            <UserProfilePage />
+          </Suspense>
+        ),
       },
       {
         path: "/mypage",

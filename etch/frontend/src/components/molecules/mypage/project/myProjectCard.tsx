@@ -1,7 +1,11 @@
-import type { ProjectCardProps } from "../../../atoms/card";
 import noImg from "../../../../assets/noImg.png"; // noImg import 추가
 
-interface Props extends ProjectCardProps {
+interface Props {
+  // 🎯 ProjectCardProps 대신 ProjectData 사용하고 필요한 필드만 추출
+  id: number;
+  title: string;
+  content: string;
+  thumbnailUrl: string;
   onCardClick: (id: number) => void; // 부모 컴포넌트에서 모달 상태를 관리
   type: "project";
 }
