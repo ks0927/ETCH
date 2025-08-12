@@ -35,7 +35,7 @@ public class JobServiceImpl implements JobService {
 		LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
 
 		List<JobEntity> jobEntityList = jobRepository
-			.findByOpeningDateLessThanAndExpirationDateGreaterThanEqual(
+			.findJobsStartingOrEndingInPeriod(
 				endExclusive, startInclusive
 			);
 		List<JobResponseDTO> jobResponseDTOList = new ArrayList<>();
