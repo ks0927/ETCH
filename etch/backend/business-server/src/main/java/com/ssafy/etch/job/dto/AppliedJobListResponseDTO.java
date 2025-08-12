@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 public class AppliedJobListResponseDTO {
-    private Long id;
+    private Long appliedJobId;
+    private Long jobId;
+    private Long companyId;
     private String title;
     private String companyName;
     private LocalDateTime openingDate;
