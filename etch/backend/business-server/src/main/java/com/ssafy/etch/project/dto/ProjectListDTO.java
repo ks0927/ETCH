@@ -13,6 +13,7 @@ public class ProjectListDTO {
 	private Long likeCount;
 	private String nickname;
 	private Boolean isPublic;
+	private Double popularityScore;
 
 	public static ProjectListDTO from(ProjectDTO p) {
 		return ProjectListDTO.builder()
@@ -23,6 +24,7 @@ public class ProjectListDTO {
 			.likeCount(p.getLikeCount() != null ? p.getLikeCount().longValue() : 0L)
 			.nickname(p.getMember().toMemberDTO().getNickname())
 			.isPublic(p.getIsPublic())
+			.popularityScore(p.getPopularityScore())
 			.build();
 	}
 }
