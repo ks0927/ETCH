@@ -269,11 +269,46 @@ export async function getAllProjects() {
     throw error;
   }
 }
-
-// 프로젝트 상세 조회 API
+// 프로젝트 상세 조회 API (디버깅 버전)
 export async function getProjectById(id: number) {
   try {
-    const response = await axios.get(`${BASE_API}/projects/${id}`);
+    const token = localStorage.getItem("accessToken");
+    console.log("=== 프로젝트 상세 조회 디버깅 ===");
+    console.log("토큰 존재:", !!token);
+    console.log("프로젝트 ID:", id);
+
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    console.log("요청 헤더:", headers);
+
+    const response = await axios.get(`${BASE_API}/projects/${id}`, {
+      headers,
+    });
+
+    console.log("=== 백엔드 응답 전체 ===");
+    console.log("전체 응답:", response.data);
+    console.log("프로젝트 데이터:", response.data.data);
+
+    // 좋아요 관련 필드들 확인
+    const projectData = response.data.data;
+    console.log("=== 좋아요 관련 필드 확인 ===");
+    console.log("likeCount:", projectData.likeCount);
+    console.log("isLiked:", projectData.isLiked); // 이 필드가 있는지 확인
+    console.log("isLikedByCurrentUser:", projectData.isLikedByCurrentUser); // 다른 이름일 수도
+    console.log("liked:", projectData.liked); // 또 다른 가능한 이름
+    console.log("userLiked:", projectData.userLiked); // 또 다른 가능한 이름
+
+    // 모든 키 확인
+    console.log("=== 프로젝트 데이터의 모든 키 ===");
+    console.log("모든 키:", Object.keys(projectData));
+
+    // 좋아요와 관련된 키만 필터링
+    const likeRelatedKeys = Object.keys(projectData).filter(
+      (key) =>
+        key.toLowerCase().includes("like") ||
+        key.toLowerCase().includes("liked")
+    );
+    console.log("좋아요 관련 키들:", likeRelatedKeys);
+
     return response.data.data;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
