@@ -399,7 +399,6 @@ function ProjectModalCard({
           </div>
         </div>
       )}
-
       {/* 작성자 정보 */}
       <section className="flex items-center justify-between pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -455,7 +454,6 @@ function ProjectModalCard({
           <span className="font-medium">{viewCount || 0}</span>
         </div>
       </section>
-
       {/* 프로젝트 이미지 캐러셀 */}
       {/* 프로젝트 이미지 캐러셀 */}
       <section>
@@ -463,7 +461,7 @@ function ProjectModalCard({
           <img
             src={images[currentImageIndex]}
             alt={`${title} - 이미지 ${currentImageIndex + 1}`}
-            className="w-full h-80 object-cover transition-all duration-300"
+            className="w-full h-120 object-cover transition-all duration-300"
             onError={(e) => {
               e.currentTarget.src = noImg;
             }}
@@ -562,7 +560,6 @@ function ProjectModalCard({
           </div>
         )}
       </section>
-
       {/* 프로젝트 제목과 내용 */}
       <section className="space-y-3">
         <h1 className="text-xl font-bold text-gray-900 leading-tight">
@@ -580,7 +577,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 카테고리 */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -599,7 +595,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 🔥 수정된 기술 스택 섹션 */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -623,7 +618,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 링크들 */}
       <section className="space-y-4">
         {/* GitHub 링크 */}
@@ -688,7 +682,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 수정/삭제 버튼 (로그인한 작성자만 보이도록) */}
       {isLoggedIn() && isAuthor && (
         <section className="pt-4 border-t border-gray-100">
@@ -739,8 +732,7 @@ function ProjectModalCard({
           </div>
         </section>
       )}
-
-      {/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
+      d{/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
       {!isLoggedIn() && (
         <section className="pt-4 border-t border-gray-100">
           <div className="text-center py-4">
