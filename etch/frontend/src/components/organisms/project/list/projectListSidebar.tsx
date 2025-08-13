@@ -5,7 +5,7 @@ import ProjectSidebar from "../../../molecules/project/projectSidebar";
 interface Props {
   ProjectSidebarType: ProjectSidebarInventory[];
   onCategoryFilter: (category: string) => void;
-  onSortChange: (sortType: string) => void; // 정렬 핸들러 추가
+  onSortChange: (sortType: string) => void;
 }
 
 function ProjectListSidebar({
@@ -34,7 +34,7 @@ function ProjectListSidebar({
     }
   }, [sidebarData, onCategoryFilter]);
 
-  // 정렬 처리
+  // 정렬 처리 - 간단하게 수정
   useEffect(() => {
     const checkedSortItems = sidebarData.filter(
       (item) => item.type === "sort" && item.checked
@@ -66,9 +66,10 @@ function ProjectListSidebar({
     );
   };
 
-  // 정렬 변경 핸들러
+  // 정렬 변경 핸들러 - 비동기 처리로 수정
   const handleSortChange = (checked: boolean, value: string) => {
     if (checked) {
+      // 즉시 UI 업데이트
       setSidebarData((prevData) =>
         prevData.map((item) =>
           item.type === "sort"
@@ -76,6 +77,11 @@ function ProjectListSidebar({
             : item
         )
       );
+
+      // 다음 프레임에서 콜백 실행
+      requestAnimationFrame(() => {
+        onSortChange(value);
+      });
     }
   };
 
