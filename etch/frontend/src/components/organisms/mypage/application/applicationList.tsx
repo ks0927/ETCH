@@ -4,12 +4,14 @@ import type { ApplicationItemProps } from "../../../atoms/listItem";
 interface ApplicationListProps {
   applications: ApplicationItemProps[];
   onStatusChange?: (id: string) => void;
+  onDelete?: (id: string) => void;
   onClick?: (id: string) => void;
 }
 
 const ApplicationList = ({
   applications,
   onStatusChange,
+  onDelete,
   onClick,
 }: ApplicationListProps) => {
   return (
@@ -28,6 +30,7 @@ const ApplicationList = ({
               {...application}
               onClick={onClick}
               onStatusChange={onStatusChange}
+              onDelete={onDelete}
             />
           ))}
         </div>

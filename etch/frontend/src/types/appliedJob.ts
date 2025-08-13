@@ -1,20 +1,13 @@
-// 지원 상태 타입 (백엔드 ApplyStatusType enum 기준)
-export type ApplyStatusType =
-  | "SCHEDULED" // 예정
-  | "DOCUMENT_DONE" // 서류 제출 완료
-  | "DOCUMENT_FAILED" // 서류 탈락
-  | "INTERVIEW_DONE" // 면접 완료
-  | "INTERVIEW_FAILED" // 면접 탈락
-  | "FINAL_PASSED"; // 최종 합격
-
 // 지원 상태 업데이트 요청 (PUT /appliedJobs/{appliedJobId} 요청 Body)
 export interface AppliedJobUpdateRequest {
-  status: ApplyStatusType;
+  status: string; // 백엔드에서 받은 상태 코드를 그대로 사용
 }
 
 // 지원 공고 목록 응답 (GET /appliedJobs/list 응답)
 export interface AppliedJobListResponse {
-  id: number; // appliedJobId
+  appliedJobId: number; // 지원 ID
+  jobId: number; // 공고 ID
+  companyId: number; // 회사 ID
   title: string; // 공고 제목
   companyName: string; // 회사명
   openingDate: string; // LocalDateTime -> ISO string
@@ -35,12 +28,4 @@ export interface DeleteAppliedJobParams {
   appliedJobId: number;
 }
 
-// 지원 상태별 한국어 라벨 (UI 표시용)
-export const ApplyStatusLabels: Record<ApplyStatusType, string> = {
-  SCHEDULED: "지원 예정",
-  DOCUMENT_DONE: "서류 제출 완료",
-  DOCUMENT_FAILED: "서류 탈락",
-  INTERVIEW_DONE: "면접 완료",
-  INTERVIEW_FAILED: "면접 탈락",
-  FINAL_PASSED: "최종 합격",
-};
+// 지원 상태별 한국어 라벨은 이제 getApplyStatusCodes API로 동적으로 받아서 사용

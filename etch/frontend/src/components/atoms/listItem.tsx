@@ -44,20 +44,19 @@ export interface DocumentItemProps extends BaseListItemProps {
   onEdit?: (id: string) => void; // Add onEdit prop
 }
 
-// 지원현황 아이템 전용
+// 지원현황 아이템 전용 - AppliedJobListResponse에 맞춤
 export interface ApplicationItemProps extends BaseListItemProps {
-  company: string;
-  position: string;
-  applyDate: string;
-  status:
-    | "scheduled"
-    | "document_submitted"
-    | "interview"
-    | "passed"
-    | "failed";
-  statusText: string;
-  stage: string;
+  appliedJobId: number; // 지원 ID
+  jobId: number; // 공고 ID
+  companyId: number; // 회사 ID
+  title: string; // 공고 제목
+  companyName: string; // 회사명
+  openingDate: string; // LocalDateTime -> ISO string
+  closingDate: string; // expirationDate -> ISO string
+  status: string; // ApplyStatusType.name() -> string
+  statusText?: string; // UI에서 표시할 한국어 상태명 (optional)
   onStatusChange?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 // 마감일 아이템 전용
