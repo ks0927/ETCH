@@ -1,6 +1,6 @@
 import type { ProjectCardProps } from "../../atoms/card";
 import noImg from "../../../assets/noImg.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LikeSVG from "../../svg/likeSVG";
 import ViewSVG from "../../svg/viewSVG";
 import { ProjectWriteTechData } from "../../../types/project/projectTechData";
@@ -9,6 +9,7 @@ import {
   deleteProject,
   likeProject,
   unlikeProject,
+  getMyProjects,
 } from "../../../api/projectApi";
 import { useNavigate } from "react-router";
 
@@ -44,6 +45,7 @@ function ProjectModalCard({
     initialLikeCount || 0
   );
   const [isLiking, setIsLiking] = useState(false);
+  const [isMyProject, setIsMyProject] = useState(false);
 
   // 로그인 상태 확인 함수
   const isLoggedIn = (): boolean => {
@@ -69,6 +71,30 @@ function ProjectModalCard({
   // 현재 사용자 정보 가져오기
   const currentUser = getUserFromToken();
 
+  // 내 프로젝트인지 확인하는 useEffect 추가
+  useEffect(() => {
+    const checkIfMyProject = async () => {
+      if (!currentUser || !isLoggedIn()) {
+        setIsMyProject(false);
+        return;
+      }
+
+      try {
+        const myProjects = await getMyProjects();
+        const isMyProj = myProjects.some(
+          (project: { id: number }) => project.id === id
+        );
+        setIsMyProject(isMyProj);
+        console.log(`프로젝트 ID ${id}가 내 프로젝트인지:`, isMyProj);
+      } catch (error) {
+        console.error("내 프로젝트 확인 실패:", error);
+        setIsMyProject(false);
+      }
+    };
+
+    checkIfMyProject();
+  }, [currentUser, id]);
+
   // 디버깅용 로그
   console.log("디버깅 정보:", {
     currentUser,
@@ -77,8 +103,20 @@ function ProjectModalCard({
     memberId: member?.id,
   });
 
-  // 작성자 체크
-  const isAuthor = currentUser && member && currentUser.id === member.id;
+  // 작성자 체크 - 내 프로젝트 목록으로 확인
+  const isAuthor = (() => {
+    if (!currentUser) {
+      return false;
+    }
+
+    // 1. member 객체가 있는 경우 (기존 로직)
+    if (member && member.id) {
+      return currentUser.id === member.id;
+    }
+
+    // 2. 내 프로젝트 목록으로 확인
+    return isMyProject;
+  })();
 
   // 2. isLiked 초기값을 백엔드 데이터로 설정
   const [isLiked, setIsLiked] = useState(initialLikedByMe || false); // 🎯 수정
