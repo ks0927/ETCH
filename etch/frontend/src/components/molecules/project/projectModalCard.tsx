@@ -77,6 +77,7 @@ function ProjectModalCard({
   const memberId = restProps.memberId as number | undefined;
   const authorId = restProps.authorId as number | undefined; // 기존 유지
 
+  console.log("memeberId", memberId);
   // 🔥 수정된 작성자 체크 - memberId 우선 사용
   const isAuthor = (() => {
     if (!currentUser) {
