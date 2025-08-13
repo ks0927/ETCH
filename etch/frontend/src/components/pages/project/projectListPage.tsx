@@ -37,6 +37,9 @@ function ProjectListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
+  // ✅ 강제 리렌더링을 위한 상태 추가
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
   // 컴포넌트 마운트 시 프로젝트 데이터 로드
   useEffect(() => {
     const loadProjects = async () => {
@@ -192,19 +195,26 @@ function ProjectListPage() {
 
   // 검색 핸들러
   const handleSearch = useCallback((searchTermValue: string) => {
+    console.log("🔍 검색 핸들러 호출:", searchTermValue);
     setSearchTerm(searchTermValue);
   }, []);
 
-  // 카테고리 필터 핸들러
+  // ✅ 카테고리 필터 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
   const handleCategoryFilter = useCallback((category: string) => {
-    console.log("필터 선택:", category);
+    console.log("🎯 카테고리 필터 핸들러 호출됨:", category);
     setSelectedCategory(category);
+    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
+    // 페이지를 1로 리셋
+    setCurrentPage(1);
   }, []);
 
-  // 정렬 핸들러
+  // ✅ 정렬 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
   const handleSortChange = useCallback((sortType: string) => {
-    console.log("정렬 변경:", sortType);
+    console.log("📊 정렬 핸들러 호출됨:", sortType);
     setSelectedSort(sortType);
+    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
+    // 페이지를 1로 리셋
+    setCurrentPage(1);
   }, []);
 
   // ✅ 새로고침 버튼 핸들러 - 정렬도 기본값으로 리셋
@@ -223,7 +233,10 @@ function ProjectListPage() {
       setProjects(sortedData);
       // 새로고침 시 정렬도 기본값(최신순)으로 리셋
       setSelectedSort("LATEST");
+      setSelectedCategory("ALL");
+      setSearchTerm("");
       setCurrentPage(1);
+      setUpdateTrigger((prev) => prev + 1);
       console.log("🔄 수동 새로고침 완료 - 최신순으로 정렬됨");
     } catch (err) {
       setError("프로젝트 데이터를 불러오는데 실패했습니다.");
@@ -333,6 +346,7 @@ function ProjectListPage() {
                       setSearchTerm("");
                       setSelectedCategory("ALL");
                       setSelectedSort("LATEST"); // 초기화 시에도 최신순으로
+                      setUpdateTrigger((prev) => prev + 1);
                     }}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800"
                   >
@@ -347,7 +361,8 @@ function ProjectListPage() {
               <div className="text-yellow-800">
                 <strong>디버그 정보:</strong> 전체 {projects.length}개 프로젝트,
                 필터링 후 {filteredProjects.length}개, 현재 정렬:{" "}
-                <strong>{selectedSort}</strong>
+                <strong>{selectedSort}</strong>, 업데이트 카운터:{" "}
+                {updateTrigger}
                 {projects.length > 0 && (
                   <span>
                     , 최신 프로젝트: {projects[0]?.title} (ID: {projects[0]?.id}
