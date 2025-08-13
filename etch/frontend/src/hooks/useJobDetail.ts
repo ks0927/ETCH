@@ -4,7 +4,7 @@ import { getCompany } from '../api/companyApi';
 import { getCompanyNews } from '../api/newsApi';
 import type { Job } from '../types/job';
 import type { Company } from '../types/companyData';
-import type { News } from '../types/news';
+import type { News } from '../types/newsTypes';
 
 interface UseJobDetailReturn {
   // 데이터

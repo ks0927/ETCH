@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import noImg from "../../assets/noImg.png";
 import { funcData } from "../../types/funcComponentData";
-import { mockJobList } from "../../types/mock/mockJobListData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
 import JobList from "../organisms/job/jobList";
 import JobDetailModal from "../organisms/job/jobDetailModal";
@@ -16,7 +15,7 @@ import type { News } from "../../types/newsTypes";
 function HomePage() {
   const [latestNewsData, setLatestNewsData] = useState<News[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-
+  console.log(selectedJobId);
   useEffect(() => {
     const loadLatestNews = async () => {
       const data = await LatestNewsData();
@@ -34,32 +33,32 @@ function HomePage() {
     setSelectedJobId(null);
   };
 
-  const selectedJob = mockJobList.find((job) => job.id === selectedJobId);
+  const selectedJob = null; // mockJobList 제거됨
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#007DFC] to-[#0056CC] w-full py-12 sm:py-16 lg:py-20 px-6 relative overflow-hidden">
         {/* 배경 장식 */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-20 h-20 bg-white rounded-full"></div>
-          <div className="absolute top-32 right-20 w-16 h-16 bg-white rounded-full"></div>
-          <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-white rounded-full"></div>
-          <div className="absolute bottom-10 right-10 w-8 h-8 bg-white rounded-full"></div>
+          <div className="absolute w-20 h-20 bg-white rounded-full top-10 left-10"></div>
+          <div className="absolute w-16 h-16 bg-white rounded-full top-32 right-20"></div>
+          <div className="absolute w-12 h-12 bg-white rounded-full bottom-20 left-1/4"></div>
+          <div className="absolute w-8 h-8 bg-white rounded-full bottom-10 right-10"></div>
         </div>
 
-        <div className="flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto text-white relative z-10 gap-8">
-          <div className="text-center lg:text-left flex-1">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
+        <div className="relative z-10 flex flex-col items-center justify-between gap-8 mx-auto text-white lg:flex-row max-w-7xl">
+          <div className="flex-1 text-center lg:text-left">
+            <h1 className="mb-6 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
               IT 취업의 모든 것
               <br />
               <span className="text-blue-200">E:TCH</span>에서 시작하세요
             </h1>
-            <p className="text-lg sm:text-xl text-blue-100 mb-8 leading-relaxed">
+            <p className="mb-8 text-lg leading-relaxed text-blue-100 sm:text-xl">
               채용 정보부터 기업 분석, 포트폴리오 작성까지
               <br />
               IT 취업 준비를 위한 모든 것을 한 곳에서
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
               <Link to={"/mypage"}>
                 <button className="bg-white cursor-pointer text-[#007DFC] px-8 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors shadow-lg">
                   시작하기
@@ -71,7 +70,7 @@ function HomePage() {
             <img
               src={noImg}
               alt="메인 이미지"
-              className="w-full h-auto rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
+              className="w-full h-auto transition-transform duration-300 transform shadow-2xl rounded-2xl hover:scale-105"
             />
           </div>
         </div>
@@ -79,10 +78,10 @@ function HomePage() {
 
       {/* 채용 정보 */}
       <section className="py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center">
+        <div className="px-6 mx-auto max-w-7xl">
+          <div className="p-6 bg-white shadow-sm rounded-3xl sm:p-8">
+            <div className="flex items-center mb-6 space-x-3">
+              <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
                 <svg
                   className="w-5 h-5 text-green-600"
                   fill="none"
@@ -97,7 +96,7 @@ function HomePage() {
                   />
                 </svg>
               </div>
-              <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                 진행중인 채용
               </h2>
               <div className="flex-1"></div>
@@ -106,7 +105,7 @@ function HomePage() {
               </Link>
             </div>
             <JobList
-              jobs={mockJobList.slice(0, 3)}
+              jobs={[]} // mockJobList 제거됨
               onJobClick={handleJobClick}
             />
           </div>
@@ -115,17 +114,17 @@ function HomePage() {
 
       {/* 프로젝트 + 뉴스 */}
       <section className="py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="px-6 mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 gap-8 xl:grid-cols-3">
             {/* 인기 프로젝트 - 2/3 너비 */}
             <div className="xl:col-span-2">
-              <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 h-full">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 space-y-3 sm:space-y-0">
+              <div className="h-full p-6 bg-white shadow-sm rounded-3xl sm:p-8">
+                <div className="flex flex-col mb-6 space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-xl">
                       <ProjectSVG />
                     </div>
-                    <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                       인기 프로젝트
                     </h2>
                   </div>
@@ -139,10 +138,10 @@ function HomePage() {
 
             {/* 뉴스 - 1/3 너비 */}
             <div className="xl:col-span-1">
-              <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8 h-full">
+              <div className="h-full p-6 bg-white shadow-sm rounded-3xl sm:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-xl">
                       <svg
                         className="w-5 h-5 text-blue-600"
                         fill="none"
@@ -157,7 +156,7 @@ function HomePage() {
                         />
                       </svg>
                     </div>
-                    <h2 className="font-bold text-2xl sm:text-3xl text-gray-900">
+                    <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
                       뉴스
                     </h2>
                   </div>
@@ -174,17 +173,17 @@ function HomePage() {
 
       {/* 주요 기능 소개 */}
       <section className="py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="px-6 mx-auto max-w-7xl">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
               E:TCH의 주요 기능
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="max-w-2xl mx-auto text-lg text-gray-600">
               IT 취업 성공을 위한 모든 도구와 정보를 하나의 플랫폼에서
               만나보세요
             </p>
           </div>
-          <div className="bg-white rounded-3xl shadow-sm p-6 sm:p-8">
+          <div className="p-6 bg-white shadow-sm rounded-3xl sm:p-8">
             <HomeFuncComponent funcData={funcData} />
           </div>
         </div>
