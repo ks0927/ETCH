@@ -449,6 +449,8 @@ export async function getAllProjectsWithPaging(
     throw error;
   }
 }
+// 🔧 projectApi.js 파일에서 getProjectById 함수를 이렇게 수정하세요
+
 export async function getProjectById(id: number) {
   try {
     const token = getAuthToken();
@@ -460,7 +462,29 @@ export async function getProjectById(id: number) {
       : {};
 
     const response = await axios.get(`${BASE_API}/projects/${id}`, config);
-    return response.data.data;
+
+    // 🔍 디버깅 로그 추가
+    console.log("=== 프로젝트 API 응답 전체 ===");
+    console.log(JSON.stringify(response.data, null, 2));
+    console.log("=== 프로젝트 데이터 ===");
+    console.log(JSON.stringify(response.data.data, null, 2));
+
+    // 작성자 정보 상세 분석
+    const projectData = response.data.data;
+    console.log("=== 작성자 정보 분석 ===");
+    console.log("authorId:", projectData?.authorId);
+    console.log("member:", projectData?.member);
+    console.log("writer:", projectData?.writer);
+    console.log("user:", projectData?.user);
+    console.log("createdBy:", projectData?.createdBy);
+    console.log("nickname:", projectData?.nickname);
+    console.log("userId:", projectData?.userId);
+
+    // 객체의 모든 키 확인
+    console.log("=== 응답 객체의 모든 키 ===");
+    console.log("Keys:", Object.keys(projectData || {}));
+
+    return projectData;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
 
@@ -471,6 +495,11 @@ export async function getProjectById(id: number) {
 
       try {
         const response = await axios.get(`${BASE_API}/projects/${id}`);
+
+        // 재시도에서도 같은 로깅
+        console.log("=== 재시도 API 응답 ===");
+        console.log(JSON.stringify(response.data, null, 2));
+
         return response.data.data;
       } catch (retryError) {
         console.error("재시도 실패:", retryError);
@@ -481,7 +510,6 @@ export async function getProjectById(id: number) {
     throw error;
   }
 }
-
 export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(
