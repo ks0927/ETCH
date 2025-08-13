@@ -3,6 +3,9 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type { JobItemProps } from "../../atoms/listItem";
 import BookmarkSVG from "../../svg/bookmarkSVG";
+import { likeApi } from "../../../api/likeApi";
+import { useLikedJobs } from "../../../hooks/useLikedItems";
+import { useState } from "react";
 
 interface CalendarViewProps {
   jobList: JobItemProps[];
@@ -15,6 +18,45 @@ function CalendarView({
   onEventClick,
   onDateRangeChange,
 }: CalendarViewProps) {
+  const { isJobLiked, addLikedJob, removeLikedJob } = useLikedJobs();
+  const [bookmarkingJobs, setBookmarkingJobs] = useState<Set<string>>(new Set());
+
+  // 북마크 클릭 핸들러
+  const handleBookmarkClick = async (jobId: string, companyName?: string) => {
+    const numJobId = Number(jobId);
+    const isLiked = isJobLiked(numJobId);
+    
+    if (bookmarkingJobs.has(jobId)) return;
+    
+    try {
+      setBookmarkingJobs(prev => new Set([...prev, jobId]));
+      
+      if (isLiked) {
+        // 이미 좋아요한 경우 - 삭제
+        await likeApi.jobs.removeLike(numJobId);
+        removeLikedJob(numJobId);
+        alert(`${companyName || '채용공고'}가 관심 공고에서 삭제되었습니다!`);
+      } else {
+        // 좋아요하지 않은 경우 - 추가
+        await likeApi.jobs.addLike(numJobId);
+        addLikedJob(numJobId);
+        alert(`${companyName || '채용공고'}가 관심 공고로 등록되었습니다!`);
+      }
+    } catch (error: any) {
+      console.error("관심 공고 처리 실패:", error);
+      if (error.response?.data?.message === "이미 좋아요를 누른 콘텐츠입니다.") {
+        alert("이미 관심 공고로 등록된 채용공고입니다.");
+      } else {
+        alert(`관심 공고 ${isLiked ? '삭제' : '등록'}에 실패했습니다. 다시 시도해주세요.`);
+      }
+    } finally {
+      setBookmarkingJobs(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(jobId);
+        return newSet;
+      });
+    }
+  };
   const convertJobsToEvents = (jobs: JobItemProps[]) => {
     const events = [];
 
@@ -34,6 +76,8 @@ function CalendarView({
         job.educationLevel,
       ].filter(Boolean);
 
+      const isLiked = isJobLiked(Number(job.id));
+      
       // 시작일 이벤트
       events.push({
         id: `${job.id}-start`,
@@ -52,6 +96,7 @@ function CalendarView({
           openingDate: job.openingDate,
           expirationDate: job.expirationDate,
           originalId: job.id,
+          isLiked,
         },
       });
 
@@ -73,6 +118,7 @@ function CalendarView({
           openingDate: job.openingDate,
           expirationDate: job.expirationDate,
           originalId: job.id,
+          isLiked,
         },
       });
     }
@@ -139,7 +185,8 @@ function CalendarView({
 
   const renderEventContent = (eventInfo: any) => {
     const { event } = eventInfo;
-    const { type, companyName } = event.extendedProps;
+    const { type, companyName, originalId, isLiked } = event.extendedProps;
+    const isBookmarking = bookmarkingJobs.has(originalId);
 
     return (
       <div className="flex items-center justify-between w-full px-1">
@@ -147,13 +194,32 @@ function CalendarView({
           {type === "start" ? "🚀" : "⏰"} {companyName}
         </span>
         <button
-          className="flex-shrink-0 ml-1 opacity-70 hover:opacity-100"
+          className={`flex-shrink-0 ml-1 transition-opacity ${
+            isBookmarking 
+              ? "opacity-30 cursor-not-allowed" 
+              : isLiked 
+                ? "text-yellow-500 opacity-90 hover:opacity-100" 
+                : "opacity-70 hover:opacity-100"
+          }`}
+          disabled={isBookmarking}
           onClick={(e) => {
             e.stopPropagation();
-            console.log("북마크 클릭:", companyName);
+            handleBookmarkClick(originalId, companyName);
           }}
+          title={isLiked ? "관심 공고 삭제" : "관심 공고 등록"}
         >
-          <BookmarkSVG />
+          {isBookmarking ? (
+            <div className="w-4 h-4 animate-spin">
+              <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">
+                  <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                  <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </div>
+          ) : (
+            <BookmarkSVG filled={isLiked} className="w-4 h-4" />
+          )}
         </button>
       </div>
     );
@@ -345,36 +411,61 @@ function CalendarView({
 
             // 북마크 버튼 부분
             const bookmarkBtn = document.createElement("button");
+            const originalId = seg.event.extendedProps.originalId;
+            const eventIsLiked = seg.event.extendedProps.isLiked;
+            const isBookmarking = bookmarkingJobs.has(originalId);
+            
             bookmarkBtn.style.cssText = `
               margin-left: 10px;
-              opacity: 0.7;
+              opacity: ${isBookmarking ? '0.3' : eventIsLiked ? '0.9' : '0.7'};
               background: none;
               border: none;
-              cursor: pointer;
+              cursor: ${isBookmarking ? 'not-allowed' : 'pointer'};
               padding: 4px;
               display: flex;
               align-items: center;
               flex-shrink: 0;
               border-radius: 4px;
-              transition: background-color 0.2s;
+              transition: background-color 0.2s, opacity 0.2s;
+              color: ${eventIsLiked ? '#eab308' : 'currentColor'};
             `;
-            bookmarkBtn.innerHTML = `
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
-              </svg>
-            `;
-            bookmarkBtn.addEventListener("mouseenter", () => {
-              bookmarkBtn.style.opacity = "1";
-              bookmarkBtn.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
-            });
-            bookmarkBtn.addEventListener("mouseleave", () => {
-              bookmarkBtn.style.opacity = "0.7";
-              bookmarkBtn.style.backgroundColor = "transparent";
-            });
+            
+            if (isBookmarking) {
+              bookmarkBtn.innerHTML = `
+                <div style="width: 16px; height: 16px;" class="animate-spin">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                      <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                      <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                    </circle>
+                  </svg>
+                </div>
+              `;
+            } else {
+              bookmarkBtn.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" ${eventIsLiked ? 'fill="currentColor"' : 'fill="none"'} stroke="currentColor" stroke-width="${eventIsLiked ? '0' : '2'}" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                </svg>
+              `;
+            }
+            
+            if (!isBookmarking) {
+              bookmarkBtn.addEventListener("mouseenter", () => {
+                bookmarkBtn.style.opacity = "1";
+                bookmarkBtn.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+              });
+              bookmarkBtn.addEventListener("mouseleave", () => {
+                bookmarkBtn.style.opacity = eventIsLiked ? "0.9" : "0.7";
+                bookmarkBtn.style.backgroundColor = "transparent";
+              });
+            }
+            
             bookmarkBtn.addEventListener("click", (e) => {
               e.stopPropagation();
-              const companyName = seg.event.extendedProps.companyName;
-              console.log("북마크 클릭:", companyName);
+              if (!isBookmarking) {
+                const companyName = seg.event.extendedProps.companyName;
+                handleBookmarkClick(originalId, companyName);
+              }
             });
 
             eventEl.appendChild(titleSpan);

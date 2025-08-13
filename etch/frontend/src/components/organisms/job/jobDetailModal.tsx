@@ -4,6 +4,7 @@ import JobDetailTabs from "../../molecules/job/jobDetailTabs";
 import JobDetailTabContent from "../../molecules/job/jobDetailTabContent";
 import { useJobDetail } from "../../../hooks/useJobDetail";
 import { applyJob } from "../../../api/appliedJobApi";
+import { likeApi } from "../../../api/likeApi";
 
 interface JobDetailModalProps {
   job: JobItemProps;
@@ -15,6 +16,7 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
     "details"
   );
   const [isApplying, setIsApplying] = useState(false);
+  const [isAddingToFavorite, setIsAddingToFavorite] = useState(false);
 
   // 새로운 useJobDetail hook 사용
   const {
@@ -45,6 +47,24 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
     }
   };
 
+  // 관심기업 등록 핸들러
+  const handleAddToFavorite = async () => {
+    try {
+      setIsAddingToFavorite(true);
+      await likeApi.companies.addLike(Number(job.companyId));
+      alert("관심기업으로 등록되었습니다!");
+    } catch (error: any) {
+      console.error("관심기업 등록 실패:", error);
+      if (error.response?.data.message === "이미 좋아요를 누른 콘텐츠입니다.") {
+        alert("이미 관심기업으로 등록된 회사입니다.");
+      } else {
+        alert("관심기업 등록에 실패했습니다. 다시 시도해주세요.");
+      }
+    } finally {
+      setIsAddingToFavorite(false);
+    }
+  };
+
   // 모달 열릴 때 body 스크롤 막기
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -69,7 +89,7 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
         {/* 헤더 - 파란색 그라데이션 */}
         <div className="relative px-6 py-4 text-white bg-gradient-to-r from-blue-500 to-blue-600">
           <h2 className="text-xl font-bold">{job.title}</h2>
-          <p className="mt-1 text-blue-100 font-medium">{job.companyName}</p>
+          <p className="mt-1 font-medium text-blue-100">{job.companyName}</p>
           <button
             onClick={onClose}
             className="absolute text-2xl text-white top-4 right-6 hover:text-blue-100"
@@ -114,8 +134,17 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
             닫기
           </button>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 text-pink-600 border border-pink-200 rounded-lg hover:bg-pink-50">
-              ❤️ 관심기업 등록
+            <button
+              onClick={handleAddToFavorite}
+              disabled={isAddingToFavorite}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-lg ${
+                isAddingToFavorite
+                  ? "text-gray-400 border-gray-200 cursor-not-allowed"
+                  : "text-pink-600 border-pink-200 hover:bg-pink-50"
+              }`}
+            >
+              {isAddingToFavorite ? "⏳" : "❤️"}
+              {isAddingToFavorite ? "등록 중..." : "관심기업 등록"}
             </button>
             <button
               onClick={handleApplyJob}

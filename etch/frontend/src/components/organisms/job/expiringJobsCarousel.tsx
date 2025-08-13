@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import JobListItem from "../../molecules/job/jobListItem";
 import type { JobItemProps } from "../../atoms/listItem";
+import { useLikedJobs } from "../../../hooks/useLikedItems";
 
 interface ExpiringJobsCarouselProps {
   jobs: JobItemProps[];
@@ -13,7 +14,16 @@ export default function ExpiringJobsCarousel({
   onJobClick, 
   loading = false 
 }: ExpiringJobsCarouselProps) {
+  const { isJobLiked, addLikedJob, removeLikedJob } = useLikedJobs();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleLikeStateChange = (jobId: number, isLiked: boolean) => {
+    if (isLiked) {
+      addLikedJob(jobId);
+    } else {
+      removeLikedJob(jobId);
+    }
+  };
 
   const scrollLeft = () => {
     if (scrollRef.current) {
@@ -80,7 +90,12 @@ export default function ExpiringJobsCarousel({
       >
         {jobs.map((job) => (
           <div key={job.id} className="flex-shrink-0 w-[400px]">
-            <JobListItem {...job} onClick={onJobClick} />
+            <JobListItem 
+              {...job} 
+              onClick={onJobClick} 
+              isLiked={isJobLiked(Number(job.id))}
+              onLikeStateChange={handleLikeStateChange}
+            />
           </div>
         ))}
       </div>

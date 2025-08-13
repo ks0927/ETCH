@@ -64,6 +64,8 @@ export interface NewsCardProps extends BaseCardProps {
   description?: string; // ✅ optional로 변경 (News 타입과 일치)
   url: string;
   publishedAt: string;
+  companyName?: string; // 회사명 추가
+  onLikeClick?: (newsId: number) => void; // 좋아요 클릭 핸들러
 }
 
 export interface CompanyCardProps extends BaseCardProps {
