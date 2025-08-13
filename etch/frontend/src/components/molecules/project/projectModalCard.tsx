@@ -48,11 +48,10 @@ function ProjectModalCard({
     initialLikeCount || 0
   );
   const [isLiking, setIsLiking] = useState(false);
-  // isMyProject state 제거 (API 오류로 사용하지 않음)
 
   // 로그인 상태 확인 함수
   const isLoggedIn = (): boolean => {
-    const token = localStorage.getItem("access_token"); // 키 이름 수정
+    const token = localStorage.getItem("access_token");
     return !!token;
   };
 
@@ -74,8 +73,6 @@ function ProjectModalCard({
   // 현재 사용자 정보 가져오기
   const currentUser = getUserFromToken();
 
-  // 디버깅용 로그
-
   // 작성자 체크 - authorId 사용 (타입 안전)
   const authorId = restProps.authorId as number | undefined;
 
@@ -94,14 +91,18 @@ function ProjectModalCard({
       return currentUser.id === member.id;
     }
 
-    // 3. 둘 다 없으면 로그인한 사용자에게 버튼 표시 (fallback)
-    return isLoggedIn();
+    // 3. 둘 다 없으면 닉네임으로 비교 (fallback)
+    if (currentUser.nickname && nickname) {
+      return currentUser.nickname === nickname;
+    }
+
+    return false;
   })();
 
-  // 2. isLiked 초기값을 백엔드 데이터로 설정
-  const [isLiked, setIsLiked] = useState(initialLikedByMe || false); // 🎯 수정
+  // isLiked 초기값을 백엔드 데이터로 설정
+  const [isLiked, setIsLiked] = useState(initialLikedByMe || false);
 
-  // 3. 좋아요 토글 핸들러에서 onLike 우선 사용
+  // 좋아요 토글 핸들러에서 onLike 우선 사용
   const handleLikeToggle = async () => {
     if (isLiking) return;
 
@@ -114,7 +115,7 @@ function ProjectModalCard({
     try {
       setIsLiking(true);
 
-      // 🎯 부모에서 전달받은 onLike 핸들러가 있으면 사용
+      // 부모에서 전달받은 onLike 핸들러가 있으면 사용
       if (onLike) {
         await onLike();
         return; // 부모 핸들러 사용했으면 여기서 종료
@@ -208,8 +209,8 @@ function ProjectModalCard({
     );
   }
 
-  // 비공개 프로젝트 체크 (필요한 경우)
-  if (!isPublic) {
+  // 🎯 수정된 비공개 프로젝트 체크 - 작성자가 아닌 경우에만 차단
+  if (!isPublic && !isAuthor) {
     return (
       <div className="text-center py-12">
         <div className="text-yellow-500 text-6xl mb-4">🔒</div>
@@ -287,6 +288,7 @@ function ProjectModalCard({
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
+
   console.log("디버깅 정보:", {
     currentUser,
     member,
@@ -294,10 +296,30 @@ function ProjectModalCard({
     memberId: member?.id,
     authorId, // authorId 추가
     isAuthor, // isAuthor 결과 추가
+    isPublic, // 공개 여부 추가
+    canView: isPublic || isAuthor, // 볼 수 있는지 여부 추가
   });
 
   return (
     <div className="space-y-6">
+      {/* 🎯 비공개 프로젝트 알림 (작성자가 볼 때만) */}
+      {!isPublic && isAuthor && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="text-yellow-600">🔒</div>
+            <div>
+              <h4 className="text-sm font-semibold text-yellow-800">
+                비공개 프로젝트
+              </h4>
+              <p className="text-xs text-yellow-700">
+                이 프로젝트는 현재 비공개 상태입니다. 다른 사용자들은 볼 수
+                없습니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 작성자 정보 */}
       <section className="flex items-center justify-between pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
