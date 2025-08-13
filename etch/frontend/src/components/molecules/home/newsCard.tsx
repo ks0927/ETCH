@@ -1,7 +1,34 @@
+import { useState } from "react";
 import { Link } from "react-router";
 import type { NewsCardProps } from "../../atoms/card";
+import HeartSVG from "../../svg/heartSVG";
+import { likeApi } from "../../../api/likeApi";
 
-function NewsCard({ title, url, publishedAt, description }: NewsCardProps) {
+function NewsCard({ id, title, url, publishedAt, description, companyName, onLikeClick }: NewsCardProps) {
+  const [isLiking, setIsLiking] = useState(false);
+
+  const handleLikeClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isLiking) return;
+
+    try {
+      setIsLiking(true);
+      await likeApi.news.addLike(id);
+      alert("관심 뉴스로 등록되었습니다!");
+      onLikeClick?.(id);
+    } catch (error: any) {
+      console.error("관심 뉴스 등록 실패:", error);
+      if (error.response?.data?.message === "이미 좋아요를 누른 콘텐츠입니다.") {
+        alert("이미 관심 뉴스로 등록된 뉴스입니다.");
+      } else {
+        alert("관심 뉴스 등록에 실패했습니다. 다시 시도해주세요.");
+      }
+    } finally {
+      setIsLiking(false);
+    }
+  };
   // 날짜 포맷팅 함수 (선택사항)
   const formatDate = (dateString: string) => {
     try {
@@ -19,11 +46,39 @@ function NewsCard({ title, url, publishedAt, description }: NewsCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <div className="p-3 sm:p-4">
-        <Link to={url} target="_blank" rel="noopener noreferrer">
-          <div className="text-base sm:text-lg font-bold mb-2 line-clamp-2 text-gray-800 hover:text-blue-600 transition-colors">
-            {title}
-          </div>
+        <div className="flex justify-between items-start mb-2">
+          <Link to={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+            <div className="text-base sm:text-lg font-bold line-clamp-2 text-gray-800 hover:text-blue-600 transition-colors">
+              {title}
+            </div>
+          </Link>
+          
+          <button
+            onClick={handleLikeClick}
+            disabled={isLiking}
+            className={`ml-2 p-2 rounded-full transition-colors ${
+              isLiking 
+                ? "text-gray-300 cursor-not-allowed" 
+                : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+            }`}
+            title="관심 뉴스 등록"
+          >
+            {isLiking ? (
+              <div className="w-5 h-5 animate-spin">
+                <svg className="w-full h-full" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="31.416" strokeDashoffset="31.416">
+                    <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                    <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+              </div>
+            ) : (
+              <HeartSVG />
+            )}
+          </button>
+        </div>
 
+        <Link to={url} target="_blank" rel="noopener noreferrer">
           {/* description이 있으면 표시 */}
           {description && (
             <div className="text-sm text-gray-600 mb-2 line-clamp-2">
@@ -31,11 +86,18 @@ function NewsCard({ title, url, publishedAt, description }: NewsCardProps) {
             </div>
           )}
 
-          <div className="flex justify-between items-start text-gray-500 text-sm">
+          <div className="flex justify-between items-center text-gray-500 text-sm">
             {/* 발행일 */}
             <div className="text-xs sm:text-sm whitespace-nowrap">
               {formatDate(publishedAt)}
             </div>
+            
+            {/* 회사명 */}
+            {companyName && (
+              <div className="text-xs sm:text-sm text-gray-400">
+                {companyName}
+              </div>
+            )}
           </div>
         </Link>
       </div>
