@@ -438,7 +438,7 @@ function ProjectModalCard({
                 : isLiked
                 ? "text-red-500 hover:text-red-600"
                 : "text-gray-600 hover:text-red-500"
-            } ${isLiking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${isLiking ? "opacity-50 cursor-pointer" : "cursor-pointer"}`}
             title={!isLoggedIn() ? "로그인이 필요합니다" : ""}
           >
             <div
