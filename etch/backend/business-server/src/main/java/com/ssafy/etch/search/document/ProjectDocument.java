@@ -7,19 +7,27 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Document(indexName = "project")
 @Getter
+@AllArgsConstructor
+@Builder
+@Setting(settingPath = "/es/project-settings.json")
+@Mapping(mappingPath = "/es/project-mappings.json")
 public class ProjectDocument {
 	@Id
 	private Long id;
 
-	@Field(type = FieldType.Text, analyzer = "nori")
+	@Field(type = FieldType.Text, analyzer = "my_nori_analyzer")
 	private String title;
 
-	@Field(type = FieldType.Text, analyzer = "nori")
+	@Field(type = FieldType.Text, analyzer = "my_nori_analyzer")
 	private String content;
 
 	@Field(type = FieldType.Keyword)
