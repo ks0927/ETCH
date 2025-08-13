@@ -17,4 +17,6 @@ public interface ProjectTechRepository extends JpaRepository<ProjectTechEntity, 
 	@Modifying
 	@Query("DELETE FROM ProjectTechEntity pt WHERE pt.project.id = :projectId AND pt.techCode.id IN :techIds")
 	void deleteLinks(@Param("projectId") Long projectId, @Param("techIds") List<Long> techIds);
+
+	void deleteAllByProjectId(Long projectId);
 }

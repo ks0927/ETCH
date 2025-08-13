@@ -30,6 +30,8 @@ import com.ssafy.etch.project.repository.ProjectTechRepository;
 import com.ssafy.etch.tech.entity.TechCodeEntity;
 import com.ssafy.etch.tech.repository.TechCodeRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -56,6 +58,8 @@ public class ProjectServiceImpl implements ProjectService {
 	private static final int MAX_IMAGES = 9; // 썸네일 제외 본문 이미지 최대 4장
 
 	private static final int MAX_PAGE_SIZE = 100;
+
+	private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
 	public ProjectServiceImpl(ProjectRepository projectRepository,
 		LikeRepository likeRepository,
@@ -278,12 +282,47 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	@Transactional
 	public void deleteProject(Long projectId, Long memberId) {
-		if (memberId == null) {
-			throw new IllegalStateException("로그인이 필요합니다.");
+		// 1. 프로젝트 엔티티를 조회합니다.
+		ProjectEntity project = projectRepository.findById(projectId)
+			.orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없습니다."));
+
+		// 2. 삭제 권한을 확인합니다.
+		if (!project.getMember().toMemberDTO().getId().equals(memberId)) {
+			throw new AccessDeniedException("본인만 삭제할 수 있습니다.");
 		}
+
+		// 3. 프로젝트에 연결된 파일들의 URL을 가져옵니다.
+		// 썸네일 URL을 가져와 삭제 리스트에 추가합니다.
+		List<String> fileUrlsToDelete = new ArrayList<>();
+		if (project.getThumbnailUrl() != null) {
+			fileUrlsToDelete.add(project.getThumbnailUrl());
+		}
+
+		// 본문 이미지들의 URL을 가져와 삭제 리스트에 추가합니다.
+		List<FileEntity> files = fileRepository.findAllByProjectId(projectId);
+		for (FileEntity file : files) {
+			fileUrlsToDelete.add(file.getFileUrl());
+		}
+
+		// 4. S3Service를 사용하여 MinIO에서 파일들을 삭제합니다.
+		for (String fileUrl : fileUrlsToDelete) {
+			try {
+				s3Service.deleteFileByUrl(fileUrl);
+			} catch (Exception e) {
+				log.error("MinIO 파일 삭제 실패. URL: {}", fileUrl, e);
+			}
+		}
+
+		// 5. 데이터베이스에서 프로젝트와 연결된 파일들을 삭제합니다.
+		fileRepository.deleteAll(files);
+
+		// 6. ProjectTechEntity 링크를 삭제합니다.
+		projectTechRepository.deleteAllByProjectId(projectId);
+
+		// 7. 프로젝트를 soft-delete합니다.
+		// 만약 완전히 삭제하려면 projectRepository.delete(project); 를 사용합니다.
 		int changed = projectRepository.softDelete(projectId, memberId);
 
-		// 쿼리 실행이 성공한 행의 개수가 0 -> 실패(이미 삭제된 프로젝트거나 다른 회원의 글이거나)
 		if (changed == 0) {
 			throw new NoSuchElementException("삭제할 수 없습니다.");
 		}
