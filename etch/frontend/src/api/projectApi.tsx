@@ -514,16 +514,49 @@ export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(`${BASE_API}/members/${userId}/projects`);
 
+    // 전체 응답 구조 확인
+    console.log("=== 전체 응답 구조 ===");
+    console.log("Status:", response.status);
+    console.log("Headers:", response.headers);
+    console.log("Full Response Data:", JSON.stringify(response.data, null, 2));
+
     const data = response.data.data;
+    console.log("=== 추출된 data 부분 ===");
+    console.log("Data type:", typeof data);
+    console.log("Is Array:", Array.isArray(data));
+    console.log("Data content:", JSON.stringify(data, null, 2));
+
     if (Array.isArray(data)) {
+      console.log("배열로 반환, 길이:", data.length);
       return data;
     } else if (data && typeof data === "object" && "content" in data) {
+      console.log(
+        "객체에서 content 추출, content 길이:",
+        data.content?.length || 0
+      );
+      console.log("Content:", JSON.stringify(data.content, null, 2));
       return data.content || [];
     }
 
+    console.log("빈 배열 반환");
     return [];
   } catch (error) {
-    console.error("사용자 공개 프로젝트 조회 실패:", error);
+    console.error("=== 오류 상세 정보 ===");
+
+    if (axios.isAxiosError(error)) {
+      console.error("Axios Error Details:");
+      console.error("- Status:", error.response?.status);
+      console.error("- Status Text:", error.response?.statusText);
+      console.error(
+        "- Response Data:",
+        JSON.stringify(error.response?.data, null, 2)
+      );
+      console.error("- Request URL:", error.config?.url);
+      console.error("- Request Method:", error.config?.method);
+    } else {
+      console.error("General Error:", error);
+    }
+
     throw error;
   }
 }
