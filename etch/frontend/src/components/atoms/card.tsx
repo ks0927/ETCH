@@ -18,33 +18,43 @@ export interface ProjectCardProps extends BaseCardProps {
   id: number;
   title: string;
   content: string;
-  thumbnailUrl: string; // ProjectData와 일치
-  youtubeUrl: string; // 추가 (ProjectData에 있음)
+  thumbnailUrl: string;
+  youtubeUrl: string;
   viewCount: number;
   projectCategory: ProjectCategoryEnum | "";
   createdAt: string;
-  updatedAt: string; // 추가 (ProjectData에 있음)
-  isDeleted: boolean; // 추가 (ProjectData에 있음)
+  updatedAt: string;
+  isDeleted: boolean;
   githubUrl: string;
   isPublic: boolean;
   nickname: string;
   authorId?: number;
   onClose?: () => void;
-  likedByMe?: boolean; // 🎯 추가
+  likedByMe?: boolean;
   onLike?: () => void;
-  member: {
-    // ProjectData와 일치
-    id: number;
-  };
-  files: File[]; // ProjectData와 일치
-  projectTechs: number[]; // ProjectData와 일치
 
-  // 추가 필드들 (UI용)
+  // 🔥 member 타입 수정 - nickname 옵션 추가
+  member: {
+    id: number;
+    nickname?: string; // 🔥 추가
+  };
+
+  files: File[];
+  projectTechs: number[];
+
+  // 추가 필드들
   likeCount: number;
   writerImg?: string;
   commentCount?: number;
   comments?: CommentProps[];
   onCardClick?: (id: number) => void;
+
+  // 🔥 새로운 API 필드들 추가
+  techCodes?: string[]; // API에서 오는 기술 스택
+  techCategories?: string[]; // API에서 오는 기술 카테고리
+  fileUrls?: string[]; // API에서 오는 파일 URL들
+  profileUrl?: string; // API에서 오는 프로필 이미지
+  memberId?: number; // API에서 오는 작성자 ID
 }
 
 export interface NewsCardProps extends BaseCardProps {

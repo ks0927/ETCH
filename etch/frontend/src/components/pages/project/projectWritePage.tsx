@@ -9,9 +9,7 @@ import CategorySVG from "../../svg/categorySVG";
 import IsPublicSVG from "../../svg/isPublicSVG";
 import ProjectSVG from "../../svg/projectSVG";
 import {
-  ProjectState,
-  type ProjectData,
-  type ProjectInputData, // 추가
+  type ProjectInputData, // 🔥 ProjectInputData만 사용
 } from "../../../types/project/projectDatas";
 import ProjectCategory from "../../organisms/project/write/projectCategory";
 import ProjectWriteInput from "../../organisms/project/write/projectWriteInput";
@@ -24,12 +22,38 @@ import { useNavigate } from "react-router";
 import { ProjectWriteTechData } from "../../../types/project/projectTechData";
 import ProjectWriteText from "../../organisms/project/write/projectWriteText";
 
-// 기존 ProjectData 사용 (단순하게!)
+// 🔥 프로젝트 작성용 별도 상태 인터페이스 정의
+interface ProjectWriteState {
+  title: string;
+  content: string;
+  projectCategory: ProjectCategoryEnum | "";
+  githubUrl: string;
+  youtubeUrl: string;
+  isPublic: boolean;
+  projectTechs: number[]; // 선택된 기술 스택 ID들
+  files: File[]; // 업로드된 파일들
+}
+
+// 🔥 초기 상태값
+const initialProjectWriteState: ProjectWriteState = {
+  title: "",
+  content: "",
+  projectCategory: "",
+  githubUrl: "",
+  youtubeUrl: "",
+  isPublic: true,
+  projectTechs: [],
+  files: [],
+};
+
 function ProjectWritePage() {
   const navigate = useNavigate();
-  const [projectData, setProjectData] = useState<ProjectData>({
-    ...ProjectState,
+
+  // 🔥 ProjectWriteState 사용 (ProjectData 대신)
+  const [projectData, setProjectData] = useState<ProjectWriteState>({
+    ...initialProjectWriteState,
   });
+
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
 
   // 2. 썸네일 핸들러들
@@ -145,16 +169,16 @@ function ProjectWritePage() {
       // 파일 분류
       const { imageFiles } = categorizeFiles(projectData.files);
 
-      // ProjectInputData 형태로 API 호출
+      // 🔥 ProjectInputData 형태로 API 호출 (정확한 필드명 사용)
       const projectInput: ProjectInputData = {
         title: projectData.title,
         content: projectData.content,
         projectCategory: projectData.projectCategory as ProjectCategoryEnum,
-        techCodeIds: projectData.projectTechs,
+        techCodeIds: projectData.projectTechs, // 🔥 API에서 요구하는 필드명
         githubUrl: projectData.githubUrl || "",
         youtubeUrl: projectData.youtubeUrl || "",
         isPublic: projectData.isPublic,
-        thumbnailFile: thumbnailFile || undefined, // 없으면 undefined
+        thumbnailFile: thumbnailFile || undefined,
         imageFiles,
       };
 
@@ -163,9 +187,9 @@ function ProjectWritePage() {
       console.log("썸네일 파일:", thumbnailFile ? thumbnailFile.name : "없음");
 
       // API 호출
-      const projectId = await createProject(projectInput);
+      const result = await createProject(projectInput);
 
-      console.log("프로젝트 생성 성공! ID:", projectId);
+      console.log("프로젝트 생성 성공!", result);
       alert("프로젝트가 성공적으로 등록되었습니다!");
 
       // 성공 후 /projects 페이지로 이동
@@ -195,7 +219,7 @@ function ProjectWritePage() {
       ...prev,
       projectCategory: category,
     }));
-    console.log("현재 카테고리 스택 ID:", category);
+    console.log("현재 카테고리:", category);
   };
 
   const handleIsPublicChange = (isPublic: boolean) => {
@@ -297,7 +321,6 @@ function ProjectWritePage() {
                 </div>
               </div>
 
-              {/* 기존 방식 그대로 사용 */}
               <ProjectStack
                 isStackData={ProjectWriteTechData}
                 isSelect={projectData.projectTechs}

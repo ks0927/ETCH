@@ -376,8 +376,7 @@ export async function getMyProjects(): Promise<MyProjectResponse[]> {
   }
 }
 
-// 최신순으로 기본 정렬하는 프로젝트 목록 조회
-export async function getAllProjects(sort: string = "latest") {
+export async function getAllProjects() {
   try {
     const token = getAuthToken();
 
@@ -387,9 +386,9 @@ export async function getAllProjects(sort: string = "latest") {
         }
       : {};
 
-    // 정렬 파라미터 추가
+    // 정렬 파라미터 제거하고 모든 데이터를 가져옴
     const response = await axios.get(
-      `${BASE_API}/projects?sort=${sort}&pageSize=50`, // pageSize=50 추가
+      `${BASE_API}/projects?pageSize=100`, // 모든 데이터를 가져오기 위해 pageSize 증가
       config
     );
 
@@ -409,7 +408,7 @@ export async function getAllProjects(sort: string = "latest") {
 
       // 토큰 없이 재시도
       try {
-        const response = await axios.get(`${BASE_API}/projects?sort=${sort}`);
+        const response = await axios.get(`${BASE_API}/projects?pageSize=100`);
         const pageData = response.data.data;
         const projects = pageData.content || [];
         return projects;
@@ -423,6 +422,35 @@ export async function getAllProjects(sort: string = "latest") {
   }
 }
 
+// 만약 서버에서 페이징이 필요하다면 별도 함수로 분리
+export async function getAllProjectsWithPaging(
+  page: number = 0,
+  size: number = 20,
+  sort: string = "latest"
+) {
+  try {
+    const token = getAuthToken();
+
+    const config = token
+      ? {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      : {};
+
+    const response = await axios.get(
+      `${BASE_API}/projects?page=${page}&size=${size}&sort=${sort}`,
+      config
+    );
+
+    console.log("getAllProjectsWithPaging 응답:", response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("페이징된 프로젝트 목록 조회 실패:", error);
+    throw error;
+  }
+}
+// 🔧 projectApi.js 파일에서 getProjectById 함수를 이렇게 수정하세요
+
 export async function getProjectById(id: number) {
   try {
     const token = getAuthToken();
@@ -434,7 +462,29 @@ export async function getProjectById(id: number) {
       : {};
 
     const response = await axios.get(`${BASE_API}/projects/${id}`, config);
-    return response.data.data;
+
+    // 🔍 디버깅 로그 추가
+    console.log("=== 프로젝트 API 응답 전체 ===");
+    console.log(JSON.stringify(response.data, null, 2));
+    console.log("=== 프로젝트 데이터 ===");
+    console.log(JSON.stringify(response.data.data, null, 2));
+
+    // 작성자 정보 상세 분석
+    const projectData = response.data.data;
+    console.log("=== 작성자 정보 분석 ===");
+    console.log("authorId:", projectData?.authorId);
+    console.log("member:", projectData?.member);
+    console.log("writer:", projectData?.writer);
+    console.log("user:", projectData?.user);
+    console.log("createdBy:", projectData?.createdBy);
+    console.log("nickname:", projectData?.nickname);
+    console.log("userId:", projectData?.userId);
+
+    // 객체의 모든 키 확인
+    console.log("=== 응답 객체의 모든 키 ===");
+    console.log("Keys:", Object.keys(projectData || {}));
+
+    return projectData;
   } catch (error) {
     console.error("프로젝트 상세 조회 실패:", error);
 
@@ -445,6 +495,11 @@ export async function getProjectById(id: number) {
 
       try {
         const response = await axios.get(`${BASE_API}/projects/${id}`);
+
+        // 재시도에서도 같은 로깅
+        console.log("=== 재시도 API 응답 ===");
+        console.log(JSON.stringify(response.data, null, 2));
+
         return response.data.data;
       } catch (retryError) {
         console.error("재시도 실패:", retryError);
@@ -455,7 +510,6 @@ export async function getProjectById(id: number) {
     throw error;
   }
 }
-
 export async function getUserPublicProjects(userId: number) {
   try {
     const response = await axios.get(

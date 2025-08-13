@@ -47,7 +47,7 @@ public interface ProjectRepository extends JpaRepository<ProjectEntity, Long> {
     @Query("""
         UPDATE ProjectEntity p
            SET p.isDeleted = true,
-               p.updatedAt = CURRENT_DATE
+               p.updatedAt = CURRENT_TIMESTAMP
         WHERE p.id = :id
            AND p.member.id = :memberId
            AND p.isDeleted = false
