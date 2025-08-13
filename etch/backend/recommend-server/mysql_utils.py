@@ -29,7 +29,7 @@ def get_liked_items(user_id: int):
         with conn.cursor(DictCursor) as cursor:
             # 1. Get liked NEWS from news table
             query_news = """
-                SELECT n.description, n.title
+                SELECT n.id, n.description, n.title
                 FROM news n
                 JOIN liked_content lc ON n.id = lc.targetId
                 WHERE lc.member_id = %s AND lc.type = 'NEWS'
@@ -49,7 +49,7 @@ def get_liked_items(user_id: int):
 
             # 3. Get liked JOBS from job table
             query_jobs = """
-                SELECT j.title
+                SELECT j.id, j.title, j.company_name, j.industry, j.job_category
                 FROM job j
                 JOIN liked_content lc ON j.id = lc.targetId
                 WHERE lc.member_id = %s AND lc.type = 'JOB'
@@ -58,8 +58,52 @@ def get_liked_items(user_id: int):
             results_by_type["JOB"] = cursor.fetchall()
             
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SQL Query Result~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print(results_by_type)
     finally:
         conn.close()
         
     return results_by_type
+
+def get_latest_items():
+    conn = pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        db=os.getenv("DB_NAME"),
+        charset='utf8mb4',
+        ssl={'ca': os.getenv("DB_SSL_CA")}  # CA 인증서 경로
+    )
+    print("Connected to MySQL database for latest items.")
+    
+    latest_items = {
+        "NEWS": [],
+        "JOB": []
+    }
+    
+    try:
+        with conn.cursor(DictCursor) as cursor:
+            # Get latest 5 NEWS
+            query_latest_news = """
+                SELECT id, description, title
+                FROM news
+                ORDER BY id DESC
+                LIMIT 5
+            """
+            cursor.execute(query_latest_news)
+            latest_items["NEWS"] = cursor.fetchall()
+
+            # Get latest 5 JOBS
+            query_latest_jobs = """
+                SELECT id, title, company_name, industry, job_category
+                FROM job
+                ORDER BY id DESC
+                LIMIT 5
+            """
+            cursor.execute(query_latest_jobs)
+            latest_items["JOB"] = cursor.fetchall()
+            
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Latest Items Query Result~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    finally:
+        conn.close()
+        
+    return latest_items
