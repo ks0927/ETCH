@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import noImg from "../../assets/noImg.png";
 import { funcData } from "../../types/funcComponentData";
 import HomeFuncComponent from "../organisms/home/homeFuncComponent";
-import JobList from "../organisms/job/jobList";
+import ExpiringJobsCarousel from "../organisms/job/expiringJobsCarousel";
 import JobDetailModal from "../organisms/job/jobDetailModal";
 import HomeNewsCard from "../organisms/home/homeNewsCard";
 import HomeProjectCard from "../organisms/home/homeProjectCard";
@@ -10,12 +10,16 @@ import ProjectSVG from "../svg/projectSVG";
 import SeeMore from "../svg/seeMore";
 import { LatestNewsData } from "../../api/newsApi";
 import { useEffect, useState } from "react";
+import { useExpiringJobs } from "../../hooks/useExpiringJobs";
 import type { News } from "../../types/newsTypes";
 
 function HomePage() {
   const [latestNewsData, setLatestNewsData] = useState<News[]>([]);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  console.log(selectedJobId);
+
+  // 마감 임박 채용공고 데이터
+  const { jobs: expiringJobs, loading: jobsLoading } = useExpiringJobs();
+
   useEffect(() => {
     const loadLatestNews = async () => {
       const data = await LatestNewsData();
@@ -33,9 +37,9 @@ function HomePage() {
     setSelectedJobId(null);
   };
 
-  const selectedJob = null; // mockJobList 제거됨
+  const selectedJob = expiringJobs.find((job) => job.id === selectedJobId);
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-[#007DFC] to-[#0056CC] w-full py-12 sm:py-16 lg:py-20 px-6 relative overflow-hidden">
         {/* 배경 장식 */}
@@ -97,16 +101,17 @@ function HomePage() {
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-                진행중인 채용
+                마감 임박 채용
               </h2>
               <div className="flex-1"></div>
               <Link to={"/jobs"}>
                 <SeeMore />
               </Link>
             </div>
-            <JobList
-              jobs={[]} // mockJobList 제거됨
+            <ExpiringJobsCarousel
+              jobs={expiringJobs}
               onJobClick={handleJobClick}
+              loading={jobsLoading}
             />
           </div>
         </div>
