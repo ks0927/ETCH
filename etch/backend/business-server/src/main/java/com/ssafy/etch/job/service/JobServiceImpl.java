@@ -3,10 +3,11 @@ package com.ssafy.etch.job.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
+import com.ssafy.etch.global.exception.CustomException;
+import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.job.dto.JobDTO;
 import com.ssafy.etch.job.dto.JobResponseDTO;
 import com.ssafy.etch.job.entity.JobEntity;
@@ -23,7 +24,7 @@ public class JobServiceImpl implements JobService {
 	public JobResponseDTO getJob(Long jobId) {
 		JobDTO jobDTO = jobRepository.findById(jobId)
 			.map(JobEntity::toJobDTO)
-			.orElseThrow(() -> new NoSuchElementException("채용공고를 찾을 수 없습니다"));
+			.orElseThrow(() -> new CustomException(ErrorCode.JOB_NOT_FOUND));
 
 		return JobResponseDTO.from(jobDTO);
 	}
@@ -34,11 +35,18 @@ public class JobServiceImpl implements JobService {
 		LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
 
 		// ✅ 순서: startInclusive, endExclusive
-		List<JobEntity> jobEntityList = jobRepository
-			.findJobsStartingOrEndingInPeriod(startInclusive, endExclusive);
+		List<JobEntity> jobEntityList = jobRepository.findJobsStartingOrEndingInPeriod(startInclusive, endExclusive);
 
-		return jobEntityList.stream()
-			.map(e -> JobResponseDTO.from(e.toJobDTO()))
-			.toList();
+		return jobEntityList.stream().map(e -> JobResponseDTO.from(e.toJobDTO())).toList();
+	}
+
+	@Override
+	public List<JobResponseDTO> getJobsByExpirationDate(LocalDate startDate, LocalDate endDate) {
+		LocalDateTime startInclusive = startDate.atStartOfDay();       // yyyy-MM-dd 00:00:00
+		LocalDateTime endExclusive = endDate.plusDays(1).atStartOfDay();
+
+		List<JobEntity> jobEntityList = jobRepository.findByExpirationDateBetween(startInclusive, endExclusive);
+
+		return jobEntityList.stream().map(e -> JobResponseDTO.from(e.toJobDTO())).toList();
 	}
 }
