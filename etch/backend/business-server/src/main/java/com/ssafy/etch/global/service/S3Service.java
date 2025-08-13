@@ -26,6 +26,9 @@ public class S3Service {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
+	@Value("${PUBLIC_MINIO_BASE_URL}")
+	private String publicMinioBaseUrl;
+
 	private final AmazonS3 amazonS3;
 
 	public List<String> uploadFiles(List<MultipartFile> multipartFiles) {
@@ -52,7 +55,8 @@ public class S3Service {
 			throw new CustomException(ErrorCode.FILE_UPLOAD_FAILED);
 		}
 
-		return amazonS3.getUrl(bucket, fileName).toString();
+//		return amazonS3.getUrl(bucket, fileName).toString();
+		return String.format("%s/%s/%s", publicMinioBaseUrl, bucket, fileName);
 	}
 
 	// 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.
