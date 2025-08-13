@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -21,8 +22,8 @@ public class ProjectDTO {
     private String thumbnailUrl;
     private String youtubeUrl;
     private Long viewCount;
-    private LocalDate createdAt;
-    private LocalDate updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private Boolean isDeleted;
     private String githubUrl;
     private Boolean isPublic;
