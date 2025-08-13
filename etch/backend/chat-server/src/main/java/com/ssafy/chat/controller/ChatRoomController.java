@@ -8,6 +8,7 @@ import com.ssafy.chat.repository.redis.ChatRoomRepository;
 import com.ssafy.chat.service.ChatService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chat")
@@ -82,18 +84,19 @@ public class ChatRoomController {
         return ResponseEntity.ok(messages);
     }
 
-
     /**
      * 클라이언트가 채팅방에 입장할 때 호출됩니다.
      * 이 API가 호출되면, 서버는 해당 채팅방의 Topic을 실제 Redis 리스너에 등록하여
      * 메시지 수신을 시작합니다.
+     *
+     * ⭐ 중요: 읽음 처리는 별도의 API나 사용자의 명시적 액션에 의해서만 수행됩니다.
      */
     @PostMapping("/room/{roomId}/enter")
     public ResponseEntity<Void> enterChatRoom(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String roomId) {
         // 1. 토큰에서 memberId 추출
         Long memberId = getMemberIdFromToken(authorizationHeader);
         if (memberId == null) {
-            System.out.println("Invalid or expired token for room: " + roomId);
+            log.warn("Invalid or expired token for room: {}", roomId);
             return ResponseEntity.status(401).build(); // Unauthorized
         }
 
@@ -105,44 +108,80 @@ public class ChatRoomController {
                 topic = new ChannelTopic("chat-room-" + roomId);
                 topics.put(roomId, topic);
             } else {
-                System.out.println("Room not found: " + roomId);
+                log.warn("Room not found: {}", roomId);
                 return ResponseEntity.notFound().build();
             }
         }
         redisMessageListener.addMessageListener(redisSubscriber, topic);
 
-        // 3. DB에 참여자 정보 저장
+        // 3. DB에 참여자 정보 저장 (읽음 처리는 하지 않음)
         try {
+            log.info("Member {} entered room: {}", memberId, roomId);
             chatService.addParticipant(roomId, memberId);
-            System.out.println("Member " + memberId + " entered room: " + roomId);
+
+            // ⭐ 수정: 자동 읽음 처리 제거
+            // chatService.markRoomAsReadOnEnter(roomId, memberId); // 이 라인 제거
+
         } catch (Exception e) {
-            System.out.println("Failed to add participant: " + e.getMessage());
+            log.error("Failed to add participant: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
 
         return ResponseEntity.ok().build();
     }
 
-    // 채팅방 퇴장 API도 동일하게 수정
+    // 채팅방 퇴장 API
     @PostMapping("/room/{roomId}/exit")
     public ResponseEntity<Void> exitChatRoom(@RequestHeader("Authorization") String authorizationHeader, @PathVariable String roomId) {
         // 1. 토큰에서 memberId 추출
         Long memberId = getMemberIdFromToken(authorizationHeader);
         if (memberId == null) {
-            System.out.println("Invalid or expired token for room exit: " + roomId);
+            log.warn("Invalid or expired token for room exit: {}", roomId);
             return ResponseEntity.status(401).build(); // Unauthorized
         }
 
         // 2. DB에서 참여자 정보 삭제
         try {
             chatService.removeParticipant(roomId, memberId);
-            System.out.println("Member " + memberId + " exited room: " + roomId);
+            log.info("Member {} exited room: {}", memberId, roomId);
         } catch (Exception e) {
-            System.out.println("Failed to remove participant: " + e.getMessage());
+            log.error("Failed to remove participant: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 사용자가 특정 채팅방의 메시지를 읽었음을 서버에 알립니다.
+     * 이 API는 사용자가 실제로 메시지를 읽었을 때만 호출되어야 합니다.
+     */
+    @PostMapping("/room/{roomId}/read")
+    public ResponseEntity<Void> markAsRead(@RequestHeader("Authorization") String authorizationHeader,
+                                           @PathVariable String roomId) {
+        Long memberId = getMemberIdFromToken(authorizationHeader);
+        if (memberId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        log.info("Manual read status update requested by member {} for room {}", memberId, roomId);
+        chatService.updateReadStatus(roomId, memberId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 사용자의 모든 채팅방에 대한 안 읽은 메시지 수를 조회합니다.
+     * 채팅방 목록을 보여줄 때 사용됩니다.
+     */
+    @GetMapping("/rooms/unread-counts")
+    public ResponseEntity<Map<String, Long>> getTotalUnreadCounts(@RequestHeader("Authorization") String authorizationHeader) {
+        Long memberId = getMemberIdFromToken(authorizationHeader);
+        if (memberId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Long> unreadCounts = chatService.getUnreadMessageCounts(memberId);
+        return ResponseEntity.ok(unreadCounts);
     }
 
     // 토큰 파싱을 위한 안전한 헬퍼 메서드
@@ -155,7 +194,7 @@ public class ChatRoomController {
                     return jwtUtil.getId(token);
                 }
             } catch (Exception e) {
-                System.out.println("Token validation failed: " + e.getMessage());
+                log.error("Token validation failed: {}", e.getMessage());
             }
         }
         return null;
