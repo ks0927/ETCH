@@ -74,3 +74,18 @@ export const deleteAppliedJob = async (appliedJobId: number): Promise<void> => {
     throw error;
   }
 };
+
+/**
+ * GET /appliedJobs/codeList - 지원 상태 코드 목록 조회
+ */
+export const getApplyStatusCodes = async (): Promise<Record<string, string>> => {
+  try {
+    const response = await authInstance.get<ApiResponse<Record<string, string>>>(
+      '/appliedJobs/codeList'
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error('지원 상태 코드 목록 조회 실패:', error);
+    throw error;
+  }
+};
