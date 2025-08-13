@@ -78,7 +78,7 @@ function ProjectListPage() {
 
   // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
   const filteredProjects = useMemo(() => {
-    console.log("=== 필터링 및 정렬 시작 ===");
+    console.log("=== useMemo 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
     console.log("선택된 정렬:", selectedSort);
