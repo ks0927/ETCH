@@ -86,6 +86,5 @@ def fetch_and_tokenize_all(index: str = "news", size: int = 1000) -> Dict[str, D
         tokens_freq = nori_tokenize_with_freq(combined_text, index=doc.get('_index', 'news'))  # 수정된 부분
         tokenized_docs[doc_id] = tokens_freq
 
-    print("~~~~~~~~~~~~~~~ end fetching and tokenizing all documents ~~~~~~~~~~~~~~~")
-    print(f"Tokenized all docs: {tokenized_docs}")
+    print("~~~~~~~~~~~~~~~ end fetching and tokenizing all "+index+"documents ~~~~~~~~~~~~~~~")
     return tokenized_docs
