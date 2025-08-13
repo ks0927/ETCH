@@ -1,6 +1,6 @@
 import type { ProjectCardProps } from "../../atoms/card";
 import noImg from "../../../assets/noImg.png";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import LikeSVG from "../../svg/likeSVG";
 import ViewSVG from "../../svg/viewSVG";
 import { ProjectWriteTechData } from "../../../types/project/projectTechData";
@@ -9,7 +9,6 @@ import {
   deleteProject,
   likeProject,
   unlikeProject,
-  getMyProjects,
 } from "../../../api/projectApi";
 import { useNavigate } from "react-router";
 
@@ -30,12 +29,16 @@ function ProjectModalCard({
   nickname,
   files,
   projectTechs,
-  likeCount: initialLikeCount, // props 이름 변경
+  likeCount: initialLikeCount,
   likedByMe: initialLikedByMe,
   writerImg,
   onLike,
   onClose,
-}: ProjectCardProps & { onClose?: () => void }) {
+  ...restProps // 나머지 props 받기
+}: ProjectCardProps & {
+  onClose?: () => void;
+  [key: string]: unknown; // any 대신 unknown 사용
+}) {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -45,7 +48,7 @@ function ProjectModalCard({
     initialLikeCount || 0
   );
   const [isLiking, setIsLiking] = useState(false);
-  const [isMyProject, setIsMyProject] = useState(false);
+  // isMyProject state 제거 (API 오류로 사용하지 않음)
 
   // 로그인 상태 확인 함수
   const isLoggedIn = (): boolean => {
@@ -71,51 +74,28 @@ function ProjectModalCard({
   // 현재 사용자 정보 가져오기
   const currentUser = getUserFromToken();
 
-  // 내 프로젝트인지 확인하는 useEffect 추가
-  useEffect(() => {
-    const checkIfMyProject = async () => {
-      if (!currentUser || !isLoggedIn()) {
-        setIsMyProject(false);
-        return;
-      }
-
-      try {
-        const myProjects = await getMyProjects();
-        const isMyProj = myProjects.some(
-          (project: { id: number }) => project.id === id
-        );
-        setIsMyProject(isMyProj);
-        console.log(`프로젝트 ID ${id}가 내 프로젝트인지:`, isMyProj);
-      } catch (error) {
-        console.error("내 프로젝트 확인 실패:", error);
-        setIsMyProject(false);
-      }
-    };
-
-    checkIfMyProject();
-  }, [currentUser, id]);
-
   // 디버깅용 로그
-  console.log("디버깅 정보:", {
-    currentUser,
-    member,
-    currentUserId: currentUser?.id,
-    memberId: member?.id,
-  });
 
-  // 작성자 체크 - 내 프로젝트 목록으로 확인
+  // 작성자 체크 - authorId 사용 (타입 안전)
+  const authorId = restProps.authorId as number | undefined;
+
   const isAuthor = (() => {
     if (!currentUser) {
       return false;
     }
 
-    // 1. member 객체가 있는 경우 (기존 로직)
+    // 1. authorId가 있으면 정확한 비교 (백엔드 수정 후)
+    if (authorId) {
+      return currentUser.id === authorId;
+    }
+
+    // 2. member 객체가 있으면 사용 (기존 방식)
     if (member && member.id) {
       return currentUser.id === member.id;
     }
 
-    // 2. 내 프로젝트 목록으로 확인
-    return isMyProject;
+    // 3. 둘 다 없으면 로그인한 사용자에게 버튼 표시 (fallback)
+    return isLoggedIn();
   })();
 
   // 2. isLiked 초기값을 백엔드 데이터로 설정
@@ -171,12 +151,9 @@ function ProjectModalCard({
     navigate(`/projects/${id}/edit`);
   };
 
-  // 삭제 버튼 클릭 핸들러 수정
+  // 삭제 버튼 클릭 핸들러
   const handleDelete = async () => {
-    // 로그인 체크 - 키 이름 수정
     const token = localStorage.getItem("access_token");
-    console.log("토큰:", token); // 디버깅용
-    console.log("토큰 존재 여부:", !!token); // 디버깅용
 
     if (!token) {
       alert("로그인이 필요한 기능입니다.");
@@ -192,17 +169,14 @@ function ProjectModalCard({
       await deleteProject(id);
       alert("프로젝트가 성공적으로 삭제되었습니다.");
 
-      // 모달 닫기
       if (onClose) {
         onClose();
       }
 
-      // 페이지 새로고침 또는 목록으로 이동
       window.location.reload();
     } catch (error: unknown) {
       console.error("프로젝트 삭제 실패:", error);
 
-      // Error 타입인지 확인
       if (error instanceof Error) {
         if (error.message?.includes("로그인")) {
           alert(error.message);
@@ -313,6 +287,14 @@ function ProjectModalCard({
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
+  console.log("디버깅 정보:", {
+    currentUser,
+    member,
+    currentUserId: currentUser?.id,
+    memberId: member?.id,
+    authorId, // authorId 추가
+    isAuthor, // isAuthor 결과 추가
+  });
 
   return (
     <div className="space-y-6">

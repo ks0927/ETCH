@@ -28,6 +28,7 @@ export interface ProjectCardProps extends BaseCardProps {
   githubUrl: string;
   isPublic: boolean;
   nickname: string;
+  authorId?: number;
   onClose?: () => void;
   likedByMe?: boolean; // 🎯 추가
   onLike?: () => void;
