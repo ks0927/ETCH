@@ -4,7 +4,22 @@ import type { NewsCardProps } from "../../atoms/card";
 import HeartSVG from "../../svg/heartSVG";
 import { likeApi } from "../../../api/likeApi";
 
-function NewsCard({ id, title, url, publishedAt, description, companyName, onLikeClick }: NewsCardProps) {
+interface NewsCardWithLikeProps extends NewsCardProps {
+  isLiked?: boolean;
+  onLikeStateChange?: (newsId: number, isLiked: boolean) => void;
+}
+
+function NewsCard({ 
+  id, 
+  title, 
+  url, 
+  publishedAt, 
+  description, 
+  companyName, 
+  onLikeClick,
+  isLiked = false,
+  onLikeStateChange 
+}: NewsCardWithLikeProps) {
   const [isLiking, setIsLiking] = useState(false);
 
   const handleLikeClick = async (e: React.MouseEvent) => {
@@ -15,15 +30,26 @@ function NewsCard({ id, title, url, publishedAt, description, companyName, onLik
 
     try {
       setIsLiking(true);
-      await likeApi.news.addLike(id);
-      alert("관심 뉴스로 등록되었습니다!");
+      
+      if (isLiked) {
+        // 이미 좋아요한 경우 - 삭제
+        await likeApi.news.removeLike(id);
+        alert("관심 뉴스에서 삭제되었습니다!");
+        onLikeStateChange?.(id, false);
+      } else {
+        // 좋아요하지 않은 경우 - 추가
+        await likeApi.news.addLike(id);
+        alert("관심 뉴스로 등록되었습니다!");
+        onLikeStateChange?.(id, true);
+      }
+      
       onLikeClick?.(id);
     } catch (error: any) {
-      console.error("관심 뉴스 등록 실패:", error);
+      console.error("관심 뉴스 처리 실패:", error);
       if (error.response?.data?.message === "이미 좋아요를 누른 콘텐츠입니다.") {
         alert("이미 관심 뉴스로 등록된 뉴스입니다.");
       } else {
-        alert("관심 뉴스 등록에 실패했습니다. 다시 시도해주세요.");
+        alert(`관심 뉴스 ${isLiked ? '삭제' : '등록'}에 실패했습니다. 다시 시도해주세요.`);
       }
     } finally {
       setIsLiking(false);
@@ -59,9 +85,11 @@ function NewsCard({ id, title, url, publishedAt, description, companyName, onLik
             className={`ml-2 p-2 rounded-full transition-colors ${
               isLiking 
                 ? "text-gray-300 cursor-not-allowed" 
-                : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+                : isLiked
+                  ? "text-red-500 hover:text-red-600 hover:bg-red-50"
+                  : "text-gray-400 hover:text-red-500 hover:bg-red-50"
             }`}
-            title="관심 뉴스 등록"
+            title={isLiked ? "관심 뉴스 삭제" : "관심 뉴스 등록"}
           >
             {isLiking ? (
               <div className="w-5 h-5 animate-spin">
@@ -73,7 +101,7 @@ function NewsCard({ id, title, url, publishedAt, description, companyName, onLik
                 </svg>
               </div>
             ) : (
-              <HeartSVG />
+              <HeartSVG filled={isLiked} />
             )}
           </button>
         </div>

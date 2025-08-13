@@ -5,6 +5,8 @@ import { likeApi } from "../../../api/likeApi";
 
 interface JobListItemWithBookmarkProps extends JobItemProps {
   onBookmarkClick?: (jobId: string | number) => void;
+  isLiked?: boolean;
+  onLikeStateChange?: (jobId: number, isLiked: boolean) => void;
 }
 
 export default function JobListItem({
@@ -20,6 +22,8 @@ export default function JobListItem({
   expirationDate,
   onClick,
   onBookmarkClick,
+  isLiked = false,
+  onLikeStateChange,
 }: JobListItemWithBookmarkProps) {
   const [isBookmarking, setIsBookmarking] = useState(false);
 
@@ -31,15 +35,26 @@ export default function JobListItem({
 
     try {
       setIsBookmarking(true);
-      await likeApi.jobs.addLike(Number(id));
-      alert("관심 공고로 등록되었습니다!");
+      
+      if (isLiked) {
+        // 이미 좋아요한 경우 - 삭제
+        await likeApi.jobs.removeLike(Number(id));
+        alert("관심 공고에서 삭제되었습니다!");
+        onLikeStateChange?.(Number(id), false);
+      } else {
+        // 좋아요하지 않은 경우 - 추가
+        await likeApi.jobs.addLike(Number(id));
+        alert("관심 공고로 등록되었습니다!");
+        onLikeStateChange?.(Number(id), true);
+      }
+      
       onBookmarkClick?.(id);
     } catch (error: any) {
-      console.error("관심 공고 등록 실패:", error);
+      console.error("관심 공고 처리 실패:", error);
       if (error.response?.data?.message === "이미 좋아요를 누른 콘텐츠입니다.") {
         alert("이미 관심 공고로 등록된 채용공고입니다.");
       } else {
-        alert("관심 공고 등록에 실패했습니다. 다시 시도해주세요.");
+        alert(`관심 공고 ${isLiked ? '삭제' : '등록'}에 실패했습니다. 다시 시도해주세요.`);
       }
     } finally {
       setIsBookmarking(false);
@@ -80,9 +95,11 @@ export default function JobListItem({
           className={`flex-shrink-0 p-1 rounded transition-colors ${
             isBookmarking 
               ? "text-gray-300 cursor-not-allowed" 
-              : "text-gray-400 hover:text-pink-500 hover:bg-pink-50"
+              : isLiked
+                ? "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50"
+                : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50"
           }`}
-          title="관심 공고 등록"
+          title={isLiked ? "관심 공고 삭제" : "관심 공고 등록"}
         >
           {isBookmarking ? (
             <div className="w-5 h-5 animate-spin">
@@ -94,7 +111,7 @@ export default function JobListItem({
               </svg>
             </div>
           ) : (
-            <BookmarkSVG />
+            <BookmarkSVG filled={isLiked} />
           )}
         </button>
       </div>
