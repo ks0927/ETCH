@@ -119,21 +119,29 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 클라이언트 사이드 정렬 - 기본값을 최신순으로 명확히 처리
+    // 3. ✅ 클라이언트 사이드 정렬 - 강화된 정렬 로직
     filtered.sort((a, b) => {
+      console.log(`정렬 비교 중: A(${a.id}) vs B(${b.id})`);
+
       switch (selectedSort) {
         case "LATEST": {
           // 최신순 - createdAt 기준 내림차순 (기본값)
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
+          console.log(
+            `📅 날짜 비교: A(${a.createdAt}, ${dateA}) vs B(${b.createdAt}, ${dateB})`
+          );
           console.log("🔄 최신순 정렬 적용");
-          return dateB - dateA;
+          const result = dateB - dateA;
+          console.log(`정렬 결과: ${result} (양수면 B가 앞, 음수면 A가 앞)`);
+          return result;
         }
 
         case "POPULAR": {
           // 인기순 - popularityScore 기준 내림차순 (없으면 likeCount 사용)
           const popularityA = a.popularityScore || a.likeCount || 0;
           const popularityB = b.popularityScore || b.likeCount || 0;
+          console.log(`🔥 인기도 비교: A(${popularityA}) vs B(${popularityB})`);
           console.log("🔥 인기순 정렬 적용");
           return popularityB - popularityA;
         }
@@ -142,6 +150,7 @@ function ProjectListPage() {
           // 조회순 - viewCount 기준 내림차순
           const viewsA = a.viewCount || 0;
           const viewsB = b.viewCount || 0;
+          console.log(`👀 조회수 비교: A(${viewsA}) vs B(${viewsB})`);
           console.log("👀 조회순 정렬 적용");
           return viewsB - viewsA;
         }
@@ -150,6 +159,7 @@ function ProjectListPage() {
           // 좋아요순 - likeCount 기준 내림차순
           const likesA = a.likeCount || 0;
           const likesB = b.likeCount || 0;
+          console.log(`👍 좋아요 비교: A(${likesA}) vs B(${likesB})`);
           console.log("👍 좋아요순 정렬 적용");
           return likesB - likesA;
         }
@@ -158,6 +168,9 @@ function ProjectListPage() {
           // 기본값도 최신순으로 처리
           const defaultDateA = new Date(a.createdAt || 0).getTime();
           const defaultDateB = new Date(b.createdAt || 0).getTime();
+          console.log(
+            `📅 기본 날짜 비교: A(${defaultDateA}) vs B(${defaultDateB})`
+          );
           console.log("🔄 기본값 최신순 정렬 적용");
           return defaultDateB - defaultDateA;
         }
@@ -167,6 +180,17 @@ function ProjectListPage() {
     console.log("=== 필터링 및 정렬 완료 ===");
     console.log("필터링된 프로젝트 수:", filtered.length);
     console.log("적용된 정렬:", selectedSort);
+
+    // 정렬 결과 확인을 위한 로그
+    console.log("📋 정렬 결과 (처음 3개):");
+    filtered.slice(0, 3).forEach((project, index) => {
+      console.log(
+        `${index + 1}. ID: ${project.id}, 제목: ${project.title}, 생성일: ${
+          project.createdAt
+        }, 조회수: ${project.viewCount}, 좋아요: ${project.likeCount}`
+      );
+    });
+
     return filtered;
   };
 
