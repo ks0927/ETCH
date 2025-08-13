@@ -75,8 +75,7 @@ public class ProjectController {
 		@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestPart("data") MultipartFile dataFile,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
-		@RequestPart(value = "images", required = false) List<MultipartFile> images,
-		@RequestPart(value = "pdf", required = false) MultipartFile pdf
+		@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) throws IOException {
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -89,7 +88,7 @@ public class ProjectController {
 		ProjectCreateRequestDTO data = objectMapper.readValue(dataStr, ProjectCreateRequestDTO.class);
 
 		Long memberId = user.getId();
-		Long id = projectService.createProject(memberId, data, thumbnail, images, pdf);
+		Long id = projectService.createProject(memberId, data, thumbnail, images);
 
 		return ResponseEntity.ok(ApiResponse.success(id));
 	}
@@ -104,8 +103,7 @@ public class ProjectController {
 		@AuthenticationPrincipal CustomOAuth2User user,
 		@RequestPart("data") MultipartFile dataFile,
 		@RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
-		@RequestPart(value = "images",    required = false) List<MultipartFile> images,
-		@RequestPart(value = "pdf",       required = false) MultipartFile pdf
+		@RequestPart(value = "images",    required = false) List<MultipartFile> images
 	) throws IOException {
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인이 필요합니다."));
@@ -115,7 +113,7 @@ public class ProjectController {
 		ProjectUpdateRequestDTO data = objectMapper.readValue(dataStr, ProjectUpdateRequestDTO.class);
 
 		Long memberId = user.getId();
-		projectService.updateProject(projectId, memberId, data, thumbnail, images, pdf);
+		projectService.updateProject(projectId, memberId, data, thumbnail, images);
 
 		return ResponseEntity.ok(ApiResponse.success(null));
 	}

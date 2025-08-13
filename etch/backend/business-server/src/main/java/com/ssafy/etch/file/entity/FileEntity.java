@@ -28,10 +28,7 @@ public class FileEntity {
 	private String name;
 
 	@Column(name = "file_url")
-	private String fileUrl; // 사진/파일 url (PDF도 여기 저장)
-
-	@Column(name = "is_pdf")
-	private boolean isPdf; // true: pdf, false: image
+	private String fileUrl; // 사진/파일 url
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "project_post_id")
@@ -42,16 +39,6 @@ public class FileEntity {
 		f.project = p;
 		f.name = name;
 		f.fileUrl = fileUrl;
-		f.isPdf = false;
-		return f;
-	}
-
-	public static FileEntity pdf(ProjectEntity p, String name, String fileUrl) {
-		FileEntity f = new FileEntity();
-		f.project = p;
-		f.name = name;
-		f.fileUrl = fileUrl;
-		f.isPdf = true;
 		return f;
 	}
 

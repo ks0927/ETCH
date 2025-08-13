@@ -50,11 +50,10 @@ public class ProjectServiceImpl implements ProjectService {
 	private final FileRepository fileRepository;
 	private final S3Service s3Service;
 
-	// 이미지: .png/.jpg만, 각 5MB 이하
 	private static final Set<String> ALLOWED_IMAGE_CT = Set.of("image/jpeg", "image/png");
-	private static final Set<String> ALLOWED_IMAGE_EXT = Set.of(".jpg", ".png");
+	private static final Set<String> ALLOWED_IMAGE_EXT = Set.of(".jpg", ".png", "jpeg", ".gif", "webp");
 	private static final long MAX_SIZE = 5L * 1024 * 1024; // 5MB
-	private static final int MAX_IMAGES = 4; // 썸네일 제외 본문 이미지 최대 4장
+	private static final int MAX_IMAGES = 9; // 썸네일 제외 본문 이미지 최대 4장
 
 	private static final int MAX_PAGE_SIZE = 100;
 
@@ -82,14 +81,6 @@ public class ProjectServiceImpl implements ProjectService {
 		boolean ctOk = ALLOWED_IMAGE_CT.contains(ct);
 		boolean extOk = ALLOWED_IMAGE_EXT.stream().anyMatch(name::endsWith);
 		return ctOk && extOk && f.getSize() <= MAX_SIZE;
-	}
-
-	private static boolean isPdfOk(MultipartFile f) {
-		if (f == null || f.isEmpty()) return false;
-		String ct = Optional.ofNullable(f.getContentType()).orElse("").toLowerCase();
-		boolean ctOk = ct.equals("application/pdf")
-			|| (ct.startsWith("application/") && Optional.ofNullable(f.getOriginalFilename()).orElse("").toLowerCase().endsWith(".pdf"));
-		return ctOk && f.getSize() <= MAX_SIZE;
 	}
 
 	private static String normalizeYoutube(String url) {
@@ -205,24 +196,17 @@ public class ProjectServiceImpl implements ProjectService {
 		List<FileEntity> files = fileRepository.findAllByProjectId(id);
 
 		List<String> imageUrls = files.stream()
-			.filter(f -> !f.isPdf())
 			.map(FileEntity::getFileUrl)
 			.toList();
 
-		String pdfUrl = files.stream()
-			.filter(FileEntity::isPdf)
-			.map(FileEntity::getFileUrl)
-			.findFirst()
-			.orElse(null);
-
-		return ProjectDetailDTO.from(p, likedByMe, techCategories, techCodes, imageUrls, pdfUrl);
+		return ProjectDetailDTO.from(p, likedByMe, techCategories, techCodes, imageUrls);
 	}
 
 	// 등록
 	@Override
 	@Transactional
 	public Long createProject(Long memberId, ProjectCreateRequestDTO req,
-		MultipartFile thumbnail, List<MultipartFile> images, MultipartFile pdf) {
+		MultipartFile thumbnail, List<MultipartFile> images) {
 		if (memberId == null) {
 			throw new IllegalStateException("로그인이 필요합니다.");
 		}
@@ -287,16 +271,6 @@ public class ProjectServiceImpl implements ProjectService {
 			fileRepository.saveAll(fileEntities);
 		}
 
-		// PDF
-		if (isPdfOk(pdf)) {
-			String url = s3Service.uploadFile(pdf);
-			FileEntity fe = FileEntity.pdf(project,
-				Optional.ofNullable(pdf.getOriginalFilename()).orElse("document.pdf"),
-				url);
-			fileRepository.save(fe);
-			project.addFile(fe);
-		}
-
 		return project.getId();
 	}
 
@@ -321,8 +295,7 @@ public class ProjectServiceImpl implements ProjectService {
 	public void updateProject(Long projectId, Long memberId,
 		ProjectUpdateRequestDTO req,
 		MultipartFile thumbnail,
-		List<MultipartFile> images,
-		MultipartFile pdf) {
+		List<MultipartFile> images) {
 		if (memberId == null) {
 			throw new IllegalStateException("로그인이 필요합니다.");
 		}
@@ -412,7 +385,7 @@ public class ProjectServiceImpl implements ProjectService {
 		List<MultipartFile> addList = Optional.ofNullable(images).orElse(List.of());
 		if (!addList.isEmpty()) {
 			int existingImages = (int) fileRepository.findAllByProjectId(projectId)
-				.stream().filter(f -> !f.isPdf()).count();
+				.size();
 			if (existingImages + addList.size() > MAX_IMAGES) {
 				throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장입니다.");
 			}
@@ -425,40 +398,6 @@ public class ProjectServiceImpl implements ProjectService {
 				p.addFile(fe);
 			}
 			if (!saved.isEmpty()) fileRepository.saveAll(saved);
-		}
-
-		// PDF
-		if (Boolean.TRUE.equals(req.getRemovePdf())) {
-			List<FileEntity> pdfs = fileRepository.findAllByProjectId(projectId).stream()
-				.filter(FileEntity::isPdf)
-				.toList();
-			if (!pdfs.isEmpty()) {
-				for (FileEntity f : pdfs) {
-					try { s3Service.deleteFileByUrl(f.getFileUrl()); } catch (Exception ignore) {}
-					p.removeFile(f);
-				}
-				fileRepository.deleteAll(pdfs);
-			}
-		} else if (pdf != null && !pdf.isEmpty()) {
-			if (!isPdfOk(pdf)) throw new IllegalArgumentException("PDF 형식/용량 오류");
-
-			// 기존 PDF 제거
-			List<FileEntity> pdfs = fileRepository.findAllByProjectId(projectId).stream()
-				.filter(FileEntity::isPdf)
-				.toList();
-			if (!pdfs.isEmpty()) {
-				for (FileEntity f : pdfs) {
-					try { s3Service.deleteFileByUrl(f.getFileUrl()); } catch (Exception ignore) {}
-					p.removeFile(f);
-				}
-				fileRepository.deleteAll(pdfs);
-			}
-
-			// 새 PDF 저장
-			String url = s3Service.uploadFile(pdf);
-			FileEntity fe = FileEntity.pdf(p, Optional.ofNullable(pdf.getOriginalFilename()).orElse("document.pdf"), url);
-			fileRepository.save(fe);
-			p.addFile(fe);
 		}
 	}
 }

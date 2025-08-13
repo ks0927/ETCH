@@ -34,7 +34,6 @@ public class ProjectCreateRequestDTO {
 	
 	private MultipartFile thumbnail; // 썸네일
 	private List<MultipartFile> images; // 본문 사진
-	private MultipartFile pdf;
 	private String youtubeUrl;
 
 	@NotNull
