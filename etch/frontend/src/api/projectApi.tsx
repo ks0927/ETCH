@@ -14,6 +14,18 @@ export interface ProjectCreateRequestData {
   isPublic: boolean;
 }
 
+// 내 프로젝트 API 응답 타입 (스웨거 기준)
+export interface MyProjectResponse {
+  id: number;
+  title: string;
+  thumbnailUrl: string | null;
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  isPublic: boolean;
+  popularityScore: number;
+}
+
 // 토큰을 안전하게 가져오는 유틸리티 함수
 function getAuthToken(): string | null {
   // 먼저 정상적인 키로 시도
@@ -320,16 +332,27 @@ export async function getLikedProjects() {
   }
 }
 
-export async function getMyProjects() {
+// 내 프로젝트 조회 API - 올바른 엔드포인트 사용
+export async function getMyProjects(): Promise<MyProjectResponse[]> {
   try {
     const token = getAuthToken();
-    const response = await axios.get(`${BASE_API}/projects/my`, {
+    if (!token) {
+      throw new Error("로그인이 필요합니다.");
+    }
+
+    console.log("📡 내 프로젝트 API 호출:", `${BASE_API}/members/projects`);
+
+    const response = await axios.get(`${BASE_API}/members/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
+    console.log("✅ 내 프로젝트 API 응답:", response.data);
+
+    // 스웨거 응답 구조에 맞게 데이터 추출
     const data = response.data.data;
+
     if (Array.isArray(data)) {
       return data;
     } else if (data && typeof data === "object" && "content" in data) {
@@ -339,6 +362,16 @@ export async function getMyProjects() {
     return [];
   } catch (error) {
     console.error("내 프로젝트 조회 실패:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        localStorage.removeItem("access_token");
+        throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+      } else if (error.response?.status === 403) {
+        throw new Error("권한이 없습니다.");
+      }
+    }
+
     throw error;
   }
 }
