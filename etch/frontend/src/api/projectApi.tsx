@@ -521,14 +521,32 @@ export async function getUserProjects(
   isPublicOnly: boolean = false
 ) {
   try {
+    // 토큰 가져오기
+    const token = getAuthToken();
+
     const params = new URLSearchParams();
     params.append("userId", userId.toString());
     if (isPublicOnly) {
       params.append("isPublic", "true");
     }
 
+    // 헤더 설정 - 토큰이 있으면 포함
+    const config = token
+      ? {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      : {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+
     const response = await axios.get(
-      `${BASE_API}/projects?${params.toString()}`
+      `${BASE_API}/projects?${params.toString()}`,
+      config
     );
 
     const data = response.data.data;
@@ -540,6 +558,40 @@ export async function getUserProjects(
 
     return [];
   } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        // 401 에러인 경우 토큰 없이 재시도 (공개 프로젝트만)
+        try {
+          const params = new URLSearchParams();
+          params.append("userId", userId.toString());
+          params.append("isPublic", "true"); // 공개 프로젝트만 요청
+
+          const retryResponse = await axios.get(
+            `${BASE_API}/projects?${params.toString()}`
+          );
+
+          const retryData = retryResponse.data.data;
+          if (Array.isArray(retryData)) {
+            return retryData;
+          } else if (
+            retryData &&
+            typeof retryData === "object" &&
+            "content" in retryData
+          ) {
+            return retryData.content || [];
+          }
+
+          return [];
+        } catch (retryError) {
+          console.error("공개 프로젝트 조회도 실패:", retryError);
+          throw retryError;
+        }
+      } else if (error.response?.status === 403) {
+        // 권한 없음 - 빈 배열 반환
+        return [];
+      }
+    }
+
     console.error("사용자 프로젝트 조회 실패:", error);
     throw error;
   }
