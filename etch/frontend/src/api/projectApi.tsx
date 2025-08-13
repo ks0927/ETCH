@@ -512,7 +512,21 @@ export async function getProjectById(id: number) {
 }
 export async function getUserPublicProjects(userId: number) {
   try {
-    const response = await axios.get(`${BASE_API}/members/${userId}/projects`);
+    // 토큰 가져오기
+    const token = getAuthToken();
+
+    if (!token) {
+      console.error("인증 토큰이 없습니다. 로그인이 필요합니다.");
+      throw new Error("인증 토큰이 없습니다. 로그인이 필요합니다.");
+    }
+
+    // 헤더에 토큰 포함하여 요청
+    const response = await axios.get(`${BASE_API}/members/${userId}/projects`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     // 전체 응답 구조 확인
     console.log("=== 전체 응답 구조 ===");
@@ -553,6 +567,12 @@ export async function getUserPublicProjects(userId: number) {
       );
       console.error("- Request URL:", error.config?.url);
       console.error("- Request Method:", error.config?.method);
+
+      // 401 에러인 경우 특별 처리
+      if (error.response?.status === 401) {
+        console.error("인증 실패: 토큰이 만료되었거나 유효하지 않습니다.");
+        // 필요시 로그인 페이지로 리다이렉트하거나 토큰 갱신 로직 추가
+      }
     } else {
       console.error("General Error:", error);
     }
