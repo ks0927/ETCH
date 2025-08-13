@@ -51,6 +51,35 @@ function ProjectModalCard({
     return !!token;
   };
 
+  // JWT 토큰에서 사용자 정보 추출하는 함수
+  const getUserFromToken = () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return null;
+
+      const base64Payload = token.split(".")[1];
+      const payload = JSON.parse(atob(base64Payload));
+      return payload;
+    } catch (error) {
+      console.error("토큰 디코딩 실패:", error);
+      return null;
+    }
+  };
+
+  // 현재 사용자 정보 가져오기
+  const currentUser = getUserFromToken();
+
+  // 디버깅용 로그
+  console.log("디버깅 정보:", {
+    currentUser,
+    member,
+    currentUserId: currentUser?.id,
+    memberId: member?.id,
+  });
+
+  // 작성자 체크
+  const isAuthor = currentUser && member && currentUser.id === member.id;
+
   // 2. isLiked 초기값을 백엔드 데이터로 설정
   const [isLiked, setIsLiked] = useState(initialLikedByMe || false); // 🎯 수정
 
@@ -151,10 +180,6 @@ function ProjectModalCard({
       setIsDeleting(false);
     }
   };
-
-  // 현재 사용자가 작성자인지 확인 (임시로 member.id === 1로 가정)
-  // 실제로는 현재 로그인한 사용자 ID와 비교해야 함
-  const isAuthor = member?.id === 1; // 실제 로그인 사용자 ID로 변경 필요
 
   // 삭제된 프로젝트는 표시하지 않음
   if (isDeleted) {
