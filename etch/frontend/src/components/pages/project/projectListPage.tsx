@@ -28,10 +28,10 @@ function ProjectListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 필터 상태 관리
+  // 필터 상태 관리 - 기본값을 명시적으로 최신순으로 설정
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
-  const [selectedSort, setSelectedSort] = useState<string>("LATEST");
+  const [selectedSort, setSelectedSort] = useState<string>("LATEST"); // 기본값: 최신순
 
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,7 +44,16 @@ function ProjectListPage() {
         setLoading(true);
         // 정렬 없이 모든 데이터 로드
         const projectData = await fetchProjects();
-        setProjects(projectData);
+
+        // ✅ 데이터를 불러온 즉시 최신순으로 정렬
+        const sortedData = [...projectData].sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+
+        setProjects(sortedData);
+        console.log("✅ 프로젝트 로드 완료, 최신순 정렬 적용됨");
       } catch (err) {
         setError("프로젝트 데이터를 불러오는데 실패했습니다.");
         console.error(err);
@@ -55,16 +64,6 @@ function ProjectListPage() {
 
     loadProjects();
   }, []); // 의존성 배열에서 selectedSort 제거
-
-  // ❌ 서버 사이드 정렬 useEffect 제거
-  // useEffect(() => {
-  //   if (selectedSort) {
-  //     const reloadProjects = async () => {
-  //       // 서버에서 정렬하는 코드 제거
-  //     };
-  //     reloadProjects();
-  //   }
-  // }, [selectedSort]);
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
@@ -120,13 +119,14 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 클라이언트 사이드 정렬 추가
+    // 3. ✅ 클라이언트 사이드 정렬 - 기본값을 최신순으로 명확히 처리
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case "LATEST": {
-          // 최신순 - createdAt 기준 내림차순
+          // 최신순 - createdAt 기준 내림차순 (기본값)
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
+          console.log("🔄 최신순 정렬 적용");
           return dateB - dateA;
         }
 
@@ -134,6 +134,7 @@ function ProjectListPage() {
           // 인기순 - popularityScore 기준 내림차순 (없으면 likeCount 사용)
           const popularityA = a.popularityScore || a.likeCount || 0;
           const popularityB = b.popularityScore || b.likeCount || 0;
+          console.log("🔥 인기순 정렬 적용");
           return popularityB - popularityA;
         }
 
@@ -141,6 +142,7 @@ function ProjectListPage() {
           // 조회순 - viewCount 기준 내림차순
           const viewsA = a.viewCount || 0;
           const viewsB = b.viewCount || 0;
+          console.log("👀 조회순 정렬 적용");
           return viewsB - viewsA;
         }
 
@@ -148,13 +150,15 @@ function ProjectListPage() {
           // 좋아요순 - likeCount 기준 내림차순
           const likesA = a.likeCount || 0;
           const likesB = b.likeCount || 0;
+          console.log("👍 좋아요순 정렬 적용");
           return likesB - likesA;
         }
 
         default: {
-          // 기본값은 최신순
+          // 기본값도 최신순으로 처리
           const defaultDateA = new Date(a.createdAt || 0).getTime();
           const defaultDateB = new Date(b.createdAt || 0).getTime();
+          console.log("🔄 기본값 최신순 정렬 적용");
           return defaultDateB - defaultDateA;
         }
       }
@@ -162,6 +166,7 @@ function ProjectListPage() {
 
     console.log("=== 필터링 및 정렬 완료 ===");
     console.log("필터링된 프로젝트 수:", filtered.length);
+    console.log("적용된 정렬:", selectedSort);
     return filtered;
   };
 
@@ -202,13 +207,24 @@ function ProjectListPage() {
     setSelectedSort(sortType);
   }, []);
 
-  // ✅ 새로고침 버튼 핸들러 수정
+  // ✅ 새로고침 버튼 핸들러 - 정렬도 기본값으로 리셋
   const handleRefresh = async () => {
     try {
       setLoading(true);
-      const projectData = await fetchProjects(); // 정렬 파라미터 제거
-      setProjects(projectData);
-      console.log("🔄 수동 새로고침 완료");
+      const projectData = await fetchProjects();
+
+      // ✅ 새로고침 시에도 바로 최신순으로 정렬
+      const sortedData = [...projectData].sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA; // 최신순 (내림차순)
+      });
+
+      setProjects(sortedData);
+      // 새로고침 시 정렬도 기본값(최신순)으로 리셋
+      setSelectedSort("LATEST");
+      setCurrentPage(1);
+      console.log("🔄 수동 새로고침 완료 - 최신순으로 정렬됨");
     } catch (err) {
       setError("프로젝트 데이터를 불러오는데 실패했습니다.");
       console.error(err);
@@ -316,7 +332,7 @@ function ProjectListPage() {
                     onClick={() => {
                       setSearchTerm("");
                       setSelectedCategory("ALL");
-                      setSelectedSort("LATEST");
+                      setSelectedSort("LATEST"); // 초기화 시에도 최신순으로
                     }}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
@@ -330,7 +346,8 @@ function ProjectListPage() {
             <section className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
               <div className="text-yellow-800">
                 <strong>디버그 정보:</strong> 전체 {projects.length}개 프로젝트,
-                필터링 후 {filteredProjects.length}개, 현재 정렬: {selectedSort}
+                필터링 후 {filteredProjects.length}개, 현재 정렬:{" "}
+                <strong>{selectedSort}</strong>
                 {projects.length > 0 && (
                   <span>
                     , 최신 프로젝트: {projects[0]?.title} (ID: {projects[0]?.id}
