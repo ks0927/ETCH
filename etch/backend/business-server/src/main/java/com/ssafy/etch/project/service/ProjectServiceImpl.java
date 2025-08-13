@@ -56,7 +56,7 @@ public class ProjectServiceImpl implements ProjectService {
 	private static final long MAX_SIZE = 5L * 1024 * 1024; // 5MB
 	private static final int MAX_IMAGES = 4; // 썸네일 제외 본문 이미지 최대 4장
 
-	private static final int MAX_PAGE_SIZE = 9;
+	private static final int MAX_PAGE_SIZE = 100;
 
 	public ProjectServiceImpl(ProjectRepository projectRepository,
 		LikeRepository likeRepository,
