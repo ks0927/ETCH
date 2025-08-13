@@ -39,3 +39,22 @@ export const getJobsList = async (params: JobListParams): Promise<Job[]> => {
     throw error;
   }
 };
+
+// 마감 임박 채용공고 목록 조회
+export const getExpiringJobs = async (params: JobListParams): Promise<Job[]> => {
+  try {
+    const response = await defaultInstance.get<ApiResponse<Job[]>>(
+      "/jobs/expiring",
+      {
+        params: {
+          start: params.start,
+          end: params.end,
+        },
+      }
+    );
+    return response.data.data;
+  } catch (error) {
+    console.error("마감 임박 채용공고 조회 실패:", error);
+    throw error;
+  }
+};
