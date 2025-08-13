@@ -145,6 +145,37 @@ public class ChatRoomController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * 사용자가 특정 채팅방의 메시지를 모두 읽었음을 서버에 알립니다.
+     * 클라이언트는 채팅방에 들어갈 때 이 API를 호출해야 합니다.
+     */
+    @PostMapping("/room/{roomId}/read")
+    public ResponseEntity<Void> markAsRead(@RequestHeader("Authorization") String authorizationHeader,
+                                           @PathVariable String roomId) {
+        Long memberId = getMemberIdFromToken(authorizationHeader);
+        if (memberId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        chatService.updateReadStatus(roomId, memberId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 사용자의 모든 채팅방에 대한 안 읽은 메시지 수를 조회합니다.
+     * 채팅방 목록을 보여줄 때 사용됩니다.
+     */
+    @GetMapping("/rooms/unread-counts")
+    public ResponseEntity<Map<String, Long>> getTotalUnreadCounts(@RequestHeader("Authorization") String authorizationHeader) {
+        Long memberId = getMemberIdFromToken(authorizationHeader);
+        if (memberId == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Long> unreadCounts = chatService.getUnreadMessageCounts(memberId);
+        return ResponseEntity.ok(unreadCounts);
+    }
+
     // 토큰 파싱을 위한 안전한 헬퍼 메서드
     private Long getMemberIdFromToken(String authorizationHeader) {
         if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
