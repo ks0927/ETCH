@@ -22,12 +22,12 @@ public class ChatService {
     private final ChatParticipantRepository chatParticipantRepository;
 
     @Transactional
-    public void sendMessage(ChatMessageDto messageDto) { // íŒŒë¼ë¯¸í„° íƒ€ìž… ë³€ê²½
+    public void sendMessage(ChatMessageDto messageDto) { // 파라미터 타입 변경
         if (ChatMessageDto.MessageType.ENTER.equals(messageDto.getType())) {
-            messageDto.setMessage(messageDto.getSender() + "ë‹˜ì´ ìž…ìž¥í•˜ì…¨ìŠµë‹ˆë‹¤.");
+            messageDto.setMessage(messageDto.getSender() + "님이 입장하셨습니다.");
         }
 
-        // 1. DTO -> Entity ë³€í™˜
+        // 1. DTO -> Entity 변환
         ChatMessage chatMessage = ChatMessage.builder()
                 .roomId(messageDto.getRoomId())
                 .senderId(messageDto.getSenderId())
@@ -36,20 +36,20 @@ public class ChatService {
                 .sentAt(LocalDateTime.now())
                 .build();
 
-        // 2. DBì— ì±„íŒ… ë©”ì‹œì§€ ì €ìž¥
+        // 2. DB에 채팅 메시지 저장
         chatMessageRepository.save(chatMessage);
 
-        // 3. Redis í† í”½ìœ¼ë¡œ ë©”ì‹œì§€ ë°œí–‰
+        // 3. Redis 토픽으로 메시지 발행
         redisPublisher.publish("chat-room-" + messageDto.getRoomId(), messageDto);
     }
 
-    // ì´ì „ ëŒ€í™” ë‚´ì—­ ì¡°íšŒ
+    // 이전 대화 내역 조회
     @Transactional(readOnly = true)
     public List<ChatMessage> getChatMessages(String roomId) {
         return chatMessageRepository.findByRoomIdOrderBySentAtAsc(roomId);
     }
 
-    // ì‚¬ìš©ìžë¥¼ ì±„íŒ…ë°©ì— ì¶”ê°€í•˜ëŠ” ë©”ì„œë“œ
+    // 사용자를 채팅방에 추가하는 메서드
     @Transactional
     public void addParticipant(String roomId, Long memberId) {
         ChatParticipant participant = ChatParticipant.builder()
@@ -60,7 +60,7 @@ public class ChatService {
         chatParticipantRepository.save(participant);
     }
 
-    // ì‚¬ìš©ìžë¥¼ ì±„íŒ…ë°©ì—ì„œ ì œê±°í•˜ëŠ” ë©”ì„œë“œ
+    // 사용자를 채팅방에서 제거하는 메서드
     @Transactional
     public void removeParticipant(String roomId, Long memberId) {
         chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId)
