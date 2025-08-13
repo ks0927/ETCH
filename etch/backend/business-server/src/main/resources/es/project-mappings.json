@@ -1,0 +1,24 @@
+{
+  "properties": {
+    "id": {
+      "type": "long"
+    },
+    "title": {
+      "type": "text",
+      "analyzer": "my_nori_analyzer"
+    },
+    "content": {
+      "type": "text",
+      "analyzer": "my_nori_analyzer"
+    },
+    "thumbnailUrl": {
+      "type": "keyword"
+    },
+    "createdAt": {
+      "type": "date"
+    },
+    "updatedAt": {
+      "type": "date"
+    }
+  }
+}
