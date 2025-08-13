@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface ChatParticipantRepository extends JpaRepository<ChatParticipant, Long> {
     Optional<ChatParticipant> findByRoomIdAndMemberId(String roomId, Long memberId);
+    // 특정 채팅방의 총 참여자 수를 세는 메소드
+    int countByRoomId(String roomId);
 }

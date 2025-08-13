@@ -30,30 +30,34 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository; // 채팅방 목록 조회를 위해 추가
 
     @Transactional
-    public void sendMessage(ChatMessageDto messageDto) { // 파라미터 타입 변경
-        // ENTER 타입 메시지 처리
+    public void sendMessage(ChatMessageDto messageDto) {
         if (ChatMessageDto.MessageType.ENTER.equals(messageDto.getType())) {
             messageDto.setMessage(messageDto.getSender() + "님이 입장하셨습니다.");
-            // 입장 메시지는 DB에 저장하지 않고, 바로 Redis로 발행
             redisPublisher.publish("chat-room-" + messageDto.getRoomId(), messageDto);
-            return; // 아래 저장 로직을 실행하지 않고 종료
+            return;
         }
 
-        // TALK 타입 메시지 처리
-        // 1. DTO -> Entity 변환
+        // 1. 채팅방의 현재 참여자 수 계산
+        int participantCount = chatParticipantRepository.countByRoomId(messageDto.getRoomId());
+
         ChatMessage chatMessage = ChatMessage.builder()
                 .roomId(messageDto.getRoomId())
                 .senderId(messageDto.getSenderId())
                 .senderNickname(messageDto.getSender())
                 .message(messageDto.getMessage())
                 .sentAt(LocalDateTime.now())
+                .unreadCount(participantCount - 1) // 안 읽은 사람 수 = (전체 참여자 - 보낸 사람 1명)
                 .build();
 
-        // 2. DB에 채팅 메시지 저장
-        chatMessageRepository.save(chatMessage);
+        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
 
-        // 3. Redis 토픽으로 메시지 발행
-        redisPublisher.publish("chat-room-" + messageDto.getRoomId(), messageDto);
+        // 2. 보낸 사람의 읽음 상태는 즉시 최신으로 업데이트
+        updateReadStatusInternal(savedMessage.getRoomId(), savedMessage.getSenderId(), savedMessage.getId());
+
+        // 3. DTO에 messageId와 unreadCount를 담아 발행
+        messageDto.setMessageId(savedMessage.getId());
+        messageDto.setUnreadCount(savedMessage.getUnreadCount());
+        redisPublisher.publish("chat-room-" + savedMessage.getRoomId(), messageDto);
     }
 
     // 이전 대화 내역 조회
@@ -84,27 +88,39 @@ public class ChatService {
     }
 
     /**
-     * 사용자의 특정 채팅방 읽음 상태를 최신 메시지 ID로 업데이트합니다.
-     * 안 읽은 메시지 수를 0으로 만드는 효과가 있습니다.
+     * 사용자가 채팅방의 메시지를 읽었음을 처리합니다.
+     * 안 읽었던 모든 메시지를 찾아 unreadCount를 1 감소시키고,
+     * READ 이벤트를 발행하여 모든 클라이언트에게 알립니다.
      */
     @Transactional
     public void updateReadStatus(String roomId, Long memberId) {
-        // 1. 해당 채팅방의 가장 마지막 메시지를 찾습니다.
-        ChatMessage lastMessage = chatMessageRepository.findTopByRoomIdOrderByIdDesc(roomId)
-                .orElse(null);
+        // 1. 사용자의 마지막 읽은 메시지 ID 확인
+        Long lastReadMessageId = chatReadStatusRepository.findByRoomIdAndMemberId(roomId, memberId)
+                .map(ChatReadStatus::getLastReadMessageId)
+                .orElse(0L);
 
-        // 메시지가 하나도 없으면 아무것도 하지 않습니다.
-        if (lastMessage == null) {
+        // 2. 해당 채팅방에서 내가 안 읽은, 다른 사람이 보낸 메시지 목록을 찾음
+        List<ChatMessage> unreadMessages = chatMessageRepository.findByRoomIdAndSenderIdNotAndIdGreaterThan(roomId, memberId, lastReadMessageId);
+
+        if (unreadMessages.isEmpty()) {
             return;
         }
 
-        // 2. 사용자의 읽기 상태 정보를 찾거나 새로 생성합니다.
-        ChatReadStatus readStatus = chatReadStatusRepository.findByRoomIdAndMemberId(roomId, memberId)
-                .orElse(new ChatReadStatus(roomId, memberId, 0L));
+        for (ChatMessage message : unreadMessages) {
+            message.setUnreadCount(Math.max(0, message.getUnreadCount() - 1));
 
-        // 3. 마지막으로 읽은 메시지 ID를 업데이트합니다.
-        readStatus.setLastReadMessageId(lastMessage.getId());
-        chatReadStatusRepository.save(readStatus);
+            // 변경된 unreadCount를 실시간으로 전파하기 위한 READ 메시지 발행
+            ChatMessageDto readEventDto = new ChatMessageDto();
+            readEventDto.setType(ChatMessageDto.MessageType.READ);
+            readEventDto.setRoomId(roomId);
+            readEventDto.setMessageId(message.getId());
+            readEventDto.setUnreadCount(message.getUnreadCount());
+            redisPublisher.publish("chat-room-" + roomId, readEventDto);
+        }
+
+        // 3. 마지막으로 읽은 메시지 ID를 최신으로 업데이트
+        Long newLastReadId = unreadMessages.get(unreadMessages.size() - 1).getId();
+        updateReadStatusInternal(roomId, memberId, newLastReadId);
     }
 
     /**
@@ -131,5 +147,16 @@ public class ChatService {
                             return chatMessageRepository.countByRoomIdAndIdGreaterThan(roomId, lastReadMessageId);
                         }
                 ));
+    }
+
+    /**
+     * 내부적으로 사용될 읽음 상태 업데이트 메소드
+     */
+    @Transactional
+    public void updateReadStatusInternal(String roomId, Long memberId, Long lastMessageId) {
+        ChatReadStatus readStatus = chatReadStatusRepository.findByRoomIdAndMemberId(roomId, memberId)
+                .orElse(new ChatReadStatus(roomId, memberId, 0L));
+        readStatus.setLastReadMessageId(lastMessageId);
+        chatReadStatusRepository.save(readStatus);
     }
 }
