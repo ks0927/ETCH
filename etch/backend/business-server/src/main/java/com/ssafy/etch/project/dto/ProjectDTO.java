@@ -28,7 +28,7 @@ public class ProjectDTO {
     private String githubUrl;
     private Boolean isPublic;
     private MemberEntity member;
-    private ProjectCategory category;
+    private ProjectCategory projectCategory;
     private List<ProjectTechEntity> projectTechs;
     private List<CommentEntity> comments;
     private List<FileEntity> files;

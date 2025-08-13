@@ -14,7 +14,7 @@ import lombok.Getter;
 public class ProjectUpdateRequestDTO {
 	private String title;
 	private String content;
-	private ProjectCategory category;
+	private ProjectCategory projectCategory;
 	private List<Long> techCodeIds;
 	private String githubUrl;
 	private Boolean isPublic;
