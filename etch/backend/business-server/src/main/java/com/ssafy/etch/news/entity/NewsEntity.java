@@ -1,6 +1,7 @@
 package com.ssafy.etch.news.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.ssafy.etch.company.entity.CompanyEntity;
 
@@ -41,7 +42,7 @@ public class NewsEntity {
 	private String companyName;
 
 	@Column(name = "published_at")
-	private LocalDate publishedAt;
+	private LocalDateTime publishedAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "company_id", nullable = false)

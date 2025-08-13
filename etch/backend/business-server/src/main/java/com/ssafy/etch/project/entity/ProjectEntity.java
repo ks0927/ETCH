@@ -3,6 +3,7 @@ package com.ssafy.etch.project.entity;
 import static jakarta.persistence.FetchType.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +48,10 @@ public class ProjectEntity {
 	private ProjectCategory category;
 
 	@Column(name = "created_at")
-	private LocalDate createdAt;
+	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at")
-	private LocalDate updatedAt;
+	private LocalDateTime updatedAt;
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
@@ -141,8 +142,8 @@ public class ProjectEntity {
 		this.member = member;
 		this.viewCount = 0L;
 		this.isDeleted = false;
-		this.createdAt = LocalDate.now();
-		this.updatedAt = LocalDate.now();
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
 	}
 
 	public void hit() { this.viewCount = this.viewCount + 1; }
@@ -157,7 +158,7 @@ public class ProjectEntity {
 		this.category = category;
 		this.githubUrl = githubUrl;
 		this.isPublic = isPublic;
-		this.updatedAt = LocalDate.now();
+		this.updatedAt = LocalDateTime.now();
 	}
 
 	public void addFile(FileEntity file) {
