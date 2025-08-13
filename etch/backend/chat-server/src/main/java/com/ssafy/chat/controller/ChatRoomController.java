@@ -113,8 +113,8 @@ public class ChatRoomController {
 
         // 3. DB에 참여자 정보 저장
         try {
-            chatService.addParticipant(roomId, memberId);
             System.out.println("Member " + memberId + " entered room: " + roomId);
+            chatService.addParticipant(roomId, memberId);
         } catch (Exception e) {
             System.out.println("Failed to add participant: " + e.getMessage());
             return ResponseEntity.status(500).build();

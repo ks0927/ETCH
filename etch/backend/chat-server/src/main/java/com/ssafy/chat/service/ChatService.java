@@ -31,10 +31,15 @@ public class ChatService {
 
     @Transactional
     public void sendMessage(ChatMessageDto messageDto) { // 파라미터 타입 변경
+        // ENTER 타입 메시지 처리
         if (ChatMessageDto.MessageType.ENTER.equals(messageDto.getType())) {
             messageDto.setMessage(messageDto.getSender() + "님이 입장하셨습니다.");
+            // 입장 메시지는 DB에 저장하지 않고, 바로 Redis로 발행
+            redisPublisher.publish("chat-room-" + messageDto.getRoomId(), messageDto);
+            return; // 아래 저장 로직을 실행하지 않고 종료
         }
 
+        // TALK 타입 메시지 처리
         // 1. DTO -> Entity 변환
         ChatMessage chatMessage = ChatMessage.builder()
                 .roomId(messageDto.getRoomId())
@@ -60,12 +65,15 @@ public class ChatService {
     // 사용자를 채팅방에 추가하는 메서드
     @Transactional
     public void addParticipant(String roomId, Long memberId) {
-        ChatParticipant participant = ChatParticipant.builder()
-                .roomId(roomId)
-                .memberId(memberId)
-                .joinedAt(LocalDateTime.now())
-                .build();
-        chatParticipantRepository.save(participant);
+        // 이미 참여하고 있는지 확인
+        if (chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId).isEmpty()) {
+            ChatParticipant participant = ChatParticipant.builder()
+                    .roomId(roomId)
+                    .memberId(memberId)
+                    .joinedAt(LocalDateTime.now())
+                    .build();
+            chatParticipantRepository.save(participant);
+        }
     }
 
     // 사용자를 채팅방에서 제거하는 메서드
