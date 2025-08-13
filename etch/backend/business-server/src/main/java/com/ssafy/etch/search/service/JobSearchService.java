@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.etch.search.document.JobDocument;
+import com.ssafy.etch.search.dto.JobSearchResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,7 @@ public class JobSearchService {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 
-	public List<JobDocument> searchWithFilters(
+	public List<JobSearchResponseDTO> searchWithFilters(
 		String keyword,
 		List<String> regions,
 		List<String> jobCategories,
@@ -41,7 +42,7 @@ public class JobSearchService {
 			elasticsearchOperations.search(query, JobDocument.class);
 
 		return hits.getSearchHits().stream()
-			.map(SearchHit::getContent)
+			.map(SearchHit::getContent).map(JobSearchResponseDTO::from)
 			.toList();
 	}
 

@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.etch.search.document.NewsDocument;
+import com.ssafy.etch.search.dto.NewsSearchResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,7 +20,7 @@ public class NewsSearchService {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 
-	public List<NewsDocument> search(String keyword) {
+	public List<NewsSearchResponseDTO> search(String keyword) {
 		if (keyword == null || keyword.isBlank()) {
 			return List.of(); // 검색어 없으면 빈 결과
 		}
@@ -40,7 +41,7 @@ public class NewsSearchService {
 		SearchHits<NewsDocument> hits = elasticsearchOperations.search(query, NewsDocument.class);
 
 		return hits.getSearchHits().stream()
-			.map(SearchHit::getContent)
+			.map(SearchHit::getContent).map(NewsSearchResponseDTO::from)
 			.toList();
 	}
 }
