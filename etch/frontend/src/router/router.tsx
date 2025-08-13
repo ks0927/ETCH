@@ -179,7 +179,7 @@ const router = createBrowserRouter([
         element: <JobPage />,
       },
       {
-        path: "profile/:userId",
+        path: "members/:userId/projects",
         element: (
           <Suspense fallback={<LoadingPage />}>
             <UserProfilePage />

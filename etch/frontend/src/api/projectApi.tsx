@@ -512,9 +512,7 @@ export async function getProjectById(id: number) {
 }
 export async function getUserPublicProjects(userId: number) {
   try {
-    const response = await axios.get(
-      `${BASE_API}/projects/user/${userId}/public`
-    );
+    const response = await axios.get(`${BASE_API}/members/${userId}/projects`);
 
     const data = response.data.data;
     if (Array.isArray(data)) {

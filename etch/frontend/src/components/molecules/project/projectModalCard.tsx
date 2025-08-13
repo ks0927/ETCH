@@ -357,7 +357,7 @@ function ProjectModalCard({
 
     if (userId) {
       console.log("프로필 페이지로 이동:", userId);
-      navigate(`/profile/${userId}`);
+      navigate(`/members/${userId}`);
     } else {
       console.warn("사용자 ID를 찾을 수 없습니다");
       alert("사용자 정보를 찾을 수 없습니다.");
