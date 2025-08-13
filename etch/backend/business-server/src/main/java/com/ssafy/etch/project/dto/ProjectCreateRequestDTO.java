@@ -24,7 +24,7 @@ public class ProjectCreateRequestDTO {
 	private String content;
 
 	@NotNull
-	private ProjectCategory category; // 프로젝트 자체 분류
+	private ProjectCategory projectCategory; // 프로젝트 자체 분류
 
 	@NotNull @Size(min = 1)
 	private List<Long> techCodeIds; // 기술스택 ID 분류

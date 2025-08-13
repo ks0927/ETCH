@@ -11,7 +11,7 @@ public class ProjectListDTO {
 	private Long id;
 	private String title;
 	private String thumbnailUrl;
-	private ProjectCategory category;
+	private ProjectCategory projectCategory;
 	private Long viewCount;
 	private Long likeCount;
 	private String nickname;
@@ -22,7 +22,7 @@ public class ProjectListDTO {
 		return ProjectListDTO.builder()
 			.id(p.getId())
 			.title(p.getTitle())
-			.category(p.getCategory())
+			.projectCategory(p.getProjectCategory())
 			.thumbnailUrl(p.getThumbnailUrl())
 			.viewCount(p.getViewCount())
 			.likeCount(p.getLikeCount() != null ? p.getLikeCount().longValue() : 0L)

@@ -122,6 +122,7 @@ public class ProjectServiceImpl implements ProjectService {
 			return ProjectListDTO.builder()
 				.id(projectDTO.getId())
 				.title(projectDTO.getTitle())
+				.projectCategory(projectDTO.getProjectCategory())
 				.thumbnailUrl(projectDTO.getThumbnailUrl())
 				.viewCount(projectDTO.getViewCount())
 				.likeCount(likeCount)
@@ -154,6 +155,7 @@ public class ProjectServiceImpl implements ProjectService {
 			return ProjectListDTO.builder()
 				.id(projectDTO.getId())
 				.title(projectDTO.getTitle())
+				.projectCategory(projectDTO.getProjectCategory())
 				.thumbnailUrl(projectDTO.getThumbnailUrl())
 				.viewCount(projectDTO.getViewCount())
 				.likeCount(likeCount)
@@ -229,7 +231,7 @@ public class ProjectServiceImpl implements ProjectService {
 		ProjectEntity project = ProjectEntity.builder()
 			.title(req.getTitle())
 			.content(req.getContent())
-			.category(req.getCategory())
+			.projectCategory(req.getProjectCategory())
 			.githubUrl(req.getGithubUrl())
 			.isPublic(req.getIsPublic())
 			.member(member)
@@ -353,7 +355,7 @@ public class ProjectServiceImpl implements ProjectService {
 		p.change(
 			req.getTitle(),
 			req.getContent(),
-			req.getCategory(),
+			req.getProjectCategory(),
 			req.getGithubUrl(),
 			req.getIsPublic()
 		);
