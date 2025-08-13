@@ -34,7 +34,7 @@ function ProjectCard({
       className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer"
       onClick={handleClick}
     >
-      <section className="w-full h-96">
+      <section className="w-full h-56">
         <img
           className="w-full object-cover h-full"
           src={thumbnailUrl || noImg}

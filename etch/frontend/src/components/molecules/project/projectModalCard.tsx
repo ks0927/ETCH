@@ -457,12 +457,13 @@ function ProjectModalCard({
       </section>
 
       {/* 프로젝트 이미지 캐러셀 */}
+      {/* 프로젝트 이미지 캐러셀 */}
       <section>
         <div className="relative overflow-hidden rounded-lg bg-gray-100">
           <img
             src={images[currentImageIndex]}
             alt={`${title} - 이미지 ${currentImageIndex + 1}`}
-            className="w-full h-64 object-cover transition-all duration-300"
+            className="w-full h-80 object-cover transition-all duration-300"
             onError={(e) => {
               e.currentTarget.src = noImg;
             }}
