@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Builder
 @Getter
@@ -13,7 +14,7 @@ public class NewsLikeResponseDTO {
     private String title;
     private String description;
     private String url;
-    private LocalDate publishedAt;
+    private LocalDateTime publishedAt;
     private String name;
 
     public static NewsLikeResponseDTO from(NewsDTO newsDTO) {

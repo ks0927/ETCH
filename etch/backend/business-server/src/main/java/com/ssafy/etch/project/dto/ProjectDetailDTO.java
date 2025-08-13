@@ -1,6 +1,7 @@
 package com.ssafy.etch.project.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.Builder;
@@ -20,8 +21,8 @@ public class ProjectDetailDTO {
 	private Boolean likedByMe; // 내가 좋아요 눌렀는지 여부
 	private String nickname;
 	private String profileUrl;
-	private LocalDate createdAt;
-	private LocalDate updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 
 	private String projectCategory; // 프로젝트 카테고리
 	private List<String> techCategories; // 기술 카테고리(BACKEND/FRONTEND)

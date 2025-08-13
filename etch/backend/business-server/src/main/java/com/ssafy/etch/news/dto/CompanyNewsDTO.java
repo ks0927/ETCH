@@ -1,6 +1,7 @@
 package com.ssafy.etch.news.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ public class CompanyNewsDTO {
 	private String title;
 	private String description;
 	private String url;
-	private LocalDate publishedAt;
+	private LocalDateTime publishedAt;
 
 	public static CompanyNewsDTO from(NewsDTO newsDTO) {
 		return CompanyNewsDTO.builder()
