@@ -53,23 +53,33 @@ function AdditionalInfoPage() {
         return;
       }
 
+      // FormData 생성 (multipart/form-data)
+      const formData = new FormData();
+      
+      // JSON 데이터를 'data' 파트에 추가
       const memberData = {
         nickname,
         phoneNumber: tel,
-        profile,
         gender,
         birth,
       };
+      formData.append('data', JSON.stringify(memberData));
+      
+      // 프로필 이미지가 있으면 'profile' 파트에 추가
+      if (profile) {
+        formData.append('profile', profile);
+      }
 
       console.log("회원가입 데이터:", memberData);
+      console.log("프로필 파일:", profile);
       console.log("Access Token:", accessToken);
 
       const response = await axios.post(
         "https://etch.it.kr/api/v1/members",
-        memberData,
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${accessToken}`,
           },
         }

@@ -86,12 +86,10 @@ function ProjectUpdatePage() {
 
       try {
         setLoading(true);
-        console.log("프로젝트 데이터 로드 중...", id);
 
         const project: BackendProjectResponse = await getProjectById(
           parseInt(id)
         );
-        console.log("로드된 프로젝트 데이터:", project);
 
         // 폼 데이터 설정
         setFormData({
@@ -131,8 +129,6 @@ function ProjectUpdatePage() {
 
         setExistingFiles(images);
         setExistingPdf(pdfFile);
-
-        console.log("데이터 로드 완료!");
       } catch (error) {
         console.error("프로젝트 로드 실패:", error);
         alert("프로젝트를 불러올 수 없습니다.");
@@ -275,9 +271,6 @@ function ProjectUpdatePage() {
         removeFileIds,
         removePdf,
       };
-
-      console.log("=== 수정 데이터 ===");
-      console.log("projectInput:", projectInput);
 
       // API 호출
       await updateProject(parseInt(id), projectInput);

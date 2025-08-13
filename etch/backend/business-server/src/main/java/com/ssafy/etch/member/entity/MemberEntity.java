@@ -111,6 +111,10 @@ public class MemberEntity {
         memberEntity.profile = profileUrl;
     }
 
+    public static void updateProfileImage(MemberEntity memberEntity, String profileUrl) {
+        memberEntity.profile = profileUrl;
+    }
+
     public Long getId() {
         return id;
     }

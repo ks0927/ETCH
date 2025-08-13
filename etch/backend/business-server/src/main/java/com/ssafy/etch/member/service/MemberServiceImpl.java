@@ -125,4 +125,32 @@ public class MemberServiceImpl implements MemberService {
                 .map(ProjectListDTO::from)
                 .toList();
     }
+
+    @Override
+    @Transactional
+    public String updateProfileImage(Long id, MultipartFile profile) {
+        MemberEntity memberEntity = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String profileUrl = memberEntity.toMemberDTO().getProfile();
+
+        if (profile != null && !profile.isEmpty()) {
+            if (!FileUtil.isImageOk(profile)) {
+                throw new IllegalArgumentException("이미지 파일이 올바르지 않습니다.");
+            }
+            if (profileUrl != null && !profileUrl.isEmpty()) {
+                s3Service.deleteFileByUrl(profileUrl);
+            }
+            profileUrl = s3Service.uploadFile(profile);
+        } else {
+            if (profileUrl != null && !profileUrl.isEmpty()) {
+                s3Service.deleteFileByUrl(profileUrl);
+                profileUrl = null;
+            }
+        }
+
+        MemberEntity.updateProfileImage(memberEntity, profileUrl);
+
+        return profileUrl;
+    }
 }

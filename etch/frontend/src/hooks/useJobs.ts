@@ -24,7 +24,6 @@ export const useJobs = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasInitialLoad, setHasInitialLoad] = useState(false);
-  const [isInitializing, setIsInitializing] = useState(true);
 
   // 채용공고 데이터 로드 함수
   const loadJobs = async (startDate: Date, endDate: Date) => {
@@ -74,7 +73,6 @@ export const useJobs = () => {
       hasInitialLoad
     });
     setHasInitialLoad(true);
-    setIsInitializing(false);
     loadJobs(startDate, endDate);
   };
 
@@ -103,7 +101,7 @@ export const useJobs = () => {
 
   return {
     jobs,
-    loading: loading || isInitializing,
+    loading,
     error,
     loadJobs,
     handleDateRangeChange

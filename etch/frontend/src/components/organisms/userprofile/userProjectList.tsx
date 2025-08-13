@@ -1,113 +1,112 @@
 import { useState } from "react";
-import ProjectModal from "../../../components/common/projectModal";
-import MyProjectCard from "../../molecules/mypage/project/myProjectCard";
-import type { ProjectData } from "../../../types/project/projectDatas";
+import type { ProjectData } from "../../../types/project/projectDatas.ts";
+import { getProjectById } from "../../../api/projectApi.tsx";
+import ProjectCard from "../../molecules/project/projectCard.tsx";
+import ProjectModal from "../../common/projectModal.tsx";
 
-interface UserProjectListProps {
-  projects: ProjectData[]; // 🎯 타입 변경
-  userName: string;
-  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 추가
+interface Props {
+  projects: ProjectData[];
+  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 업데이트 콜백 추가
 }
 
-function UserProjectList({
-  projects,
-  userName,
-  onProjectUpdate,
-}: UserProjectListProps) {
-  const [visibleCount, setVisibleCount] = useState(8); // 다른 사용자 프로필에서는 8개만 먼저 보여주기
-  const hasMore = projects.length > visibleCount;
+function UserProjectList({ projects, onProjectUpdate }: Props) {
+  const [visibleCount, setVisibleCount] = useState(10);
+  const sortedProjects = projects;
+  const hasMore = sortedProjects.length > visibleCount;
 
-  // 🎯 모달 상태를 ProjectData로 변경
+  // 모달 상태 관리
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const visibleProjects = projects.slice(0, visibleCount);
+  const visibleProjects = sortedProjects.slice(0, visibleCount);
 
   const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 8);
+    setVisibleCount((prev) => prev + 10);
   };
 
   // 카드 클릭 핸들러
-  const handleCardClick = (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId);
-    if (project) {
-      setSelectedProject(project);
+  const handleCardClick = async (projectId: number) => {
+    try {
+      const detailProject = await getProjectById(projectId);
+      setSelectedProject(detailProject);
       setIsModalOpen(true);
+    } catch (error) {
+      console.error("상세 정보 로딩 실패:", error);
     }
   };
 
-  // 모달 닫기 핸들러
+  // 🎯 모달 닫기 시 프로젝트 데이터 업데이트
   const handleCloseModal = () => {
+    // 선택된 프로젝트가 변경되었다면 부모 컴포넌트에 알림
+    if (selectedProject && onProjectUpdate) {
+      onProjectUpdate(selectedProject);
+    }
+
     setIsModalOpen(false);
     setSelectedProject(null);
   };
 
-  // 🎯 프로젝트 업데이트 핸들러 추가
+  // 🎯 모달에서 프로젝트 업데이트 핸들러
   const handleProjectUpdate = (updatedProject: ProjectData) => {
-    setSelectedProject(updatedProject); // 모달 내 프로젝트 상태 업데이트
-    // 부모 컴포넌트에도 알림
-    onProjectUpdate?.(updatedProject);
+    setSelectedProject(updatedProject);
   };
 
   return (
     <div className="space-y-8">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">공개 프로젝트</h2>
-        <span className="text-sm text-gray-500">총 {projects.length}개</span>
-      </div>
-
-      {/* 프로젝트가 없는 경우 */}
-      {projects.length === 0 && (
-        <div className="py-12 text-center bg-white border border-gray-200 rounded-lg">
-          <div className="mb-2 text-lg text-gray-500">📂</div>
-          <p className="text-gray-600">
-            {userName}님이 공개한 프로젝트가 없습니다.
-          </p>
+      {projects.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-6xl mb-4">📂</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            조건에 맞는 프로젝트가 없습니다
+          </h3>
+          <p className="text-gray-600">다른 검색 조건을 시도해보세요.</p>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {visibleProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                type="project"
+                id={project.id}
+                title={project.title}
+                likedByMe={project.likedByMe}
+                nickname={project.nickname}
+                viewCount={project.viewCount}
+                likeCount={project.likeCount}
+                thumbnailUrl={project.thumbnailUrl}
+                onCardClick={handleCardClick}
+              />
+            ))}
+          </div>
+
+          {hasMore && (
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={handleLoadMore}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold transition-colors border border-gray-300"
+              >
+                더보기 ({sortedProjects.length - visibleCount}개 더 보기)
+              </button>
+            </div>
+          )}
+
+          {!hasMore && projects.length > 10 && (
+            <div className="text-center text-gray-500 pt-4">
+              모든 프로젝트를 확인했습니다 ({projects.length}개)
+            </div>
+          )}
+        </>
       )}
 
-      {/* 프로젝트 카드 그리드 */}
-      {projects.length > 0 && (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {visibleProjects.map((project) => (
-            <MyProjectCard
-              key={project.id}
-              {...project}
-              type="project"
-              onCardClick={handleCardClick}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* 더보기 버튼 */}
-      {hasMore && (
-        <div className="pt-4 text-center">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-3 font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200"
-          >
-            더 많은 프로젝트 보기
-          </button>
-        </div>
-      )}
-
-      {/* 모든 프로젝트를 다 보여준 경우 */}
-      {!hasMore && projects.length > 8 && (
-        <div className="pt-4 text-center text-gray-500">
-          모든 공개 프로젝트를 확인했습니다 ({projects.length}개)
-        </div>
-      )}
-
-      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
+      {/* 🎯 모달에 업데이트 핸들러 전달 */}
       {isModalOpen && selectedProject && (
         <ProjectModal
           project={selectedProject}
           onClose={handleCloseModal}
-          onProjectUpdate={handleProjectUpdate} // 추가
+          onProjectUpdate={handleProjectUpdate} // 프로젝트 업데이트 핸들러 전달
         />
       )}
     </div>

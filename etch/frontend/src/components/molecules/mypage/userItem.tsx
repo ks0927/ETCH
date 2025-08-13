@@ -43,7 +43,7 @@ function UserItem({
       {/* User Info */}
       <div className="flex-1 min-w-0">
         <a
-          href={`/profile/${id}`}
+          href={`/members/${id}`}
           className="block text-base font-semibold text-blue-600 hover:underline cursor-pointer mb-0.5"
         >
           {nickname}
@@ -82,7 +82,7 @@ function UserItem({
               : "bg-white text-gray-800 border-gray-300 hover:bg-gray-50 hover:border-gray-300"
           }`}
         >
-          {isLoading ? "처리중..." : (isFollowing ? "Following" : "Follow")}
+          {isLoading ? "처리중..." : isFollowing ? "Following" : "Follow"}
         </button>
       </div>
     </div>

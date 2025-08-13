@@ -2,23 +2,9 @@ import { Link } from "react-router";
 import type { CompanyCardProps } from "../../atoms/card";
 import BuildingSVG from "../../svg/buildingSVG";
 
-function CompanyCard({ companyName, like, rank }: CompanyCardProps) {
-  const getRankBadgeColor = (rank?: number) => {
-    if (!rank) return "bg-gray-100 text-gray-600";
-    if (rank === 1) return "bg-yellow-100 text-yellow-700 border border-yellow-300";
-    if (rank === 2) return "bg-gray-100 text-gray-700 border border-gray-300";
-    if (rank === 3) return "bg-orange-100 text-orange-700 border border-orange-300";
-    return "bg-blue-100 text-blue-700";
-  };
-
+function CompanyCard({ companyName, like }: CompanyCardProps) {
   return (
     <div className="w-full min-w-0 overflow-hidden transition-shadow duration-300 bg-white rounded-lg shadow-md sm:rounded-xl lg:rounded-2xl hover:shadow-lg relative">
-      {/* 등수 뱃지 */}
-      {rank && (
-        <div className={`absolute top-2 left-2 px-2 py-1 rounded-full text-xs font-bold ${getRankBadgeColor(rank)}`}>
-          #{rank}
-        </div>
-      )}
       
       <Link to={`/search?q=${companyName}`} className="block p-4 sm:p-6">
         {/* 회사명과 아이콘 */}
