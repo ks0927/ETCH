@@ -44,7 +44,6 @@ function CompanyNews({ companyData }: Props) {
             key={`${company.companyId}-${currentIndex}-${index}`}
             companyName={company.companyName}
             like={company.likeCount}
-            rank={company.rank}
             type="company"
           />
         ))}

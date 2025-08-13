@@ -10,7 +10,7 @@ function RecommendCard({
 }: NewsCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-      <Link to={url}>
+      <Link to={url} target="_blank" rel="noopener noreferrer">
         {/* 모바일: 세로 배치, 태블릿 이상: 가로 배치 */}
         <div className="flex flex-col sm:flex-row p-3 sm:p-4">
           {/* 모바일에서는 이미지가 위에 */}

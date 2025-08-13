@@ -58,13 +58,6 @@ export default function JobPage() {
         onFilterClick={handleFilterClick}
       />
 
-      {/* 로딩 상태 표시 */}
-      {loading && (
-        <div className="flex items-center justify-center p-8">
-          <div className="text-lg text-gray-600">채용공고를 불러오는 중...</div>
-        </div>
-      )}
-
       {currentView === "list" && (
         <JobList jobs={jobs} onJobClick={handleJobClick} />
       )}
@@ -74,6 +67,19 @@ export default function JobPage() {
           onEventClick={handleJobClick}
           onDateRangeChange={handleDateRangeChange}
         />
+      )}
+      
+      {/* 로딩 중일 때 오버레이 */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg p-8 shadow-lg">
+            <div className="flex flex-col items-center">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+              <div className="text-lg text-gray-600 font-medium">채용달력을 불러오고 있어요</div>
+              <div className="text-sm text-gray-500 mt-2">잠시만 기다려주세요...</div>
+            </div>
+          </div>
+        </div>
       )}
 
       {selectedJob && (
