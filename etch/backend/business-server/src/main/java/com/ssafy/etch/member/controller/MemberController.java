@@ -1,5 +1,8 @@
 package com.ssafy.etch.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.etch.global.exception.CustomException;
+import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.global.util.CookieUtil;
@@ -20,9 +23,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+    import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,14 +62,19 @@ public class MemberController {
         summary = "회원가입 API",
         description = "회원가입을 할 수 있습니다."
     )
-    @PostMapping
-    public ResponseEntity<ApiResponse<Object>> registerNewMember(@AuthenticationPrincipal CustomOAuth2User oAuth2User, @RequestBody MemberDTO requestDTO, HttpServletResponse response) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<Object>> registerNewMember(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "profile", required = false) MultipartFile profile,
+            HttpServletResponse response) {
         if (oAuth2User == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("인증되지 않은 사용자입니다."));
         }
+        MemberRequestDTO requestDTO = safeParseJson(requestJson, MemberRequestDTO.class);
 
         // 회원 등록
-        MemberDTO newMember = memberService.registerNewMember(oAuth2User.getEmail(), requestDTO);
+        MemberDTO newMember = memberService.registerNewMember(oAuth2User.getEmail(), requestDTO, profile);
 
         // 새로운 액세스 토큰 발급
         String newAccessToken = jwtUtil.createJwt(
@@ -111,12 +121,14 @@ public class MemberController {
         summary = "회원 정보 수정 API",
         description = "본인 계정에 대한 정보를 수정할 수 있습니다."
     )
-    @PutMapping
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<?>> updateMemberInfo(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User,
-            @RequestBody MemberRequestDTO memberRequestDTO) {
+            @RequestPart("data") String requestJson,
+            @RequestPart(value = "profile", required = false) MultipartFile profile) {
 
-        MemberDTO memberDTO = memberService.updateMember(oAuth2User.getId(), memberRequestDTO);
+        MemberRequestDTO memberRequestDTO = safeParseJson(requestJson, MemberRequestDTO.class);
+        MemberDTO memberDTO = memberService.updateMember(oAuth2User.getId(), memberRequestDTO, profile);
         return ResponseEntity.ok(ApiResponse.success(MemberResponseDTO.from(memberDTO), "회원 정보가 수정되었습니다."));
     }
 
@@ -168,5 +180,13 @@ public class MemberController {
         List<RecommendNewsDTO> list = newsService.getRecommendNewsFromRedis(user.getId());
 
         return ResponseEntity.ok(ApiResponse.success(list));
+    }
+    private <T> T safeParseJson(String json, Class<T> clazz) {
+        try {
+            return new ObjectMapper().readValue(json, clazz);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
     }
 }

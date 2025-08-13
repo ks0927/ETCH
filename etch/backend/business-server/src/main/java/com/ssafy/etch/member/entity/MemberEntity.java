@@ -105,10 +105,10 @@ public class MemberEntity {
     public static void changeMemberStatus(MemberEntity memberEntity, boolean isDeleted) {
         memberEntity.isDeleted = isDeleted;
     }
-    public static void updateMemberInfo(MemberEntity memberEntity, MemberRequestDTO memberRequestDTO) {
+    public static void updateMemberInfo(MemberEntity memberEntity, MemberRequestDTO memberRequestDTO, String profileUrl) {
         memberEntity.nickname = memberRequestDTO.getNickname();
         memberEntity.phoneNumber = memberRequestDTO.getPhoneNumber();
-        memberEntity.profile = memberRequestDTO.getProfile();
+        memberEntity.profile = profileUrl;
     }
 
     public Long getId() {
