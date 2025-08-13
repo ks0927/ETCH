@@ -283,7 +283,7 @@ function ProjectUpdatePage() {
       await updateProject(parseInt(id), projectInput);
 
       alert("프로젝트가 성공적으로 수정되었습니다!");
-      navigate(`/projects/${id}`);
+      navigate(`/projects`);
     } catch (error) {
       console.error("프로젝트 수정 실패:", error);
       alert("프로젝트 수정 중 오류가 발생했습니다.");
