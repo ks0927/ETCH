@@ -37,26 +37,19 @@ function ProjectListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
-  // ✅ 강제 리렌더링을 위한 상태 추가
-  const [updateTrigger, setUpdateTrigger] = useState(0);
-
   // 컴포넌트 마운트 시 프로젝트 데이터 로드
   useEffect(() => {
     const loadProjects = async () => {
       try {
         setLoading(true);
-        // 정렬 없이 모든 데이터 로드
         const projectData = await fetchProjects();
 
-        // ✅ 데이터를 불러온 즉시 최신순으로 정렬
+        // ID 기준으로 최신순 정렬 (높은 ID = 최신)
         const sortedData = [...projectData].sort((a, b) => {
-          const dateA = new Date(a.createdAt || 0).getTime();
-          const dateB = new Date(b.createdAt || 0).getTime();
-          return dateB - dateA; // 최신순 (내림차순)
+          return (b.id || 0) - (a.id || 0);
         });
 
         setProjects(sortedData);
-        console.log("✅ 프로젝트 로드 완료, 최신순 정렬 적용됨");
       } catch (err) {
         setError("프로젝트 데이터를 불러오는데 실패했습니다.");
         console.error(err);
@@ -66,7 +59,7 @@ function ProjectListPage() {
     };
 
     loadProjects();
-  }, []); // 의존성 배열에서 selectedSort 제거
+  }, []);
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
@@ -78,7 +71,7 @@ function ProjectListPage() {
 
   // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
   const filteredProjects = useMemo(() => {
-    console.log("=== useMemo 시작 ===");
+    console.log("=== 필터링 및 정렬 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
     console.log("선택된 정렬:", selectedSort);
@@ -122,26 +115,22 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 클라이언트 사이드 정렬 - 강화된 정렬 로직
+    // 3. ✅ 클라이언트 사이드 정렬 - createdAt이 없으므로 대안 사용
     filtered.sort((a, b) => {
       console.log(`정렬 비교 중: A(${a.id}) vs B(${b.id})`);
 
       switch (selectedSort) {
         case "LATEST": {
-          // 최신순 - createdAt 기준 내림차순 (기본값)
-          const dateA = new Date(a.createdAt || 0).getTime();
-          const dateB = new Date(b.createdAt || 0).getTime();
-          console.log(
-            `📅 날짜 비교: A(${a.createdAt}, ${dateA}) vs B(${b.createdAt}, ${dateB})`
-          );
-          console.log("🔄 최신순 정렬 적용");
-          const result = dateB - dateA;
+          // ⚠️ createdAt이 없으므로 ID를 기준으로 최신순 (높은 ID = 최신)
+          console.log(`🆔 ID 비교 (최신순): A(${a.id}) vs B(${b.id})`);
+          console.log("🔄 최신순 정렬 적용 (ID 기준)");
+          const result = (b.id || 0) - (a.id || 0);
           console.log(`정렬 결과: ${result} (양수면 B가 앞, 음수면 A가 앞)`);
           return result;
         }
 
         case "POPULAR": {
-          // 인기순 - popularityScore 기준 내림차순 (없으면 likeCount 사용)
+          // 인기순 - popularityScore 기준 내림차순
           const popularityA = a.popularityScore || a.likeCount || 0;
           const popularityB = b.popularityScore || b.likeCount || 0;
           console.log(`🔥 인기도 비교: A(${popularityA}) vs B(${popularityB})`);
@@ -168,14 +157,10 @@ function ProjectListPage() {
         }
 
         default: {
-          // 기본값도 최신순으로 처리
-          const defaultDateA = new Date(a.createdAt || 0).getTime();
-          const defaultDateB = new Date(b.createdAt || 0).getTime();
-          console.log(
-            `📅 기본 날짜 비교: A(${defaultDateA}) vs B(${defaultDateB})`
-          );
-          console.log("🔄 기본값 최신순 정렬 적용");
-          return defaultDateB - defaultDateA;
+          // 기본값도 ID 기준 최신순
+          console.log(`🆔 기본 ID 비교: A(${a.id}) vs B(${b.id})`);
+          console.log("🔄 기본값 최신순 정렬 적용 (ID 기준)");
+          return (b.id || 0) - (a.id || 0);
         }
       }
     });
@@ -218,49 +203,37 @@ function ProjectListPage() {
 
   // 검색 핸들러
   const handleSearch = useCallback((searchTermValue: string) => {
-    console.log("🔍 검색 핸들러 호출:", searchTermValue);
     setSearchTerm(searchTermValue);
   }, []);
 
-  // ✅ 카테고리 필터 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
+  // 카테고리 필터 핸들러
   const handleCategoryFilter = useCallback((category: string) => {
-    console.log("🎯 카테고리 필터 핸들러 호출됨:", category);
     setSelectedCategory(category);
-    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
-    // 페이지를 1로 리셋
     setCurrentPage(1);
   }, []);
 
-  // ✅ 정렬 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
+  // 정렬 핸들러
   const handleSortChange = useCallback((sortType: string) => {
-    console.log("📊 정렬 핸들러 호출됨:", sortType);
     setSelectedSort(sortType);
-    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
-    // 페이지를 1로 리셋
     setCurrentPage(1);
   }, []);
 
-  // ✅ 새로고침 버튼 핸들러 - 정렬도 기본값으로 리셋
+  // 새로고침 버튼 핸들러
   const handleRefresh = async () => {
     try {
       setLoading(true);
       const projectData = await fetchProjects();
 
-      // ✅ 새로고침 시에도 바로 최신순으로 정렬
+      // ID 기준으로 최신순 정렬
       const sortedData = [...projectData].sort((a, b) => {
-        const dateA = new Date(a.createdAt || 0).getTime();
-        const dateB = new Date(b.createdAt || 0).getTime();
-        return dateB - dateA; // 최신순 (내림차순)
+        return (b.id || 0) - (a.id || 0);
       });
 
       setProjects(sortedData);
-      // 새로고침 시 정렬도 기본값(최신순)으로 리셋
       setSelectedSort("LATEST");
       setSelectedCategory("ALL");
       setSearchTerm("");
       setCurrentPage(1);
-      setUpdateTrigger((prev) => prev + 1);
-      console.log("🔄 수동 새로고침 완료 - 최신순으로 정렬됨");
     } catch (err) {
       setError("프로젝트 데이터를 불러오는데 실패했습니다.");
       console.error(err);
@@ -369,7 +342,6 @@ function ProjectListPage() {
                       setSearchTerm("");
                       setSelectedCategory("ALL");
                       setSelectedSort("LATEST"); // 초기화 시에도 최신순으로
-                      setUpdateTrigger((prev) => prev + 1);
                     }}
                     className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
@@ -379,17 +351,15 @@ function ProjectListPage() {
               </section>
             )}
 
-            {/* 현재 상태 디버깅 정보 */}
-            <section className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
-              <div className="text-yellow-800">
-                <strong>디버그 정보:</strong> 전체 {projects.length}개 프로젝트,
-                필터링 후 {filteredProjects.length}개, 현재 정렬:{" "}
-                <strong>{selectedSort}</strong>, 업데이트 카운터:{" "}
-                {updateTrigger}
-                {projects.length > 0 && (
+            {/* 현재 상태 정보 */}
+            <section className="bg-gray-100 border border-gray-300 rounded-lg p-4 text-sm">
+              <div className="text-gray-700">
+                <strong>현재 상태:</strong> 전체 {projects.length}개 프로젝트,
+                표시 중 {filteredProjects.length}개, 현재 정렬:{" "}
+                <strong>{selectedSort}</strong>
+                {selectedCategory !== "ALL" && (
                   <span>
-                    , 최신 프로젝트: {projects[0]?.title} (ID: {projects[0]?.id}
-                    )
+                    , 카테고리: <strong>{selectedCategory}</strong>
                   </span>
                 )}
               </div>
