@@ -25,8 +25,5 @@ public class ProjectUpdateRequestDTO {
 	private List<Long> removeFileIds; // 삭제할 본문 이미지 파일 id들
 	private List<MultipartFile> newImages; // 추가할 새 이미지 파일들
 
-	private MultipartFile pdf; // 새 pdf
-	private Boolean removePdf; // true: 기존의 pdf 삭제
-
 	private String youtubeUrl; // 새 youtube 링크
 }

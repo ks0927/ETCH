@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 public class ProjectDetailDTO {
 	private Long id;
+	private Long memberId;
 	private String title;
 	private String content;
 	private String thumbnailUrl;
@@ -27,7 +28,6 @@ public class ProjectDetailDTO {
 
 	private List<String> techCodes;
 	private List<String> fileUrls;
-	private String pdfUrl;
 	private String githubUrl;
 	private Boolean isPublic;
 
@@ -36,11 +36,11 @@ public class ProjectDetailDTO {
 		Boolean likedByMe,
 		List<String> techCategories,
 		List<String> techCodes,
-		List<String> fileUrls,
-		String pdfUrl
+		List<String> fileUrls
 	) {
 		return ProjectDetailDTO.builder()
 			.id(p.getId())
+			.memberId(p.getMember().toMemberDTO().getId())
 			.thumbnailUrl(p.getThumbnailUrl())
 			.youtubeUrl(p.getYoutubeUrl())
 			.viewCount(p.getViewCount())
@@ -56,7 +56,6 @@ public class ProjectDetailDTO {
 			.techCategories(techCategories)
 			.techCodes(techCodes)
 			.fileUrls(fileUrls)
-			.pdfUrl(pdfUrl)
 			.githubUrl(p.getGithubUrl())
 			.isPublic(p.getIsPublic())
 			.build();

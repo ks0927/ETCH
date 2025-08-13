@@ -21,5 +21,5 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 	@Query("DELETE FROM FileEntity f WHERE f.id IN :ids AND f.project.id = :projectId")
 	void deleteByIdsAndProjectId(@Param("ids") List<Long> ids, @Param("projectId") Long projectId);
 
-	List<FileEntity> findByProjectIdAndIsPdf(Long projectId, boolean isPdf);
+	List<FileEntity> findByProjectId(Long projectId);
 }
