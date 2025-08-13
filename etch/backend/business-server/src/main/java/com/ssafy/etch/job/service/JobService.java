@@ -9,4 +9,6 @@ public interface JobService {
 	JobResponseDTO getJob(Long jobId);
 
 	List<JobResponseDTO> getJobsByDate(LocalDate startDate, LocalDate endDate);
+
+	List<JobResponseDTO> getJobsByExpirationDate(LocalDate startDate, LocalDate endDate);
 }

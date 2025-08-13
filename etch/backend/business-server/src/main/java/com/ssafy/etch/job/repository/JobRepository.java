@@ -22,4 +22,9 @@ public interface JobRepository extends JpaRepository<JobEntity, Long> {
 		""")
 	List<JobEntity> findJobsStartingOrEndingInPeriod(@Param("startInclusive") LocalDateTime startInclusive,
 		@Param("endExclusive") LocalDateTime endExclusive);
+
+	List<JobEntity> findByExpirationDateBetween(
+		LocalDateTime startInclusive,
+		LocalDateTime endInclusive
+	);
 }
