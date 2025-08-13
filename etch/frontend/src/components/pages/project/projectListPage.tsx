@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import ProjectListCard from "../../organisms/project/list/projectListCard";
 import { ProjectSidebarType } from "../../../types/projectSidebarType";
 import ProjectListSidebar from "../../organisms/project/list/projectListSidebar";
@@ -37,6 +37,9 @@ function ProjectListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
 
+  // ✅ 강제 리렌더링을 위한 상태 추가
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
   // 컴포넌트 마운트 시 프로젝트 데이터 로드
   useEffect(() => {
     const loadProjects = async () => {
@@ -73,8 +76,8 @@ function ProjectListPage() {
     );
   };
 
-  // ✅ 클라이언트 사이드 정렬이 포함된 필터링 함수
-  const getFilteredProjects = (): ProjectData[] => {
+  // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
+  const filteredProjects = useMemo(() => {
     console.log("=== 필터링 및 정렬 시작 ===");
     console.log("전체 프로젝트 수:", projects.length);
     console.log("선택된 카테고리:", selectedCategory);
@@ -192,10 +195,9 @@ function ProjectListPage() {
     });
 
     return filtered;
-  };
+  }, [projects, searchTerm, selectedCategory, selectedSort]); // 의존성 배열
 
   // 페이지네이션 계산
-  const filteredProjects = getFilteredProjects();
   const totalElements = filteredProjects.length;
   const totalPages = Math.ceil(totalElements / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -216,19 +218,26 @@ function ProjectListPage() {
 
   // 검색 핸들러
   const handleSearch = useCallback((searchTermValue: string) => {
+    console.log("🔍 검색 핸들러 호출:", searchTermValue);
     setSearchTerm(searchTermValue);
   }, []);
 
-  // 카테고리 필터 핸들러
+  // ✅ 카테고리 필터 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
   const handleCategoryFilter = useCallback((category: string) => {
-    console.log("필터 선택:", category);
+    console.log("🎯 카테고리 필터 핸들러 호출됨:", category);
     setSelectedCategory(category);
+    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
+    // 페이지를 1로 리셋
+    setCurrentPage(1);
   }, []);
 
-  // 정렬 핸들러
+  // ✅ 정렬 핸들러 - 의존성 배열 제거하고 강제 업데이트 추가
   const handleSortChange = useCallback((sortType: string) => {
-    console.log("정렬 변경:", sortType);
+    console.log("📊 정렬 핸들러 호출됨:", sortType);
     setSelectedSort(sortType);
+    setUpdateTrigger((prev) => prev + 1); // 강제 리렌더링 트리거
+    // 페이지를 1로 리셋
+    setCurrentPage(1);
   }, []);
 
   // ✅ 새로고침 버튼 핸들러 - 정렬도 기본값으로 리셋
@@ -247,7 +256,10 @@ function ProjectListPage() {
       setProjects(sortedData);
       // 새로고침 시 정렬도 기본값(최신순)으로 리셋
       setSelectedSort("LATEST");
+      setSelectedCategory("ALL");
+      setSearchTerm("");
       setCurrentPage(1);
+      setUpdateTrigger((prev) => prev + 1);
       console.log("🔄 수동 새로고침 완료 - 최신순으로 정렬됨");
     } catch (err) {
       setError("프로젝트 데이터를 불러오는데 실패했습니다.");
@@ -259,7 +271,7 @@ function ProjectListPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#007DFC]"></div>
           <p className="text-gray-600">프로젝트 데이터를 불러오는 중...</p>
@@ -270,9 +282,9 @@ function ProjectListPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="space-y-4 text-center">
-          <div className="text-6xl text-red-500">⚠️</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-red-500 text-6xl">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-900">
             오류가 발생했습니다
           </h2>
@@ -289,12 +301,12 @@ function ProjectListPage() {
   }
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-gray-50">
       {/* 전체 컨테이너 */}
-      <div className="px-4 py-6 mx-auto max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex gap-8">
           {/* 사이드바 영역 */}
-          <div className="flex-shrink-0 hidden w-64 lg:block">
+          <div className="w-64 flex-shrink-0 hidden lg:block">
             <ProjectListSidebar
               ProjectSidebarType={ProjectSidebarType}
               onCategoryFilter={handleCategoryFilter}
@@ -305,11 +317,11 @@ function ProjectListPage() {
           {/* 메인 콘텐츠 영역 */}
           <div className="flex-1 space-y-6">
             {/* 헤더 섹션 */}
-            <section className="space-y-4 text-center">
+            <section className="text-center space-y-4">
               <h1 className="text-3xl font-bold text-gray-900">
                 개발자 프로젝트
               </h1>
-              <p className="max-w-2xl mx-auto text-gray-600">
+              <p className="text-gray-600 max-w-2xl mx-auto">
                 웹 개발, 모바일 앱, AI/ML, 블록체인등 다양한 IT프로젝트를
                 확인하세요. 실력있는 개발자들의 최신 프로젝트와 기술 스택을
                 탐색할 수 있습니다.
@@ -322,7 +334,7 @@ function ProjectListPage() {
                 </Link>
                 <button
                   onClick={handleRefresh}
-                  className="px-6 py-3 font-semibold text-white transition-colors bg-gray-500 hover:bg-gray-600 rounded-xl"
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors"
                 >
                   🔄 새로고침
                 </button>
@@ -336,7 +348,7 @@ function ProjectListPage() {
 
             {/* 검색 결과 정보 */}
             {(searchTerm || selectedCategory !== "ALL") && (
-              <section className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <section className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div className="text-blue-800">
                     <span className="font-medium">{totalElements}개</span>의
@@ -357,8 +369,9 @@ function ProjectListPage() {
                       setSearchTerm("");
                       setSelectedCategory("ALL");
                       setSelectedSort("LATEST"); // 초기화 시에도 최신순으로
+                      setUpdateTrigger((prev) => prev + 1);
                     }}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                   >
                     필터 초기화
                   </button>
@@ -367,11 +380,12 @@ function ProjectListPage() {
             )}
 
             {/* 현재 상태 디버깅 정보 */}
-            <section className="p-4 text-sm border border-yellow-200 rounded-lg bg-yellow-50">
+            <section className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
               <div className="text-yellow-800">
                 <strong>디버그 정보:</strong> 전체 {projects.length}개 프로젝트,
                 필터링 후 {filteredProjects.length}개, 현재 정렬:{" "}
-                <strong>{selectedSort}</strong>
+                <strong>{selectedSort}</strong>, 업데이트 카운터:{" "}
+                {updateTrigger}
                 {projects.length > 0 && (
                   <span>
                     , 최신 프로젝트: {projects[0]?.title} (ID: {projects[0]?.id}
@@ -389,12 +403,12 @@ function ProjectListPage() {
                   onProjectUpdate={handleProjectUpdate}
                 />
               ) : (
-                <div className="py-12 text-center">
-                  <div className="mb-4 text-6xl text-gray-400">📂</div>
-                  <h3 className="mb-2 text-xl font-semibold text-gray-900">
+                <div className="text-center py-12">
+                  <div className="text-gray-400 text-6xl mb-4">📂</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     프로젝트가 없습니다
                   </h3>
-                  <p className="mb-4 text-gray-600">
+                  <p className="text-gray-600 mb-4">
                     {searchTerm || selectedCategory !== "ALL"
                       ? "검색 조건에 맞는 프로젝트가 없습니다. 검색 조건을 변경해보세요."
                       : "등록된 프로젝트가 없습니다. 새로운 프로젝트를 등록해보세요."}
