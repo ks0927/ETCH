@@ -73,25 +73,32 @@ function ProjectModalCard({
   // 현재 사용자 정보 가져오기
   const currentUser = getUserFromToken();
 
-  // 작성자 체크 - authorId 사용 (타입 안전)
-  const authorId = restProps.authorId as number | undefined;
+  // 🔥 백엔드에서 제공하는 실제 필드들 추출
+  const memberId = restProps.memberId as number | undefined;
+  const authorId = restProps.authorId as number | undefined; // 기존 유지
 
+  // 🔥 수정된 작성자 체크 - memberId 우선 사용
   const isAuthor = (() => {
     if (!currentUser) {
       return false;
     }
 
-    // 1. authorId가 있으면 정확한 비교 (백엔드 수정 후)
+    // 1. memberId 우선 사용 (백엔드에서 제공하는 실제 필드)
+    if (memberId) {
+      return currentUser.id === memberId;
+    }
+
+    // 2. authorId가 있으면 정확한 비교 (기존 방식)
     if (authorId) {
       return currentUser.id === authorId;
     }
 
-    // 2. member 객체가 있으면 사용 (기존 방식)
+    // 3. member 객체가 있으면 사용 (기존 방식)
     if (member && member.id) {
       return currentUser.id === member.id;
     }
 
-    // 3. 둘 다 없으면 닉네임으로 비교 (fallback)
+    // 4. 닉네임으로 비교 (fallback)
     if (currentUser.nickname && nickname) {
       return currentUser.nickname === nickname;
     }
@@ -196,24 +203,17 @@ function ProjectModalCard({
 
   // 삭제된 프로젝트는 표시하지 않음
   if (isDeleted) {
-    console.log("디버깅 정보:", {
-      currentUser,
-      member,
-      currentUserId: currentUser?.id,
-      memberId: member?.id,
-      authorId, // authorId 추가
-      isAuthor, // isAuthor 결과 추가
-      isPublic, // 공개 여부 추가
-      canView: isPublic || isAuthor, // 볼 수 있는지 여부 추가
-      nickname, // 닉네임 추가
-    });
-    <div className="text-center py-12">
-      <div className="text-red-500 text-6xl mb-4">🗑️</div>
-      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-        삭제된 프로젝트입니다
-      </h3>
-      <p className="text-gray-600">이 프로젝트는 더 이상 사용할 수 없습니다.</p>
-    </div>;
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-500 text-6xl mb-4">🗑️</div>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          삭제된 프로젝트입니다
+        </h3>
+        <p className="text-gray-600">
+          이 프로젝트는 더 이상 사용할 수 없습니다.
+        </p>
+      </div>
+    );
   }
 
   // 🎯 수정된 비공개 프로젝트 체크 - 작성자가 아닌 경우에만 차단
@@ -296,33 +296,35 @@ function ProjectModalCard({
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // 프로필 페이지로 이동하는 핸들러
+  // 🔥 수정된 프로필 페이지로 이동하는 핸들러
   const handleProfileClick = () => {
-    // 사용자 ID 결정 우선순위:
-    // 1. authorId (restProps에서)
-    // 2. member.id (ProjectData의 member 객체에서)
-    // 3. 현재 사용자 ID (작성자 본인인 경우)
-    let userId: number | undefined;
+    // memberId를 최우선으로 사용
+    let userId: number | undefined = memberId;
 
-    if (authorId) {
-      userId = authorId;
-    } else if (member && member.id) {
-      userId = member.id;
-    } else if (isAuthor && currentUser) {
-      userId = currentUser.id;
-    }
+    // fallback들
+    if (!userId) userId = authorId;
+    if (!userId && member && member.id) userId = member.id;
+    if (!userId && isAuthor && currentUser) userId = currentUser.id;
+
+    console.log("프로필 이동 시도:", {
+      memberId,
+      authorId,
+      memberObjectId: member?.id,
+      selectedUserId: userId,
+      nickname,
+    });
 
     if (userId) {
       console.log("프로필 페이지로 이동:", userId);
       navigate(`/profile/${userId}`);
     } else {
       console.warn("사용자 ID를 찾을 수 없습니다:", {
+        memberId,
         authorId,
-        memberId: member?.id,
+        memberId_from_member: member?.id,
         isAuthor,
         currentUserId: currentUser?.id,
       });
-      // ID를 찾을 수 없는 경우 알림
       alert("사용자 정보를 찾을 수 없습니다.");
     }
   };
