@@ -33,42 +33,25 @@ function getAuthToken(): string | null {
 
   // 찾지 못했다면 localStorage를 순회해서 access_token이 포함된 키 찾기
   if (!token) {
-    console.log(
-      "정상 키로 토큰을 찾을 수 없습니다. localStorage 전체 검색 중..."
-    );
-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      console.log(`키 확인: "${key}"`);
 
       if (
         key &&
         (key.includes("access_token") || key.trim() === "access_token")
       ) {
         token = localStorage.getItem(key);
-        console.log(
-          `토큰 발견! 키: "${key}", 토큰: ${token?.substring(0, 50)}...`
-        );
 
         if (token) {
           // 정상적인 키로 다시 저장하고 잘못된 키는 제거
           localStorage.setItem("access_token", token);
           if (key !== "access_token") {
             localStorage.removeItem(key);
-            console.log(
-              `잘못된 키 "${key}" 제거하고 "access_token"으로 저장했습니다.`
-            );
           }
           break;
         }
       }
     }
-  }
-
-  if (token) {
-    console.log(`최종 토큰: ${token.substring(0, 50)}...`);
-  } else {
-    console.log("토큰을 찾을 수 없습니다.");
   }
 
   return token;
@@ -132,9 +115,6 @@ export async function createProject(projectInput: ProjectInputData) {
     } catch (authError) {
       // 401 오류인 경우 인증 없이 재시도 (개발용)
       if (axios.isAxiosError(authError) && authError.response?.status === 401) {
-        console.warn("⚠️ 인증 실패. 개발 환경에서 인증 없이 재시도합니다.");
-        console.log("실제 환경에서는 로그인이 필요합니다.");
-
         // 토큰 없이 재시도
         const retryResponse = await axios.post(
           `${BASE_API}/projects`,
@@ -340,15 +320,11 @@ export async function getMyProjects(): Promise<MyProjectResponse[]> {
       throw new Error("로그인이 필요합니다.");
     }
 
-    console.log("📡 내 프로젝트 API 호출:", `${BASE_API}/members/projects`);
-
     const response = await axios.get(`${BASE_API}/members/projects`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log("✅ 내 프로젝트 API 응답:", response.data);
 
     // 스웨거 응답 구조에 맞게 데이터 추출
     const data = response.data.data;
@@ -392,8 +368,6 @@ export async function getAllProjects() {
       config
     );
 
-    console.log("getAllProjects 응답:", response.data);
-
     const pageData = response.data.data;
     const projects = pageData.content || [];
 
@@ -403,7 +377,6 @@ export async function getAllProjects() {
 
     // 401 오류 시 토큰 제거하고 재시도
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
       localStorage.removeItem("access_token");
 
       // 토큰 없이 재시도
@@ -442,7 +415,6 @@ export async function getAllProjectsWithPaging(
       config
     );
 
-    console.log("getAllProjectsWithPaging 응답:", response.data);
     return response.data.data;
   } catch (error) {
     console.error("페이징된 프로젝트 목록 조회 실패:", error);
@@ -463,26 +435,7 @@ export async function getProjectById(id: number) {
 
     const response = await axios.get(`${BASE_API}/projects/${id}`, config);
 
-    // 🔍 디버깅 로그 추가
-    console.log("=== 프로젝트 API 응답 전체 ===");
-    console.log(JSON.stringify(response.data, null, 2));
-    console.log("=== 프로젝트 데이터 ===");
-    console.log(JSON.stringify(response.data.data, null, 2));
-
-    // 작성자 정보 상세 분석
     const projectData = response.data.data;
-    console.log("=== 작성자 정보 분석 ===");
-    console.log("authorId:", projectData?.authorId);
-    console.log("member:", projectData?.member);
-    console.log("writer:", projectData?.writer);
-    console.log("user:", projectData?.user);
-    console.log("createdBy:", projectData?.createdBy);
-    console.log("nickname:", projectData?.nickname);
-    console.log("userId:", projectData?.userId);
-
-    // 객체의 모든 키 확인
-    console.log("=== 응답 객체의 모든 키 ===");
-    console.log("Keys:", Object.keys(projectData || {}));
 
     return projectData;
   } catch (error) {
@@ -490,15 +443,12 @@ export async function getProjectById(id: number) {
 
     // 401 오류 시 토큰 제거하고 재시도
     if (axios.isAxiosError(error) && error.response?.status === 401) {
-      console.log("토큰이 만료되었습니다. 토큰 제거 후 재시도...");
       localStorage.removeItem("access_token");
 
       try {
         const response = await axios.get(`${BASE_API}/projects/${id}`);
 
         // 재시도에서도 같은 로깅
-        console.log("=== 재시도 API 응답 ===");
-        console.log(JSON.stringify(response.data, null, 2));
 
         return response.data.data;
       } catch (retryError) {
@@ -529,30 +479,15 @@ export async function getUserPublicProjects(userId: number) {
     });
 
     // 전체 응답 구조 확인
-    console.log("=== 전체 응답 구조 ===");
-    console.log("Status:", response.status);
-    console.log("Headers:", response.headers);
-    console.log("Full Response Data:", JSON.stringify(response.data, null, 2));
 
     const data = response.data.data;
-    console.log("=== 추출된 data 부분 ===");
-    console.log("Data type:", typeof data);
-    console.log("Is Array:", Array.isArray(data));
-    console.log("Data content:", JSON.stringify(data, null, 2));
 
     if (Array.isArray(data)) {
-      console.log("배열로 반환, 길이:", data.length);
       return data;
     } else if (data && typeof data === "object" && "content" in data) {
-      console.log(
-        "객체에서 content 추출, content 길이:",
-        data.content?.length || 0
-      );
-      console.log("Content:", JSON.stringify(data.content, null, 2));
       return data.content || [];
     }
 
-    console.log("빈 배열 반환");
     return [];
   } catch (error) {
     console.error("=== 오류 상세 정보 ===");

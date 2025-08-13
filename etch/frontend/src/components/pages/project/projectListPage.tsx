@@ -12,10 +12,7 @@ import { getCategoryFromNumber } from "../../../types/project/projectCategroyDat
 // API 호출 함수 - 정렬 파라미터 제거
 const fetchProjects = async (): Promise<ProjectData[]> => {
   try {
-    console.log("🔄 프로젝트 조회 시작");
     const data = await getAllProjects(); // 정렬 파라미터 제거
-    console.log("✅ 받아온 프로젝트:", data);
-    console.log("✅ 프로젝트 개수:", data.length);
     return data;
   } catch (error) {
     console.error("❌ 프로젝트 데이터 fetch 에러:", error);
@@ -71,11 +68,6 @@ function ProjectListPage() {
 
   // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
   const filteredProjects = useMemo(() => {
-    console.log("=== 필터링 및 정렬 시작 ===");
-    console.log("전체 프로젝트 수:", projects.length);
-    console.log("선택된 카테고리:", selectedCategory);
-    console.log("선택된 정렬:", selectedSort);
-
     let filtered = [...projects];
 
     // 0. 공개된 프로젝트만 필터링
@@ -117,15 +109,10 @@ function ProjectListPage() {
 
     // 3. ✅ 클라이언트 사이드 정렬 - createdAt이 없으므로 대안 사용
     filtered.sort((a, b) => {
-      console.log(`정렬 비교 중: A(${a.id}) vs B(${b.id})`);
-
       switch (selectedSort) {
         case "LATEST": {
           // ⚠️ createdAt이 없으므로 ID를 기준으로 최신순 (높은 ID = 최신)
-          console.log(`🆔 ID 비교 (최신순): A(${a.id}) vs B(${b.id})`);
-          console.log("🔄 최신순 정렬 적용 (ID 기준)");
           const result = (b.id || 0) - (a.id || 0);
-          console.log(`정렬 결과: ${result} (양수면 B가 앞, 음수면 A가 앞)`);
           return result;
         }
 
@@ -133,8 +120,6 @@ function ProjectListPage() {
           // 인기순 - popularityScore 기준 내림차순
           const popularityA = a.popularityScore || a.likeCount || 0;
           const popularityB = b.popularityScore || b.likeCount || 0;
-          console.log(`🔥 인기도 비교: A(${popularityA}) vs B(${popularityB})`);
-          console.log("🔥 인기순 정렬 적용");
           return popularityB - popularityA;
         }
 
@@ -142,8 +127,6 @@ function ProjectListPage() {
           // 조회순 - viewCount 기준 내림차순
           const viewsA = a.viewCount || 0;
           const viewsB = b.viewCount || 0;
-          console.log(`👀 조회수 비교: A(${viewsA}) vs B(${viewsB})`);
-          console.log("👀 조회순 정렬 적용");
           return viewsB - viewsA;
         }
 
@@ -151,32 +134,14 @@ function ProjectListPage() {
           // 좋아요순 - likeCount 기준 내림차순
           const likesA = a.likeCount || 0;
           const likesB = b.likeCount || 0;
-          console.log(`👍 좋아요 비교: A(${likesA}) vs B(${likesB})`);
-          console.log("👍 좋아요순 정렬 적용");
           return likesB - likesA;
         }
 
         default: {
           // 기본값도 ID 기준 최신순
-          console.log(`🆔 기본 ID 비교: A(${a.id}) vs B(${b.id})`);
-          console.log("🔄 기본값 최신순 정렬 적용 (ID 기준)");
           return (b.id || 0) - (a.id || 0);
         }
       }
-    });
-
-    console.log("=== 필터링 및 정렬 완료 ===");
-    console.log("필터링된 프로젝트 수:", filtered.length);
-    console.log("적용된 정렬:", selectedSort);
-
-    // 정렬 결과 확인을 위한 로그
-    console.log("📋 정렬 결과 (처음 3개):");
-    filtered.slice(0, 3).forEach((project, index) => {
-      console.log(
-        `${index + 1}. ID: ${project.id}, 제목: ${project.title}, 생성일: ${
-          project.createdAt
-        }, 조회수: ${project.viewCount}, 좋아요: ${project.likeCount}`
-      );
     });
 
     return filtered;
