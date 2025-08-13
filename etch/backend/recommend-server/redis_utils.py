@@ -21,4 +21,4 @@ async def store_recommendations(user_id, news_recommendations, job_recommendatio
     }
 
     # Redis에 JSON 저장
-    await redis_client.set("recommendations_data_user_"+user_id, json.dumps(data))
+    await redis_client.set("recommendations_data_user_"+str(user_id), json.dumps(data))
