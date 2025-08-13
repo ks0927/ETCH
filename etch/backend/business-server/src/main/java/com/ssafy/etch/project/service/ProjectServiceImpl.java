@@ -10,6 +10,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.ssafy.etch.file.entity.FileEntity;
 import com.ssafy.etch.file.repository.FileRepository;
 import com.ssafy.etch.global.response.PageResponseDTO;
@@ -25,21 +37,11 @@ import com.ssafy.etch.project.dto.ProjectListDTO;
 import com.ssafy.etch.project.dto.ProjectUpdateRequestDTO;
 import com.ssafy.etch.project.entity.ProjectEntity;
 import com.ssafy.etch.project.entity.ProjectTechEntity;
+import com.ssafy.etch.project.event.ProjectChangedEvent;
 import com.ssafy.etch.project.repository.ProjectRepository;
 import com.ssafy.etch.project.repository.ProjectTechRepository;
 import com.ssafy.etch.tech.entity.TechCodeEntity;
 import com.ssafy.etch.tech.repository.TechCodeRepository;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -51,6 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
 	private final ProjectTechRepository projectTechRepository;
 	private final FileRepository fileRepository;
 	private final S3Service s3Service;
+	private final ApplicationEventPublisher events;
 
 	private static final Set<String> ALLOWED_IMAGE_CT = Set.of("image/jpeg", "image/png");
 	private static final Set<String> ALLOWED_IMAGE_EXT = Set.of(".jpg", ".png", "jpeg", ".gif", "webp");
@@ -67,7 +70,8 @@ public class ProjectServiceImpl implements ProjectService {
 		TechCodeRepository techCodeRepository,
 		ProjectTechRepository projectTechRepository,
 		FileRepository fileRepository,
-		S3Service s3Service) {
+		S3Service s3Service,
+		ApplicationEventPublisher events) {
 		this.projectRepository = projectRepository;
 		this.likeRepository = likeRepository;
 		this.techCodeRepository = techCodeRepository;
@@ -75,11 +79,13 @@ public class ProjectServiceImpl implements ProjectService {
 		this.memberRepository = memberRepository;
 		this.fileRepository = fileRepository;
 		this.s3Service = s3Service;
+		this.events = events;
 	}
 
 	// 유효성 검증
 	private static boolean isImageOk(MultipartFile f) {
-		if (f == null || f.isEmpty()) return false;
+		if (f == null || f.isEmpty())
+			return false;
 		String ct = Optional.ofNullable(f.getContentType()).orElse("").toLowerCase();
 		String name = Optional.ofNullable(f.getOriginalFilename()).orElse("").toLowerCase();
 		boolean ctOk = ALLOWED_IMAGE_CT.contains(ct);
@@ -88,9 +94,11 @@ public class ProjectServiceImpl implements ProjectService {
 	}
 
 	private static String normalizeYoutube(String url) {
-		if (url == null || url.isBlank()) return null;
+		if (url == null || url.isBlank())
+			return null;
 		String u = url.trim();
-		if (!(u.contains("youtube.com") || u.contains("youtu.be"))) return null;
+		if (!(u.contains("youtube.com") || u.contains("youtu.be")))
+			return null;
 		return u;
 	}
 
@@ -103,7 +111,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 		// 인기, 조회수, 최신 정렬(기본은 인기순) - formula 필드
 		Sort sortOption = switch (effectiveSort) {
-			case "views"  -> Sort.by(DESC, "viewCount").and(Sort.by(DESC, "createdAt"));
+			case "views" -> Sort.by(DESC, "viewCount").and(Sort.by(DESC, "createdAt"));
 			case "latest" -> Sort.by(DESC, "createdAt");
 			default -> Sort.by(DESC, "popularityScore").and(Sort.by(DESC, "createdAt"));
 		};
@@ -122,6 +130,7 @@ public class ProjectServiceImpl implements ProjectService {
 			return ProjectListDTO.builder()
 				.id(projectDTO.getId())
 				.title(projectDTO.getTitle())
+				.projectCategory(projectDTO.getProjectCategory())
 				.thumbnailUrl(projectDTO.getThumbnailUrl())
 				.viewCount(projectDTO.getViewCount())
 				.likeCount(likeCount)
@@ -143,7 +152,8 @@ public class ProjectServiceImpl implements ProjectService {
 
 		Pageable pageable = PageRequest.of(pageIndex, size, Sort.by(DESC, "createdAt"));
 
-		Page<ProjectEntity> pageData = projectRepository.findByMemberIdAndIsPublicTrueAndIsDeletedFalse(memberId, pageable);
+		Page<ProjectEntity> pageData = projectRepository.findByMemberIdAndIsPublicTrueAndIsDeletedFalse(memberId,
+			pageable);
 
 		Page<ProjectListDTO> dtoPage = pageData.map(projectEntity -> {
 			ProjectDTO projectDTO = projectEntity.toProjectDTO();
@@ -154,6 +164,7 @@ public class ProjectServiceImpl implements ProjectService {
 			return ProjectListDTO.builder()
 				.id(projectDTO.getId())
 				.title(projectDTO.getTitle())
+				.projectCategory(projectDTO.getProjectCategory())
 				.thumbnailUrl(projectDTO.getThumbnailUrl())
 				.viewCount(projectDTO.getViewCount())
 				.likeCount(likeCount)
@@ -181,10 +192,10 @@ public class ProjectServiceImpl implements ProjectService {
 		boolean likedByMe = (memberId != null) &&
 			likeRepository.existsByMember_IdAndTargetIdAndType(memberId, id, LikeType.PROJECT);
 
-		List<String> techCategories = p.getProjectTechs()==null ? List.of() :
+		List<String> techCategories = p.getProjectTechs() == null ? List.of() :
 			p.getProjectTechs().stream()
 				.map(pt -> pt.getTechCode().getTechCategory())
-				.filter(v -> v!=null && !v.isBlank())
+				.filter(v -> v != null && !v.isBlank())
 				.map(String::trim)
 				.distinct()
 				.toList();
@@ -229,7 +240,7 @@ public class ProjectServiceImpl implements ProjectService {
 		ProjectEntity project = ProjectEntity.builder()
 			.title(req.getTitle())
 			.content(req.getContent())
-			.category(req.getCategory())
+			.projectCategory(req.getProjectCategory())
 			.githubUrl(req.getGithubUrl())
 			.isPublic(req.getIsPublic())
 			.member(member)
@@ -262,7 +273,8 @@ public class ProjectServiceImpl implements ProjectService {
 		List<FileEntity> fileEntities = new ArrayList<>();
 		for (MultipartFile f : imgList) {
 			if (!isImageOk(f)) {
-				throw new IllegalArgumentException("이미지 형식/용량 오류: " + Optional.ofNullable(f.getOriginalFilename()).orElse(""));
+				throw new IllegalArgumentException(
+					"이미지 형식/용량 오류: " + Optional.ofNullable(f.getOriginalFilename()).orElse(""));
 			}
 			String url = s3Service.uploadFile(f);
 			FileEntity fe = FileEntity.image(project,
@@ -274,7 +286,7 @@ public class ProjectServiceImpl implements ProjectService {
 		if (!fileEntities.isEmpty()) {
 			fileRepository.saveAll(fileEntities);
 		}
-
+		events.publishEvent(new ProjectChangedEvent(project.getId(), ProjectChangedEvent.ChangeType.UPSERT));
 		return project.getId();
 	}
 
@@ -282,29 +294,28 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	@Transactional
 	public void deleteProject(Long projectId, Long memberId) {
-		// 1. 프로젝트 엔티티를 조회합니다.
+		// 프로젝트 엔티티 조회
 		ProjectEntity project = projectRepository.findById(projectId)
 			.orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없습니다."));
 
-		// 2. 삭제 권한을 확인합니다.
+		// 삭제 권한을 확인
 		if (!project.getMember().toMemberDTO().getId().equals(memberId)) {
 			throw new AccessDeniedException("본인만 삭제할 수 있습니다.");
 		}
 
-		// 3. 프로젝트에 연결된 파일들의 URL을 가져옵니다.
-		// 썸네일 URL을 가져와 삭제 리스트에 추가합니다.
+		// 프로젝트에 연결된 파일들의 URL 가져오기
 		List<String> fileUrlsToDelete = new ArrayList<>();
 		if (project.getThumbnailUrl() != null) {
 			fileUrlsToDelete.add(project.getThumbnailUrl());
 		}
 
-		// 본문 이미지들의 URL을 가져와 삭제 리스트에 추가합니다.
+		// 본문 이미지의 URL 가져와 삭제 리스트에 추가
 		List<FileEntity> files = fileRepository.findAllByProjectId(projectId);
 		for (FileEntity file : files) {
 			fileUrlsToDelete.add(file.getFileUrl());
 		}
 
-		// 4. S3Service를 사용하여 MinIO에서 파일들을 삭제합니다.
+		// S3Service 사용해서 MinIO에서 파일들 삭제
 		for (String fileUrl : fileUrlsToDelete) {
 			try {
 				s3Service.deleteFileByUrl(fileUrl);
@@ -313,19 +324,19 @@ public class ProjectServiceImpl implements ProjectService {
 			}
 		}
 
-		// 5. 데이터베이스에서 프로젝트와 연결된 파일들을 삭제합니다.
+		// db에서 프로젝트와 연결된 파일들을 삭제
 		fileRepository.deleteAll(files);
 
-		// 6. ProjectTechEntity 링크를 삭제합니다.
+		// ProjectTechEntity 링크 삭제
 		projectTechRepository.deleteAllByProjectId(projectId);
 
-		// 7. 프로젝트를 soft-delete합니다.
-		// 만약 완전히 삭제하려면 projectRepository.delete(project); 를 사용합니다.
 		int changed = projectRepository.softDelete(projectId, memberId);
 
 		if (changed == 0) {
 			throw new NoSuchElementException("삭제할 수 없습니다.");
 		}
+
+		events.publishEvent(new ProjectChangedEvent(projectId, ProjectChangedEvent.ChangeType.DELETE));
 	}
 
 	// 수정
@@ -353,7 +364,7 @@ public class ProjectServiceImpl implements ProjectService {
 		p.change(
 			req.getTitle(),
 			req.getContent(),
-			req.getCategory(),
+			req.getProjectCategory(),
 			req.getGithubUrl(),
 			req.getIsPublic()
 		);
@@ -395,14 +406,21 @@ public class ProjectServiceImpl implements ProjectService {
 		// 썸네일
 		if (Boolean.TRUE.equals(req.getRemoveThumbnail())) {
 			if (p.getThumbnailUrl() != null) {
-				try { s3Service.deleteFileByUrl(p.getThumbnailUrl()); } catch (Exception ignore) {}
+				try {
+					s3Service.deleteFileByUrl(p.getThumbnailUrl());
+				} catch (Exception ignore) {
+				}
 			}
 			p.changeThumbnail(null);
 		} else if (thumbnail != null && !thumbnail.isEmpty()) {
-			if (!isImageOk(thumbnail)) throw new IllegalArgumentException("썸네일 형식/용량 오류");
+			if (!isImageOk(thumbnail))
+				throw new IllegalArgumentException("썸네일 형식/용량 오류");
 			String newUrl = s3Service.uploadFile(thumbnail);
 			if (p.getThumbnailUrl() != null) {
-				try { s3Service.deleteFileByUrl(p.getThumbnailUrl()); } catch (Exception ignore) {}
+				try {
+					s3Service.deleteFileByUrl(p.getThumbnailUrl());
+				} catch (Exception ignore) {
+				}
 			}
 			p.changeThumbnail(newUrl);
 		}
@@ -413,7 +431,10 @@ public class ProjectServiceImpl implements ProjectService {
 
 			// S3 먼저 삭제 + 연관관계 해제
 			for (FileEntity f : willRemove) {
-				try { s3Service.deleteFileByUrl(f.getFileUrl()); } catch (Exception ignore) {}
+				try {
+					s3Service.deleteFileByUrl(f.getFileUrl());
+				} catch (Exception ignore) {
+				}
 				p.removeFile(f);
 			}
 			// 영속성 친화적 삭제
@@ -423,20 +444,24 @@ public class ProjectServiceImpl implements ProjectService {
 		// 본문 이미지 추가
 		List<MultipartFile> addList = Optional.ofNullable(images).orElse(List.of());
 		if (!addList.isEmpty()) {
-			int existingImages = (int) fileRepository.findAllByProjectId(projectId)
+			int existingImages = (int)fileRepository.findAllByProjectId(projectId)
 				.size();
 			if (existingImages + addList.size() > MAX_IMAGES) {
 				throw new IllegalArgumentException("이미지는 최대 " + MAX_IMAGES + "장입니다.");
 			}
 			List<FileEntity> saved = new ArrayList<>();
 			for (MultipartFile img : addList) {
-				if (!isImageOk(img)) throw new IllegalArgumentException("이미지 형식/용량 오류");
+				if (!isImageOk(img))
+					throw new IllegalArgumentException("이미지 형식/용량 오류");
 				String url = s3Service.uploadFile(img);
-				FileEntity fe = FileEntity.image(p, Optional.ofNullable(img.getOriginalFilename()).orElse("image"), url);
+				FileEntity fe = FileEntity.image(p, Optional.ofNullable(img.getOriginalFilename()).orElse("image"),
+					url);
 				saved.add(fe);
 				p.addFile(fe);
 			}
-			if (!saved.isEmpty()) fileRepository.saveAll(saved);
+			if (!saved.isEmpty())
+				fileRepository.saveAll(saved);
 		}
+		events.publishEvent(new ProjectChangedEvent(p.getId(), ProjectChangedEvent.ChangeType.UPSERT));
 	}
 }

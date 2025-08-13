@@ -1,5 +1,7 @@
 package com.ssafy.etch.project.dto;
 
+import com.ssafy.etch.project.entity.ProjectCategory;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,6 +11,7 @@ public class ProjectListDTO {
 	private Long id;
 	private String title;
 	private String thumbnailUrl;
+	private ProjectCategory projectCategory;
 	private Long viewCount;
 	private Long likeCount;
 	private String nickname;
@@ -19,6 +22,7 @@ public class ProjectListDTO {
 		return ProjectListDTO.builder()
 			.id(p.getId())
 			.title(p.getTitle())
+			.projectCategory(p.getProjectCategory())
 			.thumbnailUrl(p.getThumbnailUrl())
 			.viewCount(p.getViewCount())
 			.likeCount(p.getLikeCount() != null ? p.getLikeCount().longValue() : 0L)

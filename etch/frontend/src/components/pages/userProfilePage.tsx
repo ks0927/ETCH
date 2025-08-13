@@ -11,7 +11,6 @@ function UserProfilePage() {
 
   // 상태 관리
   const [userProjects, setUserProjects] = useState<ProjectData[]>([]);
-  const [userName, setUserName] = useState<string>("");
   const [userProfile, setUserProfile] = useState({
     nickname: "",
     email: "",
@@ -34,11 +33,6 @@ function UserProfilePage() {
         // 🎯 실제 API 사용하여 사용자 공개 프로젝트 로딩
         const projects = await getUserPublicProjects(Number(userId));
         setUserProjects(projects);
-
-        // 프로젝트에서 사용자 이름 추출 (첫 번째 프로젝트의 nickname 사용)
-        if (projects.length > 0) {
-          setUserName(projects[0].nickname || "사용자");
-        }
 
         // 임시 프로필 데이터 (실제 사용자 프로필 API가 있다면 교체)
         const mockUserInfo = {
@@ -131,7 +125,6 @@ function UserProfilePage() {
           <div className="lg:col-span-3">
             <UserProjectList
               projects={userProjects}
-              userName={userName}
               onProjectUpdate={handleProjectUpdate}
             />
           </div>

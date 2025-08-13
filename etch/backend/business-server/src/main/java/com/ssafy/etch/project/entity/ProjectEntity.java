@@ -2,7 +2,6 @@ package com.ssafy.etch.project.entity;
 
 import static jakarta.persistence.FetchType.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class ProjectEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category")
-	private ProjectCategory category;
+	private ProjectCategory projectCategory;
 
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
@@ -121,7 +120,7 @@ public class ProjectEntity {
 			.githubUrl(githubUrl)
 			.isPublic(isPublic)
 			.member(member)
-			.category(category)
+			.projectCategory(projectCategory)
 			.projectTechs(projectTechs)
 			.comments(comments)
 			.files(files)
@@ -132,11 +131,11 @@ public class ProjectEntity {
 	}
 
 	@Builder
-	private ProjectEntity(String title, String content, ProjectCategory category,
+	private ProjectEntity(String title, String content, ProjectCategory projectCategory,
 		String githubUrl, Boolean isPublic, MemberEntity member) {
 		this.title = title;
 		this.content = content;
-		this.category = category;
+		this.projectCategory = projectCategory;
 		this.githubUrl = githubUrl;
 		this.isPublic = isPublic;
 		this.member = member;
@@ -151,11 +150,11 @@ public class ProjectEntity {
 	public void changeThumbnail(String url) { this.thumbnailUrl = url; }
 	public void changeYoutubeUrl(String url) { this.youtubeUrl = url; }
 
-	public void change(String title, String content, ProjectCategory category,
+	public void change(String title, String content, ProjectCategory projectCategory,
 		String githubUrl, Boolean isPublic) {
 		this.title = title;
 		this.content = content;
-		this.category = category;
+		this.projectCategory = projectCategory;
 		this.githubUrl = githubUrl;
 		this.isPublic = isPublic;
 		this.updatedAt = LocalDateTime.now();

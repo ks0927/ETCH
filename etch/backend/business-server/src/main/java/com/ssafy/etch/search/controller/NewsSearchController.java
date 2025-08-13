@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ssafy.etch.search.document.NewsDocument;
+import com.ssafy.etch.global.response.ApiResponse;
+import com.ssafy.etch.search.dto.NewsSearchResponseDTO;
 import com.ssafy.etch.search.service.NewsSearchService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,8 +21,10 @@ public class NewsSearchController {
 	private final NewsSearchService newsSearchService;
 
 	@GetMapping("")
-	public ResponseEntity<List<NewsDocument>> searchNews(@RequestParam String keyword) {
-		List<NewsDocument> result = newsSearchService.search(keyword);
-		return ResponseEntity.ok(result);
+	public ResponseEntity<ApiResponse<List<NewsSearchResponseDTO>>> searchNews(
+		@RequestParam(required = false) String keyword,
+		@RequestParam(required = false) List<String> categories) {
+		List<NewsSearchResponseDTO> result = newsSearchService.search(keyword);
+		return ResponseEntity.ok(ApiResponse.success(result));
 	}
 }

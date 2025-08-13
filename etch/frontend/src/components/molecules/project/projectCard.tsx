@@ -10,6 +10,7 @@ interface Props {
   type: "project";
   viewCount: number;
   likeCount: number;
+  likedByMe?: boolean; // 현재 사용자가 좋아요했는지 여부
   nickname: string;
   onCardClick: (id: number) => void;
 }
@@ -22,6 +23,7 @@ function ProjectCard({
   viewCount,
   nickname,
   likeCount,
+  likedByMe = false, // 기본값은 false
 }: Props) {
   const handleClick = () => {
     onCardClick(id);
@@ -32,7 +34,7 @@ function ProjectCard({
       className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden cursor-pointer"
       onClick={handleClick}
     >
-      <section className="w-full h-36">
+      <section className="w-full h-56">
         <img
           className="w-full object-cover h-full"
           src={thumbnailUrl || noImg}
@@ -52,10 +54,16 @@ function ProjectCard({
       </section>
       <section className="p-3 sm:p-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1 text-sm text-gray-500">
-            <LikeSVG />
+          {/* 좋아요 표시 (클릭 불가, 상태만 표시) */}
+          <div
+            className={`flex items-center gap-1 text-sm ${
+              likedByMe ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            <LikeSVG isLiked={likedByMe} />
             <span>{likeCount || 0}</span>
           </div>
+          {/* 조회수 */}
           <div className="flex items-center gap-1 text-sm text-gray-500">
             <ViewSVG />
             <span>{viewCount || 0}</span>

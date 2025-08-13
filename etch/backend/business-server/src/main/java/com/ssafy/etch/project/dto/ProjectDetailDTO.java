@@ -53,7 +53,7 @@ public class ProjectDetailDTO {
 			.content(p.getContent())
 			.createdAt(p.getCreatedAt())
 			.updatedAt(p.getUpdatedAt())
-			.projectCategory(p.getCategory() == null ? null : p.getCategory().name())
+			.projectCategory(p.getProjectCategory() == null ? null : p.getProjectCategory().name())
 			.techCategories(techCategories)
 			.techCodes(techCodes)
 			.fileUrls(fileUrls)

@@ -1,24 +1,39 @@
 {
   "properties": {
-    "id": {
+    "projectId": {
       "type": "long"
     },
     "title": {
       "type": "text",
       "analyzer": "my_nori_analyzer"
     },
-    "content": {
+    "memberName": {
+      "type": "text",
+      "analyzer": "my_nori_analyzer"
+    },
+    "projectCategory": {
+      "type": "keyword"
+    },
+    "projectTechs": {
       "type": "text",
       "analyzer": "my_nori_analyzer"
     },
     "thumbnailUrl": {
       "type": "keyword"
     },
+    "likeCount": {
+      "type": "integer"
+    },
+    "viewCount": {
+      "type": "long"
+    },
     "createdAt": {
-      "type": "date"
+      "type": "date",
+      "format": "yyyy-MM-dd"
     },
     "updatedAt": {
-      "type": "date"
+      "type": "date",
+      "format": "yyyy-MM-dd"
     }
   }
 }

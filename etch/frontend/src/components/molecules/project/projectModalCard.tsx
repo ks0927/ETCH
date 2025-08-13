@@ -116,6 +116,7 @@ function ProjectModalCard({
   const [isLiked, setIsLiked] = useState(initialLikedByMe || false);
 
   // 좋아요 토글 핸들러에서 onLike 우선 사용
+  // 좋아요 토글 핸들러 수정
   const handleLikeToggle = async () => {
     if (isLiking) return;
 
@@ -128,25 +129,54 @@ function ProjectModalCard({
     try {
       setIsLiking(true);
 
+      // 먼저 UI 상태를 즉시 업데이트 (optimistic update)
+      const newIsLiked = !isLiked;
+      const newLikeCount = newIsLiked
+        ? currentLikeCount + 1
+        : currentLikeCount - 1;
+
+      setIsLiked(newIsLiked);
+      setCurrentLikeCount(newLikeCount);
+
       // 부모에서 전달받은 onLike 핸들러가 있으면 사용
       if (onLike) {
-        await onLike();
-        return; // 부모 핸들러 사용했으면 여기서 종료
-      }
-
-      // 기존 로직 (fallback)
-      if (isLiked) {
-        await unlikeProject(id);
-        setCurrentLikeCount((prev) => prev - 1);
-        setIsLiked(false);
+        try {
+          await onLike();
+        } catch (error) {
+          // 부모 핸들러 실패 시 상태 롤백
+          setIsLiked(!newIsLiked);
+          setCurrentLikeCount(currentLikeCount);
+          throw error;
+        }
       } else {
-        await likeProject(id);
-        setCurrentLikeCount((prev) => prev + 1);
-        setIsLiked(true);
+        // 기존 로직 (fallback)
+        try {
+          if (newIsLiked) {
+            await likeProject(id);
+          } else {
+            await unlikeProject(id);
+          }
+        } catch (error) {
+          // API 호출 실패 시 상태 롤백
+          setIsLiked(!newIsLiked);
+          setCurrentLikeCount(currentLikeCount);
+          throw error;
+        }
       }
     } catch (error: unknown) {
       console.error("좋아요 처리 실패:", error);
-      // 기존 에러 처리 코드 그대로...
+
+      if (error instanceof Error) {
+        if (error.message?.includes("로그인")) {
+          alert("로그인이 만료되었습니다. 다시 로그인해주세요.");
+          localStorage.removeItem("access_token");
+          window.location.href = "/login";
+        } else {
+          alert("좋아요 처리 중 오류가 발생했습니다.");
+        }
+      } else {
+        alert("좋아요 처리 중 오류가 발생했습니다.");
+      }
     } finally {
       setIsLiking(false);
     }
@@ -154,8 +184,6 @@ function ProjectModalCard({
 
   // 수정 버튼 클릭 핸들러 - React Router를 사용하도록 수정
   const handleEdit = () => {
-    console.log("프로젝트 수정 페이지로 이동:", id);
-
     // 모달 닫기 (부모 컴포넌트에서 onClose를 제공한 경우)
     if (onClose) {
       onClose();
@@ -254,7 +282,6 @@ function ProjectModalCard({
       Array.isArray(directTechCodes) &&
       directTechCodes.length > 0
     ) {
-      console.log("techCodes 사용:", directTechCodes);
       return directTechCodes;
     }
 
@@ -264,13 +291,11 @@ function ProjectModalCard({
       Array.isArray(projectTechs) &&
       projectTechs.length > 0
     ) {
-      console.log("projectTechs 사용:", projectTechs);
       return projectTechs
         .map((id) => ProjectWriteTechData.find((tech) => tech.id === id)?.text)
         .filter(Boolean) as string[];
     }
 
-    console.log("기술 스택 없음");
     return [];
   };
 
@@ -347,17 +372,8 @@ function ProjectModalCard({
   const handleProfileClick = () => {
     const userId = getAuthorId();
 
-    console.log("프로필 이동 시도:", {
-      directMemberId: restProps.memberId,
-      authorId: restProps.authorId,
-      memberObjectId: member?.id,
-      selectedUserId: userId,
-      nickname,
-    });
-
     if (userId) {
-      console.log("프로필 페이지로 이동:", userId);
-      navigate(`/profile/${userId}`);
+      navigate(`/members/${userId}/projects`);
     } else {
       console.warn("사용자 ID를 찾을 수 없습니다");
       alert("사용자 정보를 찾을 수 없습니다.");
@@ -383,7 +399,6 @@ function ProjectModalCard({
           </div>
         </div>
       )}
-
       {/* 작성자 정보 */}
       <section className="flex items-center justify-between pb-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
@@ -422,7 +437,7 @@ function ProjectModalCard({
                 : isLiked
                 ? "text-red-500 hover:text-red-600"
                 : "text-gray-600 hover:text-red-500"
-            } ${isLiking ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${isLiking ? "opacity-50 cursor-pointer" : "cursor-pointer"}`}
             title={!isLoggedIn() ? "로그인이 필요합니다" : ""}
           >
             <div
@@ -439,14 +454,14 @@ function ProjectModalCard({
           <span className="font-medium">{viewCount || 0}</span>
         </div>
       </section>
-
+      {/* 프로젝트 이미지 캐러셀 */}
       {/* 프로젝트 이미지 캐러셀 */}
       <section>
         <div className="relative overflow-hidden rounded-lg bg-gray-100">
           <img
             src={images[currentImageIndex]}
             alt={`${title} - 이미지 ${currentImageIndex + 1}`}
-            className="w-full h-64 object-cover transition-all duration-300"
+            className="w-full h-120 object-cover transition-all duration-300"
             onError={(e) => {
               e.currentTarget.src = noImg;
             }}
@@ -545,7 +560,6 @@ function ProjectModalCard({
           </div>
         )}
       </section>
-
       {/* 프로젝트 제목과 내용 */}
       <section className="space-y-3">
         <h1 className="text-xl font-bold text-gray-900 leading-tight">
@@ -563,7 +577,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 카테고리 */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -582,7 +595,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 🔥 수정된 기술 스택 섹션 */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -606,7 +618,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 링크들 */}
       <section className="space-y-4">
         {/* GitHub 링크 */}
@@ -671,7 +682,6 @@ function ProjectModalCard({
           )}
         </div>
       </section>
-
       {/* 수정/삭제 버튼 (로그인한 작성자만 보이도록) */}
       {isLoggedIn() && isAuthor && (
         <section className="pt-4 border-t border-gray-100">
@@ -722,8 +732,7 @@ function ProjectModalCard({
           </div>
         </section>
       )}
-
-      {/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
+      d{/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
       {!isLoggedIn() && (
         <section className="pt-4 border-t border-gray-100">
           <div className="text-center py-4">

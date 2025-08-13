@@ -59,12 +59,10 @@ function ProjectWritePage() {
   // 2. 썸네일 핸들러들
   const handleThumbnailUpload = (file: File) => {
     setThumbnailFile(file);
-    console.log("썸네일 업로드됨:", file.name);
   };
 
   const handleThumbnailRemove = () => {
     setThumbnailFile(null);
-    console.log("썸네일 제거됨");
   };
 
   const handleFileUpload = (newFiles: File[]) => {
@@ -72,7 +70,6 @@ function ProjectWritePage() {
       ...prev,
       files: [...prev.files, ...newFiles].slice(0, 11),
     }));
-    console.log("파일 추가됨");
   };
 
   const handleFileRemove = (index: number) => {
@@ -80,7 +77,6 @@ function ProjectWritePage() {
       ...prev,
       files: prev.files.filter((_, i) => i !== index),
     }));
-    console.log("파일 제거됨");
   };
 
   const handleTitleChange = (value: string) => {
@@ -109,8 +105,6 @@ function ProjectWritePage() {
       } else {
         newIds = [...currentIds, techId];
       }
-
-      console.log("현재 기술 스택 ID:", newIds);
 
       return {
         ...prev,
@@ -182,10 +176,6 @@ function ProjectWritePage() {
         imageFiles,
       };
 
-      console.log("=== 제출할 데이터 ===");
-      console.log("projectInput:", projectInput);
-      console.log("썸네일 파일:", thumbnailFile ? thumbnailFile.name : "없음");
-
       // API 호출
       const result = await createProject(projectInput);
 
@@ -219,7 +209,6 @@ function ProjectWritePage() {
       ...prev,
       projectCategory: category,
     }));
-    console.log("현재 카테고리:", category);
   };
 
   const handleIsPublicChange = (isPublic: boolean) => {
@@ -227,7 +216,6 @@ function ProjectWritePage() {
       ...prev,
       isPublic: isPublic,
     }));
-    console.log("현재 공개 상태(true: 공개):", isPublic);
   };
 
   return (
