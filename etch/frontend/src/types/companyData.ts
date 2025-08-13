@@ -1,4 +1,4 @@
-// company.ts
+// company.ts - 백엔드 CompanyInfoDTO 기준
 export interface Company {
   id: number;
   name: string;
@@ -7,10 +7,9 @@ export interface Company {
   ceoName: string;
   summary: string;
   stock: string;
-  businessNo: string;
   address: string;
   homepageUrl: string;
-  foundedDate: string; // LocalDate → 문자열
+  foundedDate: string; // LocalDate → ISO string
   totalEmployees: number;
   maleEmployees: number;
   femaleEmployees: number;

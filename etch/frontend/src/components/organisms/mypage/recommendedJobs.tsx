@@ -19,12 +19,7 @@ const RecommendedJobs = ({ jobs }: RecommendedJobsProps) => {
           {jobs.map((job) => (
             <JobListItem
               key={job.id}
-              id={job.id}
-              company={job.company}
-              location={job.location}
-              opening_date={job.opening_date}
-              expiration_date={job.expiration_date}
-              tags={job.tags}
+              {...job}
               onClick={(id) => console.log(`Job ${id} clicked`)}
             />
           ))}

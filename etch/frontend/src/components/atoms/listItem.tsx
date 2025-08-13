@@ -23,13 +23,17 @@ export interface ChatMessageItemProps extends BaseListItemProps {
   senderName?: string;
 }
 
-// 채용정보 아이템 전용
+// 채용정보 아이템 전용 - API 구조에 맞게 수정
 export interface JobItemProps extends BaseListItemProps {
-  company: string;
-  location: string;
-  opening_date: string;
-  expiration_date: string;
-  tags: string[];
+  companyName: string;
+  companyId: number;
+  regions: string[];
+  industries: string[];
+  jobCategories: string[];
+  workType: string;
+  educationLevel: string;
+  openingDate: string;
+  expirationDate: string;
 }
 
 // 마이페이지 대시보드 문서 아이템 전용
