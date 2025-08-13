@@ -36,8 +36,14 @@ function ProjectModalCard({
   onClose,
   ...restProps // 나머지 props 받기
 }: ProjectCardProps & {
+  // 🔥 새로 추가된 props
+  techCodes?: string[]; // API에서 오는 기술 스택 (문자열 배열)
+  techCategories?: string[]; // API에서 오는 기술 카테고리
+  fileUrls?: string[]; // API에서 오는 파일 URL들
+  profileUrl?: string; // API에서 오는 프로필 이미지 URL
+  memberId?: number; // API에서 오는 작성자 ID
   onClose?: () => void;
-  [key: string]: unknown; // any 대신 unknown 사용
+  [key: string]: unknown;
 }) {
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -73,33 +79,32 @@ function ProjectModalCard({
   // 현재 사용자 정보 가져오기
   const currentUser = getUserFromToken();
 
-  // 🔥 백엔드에서 제공하는 실제 필드들 추출
-  const memberId = restProps.memberId as number | undefined;
-  const authorId = restProps.authorId as number | undefined; // 기존 유지
+  // 🔥 작성자 ID 추출 함수
+  const getAuthorId = (): number | undefined => {
+    // 1순위: 직접 props로 받은 memberId
+    const directMemberId = restProps.memberId as number | undefined;
+    if (directMemberId) return directMemberId;
 
-  console.log("memeberId", memberId);
-  // 🔥 수정된 작성자 체크 - memberId 우선 사용
+    // 2순위: restProps에서 오는 authorId
+    const authorId = restProps.authorId as number | undefined;
+    if (authorId) return authorId;
+
+    // 3순위: member 객체에서
+    if (member && member.id) return member.id;
+
+    return undefined;
+  };
+
+  // 🔥 수정된 작성자 체크
   const isAuthor = (() => {
-    if (!currentUser) {
-      return false;
+    if (!currentUser) return false;
+
+    const actualAuthorId = getAuthorId();
+    if (actualAuthorId) {
+      return currentUser.id === actualAuthorId;
     }
 
-    // 1. memberId 우선 사용 (백엔드에서 제공하는 실제 필드)
-    if (memberId) {
-      return currentUser.id === memberId;
-    }
-
-    // 2. authorId가 있으면 정확한 비교 (기존 방식)
-    if (authorId) {
-      return currentUser.id === authorId;
-    }
-
-    // 3. member 객체가 있으면 사용 (기존 방식)
-    if (member && member.id) {
-      return currentUser.id === member.id;
-    }
-
-    // 4. 닉네임으로 비교 (fallback)
+    // fallback: 닉네임으로 비교
     if (currentUser.nickname && nickname) {
       return currentUser.nickname === nickname;
     }
@@ -240,18 +245,36 @@ function ProjectModalCard({
     }
   };
 
-  // 기술 스택 ID를 이름으로 변환
-  const convertTechIdsToNames = (techIds?: number[]): string[] => {
-    if (!techIds || !Array.isArray(techIds)) {
-      return [];
+  // 🔥 수정된 기술 스택 처리 함수
+  const getTechNames = (): string[] => {
+    // 1순위: API에서 techCodes로 직접 문자열 배열이 오는 경우
+    const directTechCodes = restProps.techCodes as string[] | undefined;
+    if (
+      directTechCodes &&
+      Array.isArray(directTechCodes) &&
+      directTechCodes.length > 0
+    ) {
+      console.log("techCodes 사용:", directTechCodes);
+      return directTechCodes;
     }
 
-    return techIds
-      .map((id) => ProjectWriteTechData.find((tech) => tech.id === id)?.text)
-      .filter(Boolean) as string[];
+    // 2순위: 기존 방식 - projectTechs가 숫자 배열인 경우 (하위 호환성)
+    if (
+      projectTechs &&
+      Array.isArray(projectTechs) &&
+      projectTechs.length > 0
+    ) {
+      console.log("projectTechs 사용:", projectTechs);
+      return projectTechs
+        .map((id) => ProjectWriteTechData.find((tech) => tech.id === id)?.text)
+        .filter(Boolean) as string[];
+    }
+
+    console.log("기술 스택 없음");
+    return [];
   };
 
-  // 이미지 목록 구성 (썸네일 + 추가 이미지들)
+  // 🔥 수정된 이미지 목록 구성
   const getAllImages = () => {
     const images = [];
 
@@ -260,7 +283,17 @@ function ProjectModalCard({
       images.push(thumbnailUrl);
     }
 
-    // files에서 이미지 파일들 추가
+    // 🔥 API에서 오는 파일 URL들 추가 (우선순위)
+    const directFileUrls = restProps.fileUrls as string[] | undefined;
+    if (directFileUrls && Array.isArray(directFileUrls)) {
+      directFileUrls.forEach((url) => {
+        if (url && typeof url === "string") {
+          images.push(url);
+        }
+      });
+    }
+
+    // 기존 files 배열도 처리 (하위 호환성)
     if (files && Array.isArray(files)) {
       files.forEach((file) => {
         if (file instanceof File && file.type.startsWith("image/")) {
@@ -271,8 +304,20 @@ function ProjectModalCard({
       });
     }
 
-    // 이미지가 없으면 noImg 기본 이미지 반환
     return images.length > 0 ? images : [noImg];
+  };
+
+  // 🔥 수정된 작성자 이미지 처리
+  const getWriterImage = () => {
+    // 1순위: API에서 오는 profileUrl
+    const directProfileUrl = restProps.profileUrl as string | undefined;
+    if (directProfileUrl) return directProfileUrl;
+
+    // 2순위: 기존 writerImg
+    if (writerImg) return writerImg;
+
+    // 3순위: 기본 이미지
+    return noImg;
   };
 
   // 카테고리 enum을 한글로 변환
@@ -283,10 +328,11 @@ function ProjectModalCard({
     return categoryData ? categoryData.text : categoryEnum;
   };
 
+  // 🔥 실제 사용할 데이터들
   const images = getAllImages();
   const hasMultipleImages = images.length > 1;
-  const techNames = convertTechIdsToNames(projectTechs);
-  const displayWriterImg = writerImg || noImg;
+  const techNames = getTechNames(); // 🔥 수정된 함수 사용
+  const displayWriterImg = getWriterImage(); // 🔥 수정된 함수 사용
 
   // 캐러셀 네비게이션
   const nextImage = () => {
@@ -299,17 +345,11 @@ function ProjectModalCard({
 
   // 🔥 수정된 프로필 페이지로 이동하는 핸들러
   const handleProfileClick = () => {
-    // memberId를 최우선으로 사용
-    let userId: number | undefined = memberId;
-
-    // fallback들
-    if (!userId) userId = authorId;
-    if (!userId && member && member.id) userId = member.id;
-    if (!userId && isAuthor && currentUser) userId = currentUser.id;
+    const userId = getAuthorId();
 
     console.log("프로필 이동 시도:", {
-      memberId,
-      authorId,
+      directMemberId: restProps.memberId,
+      authorId: restProps.authorId,
       memberObjectId: member?.id,
       selectedUserId: userId,
       nickname,
@@ -319,13 +359,7 @@ function ProjectModalCard({
       console.log("프로필 페이지로 이동:", userId);
       navigate(`/profile/${userId}`);
     } else {
-      console.warn("사용자 ID를 찾을 수 없습니다:", {
-        memberId,
-        authorId,
-        memberId_from_member: member?.id,
-        isAuthor,
-        currentUserId: currentUser?.id,
-      });
+      console.warn("사용자 ID를 찾을 수 없습니다");
       alert("사용자 정보를 찾을 수 없습니다.");
     }
   };
@@ -549,7 +583,7 @@ function ProjectModalCard({
         </div>
       </section>
 
-      {/* 기술 스택 */}
+      {/* 🔥 수정된 기술 스택 섹션 */}
       <section className="space-y-2">
         <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
           <span className="w-1 h-4 bg-green-500 rounded-full"></span>
