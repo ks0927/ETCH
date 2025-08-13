@@ -2,48 +2,116 @@ import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import PlusSVG from "../../svg/plusSVG";
 import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
-import { getAllProjects } from "../../../api/projectApi";
+import {
+  getMyProjects,
+  getAllProjects,
+  type MyProjectResponse,
+} from "../../../api/projectApi";
 import type { ProjectData } from "../../../types/project/projectDatas";
 import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 
-// getAllProjects API 응답 타입
-interface ApiProjectResponse {
-  id: number;
-  title: string;
+// getAllProjects용 확장된 응답 타입
+interface AllProjectResponse extends MyProjectResponse {
   content?: string;
-  thumbnailUrl: string;
   youtubeUrl?: string;
-  viewCount: number;
-  likeCount: number;
-  nickname: string;
-  isPublic: boolean;
-  likedByMe?: boolean;
+  githubUrl?: string;
+  authorId?: number;
   projectCategory?: string;
   createdAt?: string;
   updatedAt?: string;
-  githubUrl?: string;
-  authorId?: number; // 백엔드에서 제공하면 이걸 사용
+  likedByMe?: boolean;
+}
+
+// 사용자 정보 타입
+interface UserInfo {
+  id: number;
+  nickname: string;
 }
 
 function MypageProjectPage() {
   const [myProjects, setMyProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
-  // JWT 토큰에서 사용자 ID 가져오는 함수
-  const getCurrentUserId = (): number => {
+  // JWT 토큰에서 사용자 정보 가져오는 함수
+  const getUserInfoFromToken = (): UserInfo | null => {
     try {
       const token = localStorage.getItem("access_token");
-      if (!token) return 1; // 기본값
+      if (!token) return null;
 
       const base64Payload = token.split(".")[1];
       const payload = JSON.parse(atob(base64Payload));
-      return payload.id || 1;
+
+      return {
+        id: payload.id || 0,
+        nickname: payload.nickname || "",
+      };
     } catch (error) {
       console.error("JWT 토큰 디코딩 실패:", error);
-      return 1; // 기본값
+      return null;
     }
   };
+
+  // MyProjectResponse를 ProjectData로 변환
+  const transformMyProjectToProjectData = (
+    myProject: MyProjectResponse,
+    currentUserId: number
+  ): ProjectData => ({
+    id: myProject.id,
+    title: myProject.title,
+    content: "프로젝트 상세 내용을 확인해보세요", // MyProjectResponse에는 content가 없음
+    thumbnailUrl: myProject.thumbnailUrl || "", // null을 빈 문자열로 변환
+    youtubeUrl: "", // MyProjectResponse에는 youtubeUrl이 없음
+    viewCount: myProject.viewCount,
+    projectCategory: "" as ProjectCategoryEnum, // MyProjectResponse에는 category가 없음
+    createdAt: new Date().toISOString(), // MyProjectResponse에는 createdAt이 없음
+    updatedAt: new Date().toISOString(), // MyProjectResponse에는 updatedAt이 없음
+    isDeleted: false,
+    githubUrl: "", // MyProjectResponse에는 githubUrl이 없음
+    isPublic: myProject.isPublic,
+    likeCount: myProject.likeCount,
+    likedByMe: false, // MyProjectResponse에는 likedByMe가 없음
+    nickname: myProject.nickname,
+    commentCount: 0,
+    popularityScore: myProject.popularityScore,
+    member: {
+      id: currentUserId,
+      nickname: myProject.nickname,
+    },
+    files: [],
+    projectTechs: [],
+  });
+
+  // AllProjectResponse를 ProjectData로 변환 (기존 로직)
+  const transformAllProjectToProjectData = (
+    apiProject: AllProjectResponse,
+    currentUserId: number
+  ): ProjectData => ({
+    id: apiProject.id,
+    title: apiProject.title,
+    content: apiProject.content || "프로젝트 상세 내용을 확인해보세요",
+    thumbnailUrl: apiProject.thumbnailUrl || "", // null을 빈 문자열로 변환
+    youtubeUrl: apiProject.youtubeUrl || "",
+    viewCount: apiProject.viewCount,
+    projectCategory: (apiProject.projectCategory as ProjectCategoryEnum) || "",
+    createdAt: apiProject.createdAt || new Date().toISOString(),
+    updatedAt: apiProject.updatedAt || new Date().toISOString(),
+    isDeleted: false,
+    githubUrl: apiProject.githubUrl || "",
+    isPublic: apiProject.isPublic,
+    likeCount: apiProject.likeCount,
+    likedByMe: apiProject.likedByMe ?? false,
+    nickname: apiProject.nickname,
+    commentCount: 0,
+    popularityScore: apiProject.popularityScore,
+    member: {
+      id: apiProject.authorId || currentUserId,
+      nickname: apiProject.nickname,
+    },
+    files: [],
+    projectTechs: [],
+  });
 
   useEffect(() => {
     const fetchMyProjects = async () => {
@@ -51,98 +119,68 @@ function MypageProjectPage() {
         setLoading(true);
         setError(null);
 
-        console.log("🔍 내 프로젝트 로딩 시작...");
+        // 사용자 정보 확인
+        const currentUserInfo = getUserInfoFromToken();
+        if (!currentUserInfo || !currentUserInfo.id) {
+          throw new Error("로그인이 필요합니다.");
+        }
 
-        const currentUserId = getCurrentUserId();
-        console.log("👤 현재 사용자 ID:", currentUserId);
+        setUserInfo(currentUserInfo);
+        console.log("👤 현재 사용자:", currentUserInfo);
 
-        // getAllProjects 사용 (getMyProjects가 500 에러이므로)
-        console.log("📡 getAllProjects API 호출 중...");
-        const allProjects: ApiProjectResponse[] = await getAllProjects();
+        let transformedProjects: ProjectData[] = [];
 
-        console.log("✅ getAllProjects API 응답:", allProjects);
-        console.log("📊 전체 프로젝트 개수:", allProjects.length);
+        try {
+          // 먼저 getMyProjects API 시도 (/members/projects)
+          console.log("📡 getMyProjects API 호출 중...");
+          const myProjectsData: MyProjectResponse[] = await getMyProjects();
+          console.log("✅ getMyProjects 성공:", myProjectsData.length, "개");
 
-        // 현재 사용자가 작성한 프로젝트만 필터링
-        const myProjectsFiltered = allProjects.filter(
-          (project: ApiProjectResponse) => {
-            console.log(`🔍 프로젝트 ${project.id} 체크:`, {
-              projectTitle: project.title,
-              projectNickname: project.nickname,
-              projectAuthorId: project.authorId,
-              currentUserId: currentUserId,
+          // MyProjectResponse를 ProjectData로 변환
+          transformedProjects = myProjectsData.map((project) =>
+            transformMyProjectToProjectData(project, currentUserInfo.id)
+          );
+        } catch (myProjectsError) {
+          console.warn(
+            "⚠️ getMyProjects 실패, getAllProjects로 대체:",
+            myProjectsError
+          );
+
+          try {
+            // getMyProjects가 실패하면 getAllProjects로 대체하고 필터링
+            console.log("📡 getAllProjects API 호출 중...");
+            const allProjects: AllProjectResponse[] = await getAllProjects();
+            console.log("✅ getAllProjects 성공:", allProjects.length, "개");
+
+            // 현재 사용자의 프로젝트만 필터링
+            const myProjectsFiltered = allProjects.filter((project) => {
+              // authorId가 있으면 그것으로 비교
+              if (project.authorId) {
+                return project.authorId === currentUserInfo.id;
+              }
+              // authorId가 없으면 nickname으로 비교
+              return project.nickname === currentUserInfo.nickname;
             });
 
-            // 1. authorId가 있으면 그걸로 비교 (가장 정확)
-            if (project.authorId) {
-              const isMyProject = project.authorId === currentUserId;
-              console.log(
-                `📋 authorId로 비교: ${project.authorId} === ${currentUserId} = ${isMyProject}`
-              );
-              return isMyProject;
-            }
+            console.log("🔍 필터링 결과:", myProjectsFiltered.length, "개");
 
-            // 2. authorId가 없으면 닉네임으로 비교 (임시)
-            try {
-              const token = localStorage.getItem("access_token");
-              if (token) {
-                const payload = JSON.parse(atob(token.split(".")[1]));
-                const currentNickname = payload.nickname || "testSH";
-                const isMyProject = project.nickname === currentNickname;
-                console.log(
-                  `📋 닉네임으로 비교: ${project.nickname} === ${currentNickname} = ${isMyProject}`
-                );
-                return isMyProject;
-              }
-            } catch (e) {
-              console.error("닉네임 비교 실패:", e);
-            }
-
-            return false;
+            // AllProjectResponse를 ProjectData로 변환
+            transformedProjects = myProjectsFiltered.map((project) =>
+              transformAllProjectToProjectData(project, currentUserInfo.id)
+            );
+          } catch (allProjectsError) {
+            console.error("getAllProjects도 실패:", allProjectsError);
+            throw new Error("프로젝트 데이터를 가져올 수 없습니다.");
           }
-        );
+        }
 
-        console.log("🔍 필터링 결과 - 내 프로젝트:", myProjectsFiltered);
-        console.log("📊 내 프로젝트 개수:", myProjectsFiltered.length);
-
-        // ProjectData 형태로 변환
-        const userProjects: ProjectData[] = myProjectsFiltered.map(
-          (project: ApiProjectResponse): ProjectData => ({
-            id: project.id,
-            title: project.title,
-            content: project.content || "프로젝트 상세 내용을 확인해보세요",
-            thumbnailUrl: project.thumbnailUrl,
-            youtubeUrl: project.youtubeUrl || "",
-            viewCount: project.viewCount,
-            projectCategory:
-              (project.projectCategory as ProjectCategoryEnum) || "",
-            createdAt: project.createdAt || new Date().toISOString(),
-            updatedAt: project.updatedAt || new Date().toISOString(),
-            isDeleted: false,
-            githubUrl: project.githubUrl || "",
-            isPublic: project.isPublic,
-            likeCount: project.likeCount,
-            likedByMe: project.likedByMe ?? false,
-            nickname: project.nickname,
-            commentCount: 0,
-            popularityScore: 0,
-            member: {
-              id: currentUserId,
-              nickname: project.nickname,
-            },
-            files: [],
-            projectTechs: [],
-          })
-        );
-
-        console.log("🔄 최종 변환된 데이터:", userProjects);
-        setMyProjects(userProjects);
+        console.log("🔄 최종 변환된 데이터:", transformedProjects.length, "개");
+        setMyProjects(transformedProjects);
       } catch (error) {
         console.error("❌ 프로젝트 로딩 실패:", error);
 
-        // 로그인이 필요한 경우
-        if (error instanceof Error && error.message.includes("로그인")) {
-          setError("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+        if (error instanceof Error) {
+          setError(error.message);
         } else {
           setError("프로젝트를 불러오는데 실패했습니다.");
         }
@@ -163,6 +201,11 @@ function MypageProjectPage() {
     );
   };
 
+  // 새로고침 핸들러
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
@@ -177,22 +220,22 @@ function MypageProjectPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-md mx-auto px-4">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             오류가 발생했습니다
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <div className="flex gap-4 justify-center">
+          <p className="text-gray-600 mb-6">{error}</p>
+          <div className="flex gap-4 justify-center flex-wrap">
             <button
-              onClick={() => window.location.reload()}
-              className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-2 rounded-lg"
+              onClick={handleRefresh}
+              className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
             >
               다시 시도
             </button>
             {error.includes("로그인") && (
               <Link to="/login">
-                <button className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg">
+                <button className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
                   로그인하기
                 </button>
               </Link>
@@ -202,6 +245,9 @@ function MypageProjectPage() {
       </div>
     );
   }
+
+  const publicProjectsCount = myProjects.filter((p) => p.isPublic).length;
+  const privateProjectsCount = myProjects.length - publicProjectsCount;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -215,13 +261,18 @@ function MypageProjectPage() {
                 <h1 className="text-3xl font-bold text-gray-900">
                   내 프로젝트
                 </h1>
+                {userInfo && (
+                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    {userInfo.nickname}
+                  </span>
+                )}
               </div>
               <p className="text-gray-600 text-lg leading-relaxed max-w-2xl">
                 당신의 프로젝트 지식을 다른 사람들과 공유하고{" "}
                 <br className="hidden sm:block" />
                 개발 커뮤니티에 기여해보세요
               </p>
-              <div className="flex items-center gap-4 pt-2">
+              <div className="flex items-center gap-4 pt-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-gray-500">
@@ -231,13 +282,13 @@ function MypageProjectPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span className="text-sm text-gray-500">
-                    공개: {myProjects.filter((p) => p.isPublic).length}개
+                    공개: {publicProjectsCount}개
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                   <span className="text-sm text-gray-500">
-                    비공개: {myProjects.filter((p) => !p.isPublic).length}개
+                    비공개: {privateProjectsCount}개
                   </span>
                 </div>
               </div>
@@ -283,7 +334,7 @@ function MypageProjectPage() {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 아직 프로젝트가 없습니다
               </h3>
-              <p className="text-gray-500 mb-6">
+              <p className="text-gray-500 mb-6 text-center">
                 첫 번째 프로젝트를 등록하고 다른 개발자들과 공유해보세요!
               </p>
               <Link to="/projects/write">
