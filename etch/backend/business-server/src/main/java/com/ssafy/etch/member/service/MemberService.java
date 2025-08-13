@@ -19,4 +19,6 @@ public interface MemberService {
     MemberDTO updateMember(Long id, MemberRequestDTO memberRequestDTO, MultipartFile profile);
 
     List<ProjectListDTO> findAllProjectByMemberId(Long memberId);
+
+    String updateProfileImage(Long id, MultipartFile profile);
 }

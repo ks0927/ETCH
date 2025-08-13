@@ -9,6 +9,7 @@ import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.dto.MemberResponseDTO;
+import com.ssafy.etch.member.dto.ProfileImageUpdateResponseDTO;
 import com.ssafy.etch.member.service.MemberService;
 import com.ssafy.etch.news.dto.RecommendNewsDTO;
 import com.ssafy.etch.news.service.NewsService;
@@ -181,6 +182,21 @@ public class MemberController {
 
         return ResponseEntity.ok(ApiResponse.success(list));
     }
+    @Operation(
+        summary = "프로필 사진 변경 API",
+        description = "프로필 사진을 변경할 수 있습니다."
+    )
+    @PatchMapping(value = "/profile-update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<ProfileImageUpdateResponseDTO>> updateProfileImage(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @RequestPart("profile") MultipartFile profile) {
+        if (oAuth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("인증되지 않은 사용자입니다."));
+        }
+        String profileImageUrl = memberService.updateProfileImage(oAuth2User.getId(), profile);
+        return ResponseEntity.ok(ApiResponse.success(new ProfileImageUpdateResponseDTO(profileImageUrl), "프로필 사진이 변경되었습니다."));
+    }
+
     private <T> T safeParseJson(String json, Class<T> clazz) {
         try {
             return new ObjectMapper().readValue(json, clazz);
