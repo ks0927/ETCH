@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.etch.global.response.PageResponseDTO;
 import com.ssafy.etch.news.dto.CompanyNewsDTO;
 import com.ssafy.etch.news.dto.LatestNewsDTO;
@@ -20,18 +23,19 @@ import com.ssafy.etch.news.dto.RecommendNewsDTO;
 import com.ssafy.etch.news.dto.TopCompanyDTO;
 import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
-import com.ssafy.etch.project.repository.ProjectRepository;
 
 @Service
 public class NewsServiceImpl implements NewsService {
 
 	private final NewsRepository newsRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final ObjectMapper objectMapper;
 	private static final int MAX_PAGE_SIZE = 10;
 
-	public NewsServiceImpl(NewsRepository newsRepository, RedisTemplate<String, Object> redisTemplate) {
+	public NewsServiceImpl(NewsRepository newsRepository, RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
 		this.newsRepository = newsRepository;
 		this.redisTemplate = redisTemplate;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
@@ -87,41 +91,49 @@ public class NewsServiceImpl implements NewsService {
 	}
 
 	/**
-	 * redis에서 기사 ID 목록 가져와서,
-	 * 이 ID들을 DB에서 조회하고,
-	 * 기사 정보들 가져와서 프론트로 던져줌
+	 * redis에서 추천기사ID목록이 있는 json 가져와서 파싱하고,
+	 * db에서 기사ID로 정보 조회해서 결과 반환
 	 */
 	@Override
 	public List<RecommendNewsDTO> getRecommendNewsFromRedis(Long userId) {
-		// userId로 redis에서 추천 기사ID 목록 조회
+
+		// redis에서 userId를 key로 해서 json 형태의 데이터 조회
 		String redisKey = "recommendations_data_user_" + userId;
-		List<Object> recommendedIdObject = redisTemplate.opsForList().range(redisKey, 0, -1);
+		String jsonData = (String) redisTemplate.opsForValue().get(redisKey);
 
-		if (recommendedIdObject == null || recommendedIdObject.isEmpty()) return Collections.emptyList();
+		if (jsonData == null || jsonData.isEmpty()) {
+			return Collections.emptyList();
+		}
 
-		// 조회된 Id 목록을 Long 타입 리스트로 변환
-		List<Long> recommendedIds = recommendedIdObject.stream()
-			.map(obj -> Long.valueOf(String.valueOf(obj)))
-			.collect(Collectors.toList());
+		try {
+			// JSON 문자열을 Map으로 파싱
+			TypeReference<Map<String, List<List<Object>>>> typeRef = new TypeReference<>() {};
+			Map<String, List<List<Object>>> recommendationsMap = objectMapper.readValue(jsonData, typeRef);
 
-		// Id 리스트를 통해 DB에서 뉴스 데이터 조회
-		Map<Long, NewsEntity> newsEntityMap = newsRepository.findAllById(recommendedIds).stream()
-			.collect(Collectors.toMap(NewsEntity::getId, Function.identity()));
+			List<List<Object>> newsRecommendations = recommendationsMap.get("news");
+			if (newsRecommendations == null || newsRecommendations.isEmpty()) {
+				return Collections.emptyList();
+			}
 
-		// NewsEntity -> RecommendNewsDTO 반환
-		List<RecommendNewsDTO> result = recommendedIds.stream()
-			.map(newsEntityMap::get) // Map에서 NewsEntity 찾기
-			.filter(java.util.Objects::nonNull) // DB에 없는 ID가 있을 경우를 대비해 null 체크
-			.map(newsEntity -> RecommendNewsDTO.builder() // DTO로 변환
-				.id(newsEntity.getId())
-				.thumbnailUrl(newsEntity.getThumbnailUrl())
-				.title(newsEntity.getTitle())
-				.description(newsEntity.getDescription())
-				.url(newsEntity.getUrl())
-				.publishedAt(newsEntity.getPublishedAt())
-				.build())
-			.collect(Collectors.toList());
+			// 파싱된 데이터에서 뉴스 ID 목록(String)을 추출 -> Long 타입 리스트로 변환
+			List<Long> recommendedIds = newsRecommendations.stream()
+				.map(recommendation -> Long.valueOf(String.valueOf(recommendation.get(0))))
+				.collect(Collectors.toList());
 
-		return result;
+			// 뉴스 ID 리스트 -> DB에서 뉴스 엔티티들을 한 번에 조회
+			Map<Long, NewsEntity> newsEntityMap = newsRepository.findAllById(recommendedIds).stream()
+				.collect(Collectors.toMap(NewsEntity::getId, Function.identity()));
+
+			// NewsEntity를 RecommendNewsDTO로 변환
+			return recommendedIds.stream()
+				.map(newsEntityMap::get)
+				.filter(java.util.Objects::nonNull) // DB에 존재하지 않는 ID가 있을 경우 필터링
+				.map(newsEntity -> RecommendNewsDTO.from(newsEntity.toNewsDTO()))
+				.collect(Collectors.toList());
+
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+			return Collections.emptyList();
+		}
 	}
 }

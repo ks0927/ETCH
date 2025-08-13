@@ -294,29 +294,28 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	@Transactional
 	public void deleteProject(Long projectId, Long memberId) {
-		// 1. 프로젝트 엔티티를 조회합니다.
+		// 프로젝트 엔티티 조회
 		ProjectEntity project = projectRepository.findById(projectId)
 			.orElseThrow(() -> new NoSuchElementException("프로젝트를 찾을 수 없습니다."));
 
-		// 2. 삭제 권한을 확인합니다.
+		// 삭제 권한을 확인
 		if (!project.getMember().toMemberDTO().getId().equals(memberId)) {
 			throw new AccessDeniedException("본인만 삭제할 수 있습니다.");
 		}
 
-		// 3. 프로젝트에 연결된 파일들의 URL을 가져옵니다.
-		// 썸네일 URL을 가져와 삭제 리스트에 추가합니다.
+		// 프로젝트에 연결된 파일들의 URL 가져오기
 		List<String> fileUrlsToDelete = new ArrayList<>();
 		if (project.getThumbnailUrl() != null) {
 			fileUrlsToDelete.add(project.getThumbnailUrl());
 		}
 
-		// 본문 이미지들의 URL을 가져와 삭제 리스트에 추가합니다.
+		// 본문 이미지의 URL 가져와 삭제 리스트에 추가
 		List<FileEntity> files = fileRepository.findAllByProjectId(projectId);
 		for (FileEntity file : files) {
 			fileUrlsToDelete.add(file.getFileUrl());
 		}
 
-		// 4. S3Service를 사용하여 MinIO에서 파일들을 삭제합니다.
+		// S3Service 사용해서 MinIO에서 파일들 삭제
 		for (String fileUrl : fileUrlsToDelete) {
 			try {
 				s3Service.deleteFileByUrl(fileUrl);
@@ -325,14 +324,12 @@ public class ProjectServiceImpl implements ProjectService {
 			}
 		}
 
-		// 5. 데이터베이스에서 프로젝트와 연결된 파일들을 삭제합니다.
+		// db에서 프로젝트와 연결된 파일들을 삭제
 		fileRepository.deleteAll(files);
 
-		// 6. ProjectTechEntity 링크를 삭제합니다.
+		// ProjectTechEntity 링크 삭제
 		projectTechRepository.deleteAllByProjectId(projectId);
 
-		// 7. 프로젝트를 soft-delete합니다.
-		// 만약 완전히 삭제하려면 projectRepository.delete(project); 를 사용합니다.
 		int changed = projectRepository.softDelete(projectId, memberId);
 
 		if (changed == 0) {
