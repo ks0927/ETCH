@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router";
 import type { ProjectData } from "../../types/project/projectDatas";
 import { getUserPublicProjects } from "../../api/projectApi";
+import { checkFollowExists, followUser, unfollowUser } from "../../api/followApi";
+import { useUserProfile } from "../../hooks/useUserProfile";
 import UserProfileCard from "../organisms/userprofile/userProfileCard";
 import UserProjectList from "../organisms/userprofile/userProjectList";
 
@@ -9,47 +11,37 @@ import UserProjectList from "../organisms/userprofile/userProjectList";
 function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>(); // URL에서 userId 추출
 
+  // 훅을 사용한 사용자 프로필 데이터
+  const { profileData, isLoading: profileLoading, error: profileError } = useUserProfile(userId ? Number(userId) : undefined);
+  
   // 상태 관리
   const [userProjects, setUserProjects] = useState<ProjectData[]>([]);
-  const [userProfile, setUserProfile] = useState({
-    nickname: "",
-    email: "",
-    profile: "",
-    followersCount: 0,
-    followingCount: 0,
-    isFollowing: false,
-  });
-  const [loading, setLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [followLoading, setFollowLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 사용자 데이터 로딩
+  // 프로젝트와 팔로우 상태 로딩
   useEffect(() => {
     const loadUserData = async () => {
       if (!userId) return;
 
       try {
-        setLoading(true);
+        setProjectsLoading(true);
 
-        // 🎯 실제 API 사용하여 사용자 공개 프로젝트 로딩
-        const projects = await getUserPublicProjects(Number(userId));
+        // 병렬로 프로젝트와 팔로우 상태 로딩
+        const [projects, followStatus] = await Promise.all([
+          getUserPublicProjects(Number(userId)),
+          checkFollowExists(Number(userId)).catch(() => false)
+        ]);
+
         setUserProjects(projects);
-
-        // 임시 프로필 데이터 (실제 사용자 프로필 API가 있다면 교체)
-        const mockUserInfo = {
-          nickname: projects.length > 0 ? projects[0].nickname : "사용자",
-          email: "user@example.com", // 실제 API에서 가져와야 함
-          profile: "", // 실제 API에서 가져와야 함
-          followersCount: 10, // 실제 API에서 가져와야 함
-          followingCount: 5, // 실제 API에서 가져와야 함
-          isFollowing: false, // 실제 API에서 가져와야 함
-        };
-
-        setUserProfile(mockUserInfo);
+        setIsFollowing(followStatus);
       } catch (err) {
         console.error("사용자 데이터 로딩 실패:", err);
         setError("사용자 정보를 불러오는데 실패했습니다.");
       } finally {
-        setLoading(false);
+        setProjectsLoading(false);
       }
     };
 
@@ -66,9 +58,29 @@ function UserProfilePage() {
   };
 
   // 팔로우/언팔로우 핸들러
-  const handleFollowClick = () => {
-    // 팔로우/언팔로우 API 호출
-    console.log("팔로우/언팔로우");
+  const handleFollowClick = async () => {
+    if (!userId || followLoading || !profileData) return;
+
+    setFollowLoading(true);
+    
+    try {
+      if (isFollowing) {
+        // 언팔로우
+        await unfollowUser(Number(userId));
+        setIsFollowing(false);
+        console.log("언팔로우 성공:", userId);
+      } else {
+        // 팔로우
+        await followUser(Number(userId));
+        setIsFollowing(true);
+        console.log("팔로우 성공:", userId);
+      }
+    } catch (error) {
+      console.error("팔로우 토글 실패:", error);
+      alert("팔로우 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setFollowLoading(false);
+    }
   };
 
   // 채팅 핸들러
@@ -77,7 +89,7 @@ function UserProfilePage() {
     console.log("채팅하기");
   };
 
-  if (loading) {
+  if (profileLoading || projectsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -88,7 +100,7 @@ function UserProfilePage() {
     );
   }
 
-  if (error) {
+  if (profileError || error || !profileData) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -96,7 +108,7 @@ function UserProfilePage() {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             오류가 발생했습니다
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-600 mb-4">{profileError || error || "사용자 정보를 찾을 수 없습니다."}</p>
         </div>
       </div>
     );
@@ -110,12 +122,13 @@ function UserProfilePage() {
           <div className="lg:col-span-1">
             <UserProfileCard
               userId={userId || ""}
-              nickname={userProfile.nickname}
-              email={userProfile.email}
-              profile={userProfile.profile}
-              followersCount={userProfile.followersCount}
-              followingCount={userProfile.followingCount}
-              isFollowing={userProfile.isFollowing}
+              nickname={profileData.nickname}
+              email={profileData.email}
+              profile={profileData.profile}
+              followersCount={profileData.followerCount}
+              followingCount={profileData.followingCount}
+              isFollowing={isFollowing}
+              isFollowLoading={followLoading}
               onFollowClick={handleFollowClick}
               onChatClick={handleChatClick}
             />

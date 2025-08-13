@@ -43,7 +43,7 @@ function UserItem({
       {/* User Info */}
       <div className="flex-1 min-w-0">
         <a
-          href={`/members/${id}`}
+          href={`/members/${id}/projects`}
           className="block text-base font-semibold text-blue-600 hover:underline cursor-pointer mb-0.5"
         >
           {nickname}
