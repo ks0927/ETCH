@@ -25,6 +25,7 @@ export interface ChatMessageItemProps extends BaseListItemProps {
 
 // 채용정보 아이템 전용 - API 구조에 맞게 수정
 export interface JobItemProps extends BaseListItemProps {
+  title: string; // 채용공고 제목
   companyName: string;
   companyId: number;
   regions: string[];

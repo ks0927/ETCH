@@ -34,6 +34,7 @@ function MypageApplicationsPage() {
   const convertJobToJobItemProps = (job: Job): JobItemProps => {
     return {
       id: job.id.toString(),
+      title: job.title,
       companyName: job.companyName,
       companyId: job.companyId,
       regions: job.regions,

@@ -68,12 +68,8 @@ export default function JobDetailModal({ job, onClose }: JobDetailModalProps) {
       <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
         {/* 헤더 - 파란색 그라데이션 */}
         <div className="relative px-6 py-4 text-white bg-gradient-to-r from-blue-500 to-blue-600">
-          <h2 className="text-xl font-bold">{job.companyName}</h2>
-          <p className="mt-1 text-blue-100">
-            {Array.isArray(job.regions)
-              ? job.regions.join(", ")
-              : "위치 정보 없음"}
-          </p>
+          <h2 className="text-xl font-bold">{job.title}</h2>
+          <p className="mt-1 text-blue-100 font-medium">{job.companyName}</p>
           <button
             onClick={onClose}
             className="absolute text-2xl text-white top-4 right-6 hover:text-blue-100"
