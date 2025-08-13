@@ -196,17 +196,24 @@ function ProjectModalCard({
 
   // 삭제된 프로젝트는 표시하지 않음
   if (isDeleted) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-500 text-6xl mb-4">🗑️</div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          삭제된 프로젝트입니다
-        </h3>
-        <p className="text-gray-600">
-          이 프로젝트는 더 이상 사용할 수 없습니다.
-        </p>
-      </div>
-    );
+    console.log("디버깅 정보:", {
+      currentUser,
+      member,
+      currentUserId: currentUser?.id,
+      memberId: member?.id,
+      authorId, // authorId 추가
+      isAuthor, // isAuthor 결과 추가
+      isPublic, // 공개 여부 추가
+      canView: isPublic || isAuthor, // 볼 수 있는지 여부 추가
+      nickname, // 닉네임 추가
+    });
+    <div className="text-center py-12">
+      <div className="text-red-500 text-6xl mb-4">🗑️</div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        삭제된 프로젝트입니다
+      </h3>
+      <p className="text-gray-600">이 프로젝트는 더 이상 사용할 수 없습니다.</p>
+    </div>;
   }
 
   // 🎯 수정된 비공개 프로젝트 체크 - 작성자가 아닌 경우에만 차단
@@ -289,16 +296,36 @@ function ProjectModalCard({
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  console.log("디버깅 정보:", {
-    currentUser,
-    member,
-    currentUserId: currentUser?.id,
-    memberId: member?.id,
-    authorId, // authorId 추가
-    isAuthor, // isAuthor 결과 추가
-    isPublic, // 공개 여부 추가
-    canView: isPublic || isAuthor, // 볼 수 있는지 여부 추가
-  });
+  // 프로필 페이지로 이동하는 핸들러
+  const handleProfileClick = () => {
+    // 사용자 ID 결정 우선순위:
+    // 1. authorId (restProps에서)
+    // 2. member.id (ProjectData의 member 객체에서)
+    // 3. 현재 사용자 ID (작성자 본인인 경우)
+    let userId: number | undefined;
+
+    if (authorId) {
+      userId = authorId;
+    } else if (member && member.id) {
+      userId = member.id;
+    } else if (isAuthor && currentUser) {
+      userId = currentUser.id;
+    }
+
+    if (userId) {
+      console.log("프로필 페이지로 이동:", userId);
+      navigate(`/profile/${userId}`);
+    } else {
+      console.warn("사용자 ID를 찾을 수 없습니다:", {
+        authorId,
+        memberId: member?.id,
+        isAuthor,
+        currentUserId: currentUser?.id,
+      });
+      // ID를 찾을 수 없는 경우 알림
+      alert("사용자 정보를 찾을 수 없습니다.");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -332,7 +359,13 @@ function ProjectModalCard({
             }}
           />
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">{nickname}</h2>
+            <button
+              onClick={handleProfileClick}
+              className="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+              title={`${nickname}의 프로필 보기`}
+            >
+              {nickname}
+            </button>
             {/* 수정되면 updatedAt 으로 변경 */}
             <p className="text-xs text-gray-500">
               {createdAt === updatedAt
