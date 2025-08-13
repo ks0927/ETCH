@@ -1,3 +1,5 @@
+// 1. projectDatas.ts 파일 수정
+
 import type { ProjectCategoryEnum } from "./projectCategroyData";
 
 // 백엔드 응답용 타입들 (API 응답 받을 때만 사용)
@@ -23,7 +25,7 @@ export interface ProjectModalData extends ProjectData {
   onCardClick?: (id: number) => void;
 }
 
-// 프론트엔드에서 사용할 메인 ProjectData (ID 기반으로 수정)
+// 🔥 수정된 ProjectData - API 응답 구조에 맞게 변경
 export interface ProjectData {
   id: number;
   title: string;
@@ -38,17 +40,28 @@ export interface ProjectData {
   githubUrl: string;
   isPublic: boolean;
   likeCount: number;
-  commentCount?: number; // 추가
-  popularityScore?: number; // 추가
+  commentCount?: number;
+  popularityScore?: number;
   nickname: string;
   likedByMe: boolean;
-  member: {
+
+  // 🔥 작성자 정보 - API 응답에 맞게 수정
+  memberId?: number; // API에서 오는 실제 필드
+  profileUrl?: string; // 프로필 이미지 URL
+
+  member?: {
     id: number;
-    nickname?: string; // 추가하면 좋음
-    // 필요한 멤버 정보 추가
+    nickname?: string;
   };
-  files: File[]; // 기존 방식 유지
-  projectTechs: number[]; // ID 배열로 변경
+
+  // 🔥 기술 스택 - API 응답에 맞게 수정
+  techCodes?: string[]; // API에서 오는 실제 필드 (문자열 배열)
+  techCategories?: string[]; // API에서 오는 카테고리들
+  projectTechs?: number[]; // 기존 방식 (하위 호환성)
+
+  // 파일 관련
+  files?: File[]; // 기존 방식 유지
+  fileUrls?: string[]; // API에서 오는 파일 URL들
 }
 
 // 백엔드 API 호출용 입력 데이터 타입 (중복 제거)
@@ -72,7 +85,7 @@ export interface ProjectInputData {
   removePdf?: boolean;
 }
 
-// 초기 상태값 - ID 기반으로 수정
+// 🔥 수정된 초기 상태값
 export const ProjectState: ProjectData = {
   id: 0,
   title: "",
@@ -81,9 +94,9 @@ export const ProjectState: ProjectData = {
   youtubeUrl: "",
   viewCount: 0,
   likeCount: 0,
-  commentCount: 0, // 추가
-  popularityScore: 0, // 추가
-  projectCategory: "", // 빈 문자열을 타입으로 캐스팅
+  commentCount: 0,
+  popularityScore: 0,
+  projectCategory: "",
   createdAt: "",
   updatedAt: "",
   isDeleted: false,
@@ -91,11 +104,16 @@ export const ProjectState: ProjectData = {
   githubUrl: "",
   isPublic: true,
   nickname: "",
+  memberId: 0,
+  profileUrl: "",
   member: {
     id: 1,
   },
-  files: [], // 기존 방식
-  projectTechs: [], // 빈 number 배열
+  files: [],
+  fileUrls: [],
+  techCodes: [], // 🔥 새로 추가
+  techCategories: [], // 🔥 새로 추가
+  projectTechs: [], // 기존 유지
 };
 
 // 프로젝트 입력 초기 상태
