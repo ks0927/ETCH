@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 public class JobResponseDTO {
 	private Long id;
+	private String title;
 	private Long companyId;
 	private String companyName;
 	private List<String> regions;
@@ -25,6 +26,7 @@ public class JobResponseDTO {
 	public static JobResponseDTO from(JobDTO jobDTO) {
 		return JobResponseDTO.builder()
 			.id(jobDTO.getId())
+			.title(jobDTO.getTitle())
 			.companyId(jobDTO.getCompanyId())
 			.companyName(jobDTO.getCompanyName())
 			.regions(CsvUtil.splitCsv(jobDTO.getRegion()))
