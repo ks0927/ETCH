@@ -25,7 +25,7 @@ export const getJob = async (jobId: number): Promise<Job> => {
 export const getJobsList = async (params: JobListParams): Promise<Job[]> => {
   try {
     const response = await defaultInstance.get<ApiResponse<Job[]>>(
-      "/jobs/list",
+      "/jobs/overlap",
       {
         params: {
           start: params.start,

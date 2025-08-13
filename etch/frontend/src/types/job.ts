@@ -2,6 +2,7 @@
 
 export interface Job {
   id: number;
+  title: string; // 채용공고 제목
   companyName: string;
   companyId: number;
   regions: string[];

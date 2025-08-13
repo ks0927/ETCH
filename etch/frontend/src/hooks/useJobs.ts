@@ -6,6 +6,7 @@ import type { JobItemProps } from "../components/atoms/listItem";
 // Job API 데이터를 JobItemProps로 변환하는 함수
 const convertJobToJobItem = (job: Job): JobItemProps => ({
   id: job.id.toString(),
+  title: job.title,
   companyName: job.companyName,
   companyId: job.companyId,
   regions: job.regions,

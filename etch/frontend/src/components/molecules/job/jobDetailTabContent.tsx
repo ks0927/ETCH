@@ -53,6 +53,14 @@ export default function JobDetailTabContent({
           <div className="p-6 space-y-4">
             <h3 className="text-lg font-semibold">공고 상세</h3>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {currentJob.title && (
+                <div className="md:col-span-2">
+                  <label className="text-sm font-medium text-gray-600">
+                    공고 제목
+                  </label>
+                  <p className="text-gray-900 font-medium">{currentJob.title}</p>
+                </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-600">
                   회사명
