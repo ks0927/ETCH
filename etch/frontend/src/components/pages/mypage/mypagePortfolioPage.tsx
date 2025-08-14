@@ -361,13 +361,13 @@ function MypagePortfolioPage() {
       if (portfolioData.language && Array.isArray(portfolioData.language)) {
         requestData.language = portfolioData.language
           .map((lang) => [lang.name, lang.getAt, lang.issuer].join("^"))
-          .join("|");
+          .join("#");
       }
 
       if (portfolioData.education && Array.isArray(portfolioData.education)) {
         requestData.education = portfolioData.education
           .map((edu) => [edu.school, edu.graduationAt, edu.major].join("^"))
-          .join("|");
+          .join("#");
       }
 
       console.log("API 전송용 포트폴리오 데이터:", requestData);
