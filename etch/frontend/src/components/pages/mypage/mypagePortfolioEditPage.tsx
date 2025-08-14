@@ -337,10 +337,7 @@ function MypagePortfolioEditPage() {
 
           console.log(`프로젝트 "${project.title}" 생성 중...`);
           const createdProject = await createProject(projectInput);
-          createdProjectIds.push(createdProject.projectId);
-          console.log(
-            `프로젝트 "${project.title}" 생성 완료, ID: ${createdProject.projectId}`
-          );
+          createdProjectIds.push(createdProject.projectList);
         } catch (projectError) {
           console.error(`프로젝트 "${project.title}" 생성 실패:`, projectError);
           // 개별 프로젝트 생성 실패 시에도 계속 진행 (선택사항)
