@@ -1,3 +1,5 @@
+// portfolioApi.ts - 수정된 타입 정의
+
 import { authInstance } from "./instances";
 import type { portfolioDatas } from "../types/portfolio/portfolioDatas";
 import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
@@ -47,9 +49,9 @@ interface PortfolioListResponseDTO {
   introduce: string;
 }
 
-// 포트폴리오 상세 응답 타입
+// 포트폴리오 상세 응답 타입 - 첫 번째 파일과 일치하도록 수정
 interface PortfolioDetailResponseDTO {
-  portfolioId: number;
+  id: number; // portfolioId -> id로 변경
   name: string;
   phoneNumber: string;
   email: string;
@@ -57,12 +59,30 @@ interface PortfolioDetailResponseDTO {
   githubUrl: string;
   introduce: string;
   techList: string[];
-  language: string;
-  education: string;
-  memberId: number;
-  projectIds: number[];
-  createdAt: string;
-  updatedAt: string;
+  language: Array<{
+    name: string;
+    date: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
+    certificateIssuer: string;
+  }>; // CertAndLangDTO 배열
+  education: Array<{
+    name: string;
+    description: string;
+    startDate: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
+    endDate: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
+  }>; // EduAndActDTO 배열
+  projectList: Array<{
+    id: number;
+    title: string;
+    thumbnailUrl: string;
+    projectCategory: string;
+    viewCount: number;
+    likeCount: number;
+    nickname: string;
+    isPublic: boolean;
+    popularityScore: number;
+  }>; // projectIds -> projectList로 변경
+  linkedInUrl?: string | null;
+  updatedAt?: string | null;
 }
 
 // 포트폴리오 목록용 간단한 응답 타입 (프론트엔드에서 사용)
