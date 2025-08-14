@@ -10,7 +10,7 @@ export class ChatService {
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.stompClient = new Client({
-        webSocketFactory: () => new SockJS('https://etch.it.kr/api/chat/ws-stomp'),
+        webSocketFactory: () => new SockJS('wss://etch.it.kr/api/chat/ws-stomp'),
         connectHeaders: token ? {
           Authorization: `Bearer ${token}`
         } : {},
