@@ -44,34 +44,37 @@ const MyDocuments = ({
   const convertCoverLetterToDisplayItem = (
     coverLetter: CoverLetterListResponse
   ): DocumentDisplayItem => {
+    // 안전한 ID 처리
+    const safeId = coverLetter?.id || 0;
+
     // CoverLetterListResponse의 실제 필드를 타입 안전하게 확인
-    const hasTitle = "title" in coverLetter;
-    const hasSubject = "subject" in coverLetter;
-    const hasContent = "content" in coverLetter;
-    const hasUpdatedAt = "updatedAt" in coverLetter;
-    const hasModifiedAt = "modifiedAt" in coverLetter;
-    const hasCreatedAt = "createdAt" in coverLetter;
+    const hasTitle = coverLetter && "title" in coverLetter;
+    const hasSubject = coverLetter && "subject" in coverLetter;
+    const hasContent = coverLetter && "content" in coverLetter;
+    const hasUpdatedAt = coverLetter && "updatedAt" in coverLetter;
+    const hasModifiedAt = coverLetter && "modifiedAt" in coverLetter;
+    const hasCreatedAt = coverLetter && "createdAt" in coverLetter;
 
     let displayText = "제목 없음";
     if (hasTitle) {
-      displayText = (coverLetter as { title: string }).title;
+      displayText = (coverLetter as { title: string }).title || "제목 없음";
     } else if (hasSubject) {
-      displayText = (coverLetter as { subject: string }).subject;
+      displayText = (coverLetter as { subject: string }).subject || "제목 없음";
     } else if (hasContent) {
-      displayText = (coverLetter as { content: string }).content;
+      displayText = (coverLetter as { content: string }).content || "제목 없음";
     }
 
     let updatedAt = "";
     if (hasUpdatedAt) {
-      updatedAt = (coverLetter as { updatedAt: string }).updatedAt;
+      updatedAt = (coverLetter as { updatedAt: string }).updatedAt || "";
     } else if (hasModifiedAt) {
-      updatedAt = (coverLetter as { modifiedAt: string }).modifiedAt;
+      updatedAt = (coverLetter as { modifiedAt: string }).modifiedAt || "";
     } else if (hasCreatedAt) {
-      updatedAt = (coverLetter as { createdAt: string }).createdAt;
+      updatedAt = (coverLetter as { createdAt: string }).createdAt || "";
     }
 
     return {
-      id: coverLetter.id,
+      id: safeId,
       displayText,
       updatedAt,
     };
@@ -82,17 +85,21 @@ const MyDocuments = ({
     portfolio: PortfolioListItem
   ): DocumentDisplayItem => {
     return {
-      id: portfolio.id,
-      displayText: portfolio.introduce,
-      updatedAt: portfolio.updatedAt,
+      id: portfolio?.id || 0, // 안전한 ID 처리
+      displayText: portfolio?.introduce || "소개 없음",
+      updatedAt: portfolio?.updatedAt || "",
     };
   };
 
   // 현재 탭에 따라 문서들을 DocumentDisplayItem 형태로 변환
   const currentDocuments: DocumentDisplayItem[] =
     currentTab === "coverLetter"
-      ? coverLetters.map(convertCoverLetterToDisplayItem)
-      : portfolios.map(convertPortfolioToDisplayItem);
+      ? coverLetters
+          .filter((letter) => letter && letter.id) // undefined나 id가 없는 항목 필터링
+          .map(convertCoverLetterToDisplayItem)
+      : portfolios
+          .filter((portfolio) => portfolio && portfolio.id) // undefined나 id가 없는 항목 필터링
+          .map(convertPortfolioToDisplayItem);
 
   const handleDelete = async (id: string) => {
     if (currentTab === "coverLetter") {
@@ -130,8 +137,8 @@ const MyDocuments = ({
     if (currentTab === "coverLetter") {
       navigate(`/mypage/cover-letter-detail/${id}`);
     } else {
-      console.log(`View portfolio detail with ID: ${id}`);
-      alert("포트폴리오 상세 보기 기능은 아직 구현되지 않았습니다.");
+      // 포트폴리오 상세 보기 페이지로 이동
+      navigate(`/mypage/portfolio-detail/${id}`);
     }
   };
 
@@ -139,6 +146,7 @@ const MyDocuments = ({
     if (currentTab === "coverLetter") {
       navigate(`/mypage/cover-letter-edit/${id}`);
     } else {
+      // 포트폴리오 상세/편집 페이지로 이동 (/{portfolioId} 사용)
       navigate(`/mypage/portfolio/${id}`);
     }
   };
@@ -158,7 +166,7 @@ const MyDocuments = ({
             currentDocuments.map((doc) => (
               <DocumentItem
                 key={doc.id}
-                id={doc.id.toString()}
+                id={String(doc.id || 0)} // 안전한 문자열 변환
                 introduce={doc.displayText}
                 updatedAt={doc.updatedAt}
                 onClick={handleDocumentClick}
