@@ -227,8 +227,8 @@ export const convertPortfolioDataToRequest = (
       ? portfolioData.stack.map((stackEnum) => String(stackEnum))
       : [],
     // 서버에서 문자열 JSON 형태로 파싱되므로 빈 문자열도 "[]"로
-    language: portfolioData.language ? `[${portfolioData.language}]` : "[]",
-    education: portfolioData.education ? `[${portfolioData.education}]` : "[]",
+    language: portfolioData.language ? `${portfolioData.language}` : "",
+    education: portfolioData.education ? `${portfolioData.education}` : "",
     // projectList는 이미 배열이면 그대로, 빈 배열도 안전하게 전달
     projectList: projectList,
   };
