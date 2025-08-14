@@ -209,7 +209,7 @@ export const getPortfolioByUserId = async (
   return response.data.data;
 };
 
-// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
+// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수 (빈 배열/문자열까지 안전 처리)
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
   projectList: ProjectInfo[] = []
@@ -224,8 +224,13 @@ export const convertPortfolioDataToRequest = (
     techList: Array.isArray(portfolioData.stack)
       ? portfolioData.stack.map((stackEnum) => String(stackEnum))
       : [],
-    language: portfolioData.language || "",
-    education: portfolioData.education || "",
-    projectList: projectList,
+    // 서버에서 문자열 JSON 형태로 파싱하므로 빈 배열이면 "[]"로 보내기
+    language: portfolioData.language
+      ? JSON.stringify([portfolioData.language])
+      : "[]",
+    education: portfolioData.education
+      ? JSON.stringify([portfolioData.education])
+      : "[]",
+    projectList: projectList.length > 0 ? projectList : [],
   };
 };
