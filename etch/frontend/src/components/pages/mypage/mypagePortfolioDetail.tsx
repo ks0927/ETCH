@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { getPortfolioDetail } from "../../../api/portfolioApi";
 
-// API에서 실제 반환하는 타입 (백엔드 DTO에 맞게 수정)
+// API에서 반환하는 타입 (portfolioApi.ts의 PortfolioDetailResponseDTO와 일치)
 interface PortfolioDetailResponseDTO {
-  id: number;
+  portfolioId: number;
   name: string;
   phoneNumber: string;
   email: string;
@@ -12,30 +12,12 @@ interface PortfolioDetailResponseDTO {
   githubUrl: string;
   introduce: string;
   techList: string[];
-  language: Array<{
-    name: string;
-    date: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
-    certificateIssuer: string;
-  }>; // CertAndLangDTO 배열
-  education: Array<{
-    name: string;
-    description: string;
-    startDate: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
-    endDate: string; // LocalDate는 문자열로 전송됨 (yyyy-MM-dd)
-  }>; // EduAndActDTO 배열
-  projectList: Array<{
-    id: number;
-    title: string;
-    thumbnailUrl: string;
-    projectCategory: string;
-    viewCount: number;
-    likeCount: number;
-    nickname: string;
-    isPublic: boolean;
-    popularityScore: number;
-  }>;
-  linkedInUrl?: string | null;
-  updatedAt?: string | null;
+  language: string;
+  education: string;
+  memberId: number;
+  projectIds: number[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 function MypagePortfolioDetail() {
@@ -252,15 +234,9 @@ function MypagePortfolioDetail() {
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">학력</h2>
           <div className="bg-gray-50 p-3 rounded-md">
-            {portfolio.education.map((edu, idx) => (
-              <div key={idx} className="mb-2">
-                <p className="text-gray-900 font-semibold">{edu.name}</p>
-                <p className="text-gray-700 text-sm">{edu.description}</p>
-                <p className="text-gray-500 text-xs">
-                  {edu.startDate} ~ {edu.endDate}
-                </p>
-              </div>
-            ))}
+            <p className="text-gray-900 whitespace-pre-line">
+              {portfolio.education}
+            </p>
           </div>
         </div>
       )}
@@ -270,21 +246,15 @@ function MypagePortfolioDetail() {
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">어학</h2>
           <div className="bg-gray-50 p-3 rounded-md">
-            {portfolio.language.map((lang, idx) => (
-              <div key={idx} className="mb-2">
-                <p className="text-gray-900 font-semibold">{lang.name}</p>
-                <p className="text-gray-700 text-sm">취득일: {lang.date}</p>
-                <p className="text-gray-500 text-xs">
-                  발급기관: {lang.certificateIssuer}
-                </p>
-              </div>
-            ))}
+            <p className="text-gray-900 whitespace-pre-line">
+              {portfolio.language}
+            </p>
           </div>
         </div>
       )}
 
       {/* 프로젝트 정보 */}
-      {/* {portfolio.projectIds.length > 0 && (
+      {portfolio.projectIds.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">
             연결된 프로젝트 ({portfolio.projectIds.length}개)
@@ -305,7 +275,7 @@ function MypagePortfolioDetail() {
             ))}
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 }

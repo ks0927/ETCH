@@ -19,8 +19,9 @@ import PortfolioProjectPage from "./portfolioProjectPage";
 import {
   convertPortfolioDataToRequest,
   createPortfolio,
-  createProject,
+  // createProject,
 } from "../../../api/portfolioApi";
+import { createProject } from "../../../api/projectApi";
 
 // 프로젝트 데이터 타입 정의
 interface ProjectData {
@@ -329,7 +330,7 @@ function MypagePortfolioPage() {
             githubUrl: project.githubUrl,
             youtubeUrl: project.youtubeUrl,
             isPublic: project.isPublic,
-            thumbnailFile: project.thumbnailFile,
+            thumbnailFile: project.thumbnailFile || undefined,
             imageFiles: project.files.filter((file) =>
               file.type.startsWith("image/")
             ),
@@ -337,9 +338,9 @@ function MypagePortfolioPage() {
 
           console.log(`프로젝트 "${project.title}" 생성 중...`);
           const createdProject = await createProject(projectInput);
-          createdProjectIds.push(createdProject.projectId);
+          createdProjectIds.push(createdProject);
           console.log(
-            `프로젝트 "${project.title}" 생성 완료, ID: ${createdProject.projectId}`
+            `프로젝트 "${project.title}" 생성 완료, ID: ${createdProject}`
           );
         } catch (projectError) {
           console.error(`프로젝트 "${project.title}" 생성 실패:`, projectError);
@@ -367,7 +368,7 @@ function MypagePortfolioPage() {
 
       // 4. 성공 메시지
       alert(
-        `포트폴리오가 성공적으로 등록되었습니다!\n- 포트폴리오 ID: ${portfolioResponse.portfolioId}\n- 등록된 프로젝트 수: ${createdProjectIds.length}개`
+        `포트폴리오가 성공적으로 등록되었습니다!\n-  등록된 프로젝트 수: ${createdProjectIds.length}개`
       );
 
       // 5. 마이페이지로 이동
