@@ -15,7 +15,7 @@ interface PortfolioDetailResponseDTO {
   language: string;
   education: string;
   memberId: number;
-  projectIds: number[];
+  projectList: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -254,13 +254,13 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 프로젝트 정보 */}
-      {portfolio.projectIds.length > 0 && (
+      {portfolio.projectList.length > 0 && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">
-            연결된 프로젝트 ({portfolio.projectIds.length}개)
+            연결된 프로젝트 ({portfolio.projectList.length}개)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {portfolio.projectIds.map((projectId) => (
+            {portfolio.projectList.map((projectId) => (
               <div
                 key={projectId}
                 className="border border-gray-200 rounded-lg p-4"

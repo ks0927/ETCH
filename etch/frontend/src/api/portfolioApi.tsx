@@ -19,7 +19,7 @@ interface CreatePortfolioRequest {
   techList: string[];
   education: string;
   language: string;
-  projectIds: number[];
+  projectList: number[];
 }
 
 // 포트폴리오 응답 타입
@@ -35,7 +35,7 @@ interface PortfolioResponse {
   language: string;
   education: string;
   memberId: number;
-  projectIds: number[];
+  projectList: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -53,7 +53,6 @@ interface PortfolioDetailResponseDTO {
   name: string;
   phoneNumber: string;
   email: string;
-
   blogUrl: string;
   githubUrl: string;
   introduce: string;
@@ -61,7 +60,7 @@ interface PortfolioDetailResponseDTO {
   language: string;
   education: string;
   memberId: number;
-  projectIds: number[];
+  projectList: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -89,7 +88,7 @@ interface CreateProjectRequest {
 
 // 프로젝트 응답 타입
 interface ProjectResponse {
-  projectId: number;
+  projectList: number;
   title: string;
   content: string;
   projectCategory: ProjectCategoryEnum;
@@ -212,7 +211,7 @@ export const getPortfolioByUserId = async (
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
-  projectIds: number[] = []
+  projectList: number[] = []
 ): CreatePortfolioRequest => {
   return {
     name: portfolioData.name || "",
@@ -226,6 +225,6 @@ export const convertPortfolioDataToRequest = (
       : [],
     language: portfolioData.language || "",
     education: portfolioData.education || "",
-    projectIds: projectIds,
+    projectList: projectList,
   };
 };
