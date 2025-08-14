@@ -49,8 +49,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             memberRepository.findById(id).ifPresent(memberEntity -> MemberEntity.updateRefreshToken(memberEntity, refreshToken));
 
             response.addCookie(CookieUtil.createCookie("refresh", refreshToken));
-
-            fastApiService.requestRecommendList(id);
         } else if ("GUEST".equals(role)) {
             accessToken = jwtUtil.createJwt("access", email, role, null, 30 * 60 * 1000L); // 30분                                               │
         }
