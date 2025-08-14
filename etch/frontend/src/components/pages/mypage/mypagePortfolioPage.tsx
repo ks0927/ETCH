@@ -15,6 +15,10 @@ import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect
 import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
 import PortfolioProjectPage from "./portfolioProjectPage";
+import {
+  convertPortfolioDataToRequest,
+  createPortfolio,
+} from "../../../api/portfolioApi";
 
 // 프로젝트 데이터 타입 정의
 interface ProjectData {
@@ -59,6 +63,9 @@ function MypagePortfolioPage() {
   // 교육/활동과 자격증 폼 토글 상태들
   const [showEducationForm, setShowEducationForm] = useState(false);
   const [showLanguageForm, setShowLanguageForm] = useState(false);
+
+  // 제출 상태 관리 (추가)
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ============== 파싱 함수들 (화면 표시용만) ==============
 
@@ -159,6 +166,13 @@ function MypagePortfolioPage() {
     setPortfolioData((prev) => ({
       ...prev,
       githubUrl: value,
+    }));
+  };
+
+  const handleBlogUrlChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      blogUrl: value, // 블로그 URL 핸들러 추가
     }));
   };
 
@@ -271,29 +285,49 @@ function MypagePortfolioPage() {
     console.log("자격증 삭제됨, 인덱스:", index);
   };
 
+  // ============== 수정된 제출 핸들러 ==============
   const handleSubmit = async () => {
+    // 이미 제출 중이면 중복 방지
+    if (isSubmitting) return;
+
     try {
+      setIsSubmitting(true);
+
       // 포트폴리오 기본 정보 유효성 검사
-      if (
-        !portfolioData.name ||
-        !portfolioData.phoneNumber ||
-        !portfolioData.introduce
-      ) {
-        alert("필수 정보를 모두 입력해주세요.");
+      if (!portfolioData.name?.trim()) {
+        alert("이름을 입력해주세요.");
         return;
       }
 
+      if (!portfolioData.phoneNumber?.trim()) {
+        alert("연락처를 입력해주세요.");
+        return;
+      }
+
+      if (!portfolioData.introduce?.trim()) {
+        alert("자기소개를 입력해주세요.");
+        return;
+      }
+
+      console.log("=== 제출 시작 ===");
       console.log("제출할 포트폴리오 데이터:", portfolioData);
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // portfolioData는 이미 올바른 문자열 형태이므로 그대로 API 전송
-      console.log("API 전송용 데이터:", portfolioData);
+      // 1. portfolioData를 API 형식으로 변환
+      // 현재는 프로젝트 ID가 없으므로 빈 배열로 전달 (나중에 프로젝트 생성 후 업데이트 가능)
+      const requestData = convertPortfolioDataToRequest(
+        portfolioData,
+        [] // projectIds - 추후 프로젝트 생성 API 연동 시 추가
+      );
 
-      // 실제 API 호출 로직
-      // 1. 포트폴리오 생성 API
-      // const portfolioResponse = await createPortfolio(portfolioData);
+      console.log("API 전송용 데이터:", requestData);
 
-      // 2. 등록된 프로젝트들 생성 API
+      // 2. 포트폴리오 생성 API 호출
+      const portfolioResponse = await createPortfolio(requestData);
+      console.log("포트폴리오 생성 성공:", portfolioResponse);
+
+      // 3. 등록된 프로젝트들 생성 API (추후 구현)
+      // TODO: 프로젝트 생성 API가 준비되면 여기에 추가
       // for (const project of registeredProjects) {
       //   const projectInput = {
       //     title: project.title,
@@ -309,10 +343,31 @@ function MypagePortfolioPage() {
       //   await createProject(projectInput);
       // }
 
-      alert("포트폴리오와 프로젝트가 성공적으로 등록되었습니다!");
+      alert("포트폴리오가 성공적으로 등록되었습니다!");
+
+      // 성공 후 초기화 (선택사항)
+      // setPortfolioData({ ...PortfolioState, stack: [] });
+      // setRegisteredProjects([]);
     } catch (error) {
-      console.error("등록 실패:", error);
-      alert("등록 중 오류가 발생했습니다.");
+      console.error("=== 포트폴리오 등록 실패 ===");
+      console.error("에러 상세:", error);
+
+      // 에러 메시지 표시
+      let errorMessage = "포트폴리오 등록 중 오류가 발생했습니다.";
+
+      const err = error as {
+        response?: { data?: { message?: string }; status?: number };
+      };
+
+      if (err.response?.data?.message) {
+        errorMessage = `등록 실패: ${err.response.data.message}`;
+      } else if (err.response?.status) {
+        errorMessage = `서버 오류 (${err.response.status}): 잠시 후 다시 시도해주세요.`;
+      }
+
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -363,12 +418,14 @@ function MypagePortfolioPage() {
           value={portfolioData.githubUrl}
           onChange={handleGithubUrlChange}
         />
+
+        {/* 블로그 URL 핸들러 수정 */}
         <PortfolioWriteInput
           inputText="블로그"
           placeholderText="http://blog.yourblog.com"
           type="url"
-          value={portfolioData.githubUrl}
-          onChange={handleGithubUrlChange}
+          value={portfolioData.blogUrl || ""}
+          onChange={handleBlogUrlChange}
         />
       </div>
 
@@ -485,11 +542,22 @@ function MypagePortfolioPage() {
       <PortfolioSubmitButton
         onSubmit={handleSubmit}
         isDisabled={
+          isSubmitting || // 제출 중일 때 비활성화
           !portfolioData.name ||
           !portfolioData.phoneNumber ||
           !portfolioData.introduce
         }
       />
+
+      {/* 제출 중 표시 (선택사항) */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p>포트폴리오를 등록하고 있습니다...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
