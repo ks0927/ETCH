@@ -1,13 +1,13 @@
-import type { Activity } from "../../../types/portfolio/portfolioDatas";
+import type { education } from "../../../types/portfolio/portfolioDatas";
 
-function PortfolioActivityTextCard({
-  activities,
+function PortfolioEducationTextCard({
+  education,
   onRemove,
 }: {
-  activities: Activity[];
+  education: education[];
   onRemove?: (index: number) => void;
 }) {
-  if (activities.length === 0) {
+  if (education.length === 0) {
     return (
       <div className="text-gray-500 p-4 text-center">
         등록된 활동이 없습니다.
@@ -17,19 +17,19 @@ function PortfolioActivityTextCard({
 
   return (
     <div className="space-y-2">
-      {activities.map((activity, index) => (
+      {education.map((education, index) => (
         <div
           key={index}
           className="relative p-4 bg-blue-50 border-l-4 border-blue-400 rounded"
         >
           <div className="font-semibold text-blue-700">
-            {activity.companyName}
+            {education.companyName}
           </div>
           <div className="text-sm font-medium text-blue-600">
-            {activity.active}
+            {education.active}
           </div>
           <div className="text-sm text-gray-600">
-            {activity.startAt} ~ {activity.endAt}
+            {education.startAt} ~ {education.endAt}
           </div>
           {onRemove && (
             <button
@@ -45,4 +45,4 @@ function PortfolioActivityTextCard({
   );
 }
 
-export default PortfolioActivityTextCard;
+export default PortfolioEducationTextCard;

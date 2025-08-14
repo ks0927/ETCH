@@ -1,4 +1,4 @@
-type CardType = "license" | "activity" | "project";
+type CardType = "language" | "education" | "project";
 
 export interface TextCard {
   title: string;
@@ -14,14 +14,14 @@ export interface ProjectTextCard extends TextCard {
   githubURL: string;
 }
 
-export interface ActivityTextCard extends TextCard {
+export interface EducationTextCard extends TextCard {
   companyName: string;
   startAt: string;
   endAt: string;
   active: string;
 }
 
-export interface LicenseTextCard extends TextCard {
+export interface LanguageTextCard extends TextCard {
   licenseName: string;
   getAt: string;
   issuer: string;
