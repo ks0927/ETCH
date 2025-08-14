@@ -167,30 +167,53 @@ export const createProject = async (
   }
 };
 
-// 내 포트폴리오 목록 조회 (새로 추가)
+// 내 포트폴리오 목록 조회 (디버깅 강화)
 export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
+  console.log("=== 포트폴리오 목록 조회 시작 ===");
+
   try {
-    const response = await authInstance.get<ApiResponse<PortfolioResponse[]>>(
-      "/portfolios/list"
-    );
+    // 백엔드에서 List<PortfolioListResponseDTO>를 반환
+    const response = await authInstance.get<
+      ApiResponse<PortfolioListResponseDTO[]>
+    >("/portfolios/list");
 
-    // API 응답을 DocumentItem에서 사용할 수 있는 형태로 변환
+    console.log("=== 포트폴리오 목록 조회 성공 ===");
+    console.log("응답 데이터:", response.data);
+
+    // PortfolioListResponseDTO[]를 PortfolioListItem[]로 변환
     const portfolioList: PortfolioListItem[] = response.data.data.map(
-      (portfolio) => ({
-        id: portfolio.portfolioId,
-        introduce: portfolio.introduce,
-        updatedAt: portfolio.updatedAt,
-        name: portfolio.name,
-      })
+      (portfolio) => {
+        console.log("포트폴리오 항목:", portfolio);
+        return {
+          id: portfolio.portfolioId || portfolio.id || 0, // 안전한 기본값
+          introduce: portfolio.introduce || "소개 없음",
+          updatedAt: portfolio.updatedAt || "",
+          name: portfolio.name,
+        };
+      }
     );
 
+    console.log("변환된 포트폴리오 목록:", portfolioList);
     return portfolioList;
   } catch (error) {
     console.error("=== 포트폴리오 목록 조회 API 에러 ===");
-    console.error("에러:", error);
+    console.error("전체 에러 객체:", error);
+
+    // 포트폴리오가 없는 경우 빈 배열 반환
+
     throw error;
   }
 };
+
+// PortfolioListResponseDTO 타입 정의 (백엔드와 일치해야 함)
+interface PortfolioListResponseDTO {
+  portfolioId?: number;
+  id?: number; // 백엔드에서 어떤 필드명을 사용하는지 확인 필요
+  introduce: string;
+  updatedAt: string;
+  name?: string;
+  // 백엔드에서 추가로 반환하는 필드들이 있다면 여기에 추가
+}
 
 // 내 포트폴리오 조회 (단일)
 export const getMyPortfolio = async (): Promise<PortfolioResponse> => {
