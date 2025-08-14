@@ -171,7 +171,7 @@ export const createProject = async (
 export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
   try {
     const response = await authInstance.get<ApiResponse<PortfolioResponse[]>>(
-      "/portfolios/my-list"
+      "/portfolios/list"
     );
 
     // API 응답을 DocumentItem에서 사용할 수 있는 형태로 변환
