@@ -1,20 +1,22 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate, useSearchParams, useLocation } from "react-router";
 import { getMemberInfo } from "../../api/authApi";
 import useUserStore from "../../store/userStore";
+import TokenManager from "../../utils/tokenManager";
 
 const OAuthLoadingPage = () => {
   const { setMemberInfo } = useUserStore(); // Zustand 스토어에서 사용자 정보 설정 함수 가져오기
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   // OAuth 리다이렉트 후 토큰 처리
   useEffect(() => {
     const token = searchParams.get("token");
 
     if (token) {
-      // 1. Access token을 localStorage에 저장
-      localStorage.setItem("access_token", token);
+      // 1. Access token을 TokenManager로 저장 (발급 시간 포함)
+      TokenManager.setToken(token);
 
       const checkUser = async () => {
         try {
@@ -23,8 +25,10 @@ const OAuthLoadingPage = () => {
           // Zustand 스토어에 사용자 정보 저장
           setMemberInfo(userInfo);
 
-          // 기존 유저 - 메인 페이지로
-          navigate("/", { replace: true });
+          // 로그인 전에 접근하려던 페이지가 있으면 그곳으로, 없으면 메인 페이지로
+          const from = location.state?.from || "/";
+          console.log("로그인 후 이동할 페이지:", from);
+          navigate(from, { replace: true });
         } catch (error: any) {
           // 신규 유저 추가 정보 페이지로
           if (error.response.data.message === "사용자를 찾을 수 없습니다.") {

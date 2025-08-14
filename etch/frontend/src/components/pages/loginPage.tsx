@@ -1,18 +1,20 @@
-import { Link, useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router";
 import { useEffect } from "react";
 import GoogleAuthButton from "../molecules/googleAuthButton";
+import TokenManager from "../../utils/tokenManager";
 
 function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   // OAuth 리다이렉트 후 토큰 처리
   useEffect(() => {
     const token = searchParams.get("token");
 
     if (token) {
-      // 1. Access token을 localStorage에 저장
-      localStorage.setItem("access_token", token);
+      // 1. Access token을 TokenManager로 저장
+      TokenManager.setToken(token);
 
       // 2. 쿠키에서 refresh token 존재 확인
       const hasRefreshToken = document.cookie
@@ -20,14 +22,17 @@ function LoginPage() {
         .some((cookie) => cookie.trim().startsWith("refresh"));
 
       // 3. refresh token 유무에 따른 라우팅
+      // 로그인 전에 접근하려던 페이지가 있으면 그곳으로, 없으면 메인 페이지로
+      const from = location.state?.from || "/";
+
       if (hasRefreshToken) {
-        // 기존 유저 - 메인 페이지로
-        // replace - 현재 페이지를 교체
-        navigate("/", { replace: true });
+        // 기존 유저 - 원래 페이지 또는 메인 페이지로
+        navigate(from, { replace: true });
       } else {
-        // 신규 유저 - 추가 정보 페이지로
-        // replace - 현재 페이지를 교체
-        navigate("/additional-info", { replace: true });
+        // 신규 유저 - 추가 정보 페이지로 (state는 전달)
+        navigate("/additional-info", {
+          replace: true,
+        });
       }
     }
   }, [searchParams, navigate]);

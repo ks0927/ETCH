@@ -4,6 +4,7 @@ import Layout from "../layout/layout.tsx";
 import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
+import ProtectedRoute from "../components/common/ProtectedRoute.tsx";
 
 const HomePage = lazy(() => import("../components/pages/homePage.tsx"));
 const NewsPage = lazy(
@@ -164,17 +165,21 @@ const router = createBrowserRouter([
       {
         path: "/projects/write",
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <ProjectWritePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingPage />}>
+              <ProjectWritePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "/projects/:id/edit",
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <ProjectUpdatePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingPage />}>
+              <ProjectUpdatePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
@@ -192,9 +197,11 @@ const router = createBrowserRouter([
       {
         path: "/mypage",
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <MyPageLayout />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingPage />}>
+              <MyPageLayout />
+            </Suspense>
+          </ProtectedRoute>
         ),
         children: [
           {
