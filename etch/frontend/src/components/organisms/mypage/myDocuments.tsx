@@ -98,9 +98,10 @@ const MyDocuments = ({
               <DocumentItem
                 key={doc.id}
                 id={doc.id.toString()}
-                title={currentTab === "coverLetter" ? doc.name : doc.name}
-                description={currentTab === "portfolio" ? doc.introduce : undefined}
-                date={doc.date}
+                introduce={
+                  currentTab === "portfolio" ? doc.introduce : undefined
+                }
+                updatedAt={doc.updatedAt}
                 onClick={handleDocumentClick} // Use handleDocumentClick for main click
                 onDelete={handleDelete} // Pass the handleDelete function
                 onEdit={handleEditClick} // Pass the handleEditClick function
