@@ -143,46 +143,86 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   const handleWebSocketMessage = (wsMessage: WebSocketChatMessage) => {
     if (wsMessage.type === 'TALK') {
       const currentUserId = getCurrentUserId();
-      const newMessage: UIChatMessage = {
-        id: wsMessage.messageId?.toString() || Date.now().toString(),
-        message: wsMessage.message,
-        sender: wsMessage.senderId === currentUserId ? 'me' : 'other',
-        time: new Date().toLocaleTimeString('ko-KR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        senderName: wsMessage.senderId === currentUserId ? undefined : wsMessage.sender,
-        unreadCount: wsMessage.unreadCount
-      };
-
-      setMessages(prev => [...prev, newMessage]);
-    } else if (wsMessage.type === 'READ') {
-      // 읽음 상태 업데이트 - 자신이 보낸 메시지의 읽음 수만 감소
-      setMessages(prev => 
-        prev.map(msg => {
-          // 자신이 보낸 메시지이고, 읽음 처리된 메시지 ID 이하인 경우만 읽음 수 감소
-          if (msg.sender === 'me' && parseInt(msg.id) <= (wsMessage.messageId || 0)) {
-            return { ...msg, unreadCount: Math.max(0, (msg.unreadCount || 0) - 1) };
-          }
-          return msg;
-        })
-      );
-    }
-  };
-
-  // 메시지 전송
-  const sendMessage = async (message: string) => {
-    if (!currentRoom || !message.trim()) return;
-
-    try {
-      const userId = getCurrentUserId();
-      const userName = getCurrentUserName();
       
-      chatService.sendMessage(currentRoom.roomId, userId, userName, message.trim());
-    } catch (error) {
-      console.error('메시지 전송 실패:', error);
+      // 자신이 보낸 메시지는 이미 화면에 표시되어 있으므로 중복 추가 방지
+      if (wsMessage.senderId === currentUserId) {
+        // 임시 메시지를 실제 메시지로 교체
+        setMessages(prevMessages => {
+          const tempMessageIndex = prevMessages.findIndex(msg => 
+            msg.sender === 'me' && 
+            msg.message === wsMessage.message &&
+            msg.id.startsWith('temp-')
+          );
+          
+          if (tempMessageIndex >= 0) {
+            const newMessages = [...prevMessages];
+            newMessages[tempMessageIndex] = {
+              ...newMessages[tempMessageIndex],
+              id: wsMessage.messageId?.toString() || Date.now().toString(),
+              unreadCount: wsMessage.unreadCount
+            };
+            return newMessages;
+          }
+          return prevMessages;
+        });
+      } else {
+        // 다른 사용자의 메시지는 새로 추가
+        const newMessage: UIChatMessage = {
+          id: wsMessage.messageId?.toString() || Date.now().toString(),
+          message: wsMessage.message,
+          sender: 'other',
+          time: new Date().toLocaleTimeString('ko-KR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          senderName: wsMessage.sender,
+          unreadCount: wsMessage.unreadCount
+        };
+        
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+      }
     }
   };
+
+// 메시지 전송
+const sendMessage = async (message: string) => {
+  if (!currentRoom) return;
+  
+  const currentUserId = getCurrentUserId();
+  const currentUserName = getCurrentUserName();
+  
+  if (!currentUserId || !currentUserName) {
+    console.error('사용자 정보를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    // 1. 먼저 UI에 즉시 반영 (Optimistic Update)
+    const tempMessage: UIChatMessage = {
+      id: `temp-${Date.now()}`, // 임시 ID
+      message: message,
+      sender: 'me',
+      time: new Date().toLocaleTimeString('ko-KR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      senderName: undefined
+    };
+    
+    // 메시지를 즉시 화면에 추가
+    setMessages(prevMessages => [...prevMessages, tempMessage]);
+
+    // 2. WebSocket으로 메시지 전송
+    chatService.sendMessage(currentRoom.roomId, currentUserId, currentUserName, message);
+    
+  } catch (error) {
+    console.error('메시지 전송 실패:', error);
+    // 실패시 임시 메시지 제거
+    setMessages(prevMessages => 
+      prevMessages.filter(msg => msg.id !== tempMessage.id)
+    );
+  }
+};
 
   // 방 나가기
   const leaveRoom = async () => {
