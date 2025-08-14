@@ -23,12 +23,14 @@ public class PortfolioDetailResponseDTO {
     private String githubUrl;
     private String linkedInUrl;
     private String blogUrl;
-    private String techList;
+    private String email;
+    private String phoneNumber;
+    private List<String> techList;
     private List<EduAndActDTO> education;
     private List<CertAndLangDTO> language;
     private List<ProjectListDTO> projectList;
 
-    public static PortfolioDetailResponseDTO from(PortfolioDTO portfolioDTO) {
+    public static PortfolioDetailResponseDTO from(PortfolioDTO portfolioDTO, List<String> techList) {
         return builder()
                 .id(portfolioDTO.getId())
                 .name(portfolioDTO.getName())
@@ -36,7 +38,9 @@ public class PortfolioDetailResponseDTO {
                 .githubUrl(portfolioDTO.getGithubUrl())
                 .linkedInUrl(portfolioDTO.getLinkedInUrl())
                 .blogUrl(portfolioDTO.getBlogUrl())
-                .techList(portfolioDTO.getTechList())
+                .email(portfolioDTO.getEmail())
+                .phoneNumber(portfolioDTO.getPhoneNumber())
+                .techList(techList)
                 .education(parseDelimitedString(
                         portfolioDTO.getEducation(),
                         info -> EduAndActDTO.builder()

@@ -31,13 +31,19 @@ public class PortfolioEntity {
     @Column(name = "blog_url")
     private String blogUrl;
 
-    @Column(name = "tech_list")
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "tech_list", length = 1000)
     private String techList;
 
-    @Column(name = "education")
+    @Column(name = "education", length = 2000)
     private String education;
 
-    @Column(name = "language")
+    @Column(name = "language", length = 2000)
     private String language;
 
     @Column(name = "created_at")
@@ -64,6 +70,8 @@ public class PortfolioEntity {
                 .githubUrl(githubUrl)
                 .linkedInUrl(linkedInUrl)
                 .blogUrl(blogUrl)
+                .phoneNumber(phoneNumber)
+                .email(email)
                 .techList(techList)
                 .education(education)
                 .language(language)
@@ -83,6 +91,8 @@ public class PortfolioEntity {
         portfolioEntity.githubUrl = portfolioDTO.getGithubUrl();
         portfolioEntity.linkedInUrl = portfolioDTO.getLinkedInUrl();
         portfolioEntity.blogUrl = portfolioDTO.getBlogUrl();
+        portfolioEntity.phoneNumber = portfolioDTO.getPhoneNumber();
+        portfolioEntity.email = portfolioDTO.getEmail();
         portfolioEntity.techList = portfolioDTO.getTechList();
         portfolioEntity.education = portfolioDTO.getEducation();
         portfolioEntity.language = portfolioDTO.getLanguage();
@@ -98,13 +108,15 @@ public class PortfolioEntity {
         portfolioEntity.project = project;
     }
 
-    public void updateAll(PortfolioRequestDTO portfolioRequestDTO, List<PortfolioProjectEntity> newProject) {
+    public void updateAll(PortfolioRequestDTO portfolioRequestDTO, String list, List<PortfolioProjectEntity> newProject) {
         name = portfolioRequestDTO.getName();
         introduce = portfolioRequestDTO.getIntroduce();
         githubUrl = portfolioRequestDTO.getGithubUrl();
         linkedInUrl = portfolioRequestDTO.getLinkedInUrl();
         blogUrl = portfolioRequestDTO.getBlogUrl();
-        techList = portfolioRequestDTO.getTechList();
+        phoneNumber = portfolioRequestDTO.getPhoneNumber();
+        email = portfolioRequestDTO.getEmail();
+        techList = list;
         education = portfolioRequestDTO.getEducation();
         language = portfolioRequestDTO.getLanguage();
         updatedAt = LocalDate.now();

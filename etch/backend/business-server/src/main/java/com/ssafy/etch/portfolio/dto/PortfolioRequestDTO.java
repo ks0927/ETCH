@@ -5,7 +5,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-@Builder
+@Builder(toBuilder = true)
 @Getter
 public class PortfolioRequestDTO {
     private String name;
@@ -13,19 +13,23 @@ public class PortfolioRequestDTO {
     private String githubUrl;
     private String linkedInUrl;
     private String blogUrl;
-    private String techList;
+    private String phoneNumber;
+    private String email;
+    private List<String> techList;
     private String education;
     private String language;
     private Long memberId;
     private List<Long> projectIds;
 
-    public PortfolioDTO toPortfolioDTO() {
+    public PortfolioDTO toPortfolioDTO(String techList) {
         return PortfolioDTO.builder()
                 .name(name)
                 .introduce(introduce)
                 .githubUrl(githubUrl)
                 .linkedInUrl(linkedInUrl)
                 .blogUrl(blogUrl)
+                .phoneNumber(phoneNumber)
+                .email(email)
                 .techList(techList)
                 .education(education)
                 .language(language)
