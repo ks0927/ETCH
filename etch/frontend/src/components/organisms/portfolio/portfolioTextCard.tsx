@@ -1,12 +1,12 @@
 import type { TextCard } from "../../atoms/textCard";
-import PortfolioLangugaeForm from "../../molecules/portfolio/portfolioLicenseForm";
-import PortfolioLanguageTextCard from "../../molecules/portfolio/portfolioLicenseTextCard";
-import PortfolioEducationTextCard from "../../molecules/portfolio/portfolioActivityTextCart";
+import PortfolioLangugaeForm from "../../molecules/portfolio/portfolioLanguageForm";
+import PortfolioLanguageTextCard from "../../molecules/portfolio/portfolioLanguageTextCard";
+import PortfolioEducationTextCard from "../../molecules/portfolio/portfolioEducationTextCart";
 import type {
   education,
   language,
 } from "../../../types/portfolio/portfolioDatas";
-import PortfolioEducationForm from "../../molecules/portfolio/portfolioActivityForm";
+import PortfolioEducationForm from "../../molecules/portfolio/portfolioEducationForm";
 
 function PortfolioWriteTextCard({
   title,
