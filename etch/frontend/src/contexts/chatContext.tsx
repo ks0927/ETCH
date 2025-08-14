@@ -184,20 +184,19 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
-// 메시지 전송
-const sendMessage = async (message: string) => {
-  if (!currentRoom) return;
-  
-  const currentUserId = getCurrentUserId();
-  const currentUserName = getCurrentUserName();
-  
-  if (!currentUserId || !currentUserName) {
-    console.error('사용자 정보를 찾을 수 없습니다.');
-    return;
-  }
+  // 메시지 전송
+  const sendMessage = async (message: string) => {
+    if (!currentRoom) return;
+    
+    const currentUserId = getCurrentUserId();
+    const currentUserName = getCurrentUserName();
+    
+    if (!currentUserId || !currentUserName) {
+      console.error('사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
 
-  try {
-    // 1. 먼저 UI에 즉시 반영 (Optimistic Update)
+    // tempMessage를 try 블록 밖에서 선언
     const tempMessage: UIChatMessage = {
       id: `temp-${Date.now()}`, // 임시 ID
       message: message,
@@ -208,21 +207,22 @@ const sendMessage = async (message: string) => {
       }),
       senderName: undefined
     };
-    
-    // 메시지를 즉시 화면에 추가
-    setMessages(prevMessages => [...prevMessages, tempMessage]);
 
-    // 2. WebSocket으로 메시지 전송
-    chatService.sendMessage(currentRoom.roomId, currentUserId, currentUserName, message);
-    
-  } catch (error) {
-    console.error('메시지 전송 실패:', error);
-    // 실패시 임시 메시지 제거
-    setMessages(prevMessages => 
-      prevMessages.filter(msg => msg.id !== tempMessage.id)
-    );
-  }
-};
+    try {
+      // 메시지를 즉시 화면에 추가
+      setMessages(prevMessages => [...prevMessages, tempMessage]);
+
+      // WebSocket으로 메시지 전송
+      chatService.sendMessage(currentRoom.roomId, currentUserId, currentUserName, message);
+      
+    } catch (error) {
+      console.error('메시지 전송 실패:', error);
+      // 실패시 임시 메시지 제거
+      setMessages(prevMessages => 
+        prevMessages.filter(msg => msg.id !== tempMessage.id)
+      );
+    }
+  };
 
   // 방 나가기
   const leaveRoom = async () => {
