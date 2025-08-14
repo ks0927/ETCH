@@ -8,7 +8,7 @@ interface ApiResponse<T> {
   message: string | null;
 }
 
-// 포트폴리오 생성 요청 타입 (백엔드 컨트롤러에 맞게 수정)
+// 포트폴리오 생성 요청 타입
 interface CreatePortfolioRequest {
   name: string;
   introduce: string;
@@ -19,7 +19,6 @@ interface CreatePortfolioRequest {
   techList: string[];
   education: string;
   language: string;
-  // memberId 제거 - 백엔드에서 @AuthenticationPrincipal로 자동 처리
   projectIds: number[];
 }
 
@@ -41,12 +40,37 @@ interface PortfolioResponse {
   updatedAt: string;
 }
 
-// 포트폴리오 목록용 간단한 응답 타입 (목록에서는 간단한 정보만 필요)
+// PortfolioListResponseDTO 타입 정의 (백엔드 DTO와 정확히 일치)
+interface PortfolioListResponseDTO {
+  id: number;
+  name: string;
+  introduce: string;
+}
+
+// 포트폴리오 상세 응답 타입
+interface PortfolioDetailResponseDTO {
+  portfolioId: number;
+  name: string;
+  phoneNumber: string;
+  email: string;
+  blogUrl: string;
+  githubUrl: string;
+  introduce: string;
+  techList: string[];
+  language: string;
+  education: string;
+  memberId: number;
+  projectIds: number[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 포트폴리오 목록용 간단한 응답 타입 (프론트엔드에서 사용)
 interface PortfolioListItem {
-  id: number; // portfolioId를 id로 매핑
+  id: number;
   introduce: string;
   updatedAt: string;
-  name?: string; // 추가 정보로 이름도 포함
+  name?: string;
 }
 
 // 프로젝트 생성 요청 타입
@@ -83,161 +107,95 @@ interface ProjectResponse {
 export const createPortfolio = async (
   portfolioData: CreatePortfolioRequest
 ): Promise<PortfolioResponse> => {
-  console.log("=== 포트폴리오 생성 요청 ===");
-  console.log("전송 데이터:", JSON.stringify(portfolioData, null, 2));
-
-  try {
-    const response = await authInstance.post<ApiResponse<PortfolioResponse>>(
-      "/portfolios",
-      portfolioData
-    );
-
-    console.log("=== 성공 응답 ===");
-    console.log("상태 코드:", response.status);
-    console.log("응답 데이터:", response.data);
-
-    return response.data.data;
-  } catch (error) {
-    console.error("=== API 에러 ===");
-    console.error("에러:", error);
-
-    throw error;
-  }
+  const response = await authInstance.post<ApiResponse<PortfolioResponse>>(
+    "/portfolios",
+    portfolioData
+  );
+  return response.data.data;
 };
 
 // 프로젝트 생성
 export const createProject = async (
   projectData: CreateProjectRequest
 ): Promise<ProjectResponse> => {
-  console.log("=== 프로젝트 생성 요청 ===");
-  console.log("전송 데이터:", projectData);
+  const formData = new FormData();
 
-  try {
-    // FormData 생성 (파일 업로드를 위해)
-    const formData = new FormData();
+  const projectInfo = {
+    title: projectData.title,
+    content: projectData.content,
+    projectCategory: projectData.projectCategory,
+    techCodeIds: projectData.techCodeIds,
+    githubUrl: projectData.githubUrl,
+    youtubeUrl: projectData.youtubeUrl,
+    isPublic: projectData.isPublic,
+  };
 
-    // 기본 프로젝트 정보를 JSON으로 추가
-    const projectInfo = {
-      title: projectData.title,
-      content: projectData.content,
-      projectCategory: projectData.projectCategory,
-      techCodeIds: projectData.techCodeIds,
-      githubUrl: projectData.githubUrl,
-      youtubeUrl: projectData.youtubeUrl,
-      isPublic: projectData.isPublic,
-    };
-
-    formData.append(
-      "projectCreateRequest",
-      new Blob([JSON.stringify(projectInfo)], { type: "application/json" })
-    );
-
-    // 썸네일 파일 추가
-    if (projectData.thumbnailFile) {
-      formData.append("thumbnailFile", projectData.thumbnailFile);
-    }
-
-    // 이미지 파일들 추가
-    if (projectData.imageFiles && projectData.imageFiles.length > 0) {
-      projectData.imageFiles.forEach((file) => {
-        formData.append("imageFiles", file);
-      });
-    }
-
-    const response = await authInstance.post<ApiResponse<ProjectResponse>>(
-      "/projects",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-
-    console.log("=== 프로젝트 생성 성공 ===");
-    console.log("상태 코드:", response.status);
-    console.log("응답 데이터:", response.data);
-
-    return response.data.data;
-  } catch (error) {
-    console.error("=== 프로젝트 생성 API 에러 ===");
-    console.error("에러:", error);
-
-    throw error;
-  }
-};
-
-// 내 포트폴리오 목록 조회 (디버깅 강화)
-export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
-  console.log("=== 포트폴리오 목록 조회 시작 ===");
-
-  try {
-    // 백엔드에서 List<PortfolioListResponseDTO>를 반환
-    const response = await authInstance.get<
-      ApiResponse<PortfolioListResponseDTO[]>
-    >("/portfolios/list");
-
-    console.log("=== 포트폴리오 목록 조회 성공 ===");
-    console.log("응답 데이터:", response.data);
-
-    // PortfolioListResponseDTO[]를 PortfolioListItem[]로 변환
-    const portfolioList: PortfolioListItem[] = response.data.data.map(
-      (portfolio) => {
-        console.log("포트폴리오 항목:", portfolio);
-        return {
-          id: portfolio.portfolioId || portfolio.id || 0, // 안전한 기본값
-          introduce: portfolio.introduce || "소개 없음",
-          updatedAt: portfolio.updatedAt || "",
-          name: portfolio.name,
-        };
-      }
-    );
-
-    console.log("변환된 포트폴리오 목록:", portfolioList);
-    return portfolioList;
-  } catch (error) {
-    console.error("=== 포트폴리오 목록 조회 API 에러 ===");
-    console.error("전체 에러 객체:", error);
-
-    // 포트폴리오가 없는 경우 빈 배열 반환
-
-    throw error;
-  }
-};
-
-// PortfolioListResponseDTO 타입 정의 (백엔드와 일치해야 함)
-interface PortfolioListResponseDTO {
-  portfolioId?: number;
-  id?: number; // 백엔드에서 어떤 필드명을 사용하는지 확인 필요
-  introduce: string;
-  updatedAt: string;
-  name?: string;
-  // 백엔드에서 추가로 반환하는 필드들이 있다면 여기에 추가
-}
-
-// 내 포트폴리오 조회 (단일)
-export const getMyPortfolio = async (): Promise<PortfolioResponse> => {
-  const response = await authInstance.get<ApiResponse<PortfolioResponse>>(
-    "/portfolios/list"
+  formData.append(
+    "projectCreateRequest",
+    new Blob([JSON.stringify(projectInfo)], { type: "application/json" })
   );
+
+  if (projectData.thumbnailFile) {
+    formData.append("thumbnailFile", projectData.thumbnailFile);
+  }
+
+  if (projectData.imageFiles && projectData.imageFiles.length > 0) {
+    projectData.imageFiles.forEach((file) => {
+      formData.append("imageFiles", file);
+    });
+  }
+
+  const response = await authInstance.post<ApiResponse<ProjectResponse>>(
+    "/projects",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
   return response.data.data;
 };
 
-// 포트폴리오 수정
+// 내 포트폴리오 목록 조회
+export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
+  const response = await authInstance.get<
+    ApiResponse<PortfolioListResponseDTO[]>
+  >("/portfolios/list");
+
+  return response.data.data.map((portfolio) => ({
+    id: portfolio.id,
+    introduce: portfolio.introduce,
+    updatedAt: "", // 백엔드에서 제공하지 않으므로 빈 문자열
+    name: portfolio.name,
+  }));
+};
+
+// 포트폴리오 상세 조회 (/{portfolioId})
+export const getPortfolioDetail = async (
+  portfolioId: number
+): Promise<PortfolioDetailResponseDTO> => {
+  const response = await authInstance.get<
+    ApiResponse<PortfolioDetailResponseDTO>
+  >(`/portfolios/${portfolioId}`);
+  return response.data.data;
+};
+
+// 포트폴리오 수정 (PUT /{portfolioId})
 export const updatePortfolio = async (
   portfolioId: number,
   portfolioData: CreatePortfolioRequest
-): Promise<PortfolioResponse> => {
-  const response = await authInstance.put<ApiResponse<PortfolioResponse>>(
+): Promise<void> => {
+  await authInstance.put<ApiResponse<null>>(
     `/portfolios/${portfolioId}`,
     portfolioData
   );
-  return response.data.data;
 };
 
-// 포트폴리오 삭제
+// 포트폴리오 삭제 (DELETE /{portfolioId})
 export const deletePortfolio = async (portfolioId: number): Promise<void> => {
-  await authInstance.delete(`/portfolios/${portfolioId}`);
+  await authInstance.delete<ApiResponse<null>>(`/portfolios/${portfolioId}`);
 };
 
 // 특정 사용자의 포트폴리오 조회 (공개용)
@@ -250,12 +208,12 @@ export const getPortfolioByUserId = async (
   return response.data.data;
 };
 
-// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수 (수정)
+// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
-  projectIds: number[] = [] // memberId 매개변수 제거
+  projectIds: number[] = []
 ): CreatePortfolioRequest => {
-  const convertedData = {
+  return {
     name: portfolioData.name || "",
     introduce: portfolioData.introduce || "",
     githubUrl: portfolioData.githubUrl || "",
@@ -268,12 +226,5 @@ export const convertPortfolioDataToRequest = (
     language: portfolioData.language || "",
     education: portfolioData.education || "",
     projectIds: projectIds,
-    // memberId 제거 - 백엔드에서 자동 처리
   };
-
-  console.log("=== 데이터 변환 결과 ===");
-  console.log("원본 데이터:", portfolioData);
-  console.log("변환된 데이터:", convertedData);
-
-  return convertedData;
 };
