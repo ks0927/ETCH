@@ -32,23 +32,13 @@ interface PortfolioDetailResponseDTO {
   updatedAt: string;
 }
 
-// JSON 문자열을 안전하게 파싱하는 헬퍼 함수
-const safeParseJSON = (jsonString: string): string[] => {
-  if (!jsonString || jsonString.trim() === "") {
-    return [];
-  }
-
-  try {
-    const parsed = JSON.parse(jsonString);
-    if (Array.isArray(parsed)) {
-      return parsed.map((item) => String(item));
-    }
-    return [String(parsed)];
-  } catch (error) {
-    console.warn("JSON 파싱 실패:", error);
-    // JSON 파싱 실패 시 원본 문자열을 배열로 반환
-    return [jsonString];
-  }
+const parseCustomString = (str: string | null | undefined): string[] => {
+  if (!str || str.trim() === "") return [];
+  return str
+    .split("^") // ^ 기준으로 분리
+    .flatMap((part) => part.split("|")) // | 기준으로 다시 분리
+    .map((item) => item.trim()) // 공백 제거
+    .filter((item) => item !== ""); // 빈 문자열 제거
 };
 
 function MypagePortfolioDetail() {
@@ -161,8 +151,8 @@ function MypagePortfolioDetail() {
   }
 
   // JSON 문자열을 파싱하여 안전하게 렌더링
-  const educationList = safeParseJSON(portfolio.education);
-  const languageList = safeParseJSON(portfolio.language);
+  const educationList = parseCustomString(portfolio.education);
+  const languageList = parseCustomString(portfolio.language);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
