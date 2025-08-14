@@ -22,6 +22,7 @@ import {
   // createProject,
 } from "../../../api/portfolioApi";
 import { createProject } from "../../../api/projectApi";
+import type { ProjectInfo } from "./mypagePortfolioDetail";
 
 // 프로젝트 데이터 타입 정의
 interface ProjectData {
@@ -318,7 +319,7 @@ function MypagePortfolioPage() {
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
       // 1. 등록된 프로젝트들을 먼저 생성하고 프로젝트 ID들을 수집
-      const createdProjectIds: number[] = [];
+      const createdProjectIds: ProjectInfo[] = [];
 
       for (const project of registeredProjects) {
         try {
