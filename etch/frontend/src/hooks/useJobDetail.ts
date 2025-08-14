@@ -63,15 +63,16 @@ export const useJobDetail = (jobId: string, companyId: number): UseJobDetailRetu
   };
 
   // 2. 기업 정보 로드
-  const loadCompanyInfo = async () => {
-    if (!companyId) return;
+  const loadCompanyInfo = async (targetCompanyId?: number) => {
+    const useCompanyId = targetCompanyId || companyId || jobDetail?.companyId;
+    if (!useCompanyId) return;
     
     try {
       setCompanyLoading(true);
       setCompanyError(null);
-      console.log(`[useJobDetail] Loading company info: ${companyId}`);
+      console.log(`[useJobDetail] Loading company info: ${useCompanyId}`);
       
-      const company = await getCompany(companyId);
+      const company = await getCompany(useCompanyId);
       setCompanyInfo(company);
       console.log(`[useJobDetail] Company info loaded:`, company);
     } catch (error) {
@@ -83,15 +84,16 @@ export const useJobDetail = (jobId: string, companyId: number): UseJobDetailRetu
   };
 
   // 3. 기업 뉴스 로드
-  const loadCompanyNews = async () => {
-    if (!companyId) return;
+  const loadCompanyNews = async (targetCompanyId?: number) => {
+    const useCompanyId = targetCompanyId || companyId || jobDetail?.companyId;
+    if (!useCompanyId) return;
     
     try {
       setNewsLoading(true);
       setNewsError(null);
-      console.log(`[useJobDetail] Loading company news: ${companyId}`);
+      console.log(`[useJobDetail] Loading company news: ${useCompanyId}`);
       
-      const news = await getCompanyNews(companyId, 1, 5); // 최신 5개만
+      const news = await getCompanyNews(useCompanyId, 1, 5); // 최신 5개만
       setCompanyNews(news);
       console.log(`[useJobDetail] Company news loaded:`, news);
     } catch (error) {
@@ -102,9 +104,30 @@ export const useJobDetail = (jobId: string, companyId: number): UseJobDetailRetu
     }
   };
 
-  // jobId나 companyId가 변경되면 데이터 로드
+  // jobId가 변경되면 Job 상세 정보부터 로드
   useEffect(() => {
-    if (jobId && companyId) {
+    if (jobId) {
+      console.log(`[useJobDetail] Starting to load job detail: ${jobId}`);
+      loadJobDetail();
+    }
+  }, [jobId]);
+
+  // Job 상세 정보가 로드되면 companyId로 회사 정보와 뉴스 로드
+  useEffect(() => {
+    if (jobDetail?.companyId) {
+      console.log(`[useJobDetail] Job loaded, now loading company data: ${jobDetail.companyId}`);
+      Promise.all([
+        loadCompanyInfo(jobDetail.companyId),
+        loadCompanyNews(jobDetail.companyId)
+      ]).then(() => {
+        console.log(`[useJobDetail] Company data loaded successfully`);
+      });
+    }
+  }, [jobDetail]);
+
+  // 초기 companyId가 있는 경우 (기존 채용 페이지 호환성)
+  useEffect(() => {
+    if (jobId && companyId && companyId !== 0) {
       console.log(`[useJobDetail] Starting to load data for job: ${jobId}, company: ${companyId}`);
       
       // 3개 API를 병렬로 호출

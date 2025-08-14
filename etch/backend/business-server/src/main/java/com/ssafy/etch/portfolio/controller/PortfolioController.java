@@ -21,6 +21,7 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
 
+
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<PortfolioListResponseDTO>>> getPortfolioList(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
@@ -38,13 +39,13 @@ public class PortfolioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(null, "포트폴리오 등록 성공"));
     }
 
-    @PutMapping("/{portfolioId}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> updatePortfolio(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User,
             @RequestBody PortfolioRequestDTO portfolioRequestDTO,
-            @PathVariable Long portfolioId) {
+            @PathVariable Long id) {
 
-        portfolioService.updatePortfolio(oAuth2User.getId(), portfolioId, portfolioRequestDTO);
+        portfolioService.updatePortfolio(oAuth2User.getId(), id, portfolioRequestDTO);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(null, "포트폴리오 수정 성공"));
     }
