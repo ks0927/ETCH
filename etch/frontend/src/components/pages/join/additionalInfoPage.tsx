@@ -7,6 +7,7 @@ import BirthDateSelector from "../../organisms/join/BirthDateSelector";
 import GenderRadioGroup from "../../organisms/join/genderRadioGroup";
 import ProfileImageUploader from "../../organisms/join/profileImageUploader";
 import CompletionButton from "../../molecules/join/completionButton";
+import TokenManager from "../../../utils/tokenManager";
 
 function AdditionalInfoPage() {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ function AdditionalInfoPage() {
     console.log("profile:", profile);
 
     try {
-      const accessToken = localStorage.getItem("access_token");
+      const accessToken = TokenManager.getToken();
 
       if (!accessToken) {
         alert("비정상적인 접근입니다.");

@@ -7,6 +7,9 @@ import ChatModalContainer from "../components/common/chatModalContainer";
 import { ModalProvider, useModalContext } from "../contexts/modalContext";
 import useUserStore from "../store/userStore";
 import { getMemberInfo } from "../api/authApi";
+import { useTokenRefresh } from "../hooks/useTokenRefresh";
+import TokenManager from "../utils/tokenManager";
+import "../utils/tokenDebug"; // 디버깅 도구 로드
 
 function LayoutContent() {
   const { pathname } = useLocation();
@@ -14,22 +17,37 @@ function LayoutContent() {
   const [isInitializing, setIsInitializing] = useState(true);
   const chatModalRef = useRef<HTMLDivElement>(null);
   const { isLoggedIn, setMemberInfo } = useUserStore();
+  
+  // 토큰 자동 갱신 훅 사용 (초기화 완료 후에만 동작)
+  useTokenRefresh(!isInitializing);
 
-  // 앱 시작시 토큰 검증 및 로그인 상태 복원
+  // 앱 시작시 토큰 검증 및 로그인 상태 복원 + 토큰 갱신
   useEffect(() => {
     const restoreLoginState = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = TokenManager.getToken();
       
       // 토큰은 있는데 로그인 상태가 아닌 경우
       if (token && !isLoggedIn) {
         try {
           console.log("토큰 발견, 사용자 정보 복원 시도...");
+          
+          // 새로고침 시 토큰 갱신 시도
+          console.log("새로고침 시 토큰 갱신 시도...");
+          const refreshSuccess = await TokenManager.refreshToken();
+          
+          if (refreshSuccess) {
+            console.log("새로고침 시 토큰 갱신 성공");
+          } else {
+            console.log("새로고침 시 토큰 갱신 실패, 기존 토큰 사용");
+          }
+          
+          // 토큰 갱신 성공/실패와 관계없이 사용자 정보 복원 시도
           const userInfo = await getMemberInfo();
           setMemberInfo(userInfo);
           console.log("로그인 상태 복원 성공:", userInfo.nickname);
         } catch (error) {
           console.log("토큰 무효, 삭제:", error);
-          localStorage.removeItem("access_token");
+          TokenManager.removeToken();
         }
       }
       

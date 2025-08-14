@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { useEffect } from "react";
 import GoogleAuthButton from "../molecules/googleAuthButton";
+import TokenManager from "../../utils/tokenManager";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ function LoginPage() {
     const token = searchParams.get("token");
 
     if (token) {
-      // 1. Access token을 localStorage에 저장
-      localStorage.setItem("access_token", token);
+      // 1. Access token을 TokenManager로 저장
+      TokenManager.setToken(token);
 
       // 2. 쿠키에서 refresh token 존재 확인
       const hasRefreshToken = document.cookie

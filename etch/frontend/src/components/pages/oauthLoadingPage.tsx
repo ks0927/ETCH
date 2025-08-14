@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getMemberInfo } from "../../api/authApi";
 import useUserStore from "../../store/userStore";
+import TokenManager from "../../utils/tokenManager";
 
 const OAuthLoadingPage = () => {
   const { setMemberInfo } = useUserStore(); // Zustand 스토어에서 사용자 정보 설정 함수 가져오기
@@ -13,8 +14,8 @@ const OAuthLoadingPage = () => {
     const token = searchParams.get("token");
 
     if (token) {
-      // 1. Access token을 localStorage에 저장
-      localStorage.setItem("access_token", token);
+      // 1. Access token을 TokenManager로 저장 (발급 시간 포함)
+      TokenManager.setToken(token);
 
       const checkUser = async () => {
         try {
