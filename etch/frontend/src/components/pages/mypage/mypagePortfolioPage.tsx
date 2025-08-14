@@ -361,6 +361,8 @@ function MypagePortfolioPage() {
         createdProjectIds
       );
 
+      console.log(portfolioData.language);
+      console.log(portfolioData.education);
       console.log("API 전송용 포트폴리오 데이터:", requestData);
 
       // 3. 포트폴리오 생성 API 호출
