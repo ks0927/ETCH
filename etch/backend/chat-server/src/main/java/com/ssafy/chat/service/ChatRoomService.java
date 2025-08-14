@@ -10,6 +10,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,18 +68,25 @@ public class ChatRoomService {
     }
 
     /**
-     * 1:1 채팅방 생성 또는 기존 방 반환
+     * 🔧 수정된 1:1 채팅방 생성 또는 기존 방 반환 (양쪽 사용자 자동 등록)
      */
+    @Transactional
     public ChatRoom createOrGetDirectChatRoom(Long currentUserId, DirectChatRequestDto request) {
-        // 기존 구현 유지
+        // 기존 1:1 채팅방이 있는지 확인
         Optional<ChatRoom> existingRoom = findDirectChatRoom(currentUserId, request.getTargetUserId());
 
         if (existingRoom.isPresent()) {
+            ChatRoom room = existingRoom.get();
             log.info("Found existing direct chat room: {} between users {} and {}",
-                    existingRoom.get().getRoomId(), currentUserId, request.getTargetUserId());
-            return existingRoom.get();
+                    room.getRoomId(), currentUserId, request.getTargetUserId());
+
+            // 🆕 기존 방이 있어도 두 사용자가 모두 참가자로 등록되어 있는지 확인
+            ensureBothUsersAreParticipants(room.getRoomId(), currentUserId, request.getTargetUserId());
+
+            return room;
         }
 
+        // 새로운 1:1 채팅방 생성
         ChatRoom newRoom = ChatRoom.createDirectChat(
                 currentUserId,
                 request.getMyNickname(),
@@ -90,7 +98,40 @@ public class ChatRoomService {
         log.info("Created new direct chat room: {} between users {} and {}",
                 savedRoom.getRoomId(), currentUserId, request.getTargetUserId());
 
+        // 🆕 양쪽 사용자 모두를 채팅방 참가자로 자동 등록
+        try {
+            chatService.addParticipant(savedRoom.getRoomId(), currentUserId);
+            log.info("Added current user {} to room {}", currentUserId, savedRoom.getRoomId());
+
+            chatService.addParticipant(savedRoom.getRoomId(), request.getTargetUserId());
+            log.info("Added target user {} to room {}", request.getTargetUserId(), savedRoom.getRoomId());
+
+        } catch (Exception e) {
+            log.error("Failed to add participants to room {}: {}", savedRoom.getRoomId(), e.getMessage());
+            // 참가자 등록 실패 시 채팅방도 삭제 (rollback)
+            chatRoomRepository.delete(savedRoom);
+            throw new RuntimeException("Failed to create direct chat room: " + e.getMessage(), e);
+        }
+
         return savedRoom;
+    }
+
+    /**
+     * 🆕 양쪽 사용자가 모두 참가자로 등록되어 있는지 확인하고 누락된 경우 추가
+     */
+    private void ensureBothUsersAreParticipants(String roomId, Long user1Id, Long user2Id) {
+        try {
+            // user1 참가자 확인 및 추가
+            chatService.addParticipant(roomId, user1Id);
+
+            // user2 참가자 확인 및 추가
+            chatService.addParticipant(roomId, user2Id);
+
+            log.debug("Ensured both users {} and {} are participants in room {}",
+                    user1Id, user2Id, roomId);
+        } catch (Exception e) {
+            log.error("Failed to ensure participants in room {}: {}", roomId, e.getMessage());
+        }
     }
 
     /**

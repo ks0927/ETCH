@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -74,26 +75,83 @@ public class ChatService {
         return messages;
     }
 
+    /**
+     * 🔧 개선된 채팅방 참가자 추가 메서드 (중복 방지 및 안전성 강화)
+     */
     @Transactional
     public void addParticipant(String roomId, Long memberId) {
-        if (chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId).isEmpty()) {
+        if (roomId == null || memberId == null) {
+            log.warn("Invalid parameters for addParticipant: roomId={}, memberId={}", roomId, memberId);
+            return;
+        }
+
+        try {
+            // 기존 참가자 확인
+            Optional<ChatParticipant> existingParticipant =
+                    chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId);
+
+            if (existingParticipant.isPresent()) {
+                log.debug("Member {} is already a participant in room {}", memberId, roomId);
+                return; // 이미 참가자인 경우 추가하지 않음
+            }
+
+            // 새로운 참가자 추가
             ChatParticipant participant = ChatParticipant.builder()
                     .roomId(roomId)
                     .memberId(memberId)
                     .joinedAt(LocalDateTime.now())
                     .build();
-            chatParticipantRepository.save(participant);
-            log.info("Member {} added to room {}", memberId, roomId);
+
+            ChatParticipant savedParticipant = chatParticipantRepository.save(participant);
+            log.info("Member {} successfully added to room {} (participant_id: {})",
+                    memberId, roomId, savedParticipant.getId());
+
+        } catch (Exception e) {
+            log.error("Failed to add member {} to room {}: {}", memberId, roomId, e.getMessage(), e);
+            throw new RuntimeException("Failed to add participant to chat room", e);
         }
     }
 
-    @Transactional
-    public void removeParticipant(String roomId, Long memberId) {
-        chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId)
-                .ifPresent(participant -> {
-                    chatParticipantRepository.delete(participant);
-                    log.info("Member {} removed from room {}", memberId, roomId);
-                });
+    /**
+     * 🆕 채팅방의 모든 참가자 조회
+     */
+    @Transactional(readOnly = true)
+    public List<ChatParticipant> getRoomParticipants(String roomId) {
+        try {
+            return chatParticipantRepository.findByRoomId(roomId);
+        } catch (Exception e) {
+            log.error("Failed to get participants for room {}: {}", roomId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * 🆕 특정 사용자의 모든 참가 채팅방 ID 조회
+     */
+    @Transactional(readOnly = true)
+    public List<String> getUserParticipatingRoomIds(Long memberId) {
+        try {
+            return chatParticipantRepository.findByMemberId(memberId)
+                    .stream()
+                    .map(ChatParticipant::getRoomId)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Failed to get participating rooms for member {}: {}", memberId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * 🆕 채팅방 참가자 수 조회 (안전성 강화)
+     */
+    @Transactional(readOnly = true)
+    public int getRoomParticipantCount(String roomId) {
+        try {
+            return chatParticipantRepository.countByRoomId(roomId);
+        } catch (Exception e) {
+            log.error("Failed to count participants for room {}: {}", roomId, e.getMessage());
+            return 0;
+        }
     }
 
     /**
