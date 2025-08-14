@@ -235,7 +235,7 @@ function MypagePortfolioPage() {
   const handleActivityAdd = (educationString: string) => {
     // 기존 문자열에 새 항목 추가
     const newEducationString = portfolioData.education
-      ? `${portfolioData.education}/${educationString}`
+      ? `${portfolioData.education}|${educationString}`
       : educationString;
 
     setPortfolioData((prev) => ({
@@ -251,7 +251,7 @@ function MypagePortfolioPage() {
   const handleLicenseAdd = (languageString: string) => {
     // 기존 문자열에 새 항목 추가
     const newLanguageString = portfolioData.language
-      ? `${portfolioData.language}/${languageString}`
+      ? `${portfolioData.language}|${languageString}`
       : languageString;
 
     setPortfolioData((prev) => ({
