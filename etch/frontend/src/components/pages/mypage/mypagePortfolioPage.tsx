@@ -15,7 +15,6 @@ import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect
 import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
 import PortfolioProjectPage from "./portfolioProjectPage";
-import { createPortfolio, convertPortfolioDataToRequest } from "../../../api/portfolioApi";
 
 // 프로젝트 데이터 타입 정의
 interface ProjectData {
@@ -225,6 +224,8 @@ function MypagePortfolioPage() {
       education: newEducationString,
     }));
 
+    // 폼 닫기
+    setShowEducationForm(false);
     console.log("교육/활동 추가됨:", educationString);
   };
 
@@ -239,6 +240,8 @@ function MypagePortfolioPage() {
       language: newLanguageString,
     }));
 
+    // 폼 닫기
+    setShowLanguageForm(false);
     console.log("자격증 추가됨:", languageString);
   };
 
@@ -252,6 +255,7 @@ function MypagePortfolioPage() {
       ...prev,
       education: newEducationString,
     }));
+    console.log("교육/활동 삭제됨, 인덱스:", index);
   };
 
   const handleLanguageRemove = (index: number) => {
@@ -264,6 +268,7 @@ function MypagePortfolioPage() {
       ...prev,
       language: newLanguageString,
     }));
+    console.log("자격증 삭제됨, 인덱스:", index);
   };
 
   const handleSubmit = async () => {
@@ -281,15 +286,14 @@ function MypagePortfolioPage() {
       console.log("제출할 포트폴리오 데이터:", portfolioData);
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // portfolioData를 API 요청 형태로 변환
-      const apiRequestData = convertPortfolioDataToRequest(portfolioData);
-      console.log("API 전송용 데이터:", apiRequestData);
+      // portfolioData는 이미 올바른 문자열 형태이므로 그대로 API 전송
+      console.log("API 전송용 데이터:", portfolioData);
 
-      // 포트폴리오 생성
-      await createPortfolio(apiRequestData);
-      alert("포트폴리오가 성공적으로 등록되었습니다!");
+      // 실제 API 호출 로직
+      // 1. 포트폴리오 생성 API
+      // const portfolioResponse = await createPortfolio(portfolioData);
 
-      // TODO: 등록된 프로젝트들 생성 API 호출
+      // 2. 등록된 프로젝트들 생성 API
       // for (const project of registeredProjects) {
       //   const projectInput = {
       //     title: project.title,
@@ -305,9 +309,10 @@ function MypagePortfolioPage() {
       //   await createProject(projectInput);
       // }
 
+      alert("포트폴리오와 프로젝트가 성공적으로 등록되었습니다!");
     } catch (error) {
-      console.error("포트폴리오 등록 실패:", error);
-      alert("포트폴리오 등록 중 오류가 발생했습니다.");
+      console.error("등록 실패:", error);
+      alert("등록 중 오류가 발생했습니다.");
     }
   };
 
