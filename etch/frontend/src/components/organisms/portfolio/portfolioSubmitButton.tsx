@@ -4,11 +4,13 @@ import PortfolioButton from "../../molecules/portfolio/portfolioButton";
 interface PortfolioSubmitButtonProps {
   onSubmit: () => void;
   isDisabled: boolean;
+  submitButtonText?: string;
 }
 
 function PortfolioSubmitButton({
   onSubmit,
   isDisabled,
+  submitButtonText = "포트폴리오 등록",
 }: PortfolioSubmitButtonProps) {
   const navigate = useNavigate();
   return (
@@ -24,7 +26,7 @@ function PortfolioSubmitButton({
         }}
       />
       <PortfolioButton
-        text="포트폴리오 등록"
+        text={submitButtonText}
         bgColor={isDisabled ? "bg-gray-400" : "bg-blue-500"}
         textColor="text-white"
         css={`px-8 py-3 rounded-lg font-semibold transition-all duration-200 whitespace-nowrap min-w-[140px] order-1 sm:order-2 ${
