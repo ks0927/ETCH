@@ -1,7 +1,6 @@
 package com.ssafy.etch.search.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,12 +28,14 @@ public class SearchController {
 	private final ProjectSearchService projectSearchService;
 
 	@GetMapping
-	public ResponseEntity<ApiResponse<SearchResponseDTO>> search(@RequestParam(required = false) String keyword) {
-		List<JobSearchResponseDTO> jobDocuments = jobSearchService.searchWithFilters(keyword, null, null, null,
-			null);
-		List<NewsSearchResponseDTO> newsDocuments = newsSearchService.search(keyword);
-		List<ProjectSearchResponseDTO> projectDocuments = projectSearchService.search(keyword, null,
-			ProjectSort.LATEST);
+	public ResponseEntity<ApiResponse<SearchResponseDTO>> search(@RequestParam(required = false) String keyword,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "3") int size) {
+		Page<JobSearchResponseDTO> jobDocuments = jobSearchService.searchWithFilters(keyword, null, null, null,
+			null, page, size);
+		Page<NewsSearchResponseDTO> newsDocuments = newsSearchService.search(keyword, page, size);
+		Page<ProjectSearchResponseDTO> projectDocuments = projectSearchService.search(keyword, null,
+			ProjectSort.LATEST, page, size);
 		SearchResponseDTO searchResponseDTO = SearchResponseDTO.from(jobDocuments, newsDocuments, projectDocuments);
 		return ResponseEntity.ok(ApiResponse.success(searchResponseDTO));
 	}

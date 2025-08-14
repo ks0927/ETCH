@@ -1,6 +1,6 @@
 package com.ssafy.etch.search.dto;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -9,19 +9,13 @@ import lombok.Getter;
 @Getter
 public class SearchResponseDTO {
 
-	private int jobCount;
-	private int newsCount;
-	private int projectCount;
-	private List<JobSearchResponseDTO> jobs;
-	private List<NewsSearchResponseDTO> news;
-	private List<ProjectSearchResponseDTO> projects;
+	private Page<JobSearchResponseDTO> jobs;
+	private Page<NewsSearchResponseDTO> news;
+	private Page<ProjectSearchResponseDTO> projects;
 
-	public static SearchResponseDTO from(List<JobSearchResponseDTO> jobs, List<NewsSearchResponseDTO> news,
-		List<ProjectSearchResponseDTO> projects) {
+	public static SearchResponseDTO from(Page<JobSearchResponseDTO> jobs, Page<NewsSearchResponseDTO> news,
+		Page<ProjectSearchResponseDTO> projects) {
 		return SearchResponseDTO.builder()
-			.jobCount(jobs.size())
-			.newsCount(news.size())
-			.projectCount(projects.size())
 			.jobs(jobs)
 			.news(news)
 			.projects(projects)
