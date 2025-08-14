@@ -24,50 +24,56 @@ chatInstance.interceptors.request.use(
   }
 );
 
-// 채팅방 관리 API - 운영 환경
+// 채팅방 관리 API - 운영 환경 (nginx 프록시 대응)
 export const chatApi = {
-  // 모든 채팅방 목록 조회
+  // 모든 채팅방 목록 조회: GET /api/chat/chat/rooms
   getRooms: async (): Promise<ChatRoom[]> => {
-    const response = await chatInstance.get('/rooms');
+    const response = await chatInstance.get('/chat/rooms');
     return response.data;
   },
 
-  // 1:1 채팅방 생성 (새로운 API 명세에 따라)
+  // 1:1 채팅방 생성: POST /api/chat/chat/direct
   createDirectChat: async (request: DirectChatRequest): Promise<ChatRoom> => {
-    const response = await chatInstance.post('/direct', request);
+    const response = await chatInstance.post('/chat/direct', request);
     return response.data;
   },
 
-  // 특정 채팅방 정보 조회
+  // 그룹 채팅방 생성: POST /api/chat/chat/room
+  createGroupRoom: async (roomName: string): Promise<ChatRoom> => {
+    const response = await chatInstance.post(`/chat/room?name=${encodeURIComponent(roomName)}`);
+    return response.data;
+  },
+
+  // 특정 채팅방 정보 조회: GET /api/chat/chat/room/{roomId}
   getRoom: async (roomId: string): Promise<ChatRoom> => {
-    const response = await chatInstance.get(`/room/${roomId}`);
+    const response = await chatInstance.get(`/chat/room/${roomId}`);
     return response.data;
   },
 
-  // 채팅방 메시지 내역 조회
+  // 채팅방 메시지 내역 조회: GET /api/chat/chat/room/{roomId}/messages
   getRoomMessages: async (roomId: string): Promise<ChatMessage[]> => {
-    const response = await chatInstance.get(`/room/${roomId}/messages`);
+    const response = await chatInstance.get(`/chat/room/${roomId}/messages`);
     return response.data;
   },
 
-  // 채팅방 입장
+  // 채팅방 입장: POST /api/chat/chat/room/{roomId}/enter
   enterRoom: async (roomId: string): Promise<void> => {
-    await chatInstance.post(`/room/${roomId}/enter`);
+    await chatInstance.post(`/chat/room/${roomId}/enter`);
   },
 
-  // 채팅방 퇴장
+  // 채팅방 퇴장: POST /api/chat/chat/room/{roomId}/exit
   exitRoom: async (roomId: string): Promise<void> => {
-    await chatInstance.post(`/room/${roomId}/exit`);
+    await chatInstance.post(`/chat/room/${roomId}/exit`);
   },
 
-  // 메시지 읽음 처리
+  // 메시지 읽음 처리: POST /api/chat/chat/room/{roomId}/read
   markAsRead: async (roomId: string): Promise<void> => {
-    await chatInstance.post(`/room/${roomId}/read`);
+    await chatInstance.post(`/chat/room/${roomId}/read`);
   },
 
-  // 안 읽은 메시지 수 조회
+  // 안 읽은 메시지 수 조회: GET /api/chat/chat/rooms/unread-counts
   getUnreadCounts: async () => {
-    const response = await chatInstance.get('/rooms/unread-counts');
+    const response = await chatInstance.get('/chat/rooms/unread-counts');
     return response.data;
   }
 };
