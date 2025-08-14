@@ -64,4 +64,20 @@ public class RedisConfig {
         redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
+
+    // ChatMessage 전용 RedisTemplate 추가
+    @Bean
+    public RedisTemplate<String, String> chatMessageRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+
+        // 모든 직렬화를 String으로 통일
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+
+        redisTemplate.afterPropertiesSet();
+        return redisTemplate;
+    }
 }
