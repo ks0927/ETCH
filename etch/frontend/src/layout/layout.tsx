@@ -4,11 +4,39 @@ import Footer from "../components/common/footer";
 import Header from "../components/common/header";
 import ChatButton from "../components/molecules/chat/chatButton";
 import ChatModalContainer from "../components/common/chatModalContainer";
+import useUserStore from "../store/userStore";
+import { getMemberInfo } from "../api/authApi";
 
 function Layout() {
   const { pathname } = useLocation();
   const [showChatModal, setShowChatModal] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const chatModalRef = useRef<HTMLDivElement>(null);
+  const { isLoggedIn, setMemberInfo } = useUserStore();
+
+  // 앱 시작시 토큰 검증 및 로그인 상태 복원
+  useEffect(() => {
+    const restoreLoginState = async () => {
+      const token = localStorage.getItem("access_token");
+      
+      // 토큰은 있는데 로그인 상태가 아닌 경우
+      if (token && !isLoggedIn) {
+        try {
+          console.log("토큰 발견, 사용자 정보 복원 시도...");
+          const userInfo = await getMemberInfo();
+          setMemberInfo(userInfo);
+          console.log("로그인 상태 복원 성공:", userInfo.nickname);
+        } catch (error) {
+          console.log("토큰 무효, 삭제:", error);
+          localStorage.removeItem("access_token");
+        }
+      }
+      
+      setIsInitializing(false);
+    };
+
+    restoreLoginState();
+  }, []); // 앱 시작시 한 번만
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -33,6 +61,18 @@ function Layout() {
       setShowChatModal(false);
     }
   };
+
+  // 초기화 중일 때 로딩 화면
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">앱을 초기화하는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
