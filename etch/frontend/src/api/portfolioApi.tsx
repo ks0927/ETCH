@@ -1,6 +1,7 @@
 import { authInstance } from "./instances";
 import type { portfolioDatas } from "../types/portfolio/portfolioDatas";
 import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
+import type { ProjectInfo } from "../components/pages/mypage/mypagePortfolioDetail";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -60,7 +61,7 @@ interface PortfolioDetailResponseDTO {
   language: string;
   education: string;
   memberId: number;
-  projectList: number[];
+  projectList: ProjectInfo[];
   createdAt: string;
   updatedAt: string;
 }
