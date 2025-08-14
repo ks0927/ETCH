@@ -100,7 +100,7 @@ public class ProjectEntity {
 		""")
 	private Integer likeCount;
 
-	// 댓글 수
+	// 댓글 수 /
 	@org.hibernate.annotations.Formula("""
 		(SELECT COUNT(1)
 		 FROM project_comment c
