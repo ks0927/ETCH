@@ -5,6 +5,7 @@ import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.global.response.PageResponseDTO;
+import com.ssafy.etch.global.service.FastApiService;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
@@ -45,6 +46,7 @@ public class MemberController {
     private final JWTUtil jwtUtil;
     private final ProjectService projectService;
     private final NewsService newsService;
+    private final FastApiService fastApiService;
 
     @Operation(
         summary = "마이페이지 API",
@@ -56,6 +58,10 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("Invalid refresh token."));
         }
         MemberResponseDTO memberDTO = MemberResponseDTO.from(memberService.findById(oAuth2User.getId()));
+        
+        // 추천 api 호출
+        fastApiService.requestRecommendList(oAuth2User.getId()).subscribe();
+
         return ResponseEntity.ok(ApiResponse.success(memberDTO));
     }
 
@@ -196,7 +202,6 @@ public class MemberController {
         try {
             return new ObjectMapper().readValue(json, clazz);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new CustomException(ErrorCode.INVALID_INPUT);
         }
     }
