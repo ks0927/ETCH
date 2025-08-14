@@ -1,5 +1,4 @@
 import { useState } from "react";
-import PlusSVG from "../../svg/plusSVG";
 
 interface CommentInputProps {
   onSubmit: (content: string) => void;

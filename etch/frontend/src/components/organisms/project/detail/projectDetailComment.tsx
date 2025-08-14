@@ -78,10 +78,10 @@ function ProjectDetailComment({ projectId, currentUserId }: Props) {
     }
   };
 
-  // 좋아요 처리 (구현해야됨됨)
-  const handleLikeComment = (commentId: number) => {
-    console.log("좋아요 처리:", commentId);
-  };
+  // // 좋아요 처리 (구현해야됨됨)
+  // const handleLikeComment = (commentId: number) => {
+  //   console.log("좋아요 처리:", commentId);
+  // };
 
   useEffect(() => {
     if (projectId && !isNaN(projectId)) {
