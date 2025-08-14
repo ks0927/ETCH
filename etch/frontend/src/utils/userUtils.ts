@@ -11,5 +11,13 @@ export const getCurrentUserName = (): string => {
 };
 
 export const getAccessToken = (): string | null => {
-  return localStorage.getItem('access_token');
+  const token = localStorage.getItem("access_token");
+  console.log("현재 토큰:", token); // 디버깅용 로그 추가
+  
+  if (!token) {
+    console.warn("토큰이 없습니다. 로그인이 필요합니다.");
+    return null;
+  }
+  
+  return token;
 };

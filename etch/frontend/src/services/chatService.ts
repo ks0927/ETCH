@@ -10,7 +10,7 @@ export class ChatService {
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.stompClient = new Client({
-        webSocketFactory: () => new SockJS('wss://etch.it.kr/api/chat/chat/ws-stomp'),
+        webSocketFactory: () => new SockJS('https://etch.it.kr/api/chat/chat/ws-stomp'),
         connectHeaders: token ? {
           Authorization: `Bearer ${token}`
         } : {},
@@ -29,7 +29,12 @@ export class ChatService {
         },
         onDisconnect: () => {
           console.log('WebSocket 연결 해제됨');
-        }
+        },
+
+        // 연결 재시도 설정 추가
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
       });
       
       this.stompClient.activate();
