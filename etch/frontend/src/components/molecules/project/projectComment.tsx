@@ -27,14 +27,20 @@ function ProjectComment({
   
   // 시간 포맷팅 함수
   const formatDateTime = (timeString: string) => {
-    try {
-      const d = new Date(timeString);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    } catch {
-      return timeString;
-    }
-  };
+  try {
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Seoul', // KST 고정
+    }).format(new Date(timeString));
+  } catch {
+    return timeString;
+  }
+};
 
   // 사용자 프로필 페이지로 이동
   const handleProfileClick = () => {
