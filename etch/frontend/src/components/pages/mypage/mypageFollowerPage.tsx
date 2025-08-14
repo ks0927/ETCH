@@ -1,12 +1,17 @@
 import UserList from "../../organisms/mypage/userList";
 import { useFollowList } from "../../../hooks/useFollowList";
 import { checkFollowExists, followUser, unfollowUser } from "../../../api/followApi";
+import { chatApi } from "../../../api/chatApi.tsx";
+import { useModalContext } from "../../../contexts/modalContext";
+import { getCurrentUserName } from "../../../utils/userUtils";
 import { useState, useEffect } from "react";
 
 function MypageFollowerPage() {
   const { userList, isLoading, error } = useFollowList('followers');
   const [followStatus, setFollowStatus] = useState<{[key: number]: boolean}>({});
   const [loadingUsers, setLoadingUsers] = useState<{[key: number]: boolean}>({});
+  const [chatLoadingUsers, setChatLoadingUsers] = useState<{[key: number]: boolean}>({});
+  const { openChatModal } = useModalContext();
 
   // 각 팔로워에 대해 내가 팔로우하고 있는지 확인
   useEffect(() => {
@@ -35,8 +40,32 @@ function MypageFollowerPage() {
     checkAllFollowStatus();
   }, [userList]);
 
-  const handleChatClick = (userId: number) => {
-    console.log(`채팅 시작: ${userId}`);
+  const handleChatClick = async (userId: number, targetNickname: string) => {
+    if (chatLoadingUsers[userId]) return;
+
+    setChatLoadingUsers(prev => ({ ...prev, [userId]: true }));
+    
+    try {
+      // 현재 사용자와 대상 사용자의 닉네임 가져오기
+      const myNickname = getCurrentUserName();
+      
+      // 1:1 채팅방 생성 (새로운 API 사용)
+      const chatRoom = await chatApi.createDirectChat({
+        targetUserId: userId,
+        myNickname: myNickname,
+        targetNickname: targetNickname
+      });
+      
+      // 채팅 모달을 열고 해당 채팅방으로 이동
+      openChatModal(chatRoom.roomId);
+      
+      console.log("1:1 채팅방 생성/조회 성공:", chatRoom);
+    } catch (error) {
+      console.error("채팅방 생성 실패:", error);
+      alert("채팅을 시작할 수 없습니다. 다시 시도해주세요.");
+    } finally {
+      setChatLoadingUsers(prev => ({ ...prev, [userId]: false }));
+    }
   };
 
   const handleFollowToggle = async (userId: number) => {
@@ -85,6 +114,7 @@ function MypageFollowerPage() {
         listType="followers"
         followStatus={followStatus}
         loadingUsers={loadingUsers}
+        chatLoadingUsers={chatLoadingUsers}
         onChatClick={handleChatClick}
         onFollowToggle={handleFollowToggle}
       />

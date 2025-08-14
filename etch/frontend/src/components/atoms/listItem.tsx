@@ -69,11 +69,12 @@ export interface DeadlineItemProps extends BaseListItemProps {
   urgency: "urgent" | "warning";
 }
 
-// 사용자 아이템 전용
+// 사용자 아이템 전용 - 수정된 버전
 export interface UserItemProps extends UserProfile {
   isFollowing: boolean;
   isLoading?: boolean;
+  isChatLoading?: boolean; // 채팅 로딩 상태 추가
   canChat: boolean;
-  onChatClick: (userId: number) => void;
+  onChatClick: (userId: number, targetNickname: string) => void; // 파라미터 수정
   onFollowToggle: (userId: number) => void;
 }

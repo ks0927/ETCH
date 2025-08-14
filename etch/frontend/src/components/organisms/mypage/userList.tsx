@@ -6,11 +6,12 @@ interface UserListProps {
   listType: 'followers' | 'following'; // 목록 타입을 받도록 추가
   followStatus?: {[key: number]: boolean}; // 개별 팔로우 상태
   loadingUsers?: {[key: number]: boolean}; // 개별 로딩 상태
-  onChatClick: (userId: number) => void;
+  chatLoadingUsers?: {[key: number]: boolean}; // 개별 채팅 로딩 상태
+  onChatClick: (userId: number, targetNickname: string) => void; // 파라미터 수정
   onFollowToggle: (userId: number) => void;
 }
 
-function UserList({ users, listType, followStatus, loadingUsers, onChatClick, onFollowToggle }: UserListProps) {
+function UserList({ users, listType, followStatus, loadingUsers, chatLoadingUsers, onChatClick, onFollowToggle }: UserListProps) {
   if (users.length === 0) {
     return (
       <div className="text-center py-16 px-5 text-gray-600">
@@ -31,6 +32,7 @@ function UserList({ users, listType, followStatus, loadingUsers, onChatClick, on
         // followStatus가 있으면 개별 상태 사용, 없으면 기본 로직 사용
         const isFollowing = followStatus ? (followStatus[user.id] ?? false) : (listType === 'following');
         const isLoading = loadingUsers ? (loadingUsers[user.id] ?? false) : false;
+        const isChatLoading = chatLoadingUsers ? (chatLoadingUsers[user.id] ?? false) : false;
         const canChat = isFollowing; // 팔로우하고 있는 경우에만 채팅 가능
 
         return (
@@ -39,6 +41,7 @@ function UserList({ users, listType, followStatus, loadingUsers, onChatClick, on
             {...user} // user 객체의 모든 속성을 전달
             isFollowing={isFollowing}
             isLoading={isLoading}
+            isChatLoading={isChatLoading}
             canChat={canChat}
             onChatClick={onChatClick}
             onFollowToggle={onFollowToggle}

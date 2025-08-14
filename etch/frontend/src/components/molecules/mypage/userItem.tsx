@@ -9,13 +9,14 @@ function UserItem({
   profile,
   isFollowing,
   isLoading = false,
+  isChatLoading = false,
   canChat,
   onChatClick,
   onFollowToggle,
 }: UserItemProps) {
   const handleChatClick = () => {
-    if (canChat) {
-      onChatClick(id);
+    if (canChat && !isChatLoading) {
+      onChatClick(id, nickname); // nickname도 함께 전달
     }
   };
 
@@ -56,9 +57,9 @@ function UserItem({
         {/* Chat Button */}
         <button
           onClick={handleChatClick}
-          disabled={!canChat}
+          disabled={!canChat || isChatLoading}
           className={`px-4 py-2 rounded-md text-xs font-medium flex items-center gap-1 transition-all duration-200 ${
-            canChat
+            canChat && !isChatLoading
               ? "bg-blue-600 text-white hover:bg-blue-700 border border-blue-600"
               : "bg-gray-600 text-white border border-gray-600 opacity-60 cursor-not-allowed"
           }`}
@@ -67,7 +68,7 @@ function UserItem({
           <div className="w-3 h-3">
             <ChatIcon />
           </div>
-          채팅
+          {isChatLoading ? "처리중..." : "채팅"}
         </button>
 
         {/* Follow Button */}
