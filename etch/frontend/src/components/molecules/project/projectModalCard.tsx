@@ -267,7 +267,15 @@ function ProjectModalCard({
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleString("ko-KR");
+      return new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Seoul"
+      }).format(date);
     } catch {
       return dateString;
     }
@@ -420,9 +428,9 @@ function ProjectModalCard({
             </button>
             {/* 수정되면 updatedAt 으로 변경 */}
             <p className="text-xs text-gray-500">
-              {createdAt === updatedAt
-                ? `작성일: ${formatDate(createdAt)}`
-                : `수정일: ${formatDate(updatedAt)}`}
+              {Math.abs(new Date(updatedAt).getTime() - new Date(createdAt).getTime()) > 1000
+                ? `수정일: ${formatDate(updatedAt)}`
+                : `작성일: ${formatDate(createdAt)}`}
             </p>
           </div>
         </div>
@@ -732,7 +740,7 @@ function ProjectModalCard({
           </div>
         </section>
       )}
-      d{/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
+      {/* 로그인하지 않은 경우 안내 메시지 (선택사항) */}
       {!isLoggedIn() && (
         <section className="pt-4 border-t border-gray-100">
           <div className="text-center py-4">
