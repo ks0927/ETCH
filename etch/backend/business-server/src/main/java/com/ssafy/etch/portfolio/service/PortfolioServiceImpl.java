@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +60,7 @@ public class PortfolioServiceImpl implements PortfolioService {
                 .toPortfolioDTO(techList)
                 .toBuilder()
                 .member(memberEntity)
+                .createdAt(LocalDate.now())
                 .build();
 
         PortfolioEntity savedPortfolio = portfolioRepository.save(PortfolioEntity.from(portfolioDTO));

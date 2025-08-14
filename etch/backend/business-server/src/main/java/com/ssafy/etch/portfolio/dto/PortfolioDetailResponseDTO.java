@@ -29,6 +29,7 @@ public class PortfolioDetailResponseDTO {
     private List<EduAndActDTO> education;
     private List<CertAndLangDTO> language;
     private List<ProjectListDTO> projectList;
+    private LocalDate updatedAt;
 
     public static PortfolioDetailResponseDTO from(PortfolioDTO portfolioDTO, List<String> techList) {
         return builder()
@@ -41,6 +42,7 @@ public class PortfolioDetailResponseDTO {
                 .email(portfolioDTO.getEmail())
                 .phoneNumber(portfolioDTO.getPhoneNumber())
                 .techList(techList)
+                .updatedAt(portfolioDTO.getUpdatedAt())
                 .education(parseDelimitedString(
                         portfolioDTO.getEducation(),
                         info -> EduAndActDTO.builder()
