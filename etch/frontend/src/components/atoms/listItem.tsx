@@ -41,6 +41,7 @@ export interface JobItemProps extends BaseListItemProps {
 export interface DocumentItemProps extends BaseListItemProps {
   title: string;
   date?: string;
+  description?: string; // 한줄소개를 위한 필드 추가
   onDelete?: (id: string) => void;
   onEdit?: (id: string) => void; // Add onEdit prop
 }
