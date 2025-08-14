@@ -292,13 +292,11 @@ function MypagePortfolioPage() {
 
   // ============== 수정된 제출 핸들러 ==============
   const handleSubmit = async () => {
-    // 이미 제출 중이면 중복 방지
     if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
 
-      // 포트폴리오 기본 정보 유효성 검사
       if (!portfolioData.name?.trim()) {
         alert("이름을 입력해주세요.");
         return;
@@ -318,7 +316,7 @@ function MypagePortfolioPage() {
       console.log("제출할 포트폴리오 데이터:", portfolioData);
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // 1. 등록된 프로젝트들을 먼저 생성하고 프로젝트 ID들을 수집
+      // 1. 등록된 프로젝트 생성 및 ID 수집
       const createdProjectIds: ProjectInfo[] = [];
 
       for (const project of registeredProjects) {
@@ -345,8 +343,6 @@ function MypagePortfolioPage() {
           );
         } catch (projectError) {
           console.error(`프로젝트 "${project.title}" 생성 실패:`, projectError);
-          // 개별 프로젝트 생성 실패 시에도 계속 진행 (선택사항)
-          // 완전히 중단하려면 throw projectError; 사용
           alert(
             `프로젝트 "${project.title}" 등록에 실패했습니다. 계속 진행합니다.`
           );
@@ -355,34 +351,40 @@ function MypagePortfolioPage() {
 
       console.log("생성된 프로젝트 ID들:", createdProjectIds);
 
-      // 2. portfolioData를 API 형식으로 변환 (생성된 프로젝트 ID들 포함)
+      // 2. portfolioData를 API 형식으로 변환
       const requestData = convertPortfolioDataToRequest(
         portfolioData,
         createdProjectIds
       );
 
-      console.log(portfolioData.language);
-      console.log(portfolioData.education);
+      // 3. language와 education을 문자열로 변환
+      if (portfolioData.language && Array.isArray(portfolioData.language)) {
+        requestData.language = portfolioData.language
+          .map((lang) => [lang.name, lang.getAt, lang.issuer].join("^"))
+          .join("|");
+      }
+
+      if (portfolioData.education && Array.isArray(portfolioData.education)) {
+        requestData.education = portfolioData.education
+          .map((edu) => [edu.school, edu.graduationAt, edu.major].join("^"))
+          .join("|");
+      }
+
       console.log("API 전송용 포트폴리오 데이터:", requestData);
 
-      // 3. 포트폴리오 생성 API 호출
+      // 4. 포트폴리오 생성 API 호출
       const portfolioResponse = await createPortfolio(requestData);
       console.log("포트폴리오 생성 성공:", portfolioResponse);
 
-      // 4. 성공 메시지
       alert(
         `포트폴리오가 성공적으로 등록되었습니다!\n-  등록된 프로젝트 수: ${createdProjectIds.length}개`
       );
 
-      // 5. 마이페이지로 이동
       navigate("/mypage");
     } catch (error) {
-      console.error("=== 포트폴리오 등록 실패 ===");
-      console.error("에러 상세:", error);
+      console.error("=== 포트폴리오 등록 실패 ===", error);
 
-      // 에러 메시지 표시
       let errorMessage = "포트폴리오 등록 중 오류가 발생했습니다.";
-
       const err = error as {
         response?: { data?: { message?: string }; status?: number };
       };
