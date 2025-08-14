@@ -15,7 +15,7 @@ function AdditionalInfoPage() {
   const [tel, setTel] = useState("");
   const [birth, setBirth] = useState("");
   const [gender, setGender] = useState("");
-  const [profile, setProfile] = useState("");
+  const [profile, setProfile] = useState<File | null>(null);
 
   const handleNicknameChange = (value: string) => {
     setNickname(value);
@@ -33,8 +33,8 @@ function AdditionalInfoPage() {
     setGender(value);
   };
 
-  const handleProfileChange = (value: string) => {
-    setProfile(value);
+  const handleProfileChange = (file: File | null) => {
+    setProfile(file);
   };
 
   const handleSubmit = async () => {
@@ -43,7 +43,7 @@ function AdditionalInfoPage() {
     console.log("tel:", tel);
     console.log("birth:", birth);
     console.log("gender:", gender);
-    console.log("profile:", profile);
+    console.log("profile:", profile?.name || "No file selected");
 
     try {
       const accessToken = TokenManager.getToken();
@@ -72,7 +72,7 @@ function AdditionalInfoPage() {
       }
 
       console.log("회원가입 데이터:", memberData);
-      console.log("프로필 파일:", profile);
+      console.log("프로필 파일:", profile?.name || "No file selected");
       console.log("Access Token:", accessToken);
 
       const response = await axios.post(
