@@ -20,7 +20,7 @@ interface CreatePortfolioRequest {
   techList: string[];
   education: string;
   language: string;
-  projectList: number[];
+  projectList: ProjectInfo[];
 }
 
 // 포트폴리오 응답 타입
@@ -212,7 +212,7 @@ export const getPortfolioByUserId = async (
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
-  projectList: number[] = []
+  projectList: ProjectInfo[] = []
 ): CreatePortfolioRequest => {
   return {
     name: portfolioData.name || "",
