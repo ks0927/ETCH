@@ -15,7 +15,7 @@ export default function ChatMessageItem({
     <div className={`mb-4 flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
       {/* 내가 보낸 메시지인 경우 읽음 표시를 메시지 왼쪽에 */}
       {isMe && unreadCount !== undefined && (
-        <div className="text-xs text-gray-500 pb-1 min-w-fit">
+        <div className="text-xs text-gray-500 pb-1 min-w-fit chat-unread-count">
           {unreadCount > 0 ? unreadCount : ''}
         </div>
       )}
