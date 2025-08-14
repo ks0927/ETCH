@@ -7,7 +7,7 @@ import type { ProjectInputData } from "../types/project/projectDatas";
 export interface ProjectCreateRequestData {
   title: string;
   content: string;
-  category: ProjectCategoryEnum;
+  projectCategory: ProjectCategoryEnum;
   techCodeIds: number[];
   githubUrl?: string;
   youtubeUrl?: string;
@@ -68,7 +68,7 @@ export async function createProject(projectInput: ProjectInputData) {
     const requestData: ProjectCreateRequestData = {
       title: projectInput.title,
       content: projectInput.content,
-      category: projectInput.projectCategory,
+      projectCategory: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
       githubUrl: projectInput.githubUrl,
       youtubeUrl: projectInput.youtubeUrl,
@@ -154,7 +154,7 @@ export async function updateProject(
     const requestData = {
       title: projectInput.title,
       content: projectInput.content,
-      category: projectInput.projectCategory,
+      projectCategory: projectInput.projectCategory,
       techCodeIds: projectInput.techCodeIds,
       githubUrl: projectInput.githubUrl || null,
       youtubeUrl: projectInput.youtubeUrl || null,
