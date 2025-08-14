@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChatProvider, useChatContext } from "../../contexts/chatContext";
+import { useModalContext } from "../../contexts/modalContext";
 import ChatListPage from "../pages/chat/chatListPage";
 import ChatRoomPage from "../pages/chat/chatRoomPage";
 import ChatListHeader from "../molecules/modal/chatListHeader";
@@ -11,7 +12,8 @@ interface ChatModalContainerProps {
 
 function ChatModalContent({ onClose }: ChatModalContainerProps) {
   const [modalState, setModalState] = useState<'list' | 'room'>('list');
-  const { currentRoom, leaveRoom } = useChatContext();
+  const { currentRoom, leaveRoom, selectRoom } = useChatContext();
+  const { targetRoomId } = useModalContext();
 
   const handleRoomSelect = async (_roomId: string, _roomName: string) => {
     setModalState('room');
@@ -47,6 +49,13 @@ function ChatModalContent({ onClose }: ChatModalContainerProps) {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleEscKey]);
+
+  // targetRoomId가 있을 때 해당 채팅방으로 자동 이동
+  useEffect(() => {
+    if (targetRoomId && !currentRoom) {
+      selectRoom(targetRoomId);
+    }
+  }, [targetRoomId, currentRoom, selectRoom]);
 
   // currentRoom 상태에 따라 모달 상태 동기화
   useEffect(() => {

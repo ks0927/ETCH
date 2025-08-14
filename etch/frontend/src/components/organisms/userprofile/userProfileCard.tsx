@@ -10,6 +10,7 @@ interface UserProfileCardProps {
   followingCount: number;
   isFollowing: boolean;
   isFollowLoading?: boolean;
+  isChatLoading?: boolean;
   onFollowClick: () => void;
   onChatClick: () => void;
 }
@@ -22,6 +23,7 @@ const UserProfileCard = ({
   followingCount,
   isFollowing,
   isFollowLoading = false,
+  isChatLoading = false,
   onFollowClick,
   onChatClick,
 }: UserProfileCardProps) => {
@@ -63,11 +65,11 @@ const UserProfileCard = ({
               onClick={isFollowLoading ? undefined : onFollowClick}
             />
             <ActionButton
-              text="💬 채팅하기"
-              bgColor="border border-gray-300 bg-transparent"
-              textColor="text-gray-700"
-              onClick={onChatClick}
-              disabled={!isFollowing}
+              text={isChatLoading ? "채팅방 생성중..." : "💬 채팅하기"}
+              bgColor={isChatLoading ? "bg-gray-400" : "border border-gray-300 bg-transparent"}
+              textColor={isChatLoading ? "text-white" : "text-gray-700"}
+              onClick={isChatLoading ? undefined : onChatClick}
+              disabled={!isFollowing || isChatLoading}
             />
           </div>
         </div>
