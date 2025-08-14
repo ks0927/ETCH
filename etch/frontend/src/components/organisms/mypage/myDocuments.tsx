@@ -5,6 +5,7 @@ import { useNavigate } from "react-router"; // Import useNavigate
 
 import type { CoverLetterListResponse } from "../../../types/coverLetter";
 import { deleteCoverLetter } from "../../../api/coverLetterApi"; // Import deleteCoverLetter API
+import { deletePortfolio } from "../../../api/portfolioApi"; // Import deletePortfolio API
 
 type PortfolioListResponse = any[];
 
@@ -12,12 +13,14 @@ interface MyDocumentsProps {
   coverLetters: CoverLetterListResponse[];
   portfolios: PortfolioListResponse;
   refetchCoverLetters: () => void; // Add refetchCoverLetters prop
+  refetchPortfolios?: () => void; // Add refetchPortfolios prop
 }
 
 const MyDocuments = ({
   coverLetters,
   portfolios,
   refetchCoverLetters,
+  refetchPortfolios,
 }: MyDocumentsProps) => {
   const navigate = useNavigate(); // Initialize useNavigate
   const [currentTab, setCurrentTab] = useState<"coverLetter" | "portfolio">(
@@ -43,9 +46,20 @@ const MyDocuments = ({
         }
       }
     } else {
-      // Portfolio deletion logic (to be implemented later)
-      console.log(`Delete portfolio with ID: ${id}`);
-      alert("포트폴리오 삭제 기능은 아직 구현되지 않았습니다.");
+      // Portfolio deletion logic
+      const confirmDelete = window.confirm(
+        "정말로 이 포트폴리오를 삭제하시겠습니까?"
+      );
+      if (confirmDelete) {
+        try {
+          await deletePortfolio(Number(id)); // Convert id to Number for API call
+          alert("포트폴리오가 성공적으로 삭제되었습니다.");
+          refetchPortfolios?.(); // Refetch portfolios after successful deletion
+        } catch (error) {
+          console.error("포트폴리오 삭제 실패:", error);
+          alert("포트폴리오 삭제에 실패했습니다. 다시 시도해주세요.");
+        }
+      }
     }
   };
 
@@ -63,9 +77,8 @@ const MyDocuments = ({
     if (currentTab === "coverLetter") {
       navigate(`/mypage/cover-letter-edit/${id}`); // Navigate to edit page
     } else {
-      // Portfolio edit logic (to be implemented later)
-      console.log(`Edit portfolio with ID: ${id}`);
-      alert("포트폴리오 수정 기능은 아직 구현되지 않았습니다.");
+      // Portfolio edit logic - navigate to portfolio page
+      navigate("/mypage/portfolio"); // Navigate to portfolio edit page
     }
   };
 
@@ -85,7 +98,8 @@ const MyDocuments = ({
               <DocumentItem
                 key={doc.id}
                 id={doc.id.toString()}
-                title={currentTab === "coverLetter" ? doc.name : doc.title}
+                title={currentTab === "coverLetter" ? doc.name : doc.name}
+                description={currentTab === "portfolio" ? doc.introduce : undefined}
                 date={doc.date}
                 onClick={handleDocumentClick} // Use handleDocumentClick for main click
                 onDelete={handleDelete} // Pass the handleDelete function
