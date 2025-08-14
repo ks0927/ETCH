@@ -3,10 +3,13 @@ package com.ssafy.etch.search.service;
 import java.io.StringReader;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
-import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.SearchHitSupport;
 import org.springframework.stereotype.Service;
 
 import com.ssafy.etch.search.document.JobDocument;
@@ -20,44 +23,49 @@ public class JobSearchService {
 
 	private final ElasticsearchOperations elasticsearchOperations;
 
-	public List<JobSearchResponseDTO> searchWithFilters(
+	public Page<JobSearchResponseDTO> searchWithFilters(
+		String keyword,
+		List<String> regions,
+		List<String> jobCategories,
+		String workType,
+		String educationLevel,
+		int page,
+		int size
+	) {
+		String jsonQuery = buildJsonQuery(keyword, regions, jobCategories, workType, educationLevel);
+
+		if (jsonQuery == null) {
+			return Page.empty();
+		}
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		NativeQuery query = NativeQuery.builder()
+			.withQuery(q -> q.withJson(new StringReader(jsonQuery)))
+			.withPageable(pageable)
+			.withTrackTotalHits(true) // 전체 개수 추적
+			.build();
+
+		var hits = elasticsearchOperations.search(query, JobDocument.class);
+
+		// ES 결과 -> Page<JobSearchResponseDTO>
+		return SearchHitSupport.searchPageFor(hits, pageable)
+			.map(SearchHit::getContent)                  // JobDocument
+			.map(JobSearchResponseDTO::from);            // DTO 변환
+	}
+
+	private String buildJsonQuery(
 		String keyword,
 		List<String> regions,
 		List<String> jobCategories,
 		String workType,
 		String educationLevel
 	) {
-		String jsonQuery = buildJsonQuery(keyword, regions, jobCategories, workType, educationLevel);
-
-		if (jsonQuery == null) {
-			// 검색어도 없고 필터도 없으면 빈 결과
-			return List.of();
-		}
-
-		NativeQuery query = NativeQuery.builder()
-			.withQuery(q -> q.withJson(new StringReader(jsonQuery)))
-			.build();
-
-		SearchHits<JobDocument> hits =
-			elasticsearchOperations.search(query, JobDocument.class);
-
-		return hits.getSearchHits().stream()
-			.map(SearchHit::getContent).map(JobSearchResponseDTO::from)
-			.toList();
-	}
-
-	private String buildJsonQuery(String keyword,
-		List<String> regions,
-		List<String> jobCategories,
-		String workType,
-		String educationLevel) {
-
-		// 모든 조건이 비어 있으면 검색 안 함
 		boolean noKeyword = (keyword == null || keyword.isBlank());
 		boolean noFilters = (isEmpty(regions) && isEmpty(jobCategories) && workType == null && educationLevel == null);
 
 		if (noKeyword && noFilters) {
-			return null; // 검색 안 함
+			return null;
 		}
 
 		StringBuilder filter = new StringBuilder();
@@ -84,7 +92,6 @@ public class JobSearchService {
 		}
 
 		if (noKeyword) {
-			// 필터만 있는 경우
 			return """
 				{
 				  "bool": {
@@ -95,7 +102,6 @@ public class JobSearchService {
 				}
 				""".formatted(trimTrailingComma(filter.toString()));
 		} else {
-			// 키워드 + 필터 조합
 			return """
 				{
 				  "bool": {
@@ -121,7 +127,10 @@ public class JobSearchService {
 	}
 
 	private String toJsonArray(List<String> values) {
-		return "[" + values.stream().map(v -> "\"" + v + "\"").reduce((a, b) -> a + "," + b).orElse("") + "]";
+		return "[" + values.stream()
+			.map(v -> "\"" + v + "\"")
+			.reduce((a, b) -> a + "," + b)
+			.orElse("") + "]";
 	}
 
 	private String trimTrailingComma(String s) {
