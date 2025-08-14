@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PortfolioWriteStackData,
   type PortfolioStackEnum,
@@ -15,6 +15,7 @@ import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect
 import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
 import PortfolioProjectPage from "./portfolioProjectPage";
+import { getMyPortfolio, createPortfolio, convertPortfolioDataToRequest } from "../../../api/portfolioApi";
 
 // 프로젝트 데이터 타입 정의
 interface ProjectData {
@@ -48,6 +49,10 @@ function MypagePortfolioPage() {
     stack: [] as PortfolioStackEnum[],
   });
 
+  // 로딩 및 에러 상태
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasExistingPortfolio, setHasExistingPortfolio] = useState(false);
+
   // 프로젝트 관련 상태들
   const [showProjectSection, setShowProjectSection] = useState(false);
   const [projectData, setProjectData] =
@@ -59,6 +64,39 @@ function MypagePortfolioPage() {
   // 교육/활동과 자격증 폼 토글 상태들
   const [showEducationForm, setShowEducationForm] = useState(false);
   const [showLanguageForm, setShowLanguageForm] = useState(false);
+
+  // 기존 포트폴리오 데이터 로드
+  useEffect(() => {
+    const loadPortfolioData = async () => {
+      try {
+        setIsLoading(true);
+        const existingPortfolio = await getMyPortfolio();
+        
+        // API 응답을 portfolioDatas 형태로 변환
+        setPortfolioData({
+          name: existingPortfolio.name,
+          phoneNumber: existingPortfolio.phoneNumber,
+          email: existingPortfolio.email,
+          blogUrl: existingPortfolio.blogUrl,
+          githubUrl: existingPortfolio.githubUrl,
+          introduce: existingPortfolio.introduce,
+          stack: existingPortfolio.stack.map(id => id.toString()) as PortfolioStackEnum[], // 숫자 ID를 문자열로 변환
+          language: existingPortfolio.language,
+          education: existingPortfolio.education,
+        });
+        
+        setHasExistingPortfolio(true);
+        console.log("기존 포트폴리오 로드 완료:", existingPortfolio);
+      } catch (error) {
+        console.log("기존 포트폴리오 없음 또는 로드 실패:", error);
+        setHasExistingPortfolio(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPortfolioData();
+  }, []);
 
   // ============== 파싱 함수들 (화면 표시용만) ==============
 
@@ -282,14 +320,23 @@ function MypagePortfolioPage() {
       console.log("제출할 포트폴리오 데이터:", portfolioData);
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // portfolioData는 이미 올바른 문자열 형태이므로 그대로 API 전송
-      console.log("API 전송용 데이터:", portfolioData);
+      // portfolioData를 API 요청 형태로 변환
+      const apiRequestData = convertPortfolioDataToRequest(portfolioData);
+      console.log("API 전송용 데이터:", apiRequestData);
 
-      // 실제 API 호출 로직
-      // 1. 포트폴리오 생성 API
-      // const portfolioResponse = await createPortfolio(portfolioData);
+      // 포트폴리오 생성 또는 수정
+      if (hasExistingPortfolio) {
+        // 기존 포트폴리오가 있으면 수정 (portfolioId가 필요하지만 일단 생성으로 처리)
+        await createPortfolio(apiRequestData);
+        alert("포트폴리오가 성공적으로 수정되었습니다!");
+      } else {
+        // 새 포트폴리오 생성
+        await createPortfolio(apiRequestData);
+        alert("포트폴리오가 성공적으로 생성되었습니다!");
+        setHasExistingPortfolio(true);
+      }
 
-      // 2. 등록된 프로젝트들 생성 API
+      // TODO: 등록된 프로젝트들 생성 API 호출
       // for (const project of registeredProjects) {
       //   const projectInput = {
       //     title: project.title,
@@ -305,16 +352,29 @@ function MypagePortfolioPage() {
       //   await createProject(projectInput);
       // }
 
-      alert("포트폴리오와 프로젝트가 성공적으로 등록되었습니다!");
     } catch (error) {
-      console.error("등록 실패:", error);
-      alert("등록 중 오류가 발생했습니다.");
+      console.error("포트폴리오 저장 실패:", error);
+      alert("포트폴리오 저장 중 오류가 발생했습니다.");
     }
   };
 
+  // 로딩 중일 때 표시
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 flex justify-center items-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">포트폴리오 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center mb-8">포트폴리오 작성</h1>
+      <h1 className="text-2xl font-bold text-center mb-8">
+        {hasExistingPortfolio ? "포트폴리오 수정" : "포트폴리오 작성"}
+      </h1>
 
       {/* 기본 정보 섹션 */}
       <div className="space-y-4">
@@ -485,6 +545,7 @@ function MypagePortfolioPage() {
           !portfolioData.phoneNumber ||
           !portfolioData.introduce
         }
+        submitButtonText={hasExistingPortfolio ? "포트폴리오 수정" : "포트폴리오 등록"}
       />
     </div>
   );
