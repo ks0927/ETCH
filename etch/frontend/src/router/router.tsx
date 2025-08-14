@@ -83,6 +83,9 @@ const MyPageCoverLetterDetailPage = lazy(
 const UserProfilePage = lazy(
   () => import("../components/pages/userProfilePage.tsx")
 );
+const MypagePortfolioDetail = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioDetail.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -214,6 +217,15 @@ const router = createBrowserRouter([
               </Suspense>
             ),
           },
+          {
+            path: "portfolios/:userId",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioDetail />
+              </Suspense>
+            ),
+          },
+
           {
             path: "favorites",
             element: (
