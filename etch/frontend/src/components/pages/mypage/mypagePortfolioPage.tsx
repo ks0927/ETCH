@@ -226,7 +226,6 @@ function MypagePortfolioPage() {
 
     // 폼 닫기
     setShowEducationForm(false);
-    console.log("교육/활동 추가됨:", educationString);
   };
 
   const handleLicenseAdd = (languageString: string) => {
@@ -242,7 +241,6 @@ function MypagePortfolioPage() {
 
     // 폼 닫기
     setShowLanguageForm(false);
-    console.log("자격증 추가됨:", languageString);
   };
 
   const handleEducationRemove = (index: number) => {
@@ -255,7 +253,6 @@ function MypagePortfolioPage() {
       ...prev,
       education: newEducationString,
     }));
-    console.log("교육/활동 삭제됨, 인덱스:", index);
   };
 
   const handleLanguageRemove = (index: number) => {
@@ -268,7 +265,6 @@ function MypagePortfolioPage() {
       ...prev,
       language: newLanguageString,
     }));
-    console.log("자격증 삭제됨, 인덱스:", index);
   };
 
   const handleSubmit = async () => {
