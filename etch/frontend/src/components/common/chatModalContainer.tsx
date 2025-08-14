@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { ChatProvider, useChatContext } from "../../contexts/chatContext";
 import ChatListPage from "../pages/chat/chatListPage";
 import ChatRoomPage from "../pages/chat/chatRoomPage";
 import ChatListHeader from "../molecules/modal/chatListHeader";
@@ -8,22 +9,53 @@ interface ChatModalContainerProps {
   onClose: () => void;
 }
 
-export default function ChatModalContainer({ onClose }: ChatModalContainerProps) {
+function ChatModalContent({ onClose }: ChatModalContainerProps) {
   const [modalState, setModalState] = useState<'list' | 'room'>('list');
-  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [selectedRoomName, setSelectedRoomName] = useState<string>('');
+  const { currentRoom, leaveRoom } = useChatContext();
 
-  const handleRoomSelect = (roomId: string, roomName: string) => {
-    setSelectedRoomId(roomId);
-    setSelectedRoomName(roomName);
+  const handleRoomSelect = async (_roomId: string, _roomName: string) => {
     setModalState('room');
   };
 
-  const handleBackToList = () => {
+  const handleBackToList = async () => {
+    await leaveRoom();
     setModalState('list');
-    setSelectedRoomId(null);
-    setSelectedRoomName('');
   };
+
+  // ESC 키 이벤트 핸들러
+  const handleEscKey = useCallback(async () => {
+    if (modalState === 'room') {
+      // 채팅방에서 ESC: 채팅방 목록으로 돌아가기
+      await handleBackToList();
+    } else {
+      // 채팅방 목록에서 ESC: 모달 닫기
+      onClose();
+    }
+  }, [modalState, onClose, handleBackToList]);
+
+  // ESC 키 이벤트 리스너 등록
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        handleEscKey();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleEscKey]);
+
+  // currentRoom 상태에 따라 모달 상태 동기화
+  useEffect(() => {
+    if (currentRoom) {
+      setModalState('room');
+    } else {
+      setModalState('list');
+    }
+  }, [currentRoom]);
 
   return (
     <div className="h-full flex flex-col">
@@ -36,10 +68,10 @@ export default function ChatModalContainer({ onClose }: ChatModalContainerProps)
         </>
       )}
       
-      {modalState === 'room' && selectedRoomId && (
+      {modalState === 'room' && currentRoom && (
         <>
           <ChatRoomHeader 
-            roomName={selectedRoomName} 
+            roomName={currentRoom.name} 
             onBack={handleBackToList} 
           />
           <div className="flex-1 overflow-hidden">
@@ -48,5 +80,13 @@ export default function ChatModalContainer({ onClose }: ChatModalContainerProps)
         </>
       )}
     </div>
+  );
+}
+
+export default function ChatModalContainer({ onClose }: ChatModalContainerProps) {
+  return (
+    <ChatProvider>
+      <ChatModalContent onClose={onClose} />
+    </ChatProvider>
   );
 }

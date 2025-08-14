@@ -1,0 +1,136 @@
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import type { WebSocketChatMessage, WebSocketReadMessage } from '../types/chat';
+
+export class ChatService {
+  private stompClient: Client | null = null;
+  private subscriptions: Map<string, any> = new Map();
+
+  // WebSocket 연결 - 운영 환경
+  connect(token?: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.stompClient = new Client({
+        webSocketFactory: () => new SockJS('https://etch.it.kr/api/chat/ws-stomp'),
+        connectHeaders: token ? {
+          Authorization: `Bearer ${token}`
+        } : {},
+        debug: (str) => console.log('STOMP Debug:', str),
+        onConnect: () => {
+          console.log('WebSocket 연결 성공');
+          resolve();
+        },
+        onStompError: (frame) => {
+          console.error('STOMP 에러:', frame);
+          reject(frame);
+        },
+        onWebSocketError: (error) => {
+          console.error('WebSocket 에러:', error);
+          reject(error);
+        },
+        onDisconnect: () => {
+          console.log('WebSocket 연결 해제됨');
+        }
+      });
+      
+      this.stompClient.activate();
+    });
+  }
+
+  // WebSocket 연결 해제
+  disconnect(): void {
+    if (this.stompClient) {
+      // 모든 구독 해제
+      this.subscriptions.forEach((subscription) => {
+        subscription.unsubscribe();
+      });
+      this.subscriptions.clear();
+      
+      this.stompClient.deactivate();
+      this.stompClient = null;
+      console.log('WebSocket 연결 해제 완료');
+    }
+  }
+
+  // 채팅방 구독
+  subscribeToRoom(roomId: string, onMessageReceived: (message: WebSocketChatMessage) => void): void {
+    if (this.stompClient && this.stompClient.connected) {
+      // 이미 구독중인 방이면 기존 구독 해제
+      if (this.subscriptions.has(roomId)) {
+        this.subscriptions.get(roomId).unsubscribe();
+      }
+
+      const subscription = this.stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+        try {
+          const chatMessage: WebSocketChatMessage = JSON.parse(message.body);
+          onMessageReceived(chatMessage);
+        } catch (error) {
+          console.error('메시지 파싱 에러:', error);
+        }
+      });
+
+      this.subscriptions.set(roomId, subscription);
+      console.log(`채팅방 ${roomId} 구독 시작`);
+    } else {
+      console.error('WebSocket 연결이 되어있지 않습니다.');
+    }
+  }
+
+  // 채팅방 구독 해제
+  unsubscribeFromRoom(roomId: string): void {
+    if (this.subscriptions.has(roomId)) {
+      this.subscriptions.get(roomId).unsubscribe();
+      this.subscriptions.delete(roomId);
+      console.log(`채팅방 ${roomId} 구독 해제`);
+    }
+  }
+
+  // 메시지 전송
+  sendMessage(roomId: string, senderId: number, sender: string, message: string): void {
+    if (this.stompClient && this.stompClient.connected) {
+      const chatMessage: WebSocketChatMessage = {
+        type: 'TALK',
+        roomId: roomId,
+        senderId: senderId,
+        sender: sender,
+        message: message
+      };
+      
+      this.stompClient.publish({
+        destination: '/pub/chat/message',
+        body: JSON.stringify(chatMessage)
+      });
+      
+      console.log('메시지 전송:', chatMessage);
+    } else {
+      console.error('WebSocket 연결이 되어있지 않습니다.');
+    }
+  }
+
+  // 읽음 상태 전송
+  markAsRead(roomId: string, memberId: number, messageId?: number): void {
+    if (this.stompClient && this.stompClient.connected) {
+      const readMessage: WebSocketReadMessage = {
+        roomId: roomId,
+        memberId: memberId,
+        messageId: messageId
+      };
+      
+      this.stompClient.publish({
+        destination: '/pub/chat/read',
+        body: JSON.stringify(readMessage)
+      });
+      
+      console.log('읽음 상태 전송:', readMessage);
+    } else {
+      console.error('WebSocket 연결이 되어있지 않습니다.');
+    }
+  }
+
+  // 연결 상태 확인
+  isConnected(): boolean {
+    return this.stompClient?.connected ?? false;
+  }
+}
+
+// 싱글톤 인스턴스
+export const chatService = new ChatService();

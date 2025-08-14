@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Footer from "../components/common/footer";
 import Header from "../components/common/header";
 import ChatButton from "../components/molecules/chat/chatButton";
@@ -8,6 +8,7 @@ import ChatModalContainer from "../components/common/chatModalContainer";
 function Layout() {
   const { pathname } = useLocation();
   const [showChatModal, setShowChatModal] = useState(false);
+  const chatModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,6 +21,18 @@ function Layout() {
 
     return () => clearTimeout(timer);
   }, [pathname]);
+
+  // 채팅 버튼 클릭 핸들러 - 토글 기능
+  const handleChatButtonClick = () => {
+    setShowChatModal(prev => !prev);
+  };
+
+  // 모달 외부 클릭 핸들러
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (chatModalRef.current && !chatModalRef.current.contains(e.target as Node)) {
+      setShowChatModal(false);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -37,11 +50,22 @@ function Layout() {
           <main className="pt-2 pb-2">
             <Outlet />
           </main>
-          <ChatButton onClick={() => setShowChatModal(true)} />
+          <ChatButton onClick={handleChatButtonClick} />
           <Footer />
+          
+          {/* 채팅 모달 오버레이 */}
           {showChatModal && (
-            <div className="fixed bottom-28 right-4 z-40 border border-gray-400 shadow-lg w-80 h-[500px] rounded-lg overflow-hidden bg-white">
-              <ChatModalContainer onClose={() => setShowChatModal(false)} />
+            <div 
+              className="fixed inset-0 z-40 flex items-end justify-end p-4"
+              onClick={handleOverlayClick}
+            >
+              <div 
+                ref={chatModalRef}
+                className="border border-gray-400 shadow-lg w-80 h-[500px] rounded-lg overflow-hidden bg-white mb-24 mr-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ChatModalContainer onClose={() => setShowChatModal(false)} />
+              </div>
             </div>
           )}
         </div>
