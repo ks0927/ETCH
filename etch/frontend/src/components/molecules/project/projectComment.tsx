@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { Comment } from "../../../types/comment";
 import HeartSVG from "../../svg/heartSVG";
 import { useNavigate } from "react-router";
