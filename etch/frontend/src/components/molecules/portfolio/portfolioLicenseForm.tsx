@@ -1,17 +1,17 @@
 import { useState } from "react";
 import {
   LicenseState,
-  type License,
+  type language,
 } from "../../../types/portfolio/portfolioDatas";
 
-function PortfolioLicenseForm({
+function PortfolioLangugaeForm({
   onSubmit,
   initialData,
 }: {
-  onSubmit: (data: License) => void;
-  initialData?: License;
+  onSubmit: (data: language) => void;
+  initialData?: language;
 }) {
-  const [formData, setFormData] = useState<License>(
+  const [formData, setFormData] = useState<language>(
     initialData || { ...LicenseState }
   );
   const [dateError, setDateError] = useState<string>("");
@@ -139,4 +139,4 @@ function PortfolioLicenseForm({
   );
 }
 
-export default PortfolioLicenseForm;
+export default PortfolioLangugaeForm;

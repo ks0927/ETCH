@@ -1,13 +1,13 @@
-import type { License } from "../../../types/portfolio/portfolioDatas";
+import type { language } from "../../../types/portfolio/portfolioDatas";
 
-function PortfolioLicenseTextCard({
-  licenses,
+function PortfolioLanguageTextCard({
+  language,
   onRemove,
 }: {
-  licenses: License[];
+  language: language[];
   onRemove?: (index: number) => void;
 }) {
-  if (licenses.length === 0) {
+  if (language.length === 0) {
     return (
       <div className="text-gray-500 p-4 text-center">
         등록된 자격증이 없습니다.
@@ -17,16 +17,16 @@ function PortfolioLicenseTextCard({
 
   return (
     <div className="space-y-2">
-      {licenses.map((license, index) => (
+      {language.map((language, index) => (
         <div
           key={index}
           className="relative p-4 bg-green-50 border-l-4 border-green-400 rounded"
         >
           <div className="font-semibold text-green-700">
-            {license.licenseName}
+            {language.licenseName}
           </div>
-          <div className="text-sm text-gray-700">{license.issuer}</div>
-          <div className="text-sm text-gray-600">{license.getAt}</div>
+          <div className="text-sm text-gray-700">{language.issuer}</div>
+          <div className="text-sm text-gray-600">{language.getAt}</div>
           {onRemove && (
             <button
               onClick={() => onRemove(index)}
@@ -41,4 +41,4 @@ function PortfolioLicenseTextCard({
   );
 }
 
-export default PortfolioLicenseTextCard;
+export default PortfolioLanguageTextCard;

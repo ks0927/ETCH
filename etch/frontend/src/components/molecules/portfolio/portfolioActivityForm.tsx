@@ -1,17 +1,17 @@
 import { useState } from "react";
 import {
   ActivityState,
-  type Activity,
+  type education,
 } from "../../../types/portfolio/portfolioDatas";
 
-function PortfolioActivityForm({
+function PortfolioEducationForm({
   onSubmit,
   initialData,
 }: {
-  onSubmit: (data: Activity) => void;
-  initialData?: Activity;
+  onSubmit: (data: education) => void;
+  initialData?: education;
 }) {
-  const [formData, setFormData] = useState<Activity>(
+  const [formData, setFormData] = useState<education>(
     initialData || { ...ActivityState }
   );
   const [dateError, setDateError] = useState<string>("");
@@ -147,4 +147,4 @@ function PortfolioActivityForm({
   );
 }
 
-export default PortfolioActivityForm;
+export default PortfolioEducationForm;

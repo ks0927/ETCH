@@ -5,21 +5,111 @@ import {
 } from "../../../types/portfolio/portfolioStack";
 import {
   PortfolioState,
-  type Activity,
-  type License,
   type portfolioDatas,
-  type PortfolioProject,
+  type education,
+  type language,
 } from "../../../types/portfolio/portfolioDatas";
 import PortfolioWriteInput from "../../organisms/portfolio/portfolioWriteInput";
-import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
 import PortfolioSubmitButton from "../../organisms/portfolio/portfolioSubmitButton";
 import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect";
+import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
+import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
+import PortfolioProjectPage from "./portfolioProjectPage";
+
+// 프로젝트 데이터 타입 정의
+interface ProjectData {
+  title: string;
+  content: string;
+  projectCategory: ProjectCategoryEnum | "";
+  githubUrl: string;
+  youtubeUrl: string;
+  isPublic: boolean;
+  projectTechs: number[];
+  files: File[];
+  thumbnailFile: File | null;
+}
+
+// 초기 프로젝트 상태
+const initialProjectData: ProjectData = {
+  title: "",
+  content: "",
+  projectCategory: "",
+  githubUrl: "",
+  youtubeUrl: "",
+  isPublic: true,
+  projectTechs: [],
+  files: [],
+  thumbnailFile: null,
+};
 
 function MypagePortfolioPage() {
   const [portfolioData, setPortfolioData] = useState<portfolioDatas>({
     ...PortfolioState,
-    stack: [] as PortfolioStackEnum[], // 배열로 명시적 타이핑
+    stack: [] as PortfolioStackEnum[],
   });
+
+  // 프로젝트 관련 상태들
+  const [showProjectSection, setShowProjectSection] = useState(false);
+  const [projectData, setProjectData] =
+    useState<ProjectData>(initialProjectData);
+  const [registeredProjects, setRegisteredProjects] = useState<ProjectData[]>(
+    []
+  );
+
+  // 교육/활동과 자격증 폼 토글 상태들
+  const [showEducationForm, setShowEducationForm] = useState(false);
+  const [showLanguageForm, setShowLanguageForm] = useState(false);
+
+  // ============== 파싱 함수들 (화면 표시용만) ==============
+
+  // 문자열을 배열로 파싱 (화면 표시용)
+  const parseEducationData = (educationString: string): education[] => {
+    if (!educationString) return [];
+
+    const educationItems = educationString
+      .split("/")
+      .filter((item) => item.trim());
+    return educationItems.map((item) => {
+      const [companyName, active, startAt, endAt] = item.split("^");
+      return {
+        companyName: companyName || "",
+        active: active || "",
+        startAt: startAt || "",
+        endAt: endAt || "",
+      };
+    });
+  };
+
+  const parseLanguageData = (languageString: string): language[] => {
+    if (!languageString) return [];
+
+    const languageItems = languageString
+      .split("/")
+      .filter((item) => item.trim());
+    return languageItems.map((item) => {
+      const [licenseName, issuer, getAt] = item.split("^");
+      return {
+        licenseName: licenseName || "",
+        issuer: issuer || "",
+        getAt: getAt || "",
+      };
+    });
+  };
+
+  // 배열을 문자열로 변환 (삭제 기능용만)
+  const arrayToEducationString = (educations: education[]): string => {
+    return educations
+      .map(
+        (edu) => `${edu.companyName}^${edu.active}^${edu.startAt}^${edu.endAt}`
+      )
+      .join("/");
+  };
+
+  const arrayToLanguageString = (languages: language[]): string => {
+    return languages
+      .map((lang) => `${lang.licenseName}^${lang.issuer}^${lang.getAt}`)
+      .join("/");
+  };
 
   // ============== 기본 정보 핸들러들 ==============
 
@@ -30,10 +120,8 @@ function MypagePortfolioPage() {
 
       let newStacks;
       if (isSelected) {
-        // 이미 선택된 스택이면 제거
         newStacks = currentStacks.filter((s) => s !== stack);
       } else {
-        // 선택되지 않은 스택이면 추가
         newStacks = [...currentStacks, stack];
       }
 
@@ -51,7 +139,6 @@ function MypagePortfolioPage() {
       ...prev,
       name: value,
     }));
-    console.log("현재 이름 : ", value);
   };
 
   const handlePhoneNumberChange = (value: string) => {
@@ -59,7 +146,6 @@ function MypagePortfolioPage() {
       ...prev,
       phoneNumber: value,
     }));
-    console.log("현재 휴대폰 번호 : ", value);
   };
 
   const handleEmailChange = (value: string) => {
@@ -67,7 +153,6 @@ function MypagePortfolioPage() {
       ...prev,
       email: value,
     }));
-    console.log("현재 이메일 주소 : ", value);
   };
 
   const handleGithubUrlChange = (value: string) => {
@@ -75,78 +160,159 @@ function MypagePortfolioPage() {
       ...prev,
       githubUrl: value,
     }));
-    console.log("현재 깃허브 주소 : ", value);
   };
 
   const handleIntroChange = (value: string) => {
     setPortfolioData((prev) => ({
       ...prev,
-      intro: value,
+      introduce: value,
     }));
-    console.log("현재 자기소개 : ", value);
   };
 
-  // ============== 활동/자격증 핸들러들 ==============
+  // ============== 프로젝트 관련 핸들러들 ==============
 
-  const handleProjectAdd = (project: PortfolioProject) => {
-    setPortfolioData((prev) => ({
+  const handleProjectDataChange = (newProjectData: Partial<ProjectData>) => {
+    setProjectData((prev) => ({
       ...prev,
-      projects: [...prev.projects, project],
+      ...newProjectData,
     }));
-    console.log("프로젝트 추가됨 : ", project);
-  };
-  const handleProjectRemove = (index: number) => {
-    setPortfolioData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((_, i) => i !== index),
-    }));
-    console.log("프로젝트 삭제됨, 인덱스 : ", index);
   };
 
-  const handleActivityAdd = (activity: Activity) => {
-    setPortfolioData((prev) => ({
-      ...prev,
-      activities: [...prev.activities, activity],
-    }));
-    console.log("활동 추가됨 : ", activity);
+  const handleRegisterProject = () => {
+    // 프로젝트 유효성 검사
+    if (!projectData.title.trim()) {
+      alert("프로젝트 제목을 입력해주세요.");
+      return;
+    }
+
+    if (!projectData.content.trim()) {
+      alert("프로젝트 설명을 입력해주세요.");
+      return;
+    }
+
+    if (!projectData.projectCategory) {
+      alert("프로젝트 카테고리를 선택해주세요.");
+      return;
+    }
+
+    // 등록된 프로젝트 목록에 추가
+    setRegisteredProjects((prev) => [...prev, { ...projectData }]);
+
+    // 프로젝트 데이터 초기화
+    setProjectData(initialProjectData);
+
+    // 프로젝트 섹션 숨기기
+    setShowProjectSection(false);
+
+    alert("프로젝트가 임시 등록되었습니다!");
   };
 
-  const handleLicenseAdd = (license: License) => {
-    setPortfolioData((prev) => ({
-      ...prev,
-      licenses: [...prev.licenses, license],
-    }));
-    console.log("자격증 추가됨 : ", license);
+  const handleRemoveProject = (index: number) => {
+    setRegisteredProjects((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleActivityRemove = (index: number) => {
+  // ============== 교육/자격증 관련 핸들러들 ==============
+
+  const handleActivityAdd = (educationString: string) => {
+    // 기존 문자열에 새 항목 추가
+    const newEducationString = portfolioData.education
+      ? `${portfolioData.education}/${educationString}`
+      : educationString;
+
     setPortfolioData((prev) => ({
       ...prev,
-      activities: prev.activities.filter((_, i) => i !== index),
+      education: newEducationString,
     }));
-    console.log("활동 삭제됨, 인덱스 : ", index);
+
+    // 폼 닫기
+    setShowEducationForm(false);
+    console.log("교육/활동 추가됨:", educationString);
   };
 
-  const handleLicenseRemove = (index: number) => {
+  const handleLicenseAdd = (languageString: string) => {
+    // 기존 문자열에 새 항목 추가
+    const newLanguageString = portfolioData.language
+      ? `${portfolioData.language}/${languageString}`
+      : languageString;
+
     setPortfolioData((prev) => ({
       ...prev,
-      licenses: prev.licenses.filter((_, i) => i !== index),
+      language: newLanguageString,
     }));
-    console.log("자격증 삭제됨, 인덱스 : ", index);
+
+    // 폼 닫기
+    setShowLanguageForm(false);
+    console.log("자격증 추가됨:", languageString);
+  };
+
+  const handleEducationRemove = (index: number) => {
+    // 파싱 → 삭제 → 다시 문자열 변환
+    const parsedEducations = parseEducationData(portfolioData.education);
+    const filteredEducations = parsedEducations.filter((_, i) => i !== index);
+    const newEducationString = arrayToEducationString(filteredEducations);
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      education: newEducationString,
+    }));
+    console.log("교육/활동 삭제됨, 인덱스:", index);
+  };
+
+  const handleLanguageRemove = (index: number) => {
+    // 파싱 → 삭제 → 다시 문자열 변환
+    const parsedLanguages = parseLanguageData(portfolioData.language);
+    const filteredLanguages = parsedLanguages.filter((_, i) => i !== index);
+    const newLanguageString = arrayToLanguageString(filteredLanguages);
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      language: newLanguageString,
+    }));
+    console.log("자격증 삭제됨, 인덱스:", index);
   };
 
   const handleSubmit = async () => {
     try {
-      // API 호출 로직
-      console.log("제출할 데이터:", portfolioData);
+      // 포트폴리오 기본 정보 유효성 검사
+      if (
+        !portfolioData.name ||
+        !portfolioData.phoneNumber ||
+        !portfolioData.introduce
+      ) {
+        alert("필수 정보를 모두 입력해주세요.");
+        return;
+      }
 
-      // 실제 API 호출
-      // const response = await createProject(projectData);
+      console.log("제출할 포트폴리오 데이터:", portfolioData);
+      console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // 성공 처리
+      // portfolioData는 이미 올바른 문자열 형태이므로 그대로 API 전송
+      console.log("API 전송용 데이터:", portfolioData);
+
+      // 실제 API 호출 로직
+      // 1. 포트폴리오 생성 API
+      // const portfolioResponse = await createPortfolio(portfolioData);
+
+      // 2. 등록된 프로젝트들 생성 API
+      // for (const project of registeredProjects) {
+      //   const projectInput = {
+      //     title: project.title,
+      //     content: project.content,
+      //     projectCategory: project.projectCategory,
+      //     techCodeIds: project.projectTechs,
+      //     githubUrl: project.githubUrl,
+      //     youtubeUrl: project.youtubeUrl,
+      //     isPublic: project.isPublic,
+      //     thumbnailFile: project.thumbnailFile,
+      //     imageFiles: project.files.filter(file => file.type.startsWith('image/'))
+      //   };
+      //   await createProject(projectInput);
+      // }
+
+      alert("포트폴리오와 프로젝트가 성공적으로 등록되었습니다!");
     } catch (error) {
-      // 에러 처리
-      console.error("프로젝트 생성 실패:", error);
+      console.error("등록 실패:", error);
+      alert("등록 중 오류가 발생했습니다.");
     }
   };
 
@@ -164,6 +330,14 @@ function MypagePortfolioPage() {
           type="text"
           value={portfolioData.name}
           onChange={handleNameChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="한 줄 자기소개"
+          placeholderText="안녕하세요, 열정과 패기로 준비된 신입 개발자 홍길동입니다."
+          type="text"
+          value={portfolioData.introduce}
+          onChange={handleIntroChange}
         />
 
         <PortfolioWriteInput
@@ -189,13 +363,12 @@ function MypagePortfolioPage() {
           value={portfolioData.githubUrl}
           onChange={handleGithubUrlChange}
         />
-
         <PortfolioWriteInput
-          inputText="한 줄 자기소개"
-          placeholderText="안녕하세요, 열정과 패기로 준비된 신입 개발자 홍길동입니다."
-          type="text"
-          value={portfolioData.intro}
-          onChange={handleIntroChange}
+          inputText="블로그"
+          placeholderText="http://blog.yourblog.com"
+          type="url"
+          value={portfolioData.githubUrl}
+          onChange={handleGithubUrlChange}
         />
       </div>
 
@@ -210,38 +383,111 @@ function MypagePortfolioPage() {
       </div>
 
       {/* 프로젝트 섹션 */}
-      <PortfolioWriteTextCard
-        title="프로젝트 경험"
-        type="project"
-        projects={portfolioData.projects}
-        onProjectAdd={handleProjectAdd}
-        onProjectRemove={handleProjectRemove}
-      />
+      <section>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-semibold">프로젝트 경험</h2>
+            <button
+              onClick={() => setShowProjectSection(!showProjectSection)}
+              className="flex items-center justify-center px-4 py-2 text-sm font-semibold transition-all duration-200 rounded cursor-pointer hover:brightness-90 border border-gray-300"
+            >
+              {showProjectSection ? "추가 -" : "추가 +"}
+            </button>
+          </div>
+          <div className="border-b pb-2 mb-4"></div>
 
-      {/* 활동 섹션 */}
-      <PortfolioWriteTextCard
-        title="교육 / 수료 / 활동"
-        type="activity"
-        activities={portfolioData.activities}
-        onActivityAdd={handleActivityAdd}
-        onActivityRemove={handleActivityRemove}
-      />
+          {/* 프로젝트 작성 폼 */}
+          {showProjectSection && (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <PortfolioProjectPage
+                projectData={projectData}
+                onProjectDataChange={handleProjectDataChange}
+              />
+              <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                <button
+                  onClick={handleRegisterProject}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  프로젝트 등록
+                </button>
+                <button
+                  onClick={() => setShowProjectSection(false)}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
 
-      {/* 자격증 섹션 */}
-      <PortfolioWriteTextCard
-        title="자격증 및 어학"
-        type="license"
-        licenses={portfolioData.licenses}
-        onLicenseAdd={handleLicenseAdd}
-        onLicenseRemove={handleLicenseRemove}
-      />
+          {/* 등록된 프로젝트 목록 */}
+          {registeredProjects.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium">등록된 프로젝트</h3>
+              {registeredProjects.map((project, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg">{project.title}</h4>
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                        {project.content}
+                      </p>
+                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                        {project.githubUrl && (
+                          <span>
+                            GitHub: {project.githubUrl.substring(0, 30)}...
+                          </span>
+                        )}
+                        {project.youtubeUrl && (
+                          <span>
+                            YouTube: {project.youtubeUrl.substring(0, 30)}...
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveProject(index)}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 교육/자격증 섹션 */}
+      <section>
+        <PortfolioWriteTextCard
+          title="교육 / 수료 / 활동"
+          type="education"
+          education={parseEducationData(portfolioData.education)}
+          onEducationAdd={handleActivityAdd}
+          onEducationRemove={handleEducationRemove}
+          showForm={showEducationForm}
+          onToggleForm={() => setShowEducationForm(!showEducationForm)}
+        />
+
+        <PortfolioWriteTextCard
+          title="자격증 및 어학"
+          type="language"
+          language={parseLanguageData(portfolioData.language)}
+          onLanguageAdd={handleLicenseAdd}
+          onLanguageRemove={handleLanguageRemove}
+          showForm={showLanguageForm}
+          onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
+        />
+      </section>
 
       <PortfolioSubmitButton
         onSubmit={handleSubmit}
         isDisabled={
           !portfolioData.name ||
           !portfolioData.phoneNumber ||
-          !portfolioData.intro
+          !portfolioData.introduce
         }
       />
     </div>
