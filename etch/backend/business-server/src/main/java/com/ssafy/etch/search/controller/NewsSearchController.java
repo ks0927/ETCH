@@ -1,7 +1,6 @@
 package com.ssafy.etch.search.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,10 +20,11 @@ public class NewsSearchController {
 	private final NewsSearchService newsSearchService;
 
 	@GetMapping("")
-	public ResponseEntity<ApiResponse<List<NewsSearchResponseDTO>>> searchNews(
+	public ResponseEntity<ApiResponse<Page<NewsSearchResponseDTO>>> searchNews(
 		@RequestParam(required = false) String keyword,
-		@RequestParam(required = false) List<String> categories) {
-		List<NewsSearchResponseDTO> result = newsSearchService.search(keyword);
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int size) {
+		Page<NewsSearchResponseDTO> result = newsSearchService.search(keyword, page, size);
 		return ResponseEntity.ok(ApiResponse.success(result));
 	}
 }
