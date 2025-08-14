@@ -1,19 +1,16 @@
 import type { Comment } from "../../../types/comment";
-import HeartSVG from "../../svg/heartSVG";
 import { useNavigate } from "react-router";
 
 interface ProjectCommentProps {
   comment: Comment;
   currentUserId?: number; // 현재 로그인한 사용자 ID
   onDelete?: (commentId: number) => void;
-  onLike?: (commentId: number) => void;
 }
 
 function ProjectComment({ 
   comment, 
   currentUserId, 
-  onDelete, 
-  onLike 
+  onDelete
 }: ProjectCommentProps) {
   const navigate = useNavigate();
   
