@@ -165,7 +165,7 @@ const router = createBrowserRouter([
       {
         path: "/projects/write",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute showMessage={true}>
             <Suspense fallback={<LoadingPage />}>
               <ProjectWritePage />
             </Suspense>
@@ -175,7 +175,7 @@ const router = createBrowserRouter([
       {
         path: "/projects/:id/edit",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute showMessage={true}>
             <Suspense fallback={<LoadingPage />}>
               <ProjectUpdatePage />
             </Suspense>
@@ -189,15 +189,17 @@ const router = createBrowserRouter([
       {
         path: "members/:userId/projects",
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <UserProfilePage />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingPage />}>
+              <UserProfilePage />
+            </Suspense>
+          </ProtectedRoute>
         ),
       },
       {
         path: "/mypage",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute showMessage={true}>
             <Suspense fallback={<LoadingPage />}>
               <MyPageLayout />
             </Suspense>
