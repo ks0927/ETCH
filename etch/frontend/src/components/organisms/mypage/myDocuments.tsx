@@ -138,7 +138,7 @@ const MyDocuments = ({
       navigate(`/mypage/cover-letter-detail/${id}`);
     } else {
       // 포트폴리오 상세 보기 페이지로 이동
-      navigate(`/mypage/portfolio-detail/${id}`);
+      navigate(`/mypage/portfolios/${id}`);
     }
   };
 
@@ -147,7 +147,7 @@ const MyDocuments = ({
       navigate(`/mypage/cover-letter-edit/${id}`);
     } else {
       // 포트폴리오 상세/편집 페이지로 이동 (/{portfolioId} 사용)
-      navigate(`/mypage/portfolio/${id}`);
+      navigate(`/mypage/portfolios/${id}`);
     }
   };
 
