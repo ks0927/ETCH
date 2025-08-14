@@ -79,7 +79,7 @@ function MypagePortfolioPage() {
     if (!educationString) return [];
 
     const educationItems = educationString
-      .split("/")
+      .split("|")
       .filter((item) => item.trim());
     return educationItems.map((item) => {
       const [companyName, active, startAt, endAt] = item.split("^");
@@ -96,7 +96,7 @@ function MypagePortfolioPage() {
     if (!languageString) return [];
 
     const languageItems = languageString
-      .split("/")
+      .split("|")
       .filter((item) => item.trim());
     return languageItems.map((item) => {
       const [licenseName, issuer, getAt] = item.split("^");
@@ -114,13 +114,13 @@ function MypagePortfolioPage() {
       .map(
         (edu) => `${edu.companyName}^${edu.active}^${edu.startAt}^${edu.endAt}`
       )
-      .join("/");
+      .join("|");
   };
 
   const arrayToLanguageString = (languages: language[]): string => {
     return languages
-      .map((lang) => `${lang.licenseName}^${lang.issuer}^${lang.getAt}`)
-      .join("/");
+      .map((lang) => `${lang.licenseName}^${lang.getAt}^${lang.issuer}`)
+      .join("|");
   };
 
   // ============== 기본 정보 핸들러들 ==============
