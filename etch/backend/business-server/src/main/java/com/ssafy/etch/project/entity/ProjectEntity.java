@@ -6,6 +6,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ssafy.etch.file.entity.FileEntity;
 import com.ssafy.etch.comment.entity.CommentEntity;
 import com.ssafy.etch.member.entity.MemberEntity;
@@ -46,11 +50,24 @@ public class ProjectEntity {
 	@Column(name = "category")
 	private ProjectCategory projectCategory;
 
-	@Column(name = "created_at")
+	@Column(name = "created_at", updatable = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
 	private LocalDateTime createdAt;
 
 	@Column(name = "updated_at")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
 	private LocalDateTime updatedAt;
+
+	@PrePersist
+	public void prePersist() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = null; // 생성 시점에는 null
+	}
+
+	@PreUpdate
+	public void preUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
 
 	@Column(name = "is_deleted")
 	private Boolean isDeleted;
@@ -115,7 +132,7 @@ public class ProjectEntity {
 			.youtubeUrl(youtubeUrl)
 			.viewCount(viewCount)
 			.createdAt(createdAt)
-			.updatedAt(updatedAt)
+			.updatedAt(updatedAt != null ? updatedAt : createdAt)
 			.isDeleted(isDeleted)
 			.githubUrl(githubUrl)
 			.isPublic(isPublic)
