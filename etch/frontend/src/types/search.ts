@@ -1,35 +1,84 @@
-// 검색 결과
-export interface SearchResultItem {
-  type: "job" | "news" | "project";
-  id: string;
+// 페이지네이션 정보 인터페이스
+export interface PageInfo {
+  size: number;
+  number: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+// 페이지네이션 인터페이스
+export interface Page<T> {
+  content: T[];
+  page: PageInfo;
+}
+
+// 채용 검색 결과
+export interface JobSearchResult {
+  id: number;
+  title: string;
+  companyName: string;
+  industries: string[];
+  regions: string[];
+  jobCategories: string[];
+  workType: string;
+  educationLevel: string;
+  openingDate: string;
+  expirationDate: string;
+}
+
+// 뉴스 검색 결과
+export interface NewsSearchResult {
+  id: number;
   title: string;
   summary: string;
-  url: string;
-  score: number;
-  date: string;
+  companyName: string;
+  link: string;
+  thumbnailUrl?: string;
+  publishedAt: string;
 }
 
-// 검색 집계 정보 타입
-export interface SearchAggregations {
-  type: {
-    news: number;
-    job: number;
-    project: number;
-  };
+// 프로젝트 검색 결과
+export interface ProjectSearchResult {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  createdDate: string;
+  memberCount: number;
+  isPublic: boolean;
+  thumbnail?: string;
 }
 
-// 전체 검색 응답 타입
+// 통합 검색 응답
 export interface SearchResponse {
-  total: number;
-  page: number;
-  size: number;
-  results: SearchResultItem[];
-  aggregations: SearchAggregations;
+  jobs: Page<JobSearchResult>;
+  news: Page<NewsSearchResult>;
+  projects: Page<ProjectSearchResult>;
 }
 
-// 검색 요청 파라미터 타입
-export interface SearchParams {
-  query: string;
+// 검색 필터 (채용)
+export interface JobSearchFilters {
+  keyword?: string;
+  regions?: string[];
+  jobCategories?: string[];
+  workType?: string;
+  educationLevel?: string;
+  page?: number;
+  size?: number;
+}
+
+// 검색 필터 (뉴스)
+export interface NewsSearchFilters {
+  keyword?: string;
+  page?: number;
+  size?: number;
+}
+
+// 검색 필터 (프로젝트)
+export interface ProjectSearchFilters {
+  keyword?: string;
+  category?: string;
+  sort?: 'LATEST' | 'POPULAR';
   page?: number;
   size?: number;
 }
