@@ -8,7 +8,7 @@ import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name="cover_letter")
-@SQLRestriction("is_deleted = false")
+@SQLRestriction("isDeleted = false")
 public class CoverLetterEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
