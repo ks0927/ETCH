@@ -79,7 +79,7 @@ function ProjectModal({ project, onClose, onProjectUpdate }: Props) {
       onClick={handleBackdropClick}
     >
       <div className="absolute inset-0 bg-black/40" />
-      <div className="bg-white rounded-xl flex w-full max-w-5xl h-[70vh] overflow-hidden shadow-2xl relative">
+      <div className="bg-white rounded-xl flex w-[95vw] max-w-[1200px] h-[80vh] sm:h-[85vh] overflow-hidden shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -92,11 +92,11 @@ function ProjectModal({ project, onClose, onProjectUpdate }: Props) {
           <div className="flex-[0_0_60%] min-w-0 flex flex-col p-6 overflow-y-auto">
             <ProjectDetailCard project={project} onLike={handleLike} />
           </div>
-          <div className="flex-1 min-w-0 border-l border-gray-200 flex flex-col bg-gray-50 overflow-hidden px-6">
-            <div className="py-5 flex flex-col h-full overflow-hidden">
-              <ProjectDetailComment projectId={project.id} currentUserId={memberInfo?.id} />
-            </div>
+          <div className="flex-1 min-w-0 border-l border-gray-200 flex flex-col bg-gray-50 overflow-hidden px-8">
+          <div className="pt-6 pb-5 flex flex-col h-full overflow-hidden">
+            <ProjectDetailComment projectId={project.id} currentUserId={memberInfo?.id} />
           </div>
+        </div>
         </div>
       </div>
     </div>
