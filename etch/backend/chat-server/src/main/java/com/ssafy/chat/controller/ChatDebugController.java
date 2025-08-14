@@ -205,7 +205,7 @@ public class ChatDebugController {
                 return ResponseEntity.badRequest().body(result);
             }
 
-            // 기존 참가자 조회
+            // 기존 참가자 조회.
             List<ChatParticipant> existingParticipants = chatParticipantRepository.findByRoomId(roomId);
             result.put("existingParticipants", existingParticipants.size());
 
