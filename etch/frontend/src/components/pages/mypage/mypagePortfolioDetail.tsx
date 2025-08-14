@@ -21,7 +21,8 @@ interface PortfolioDetailResponseDTO {
 }
 
 function MypagePortfolioDetail() {
-  const { portfolioId } = useParams<{ portfolioId: string }>();
+  // 라우터가 portfolios/:userId이므로 userId로 받아옴
+  const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
   const [portfolio, setPortfolio] = useState<PortfolioDetailResponseDTO | null>(
@@ -32,7 +33,10 @@ function MypagePortfolioDetail() {
 
   useEffect(() => {
     const fetchPortfolioDetail = async () => {
-      if (!portfolioId) {
+      console.log("=== 포트폴리오 상세 조회 시작 ===");
+      console.log("URL에서 받은 userId:", userId);
+
+      if (!userId) {
         setError("포트폴리오 ID가 없습니다.");
         setIsLoading(false);
         return;
@@ -41,18 +45,45 @@ function MypagePortfolioDetail() {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await getPortfolioDetail(Number(portfolioId));
+        console.log("API 호출할 userId:", Number(userId));
+        const data = await getPortfolioDetail(Number(userId));
+        console.log("API 응답 데이터:", data);
         setPortfolio(data);
       } catch (err) {
         console.error("포트폴리오 상세 조회 실패:", err);
-        setError("포트폴리오를 불러오는데 실패했습니다.");
+
+        // 타입 안전한 에러 처리
+        if (err && typeof err === "object" && "response" in err) {
+          const response = (
+            err as { response?: { status?: number; data?: unknown } }
+          ).response;
+
+          console.error("에러 상태 코드:", response?.status);
+          console.error("에러 응답 데이터:", response?.data);
+
+          if (response?.status === 404) {
+            setError(
+              "해당 포트폴리오를 찾을 수 없습니다. 포트폴리오가 삭제되었거나 존재하지 않을 수 있습니다."
+            );
+          } else if (response?.status === 403) {
+            setError("이 포트폴리오에 접근할 권한이 없습니다.");
+          } else if (response?.status) {
+            setError(
+              `포트폴리오를 불러오는데 실패했습니다. (에러 코드: ${response.status})`
+            );
+          } else {
+            setError("포트폴리오를 불러오는데 실패했습니다.");
+          }
+        } else {
+          setError("포트폴리오를 불러오는데 실패했습니다.");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPortfolioDetail();
-  }, [portfolioId]);
+  }, [userId]);
 
   if (isLoading) {
     return (
@@ -99,7 +130,7 @@ function MypagePortfolioDetail() {
         <h1 className="text-3xl font-bold text-gray-900">포트폴리오 상세</h1>
         <div className="space-x-2">
           <button
-            onClick={() => navigate(`/mypage/portfolio/edit/${portfolioId}`)}
+            onClick={() => navigate(`/mypage/portfolios/edit/${userId}`)}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
           >
             수정
