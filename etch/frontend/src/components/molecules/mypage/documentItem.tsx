@@ -1,19 +1,22 @@
 import type { DocumentItemProps } from "../../atoms/listItem";
 
-const DocumentItem = ({ id, title, date, description, onClick, onDelete, onEdit }: DocumentItemProps) => { // Add onEdit
+const DocumentItem = ({
+  id,
+  introduce,
+  updatedAt,
+  onClick,
+  onDelete,
+  onEdit,
+}: DocumentItemProps) => {
+  // Add onEdit
   return (
     <div
       className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
       onClick={() => onClick?.(id)}
     >
       <div className="flex-1">
-        <h4 className="font-medium">{title}</h4>
-        {description && (
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
-        )}
-        {date && (
-          <p className="text-sm text-gray-500 mt-1">{date}</p>
-        )}
+        <h4 className="font-medium">{introduce}</h4>
+        {updatedAt && <p className="text-sm text-gray-500 mt-1">{updatedAt}</p>}
       </div>
       <div className="flex space-x-2">
         {onEdit && ( // Conditionally render edit button if onEdit prop is provided
