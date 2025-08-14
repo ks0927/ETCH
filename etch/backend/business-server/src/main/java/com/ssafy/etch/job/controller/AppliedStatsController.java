@@ -29,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 public class AppliedStatsController {
 	private final AppliedStatsService appliedStatsService;
 
+	@Operation(summary = "사용자 지원 상태 비율",
+		description = "사용자가 지원한 채용공고 상태별 비율")
 	@GetMapping("/rates")
 	public ResponseEntity<ApiResponse<AppliedRatesResponseDTO>> getAppliedRates(
 		@AuthenticationPrincipal CustomOAuth2User oAuth2User) {
@@ -36,8 +38,8 @@ public class AppliedStatsController {
 		return ResponseEntity.ok(ApiResponse.success(rates));
 	}
 
-	@Operation(summary = "사용자 지원 상태 비율",
-		description = "사용자가 지원한 채용공고 상태별 비율")
+	@Operation(summary = "설정 기간의 사용자 지원 상태 비율",
+		description = "사용자가 지원한 채용공고 설정기간 상태별 비율")
 	@GetMapping("/rates/period")
 	public ResponseEntity<ApiResponse<AppliedRatesResponseDTO>> getAppliedRatesWithDate(
 		@AuthenticationPrincipal CustomOAuth2User oAuth2User,
@@ -48,6 +50,7 @@ public class AppliedStatsController {
 		return ResponseEntity.ok(ApiResponse.success(rates));
 	}
 
+	@Operation(summary = "월 지원공고 통계", description = "입력한 달의 사용자 지원공고 개수")
 	@GetMapping("/monthly")
 	ResponseEntity<ApiResponse<List<MonthlyItemDTO>>> getMonthly(@AuthenticationPrincipal CustomOAuth2User oAuth2User,
 		@RequestParam int year,
@@ -59,6 +62,7 @@ public class AppliedStatsController {
 		return ResponseEntity.ok(ApiResponse.success(monthlyItemDTOList));
 	}
 
+	@Operation(summary = "사용자 지원공고 직무 통계", description = "사용자 지원공고 직무별 퍼센트")
 	@GetMapping("/categories")
 	public List<CategoryShareDTO> categories(
 		@AuthenticationPrincipal CustomOAuth2User oAuth2User,

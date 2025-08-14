@@ -25,7 +25,7 @@ import com.ssafy.etch.news.entity.NewsEntity;
 import com.ssafy.etch.news.repository.NewsRepository;
 import com.ssafy.etch.project.dto.ProjectLikeResponseDTO;
 import com.ssafy.etch.project.entity.ProjectEntity;
-import com.ssafy.etch.project.event.ProjectLikeChangedEvent;
+import com.ssafy.etch.project.event.ProjectLikeCountChangedEvent;
 import com.ssafy.etch.project.repository.ProjectRepository;
 
 import jakarta.transaction.Transactional;
@@ -69,7 +69,7 @@ public class LikeServiceImpl implements LikeService {
 		likeRepository.save(likeEntity);
 
 		if (likeType.equals(LikeType.PROJECT)) {
-			eventPublisher.publishEvent(ProjectLikeChangedEvent.liked(targetId));
+			eventPublisher.publishEvent(ProjectLikeCountChangedEvent.of(targetId));
 		}
 	}
 
@@ -87,7 +87,7 @@ public class LikeServiceImpl implements LikeService {
 		likeRepository.delete(likeEntity);
 
 		if (likeType.equals(LikeType.PROJECT)) {
-			eventPublisher.publishEvent(ProjectLikeChangedEvent.unliked(targetId));
+			eventPublisher.publishEvent(ProjectLikeCountChangedEvent.of(targetId));
 		}
 	}
 
