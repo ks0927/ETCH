@@ -13,14 +13,14 @@ interface ApiResponse<T> {
 interface CreatePortfolioRequest {
   name: string;
   introduce: string;
-  githubUrl: string;
-  blogUrl: string;
+  githubUrl?: string;
+  blogUrl?: string;
   phoneNumber: string;
-  email: string;
-  techList: string[];
-  education: string;
-  language: string;
-  projectList: ProjectInfo[];
+  email?: string;
+  techList?: string[];
+  education?: string;
+  language?: string;
+  projectList?: ProjectInfo[];
 }
 
 // 포트폴리오 응답 타입
@@ -210,6 +210,8 @@ export const getPortfolioByUserId = async (
 };
 
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수 (빈 배열/문자열까지 안전 처리)
+// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
+// projectIds: number[] 형태로 전달
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
   projectList: ProjectInfo[] = []
@@ -224,13 +226,10 @@ export const convertPortfolioDataToRequest = (
     techList: Array.isArray(portfolioData.stack)
       ? portfolioData.stack.map((stackEnum) => String(stackEnum))
       : [],
-    // 서버에서 문자열 JSON 형태로 파싱하므로 빈 배열이면 "[]"로 보내기
-    language: portfolioData.language
-      ? JSON.stringify([portfolioData.language])
-      : "[]",
-    education: portfolioData.education
-      ? JSON.stringify([portfolioData.education])
-      : "[]",
-    projectList: projectList.length > 0 ? projectList : [],
+    // 서버에서 문자열 JSON 형태로 파싱되므로 빈 문자열도 "[]"로
+    language: portfolioData.language ? `[${portfolioData.language}]` : "[]",
+    education: portfolioData.education ? `[${portfolioData.education}]` : "[]",
+    // projectList는 이미 배열이면 그대로, 빈 배열도 안전하게 전달
+    projectList: projectList,
   };
 };
