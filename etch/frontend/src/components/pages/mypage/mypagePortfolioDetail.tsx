@@ -3,6 +3,17 @@ import { useParams, useNavigate } from "react-router";
 import { getPortfolioDetail } from "../../../api/portfolioApi";
 
 // API에서 반환하는 타입 (portfolioApi.ts의 PortfolioDetailResponseDTO와 일치)
+export interface ProjectInfo {
+  id: number;
+  title: string;
+  thumbnailUrl: string;
+  projectCategory: string;
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  isPublic: boolean;
+  popularityScore: number;
+}
 interface PortfolioDetailResponseDTO {
   portfolioId: number;
   name: string;
@@ -15,7 +26,7 @@ interface PortfolioDetailResponseDTO {
   language: string;
   education: string;
   memberId: number;
-  projectList: number[];
+  projectList: ProjectInfo[];
   createdAt: string;
   updatedAt: string;
 }
@@ -254,28 +265,15 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 프로젝트 정보 */}
-      {portfolio.projectList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">
-            연결된 프로젝트 ({portfolio.projectList.length}개)
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {portfolio.projectList.map((projectId) => (
-              <div
-                key={projectId}
-                className="border border-gray-200 rounded-lg p-4"
-              >
-                <h3 className="font-semibold text-gray-900 mb-2">
-                  프로젝트 ID: {projectId}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  프로젝트 상세 정보는 별도로 조회해야 합니다.
-                </p>
-              </div>
-            ))}
-          </div>
+      {portfolio.projectList.map((project) => (
+        <div key={project.id} className="border border-gray-200 rounded-lg p-4">
+          <h3 className="font-semibold text-gray-900 mb-2">
+            프로젝트 ID: {project.id}
+          </h3>
+          <p className="text-sm text-gray-600">프로젝트명: {project.title}</p>
+          <img src={project.thumbnailUrl} alt={project.title} />
         </div>
-      )}
+      ))}
     </div>
   );
 }
