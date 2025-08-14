@@ -65,7 +65,14 @@ export const chatApi = {
     await chatInstance.post(`/chat/room/${roomId}/enter`);
   },
 
-  // 채팅방 퇴장: POST /api/chat/chat/room/{roomId}/exit
+  // 🆕 채팅방 임시 나가기: POST /api/chat/chat/room/{roomId}/leave-temporarily
+  // ESC 키로 채팅방 목록으로 돌아갈 때 사용
+  temporarilyLeaveRoom: async (roomId: string): Promise<void> => {
+    await chatInstance.post(`/chat/room/${roomId}/leave-temporarily`);
+  },
+
+  // 📝 기존 exitRoom은 완전 나가기로 유지
+  // 채팅방을 아예 나가고 싶을 때 사용 (채팅방 설정에서 "나가기" 버튼 등)
   exitRoom: async (roomId: string): Promise<void> => {
     await chatInstance.post(`/chat/room/${roomId}/exit`);
   },

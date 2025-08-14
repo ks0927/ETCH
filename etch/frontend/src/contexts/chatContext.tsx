@@ -19,6 +19,8 @@ interface ChatContextType {
   sendMessage: (message: string) => Promise<void>;
   leaveRoom: () => Promise<void>;
   markOthersMessagesAsRead: (roomId: string) => Promise<void>;
+  temporarilyLeaveRoom: () => Promise<void>; // 🆕 추가
+  permanentlyLeaveRoom: () => Promise<void>; // 🆕 추가
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -184,6 +186,51 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     }
   };
 
+  // 🆕 임시 나가기 (ESC 키용 - 채팅방 목록으로 돌아가기)
+  const temporarilyLeaveRoom = async () => {
+    if (!currentRoom) return;
+
+    try {
+      // 🆕 임시 나가기 API 호출 (DB에서 참가자 제거하지 않음)
+      await chatApi.temporarilyLeaveRoom(currentRoom.roomId);
+      
+      // WebSocket 구독만 해제
+      chatService.unsubscribeFromRoom(currentRoom.roomId);
+      
+      // UI 상태 초기화
+      setCurrentRoom(null);
+      setMessages([]);
+      
+      console.log("Temporarily left room: {}", currentRoom.roomId);
+    } catch (error) {
+      console.error('임시 나가기 실패:', error);
+    }
+  };
+
+  // 🆕 완전 나가기 (설정에서 "나가기" 버튼용)
+  const permanentlyLeaveRoom = async () => {
+    if (!currentRoom) return;
+
+    try {
+      // 완전 나가기 API 호출 (DB에서 참가자 제거)
+      await chatApi.exitRoom(currentRoom.roomId);
+      
+      // WebSocket 구독 해제
+      chatService.unsubscribeFromRoom(currentRoom.roomId);
+      
+      // UI 상태 초기화
+      setCurrentRoom(null);
+      setMessages([]);
+      
+      // 채팅방 목록도 새로고침 (나간 방이 목록에서 사라져야 함)
+      await loadRooms();
+      
+      console.info("Permanently left room: %s", currentRoom.roomId);
+    } catch (error) {
+      console.error('완전 나가기 실패:', error);
+    }
+  };
+
   // 메시지 전송
   const sendMessage = async (message: string) => {
     if (!currentRoom) return;
@@ -225,18 +272,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   };
 
   // 방 나가기
-  const leaveRoom = async () => {
-    if (!currentRoom) return;
-
-    try {
-      await chatApi.exitRoom(currentRoom.roomId);
-      chatService.unsubscribeFromRoom(currentRoom.roomId);
-      setCurrentRoom(null);
-      setMessages([]);
-    } catch (error) {
-      console.error('방 나가기 실패:', error);
-    }
-  };
+  const leaveRoom = temporarilyLeaveRoom;
 
   // 다른 사용자의 메시지만 읽음 처리
   const markOthersMessagesAsRead = async (roomId: string) => {
@@ -268,6 +304,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     messages,
     isConnected,
     isLoading,
+    temporarilyLeaveRoom, // 명시적 임시 나가기
+    permanentlyLeaveRoom, // 명시적 완전 나가기
     loadRooms,
     selectRoom,
     sendMessage,

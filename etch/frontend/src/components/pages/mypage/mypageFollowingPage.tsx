@@ -22,17 +22,18 @@ function MypageFollowingPage() {
       // 현재 사용자와 대상 사용자의 닉네임 가져오기
       const myNickname = getCurrentUserName();
       
-      // 1:1 채팅방 생성 (새로운 API 사용)
+      // 🆕 1:1 채팅방 생성 또는 기존 방 조회
       const chatRoom = await chatApi.createDirectChat({
         targetUserId: userId,
         myNickname: myNickname,
         targetNickname: targetNickname
       });
       
-      // 채팅 모달을 열고 해당 채팅방으로 이동
+      // 🆕 채팅 모달을 열되, selectRoom을 직접 호출하지 않음
+      // targetRoomId만 설정하면 ChatModalContainer에서 자동으로 처리됨
       openChatModal(chatRoom.roomId);
       
-      console.log("1:1 채팅방 생성/조회 성공:", chatRoom);
+      console.log("1:1 채팅방 준비 완료:", chatRoom);
     } catch (error) {
       console.error("채팅방 생성 실패:", error);
       alert("채팅을 시작할 수 없습니다. 다시 시도해주세요.");

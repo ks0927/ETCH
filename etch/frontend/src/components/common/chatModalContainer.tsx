@@ -12,22 +12,25 @@ interface ChatModalContainerProps {
 
 function ChatModalContent({ onClose }: ChatModalContainerProps) {
   const [modalState, setModalState] = useState<'list' | 'room'>('list');
-  const { currentRoom, leaveRoom, selectRoom } = useChatContext();
+  const { currentRoom, temporarilyLeaveRoom, selectRoom } = useChatContext(); // 🆕 수정
   const { targetRoomId } = useModalContext();
 
   const handleRoomSelect = async (_roomId: string, _roomName: string) => {
     setModalState('room');
   };
 
+  // 🆕 개선된 "목록으로 돌아가기" 함수
   const handleBackToList = async () => {
-    await leaveRoom();
+    // 임시 나가기 사용 (DB에서 참가자 제거하지 않음)
+    await temporarilyLeaveRoom();
     setModalState('list');
   };
 
-  // ESC 키 이벤트 핸들러
+  // 🆕 개선된 ESC 키 이벤트 핸들러
   const handleEscKey = useCallback(async () => {
     if (modalState === 'room') {
-      // 채팅방에서 ESC: 채팅방 목록으로 돌아가기
+      // 채팅방에서 ESC: 임시 나가기로 채팅방 목록으로 돌아가기
+      // DB에서 참가자를 제거하지 않음
       await handleBackToList();
     } else {
       // 채팅방 목록에서 ESC: 모달 닫기
@@ -81,7 +84,7 @@ function ChatModalContent({ onClose }: ChatModalContainerProps) {
         <>
           <ChatRoomHeader 
             roomName={currentRoom.displayName} 
-            onBack={handleBackToList} 
+            onBack={handleBackToList} // 🆕 임시 나가기 사용
           />
           <div className="flex-1 overflow-hidden">
             <ChatRoomPage />
