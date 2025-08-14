@@ -6,15 +6,14 @@ import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
-import com.ssafy.etch.portfolio.dto.PortfolioDTO;
-import com.ssafy.etch.portfolio.dto.PortfolioDetailResponseDTO;
-import com.ssafy.etch.portfolio.dto.PortfolioListResponseDTO;
-import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
+import com.ssafy.etch.portfolio.dto.*;
 import com.ssafy.etch.portfolio.entity.PortfolioEntity;
 import com.ssafy.etch.portfolio.entity.PortfolioProjectEntity;
 import com.ssafy.etch.portfolio.repository.PortfolioProjectRepository;
 import com.ssafy.etch.portfolio.repository.PortfolioRepository;
+import com.ssafy.etch.project.dto.ProjectDTO;
 import com.ssafy.etch.project.entity.ProjectEntity;
+import com.ssafy.etch.project.entity.ProjectTechEntity;
 import com.ssafy.etch.project.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -127,6 +130,9 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     private List<PortfolioProjectEntity> getSavedEntities(PortfolioEntity portfolioEntity, List<Long> projectIds) {
+        if (projectIds == null) {
+            return Collections.emptyList();
+        }
         List<PortfolioProjectEntity> savedEntities = new ArrayList<>();
 
         for (Long projectId : projectIds) {
