@@ -1,5 +1,6 @@
 import { authInstance } from "./instances";
 import type { portfolioDatas } from "../types/portfolio/portfolioDatas";
+import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -40,6 +41,36 @@ interface PortfolioResponse {
   updatedAt: string;
 }
 
+// 프로젝트 생성 요청 타입
+interface CreateProjectRequest {
+  title: string;
+  content: string;
+  projectCategory: ProjectCategoryEnum;
+  techCodeIds: number[];
+  githubUrl: string;
+  youtubeUrl: string;
+  isPublic: boolean;
+  thumbnailFile?: File | null;
+  imageFiles?: File[];
+}
+
+// 프로젝트 응답 타입
+interface ProjectResponse {
+  projectId: number;
+  title: string;
+  content: string;
+  projectCategory: ProjectCategoryEnum;
+  techCodeIds: number[];
+  githubUrl: string;
+  youtubeUrl: string;
+  isPublic: boolean;
+  memberId: number;
+  createdAt: string;
+  updatedAt: string;
+  thumbnailUrl?: string;
+  imageUrls?: string[];
+}
+
 // 포트폴리오 생성
 export const createPortfolio = async (
   portfolioData: CreatePortfolioRequest
@@ -60,6 +91,68 @@ export const createPortfolio = async (
     return response.data.data;
   } catch (error) {
     console.error("=== API 에러 ===");
+    console.error("에러:", error);
+
+    throw error;
+  }
+};
+
+// 프로젝트 생성
+export const createProject = async (
+  projectData: CreateProjectRequest
+): Promise<ProjectResponse> => {
+  console.log("=== 프로젝트 생성 요청 ===");
+  console.log("전송 데이터:", projectData);
+
+  try {
+    // FormData 생성 (파일 업로드를 위해)
+    const formData = new FormData();
+
+    // 기본 프로젝트 정보를 JSON으로 추가
+    const projectInfo = {
+      title: projectData.title,
+      content: projectData.content,
+      projectCategory: projectData.projectCategory,
+      techCodeIds: projectData.techCodeIds,
+      githubUrl: projectData.githubUrl,
+      youtubeUrl: projectData.youtubeUrl,
+      isPublic: projectData.isPublic,
+    };
+
+    formData.append(
+      "projectCreateRequest",
+      new Blob([JSON.stringify(projectInfo)], { type: "application/json" })
+    );
+
+    // 썸네일 파일 추가
+    if (projectData.thumbnailFile) {
+      formData.append("thumbnailFile", projectData.thumbnailFile);
+    }
+
+    // 이미지 파일들 추가
+    if (projectData.imageFiles && projectData.imageFiles.length > 0) {
+      projectData.imageFiles.forEach((file) => {
+        formData.append("imageFiles", file);
+      });
+    }
+
+    const response = await authInstance.post<ApiResponse<ProjectResponse>>(
+      "/projects",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("=== 프로젝트 생성 성공 ===");
+    console.log("상태 코드:", response.status);
+    console.log("응답 데이터:", response.data);
+
+    return response.data.data;
+  } catch (error) {
+    console.error("=== 프로젝트 생성 API 에러 ===");
     console.error("에러:", error);
 
     throw error;

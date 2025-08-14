@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import {
   PortfolioWriteStackData,
   type PortfolioStackEnum,
@@ -18,6 +19,7 @@ import PortfolioProjectPage from "./portfolioProjectPage";
 import {
   convertPortfolioDataToRequest,
   createPortfolio,
+  createProject,
 } from "../../../api/portfolioApi";
 
 // 프로젝트 데이터 타입 정의
@@ -47,6 +49,7 @@ const initialProjectData: ProjectData = {
 };
 
 function MypagePortfolioPage() {
+  const navigate = useNavigate();
   const [portfolioData, setPortfolioData] = useState<portfolioDatas>({
     ...PortfolioState,
     stack: [] as PortfolioStackEnum[],
@@ -313,41 +316,62 @@ function MypagePortfolioPage() {
       console.log("제출할 포트폴리오 데이터:", portfolioData);
       console.log("제출할 프로젝트 데이터:", registeredProjects);
 
-      // 1. portfolioData를 API 형식으로 변환
-      // 현재는 프로젝트 ID가 없으므로 빈 배열로 전달 (나중에 프로젝트 생성 후 업데이트 가능)
+      // 1. 등록된 프로젝트들을 먼저 생성하고 프로젝트 ID들을 수집
+      const createdProjectIds: number[] = [];
+
+      for (const project of registeredProjects) {
+        try {
+          const projectInput = {
+            title: project.title,
+            content: project.content,
+            projectCategory: project.projectCategory as ProjectCategoryEnum,
+            techCodeIds: project.projectTechs,
+            githubUrl: project.githubUrl,
+            youtubeUrl: project.youtubeUrl,
+            isPublic: project.isPublic,
+            thumbnailFile: project.thumbnailFile,
+            imageFiles: project.files.filter((file) =>
+              file.type.startsWith("image/")
+            ),
+          };
+
+          console.log(`프로젝트 "${project.title}" 생성 중...`);
+          const createdProject = await createProject(projectInput);
+          createdProjectIds.push(createdProject.projectId);
+          console.log(
+            `프로젝트 "${project.title}" 생성 완료, ID: ${createdProject.projectId}`
+          );
+        } catch (projectError) {
+          console.error(`프로젝트 "${project.title}" 생성 실패:`, projectError);
+          // 개별 프로젝트 생성 실패 시에도 계속 진행 (선택사항)
+          // 완전히 중단하려면 throw projectError; 사용
+          alert(
+            `프로젝트 "${project.title}" 등록에 실패했습니다. 계속 진행합니다.`
+          );
+        }
+      }
+
+      console.log("생성된 프로젝트 ID들:", createdProjectIds);
+
+      // 2. portfolioData를 API 형식으로 변환 (생성된 프로젝트 ID들 포함)
       const requestData = convertPortfolioDataToRequest(
         portfolioData,
-        [] // projectIds - 추후 프로젝트 생성 API 연동 시 추가
+        createdProjectIds
       );
 
-      console.log("API 전송용 데이터:", requestData);
+      console.log("API 전송용 포트폴리오 데이터:", requestData);
 
-      // 2. 포트폴리오 생성 API 호출
+      // 3. 포트폴리오 생성 API 호출
       const portfolioResponse = await createPortfolio(requestData);
       console.log("포트폴리오 생성 성공:", portfolioResponse);
 
-      // 3. 등록된 프로젝트들 생성 API (추후 구현)
-      // TODO: 프로젝트 생성 API가 준비되면 여기에 추가
-      // for (const project of registeredProjects) {
-      //   const projectInput = {
-      //     title: project.title,
-      //     content: project.content,
-      //     projectCategory: project.projectCategory,
-      //     techCodeIds: project.projectTechs,
-      //     githubUrl: project.githubUrl,
-      //     youtubeUrl: project.youtubeUrl,
-      //     isPublic: project.isPublic,
-      //     thumbnailFile: project.thumbnailFile,
-      //     imageFiles: project.files.filter(file => file.type.startsWith('image/'))
-      //   };
-      //   await createProject(projectInput);
-      // }
+      // 4. 성공 메시지
+      alert(
+        `포트폴리오가 성공적으로 등록되었습니다!\n- 포트폴리오 ID: ${portfolioResponse.portfolioId}\n- 등록된 프로젝트 수: ${createdProjectIds.length}개`
+      );
 
-      alert("포트폴리오가 성공적으로 등록되었습니다!");
-
-      // 성공 후 초기화 (선택사항)
-      // setPortfolioData({ ...PortfolioState, stack: [] });
-      // setRegisteredProjects([]);
+      // 5. 마이페이지로 이동
+      navigate("/mypage");
     } catch (error) {
       console.error("=== 포트폴리오 등록 실패 ===");
       console.error("에러 상세:", error);
