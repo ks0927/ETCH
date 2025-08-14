@@ -4,12 +4,13 @@ import Footer from "../components/common/footer";
 import Header from "../components/common/header";
 import ChatButton from "../components/molecules/chat/chatButton";
 import ChatModalContainer from "../components/common/chatModalContainer";
+import { ModalProvider, useModalContext } from "../contexts/modalContext";
 import useUserStore from "../store/userStore";
 import { getMemberInfo } from "../api/authApi";
 
-function Layout() {
+function LayoutContent() {
   const { pathname } = useLocation();
-  const [showChatModal, setShowChatModal] = useState(false);
+  const { showChatModal, openChatModal, closeChatModal } = useModalContext();
   const [isInitializing, setIsInitializing] = useState(true);
   const chatModalRef = useRef<HTMLDivElement>(null);
   const { isLoggedIn, setMemberInfo } = useUserStore();
@@ -52,13 +53,17 @@ function Layout() {
 
   // 채팅 버튼 클릭 핸들러 - 토글 기능
   const handleChatButtonClick = () => {
-    setShowChatModal(prev => !prev);
+    if (showChatModal) {
+      closeChatModal();
+    } else {
+      openChatModal();
+    }
   };
 
   // 모달 외부 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (chatModalRef.current && !chatModalRef.current.contains(e.target as Node)) {
-      setShowChatModal(false);
+      closeChatModal();
     }
   };
 
@@ -104,13 +109,21 @@ function Layout() {
                 className="border border-gray-400 shadow-lg w-80 h-[500px] rounded-lg overflow-hidden bg-white mb-24 mr-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ChatModalContainer onClose={() => setShowChatModal(false)} />
+                <ChatModalContainer onClose={closeChatModal} />
               </div>
             </div>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+function Layout() {
+  return (
+    <ModalProvider>
+      <LayoutContent />
+    </ModalProvider>
   );
 }
 

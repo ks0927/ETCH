@@ -9,6 +9,12 @@ export const chatApi = {
     return response.data;
   },
 
+  // 1:1 채팅방 생성 (상대방 userId로)
+  createOneOnOneRoom: async (targetUserId: number): Promise<ChatRoom> => {
+    const response = await authInstance.post(`/api/chat/room?name=${encodeURIComponent('1:1 채팅')}&targetUserId=${targetUserId}`);
+    return response.data;
+  },
+
   // 특정 채팅방 정보 조회
   getRoom: async (roomId: string): Promise<ChatRoom> => {
     const response = await authInstance.get(`/api/chat/room/${roomId}`);
