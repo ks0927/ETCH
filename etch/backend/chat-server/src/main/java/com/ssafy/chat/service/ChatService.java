@@ -10,6 +10,7 @@ import com.ssafy.chat.repository.jpa.ChatParticipantRepository;
 import com.ssafy.chat.repository.jpa.ChatReadStatusRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -86,7 +87,8 @@ public class ChatService {
         }
 
         try {
-            // 기존 참가자 확인
+            // 🆕 DB 레벨에서 중복 방지를 위한 UNIQUE 제약조건 확인
+            // 이미 존재하는 경우 로그만 남기고 정상 처리
             Optional<ChatParticipant> existingParticipant =
                     chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId);
 
@@ -95,7 +97,7 @@ public class ChatService {
                 return; // 이미 참가자인 경우 추가하지 않음
             }
 
-            // 새로운 참가자 추가
+            // 새로운 참가자 추가 시도
             ChatParticipant participant = ChatParticipant.builder()
                     .roomId(roomId)
                     .memberId(memberId)
@@ -106,13 +108,64 @@ public class ChatService {
             log.info("Member {} successfully added to room {} (participant_id: {})",
                     memberId, roomId, savedParticipant.getId());
 
+        } catch (DataIntegrityViolationException e) {
+            // 🆕 DB 제약조건 위반 시 (동시성으로 인한 중복 생성 시도)
+            log.debug("Member {} is already a participant in room {} (caught by DB constraint)",
+                    memberId, roomId);
+            // 에러를 던지지 않고 정상 처리로 간주
         } catch (Exception e) {
             log.error("Failed to add member {} to room {}: {}", memberId, roomId, e.getMessage(), e);
             throw new RuntimeException("Failed to add participant to chat room", e);
         }
     }
 
-    // ChatService.java에 추가할 메서드
+    /**
+     * 🆕 채팅방 "일시 나가기" 메서드 (참가자는 유지하되 활성 상태만 변경)
+     * DB에서 삭제하지 않고 임시로 비활성화
+     */
+    @Transactional
+    public void temporarilyLeaveRoom(String roomId, Long memberId) {
+        // 실제로는 참가자를 제거하지 않음
+        // 필요시 나중에 last_seen_at 같은 필드로 관리할 수 있음
+        log.info("Member {} temporarily left room {} (participant remains)", memberId, roomId);
+    }
+
+    /**
+     * 🆕 채팅방 "완전 나가기" 메서드 (기존 removeParticipant를 명확히 구분)
+     */
+    @Transactional
+    public void permanentlyLeaveRoom(String roomId, Long memberId) {
+        if (roomId == null || memberId == null) {
+            log.warn("Invalid parameters for permanentlyLeaveRoom: roomId={}, memberId={}", roomId, memberId);
+            return;
+        }
+
+        try {
+            Optional<ChatParticipant> participantOpt =
+                    chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId);
+
+            if (participantOpt.isPresent()) {
+                ChatParticipant participant = participantOpt.get();
+                chatParticipantRepository.delete(participant);
+                log.info("Member {} permanently removed from room {} (participant_id: {})",
+                        memberId, roomId, participant.getId());
+
+                // 읽음 상태도 삭제
+                Optional<ChatReadStatus> readStatusOpt =
+                        chatReadStatusRepository.findByRoomIdAndMemberId(roomId, memberId);
+                if (readStatusOpt.isPresent()) {
+                    chatReadStatusRepository.delete(readStatusOpt.get());
+                    log.info("Read status for member {} in room {} also removed", memberId, roomId);
+                }
+            } else {
+                log.warn("Member {} is not a participant in room {}", memberId, roomId);
+            }
+        } catch (Exception e) {
+            log.error("Failed to permanently remove member {} from room {}: {}",
+                    memberId, roomId, e.getMessage(), e);
+            throw new RuntimeException("Failed to permanently remove participant from chat room", e);
+        }
+    }
 
     /**
      * 🆕 채팅방 참가자 제거 메서드

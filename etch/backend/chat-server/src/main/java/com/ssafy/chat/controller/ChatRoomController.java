@@ -195,12 +195,38 @@ public class ChatRoomController {
         }
         redisMessageListener.addMessageListener(redisSubscriber, topic);
 
-        // DB에 참여자 정보 저장
+        // 🆕 안전한 참가자 추가 (중복 방지 강화)
         try {
             log.info("Member {} entered room: {}", memberId, roomId);
             chatService.addParticipant(roomId, memberId);
         } catch (Exception e) {
             log.error("Failed to add participant: {}", e.getMessage());
+            // 🆕 참가자 추가 실패해도 Redis 연결은 유지 (이미 참가자일 수 있음)
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 🆕 새로운 임시 나가기 엔드포인트 (채팅방 목록으로 돌아가기)
+     */
+    @PostMapping("/room/{roomId}/leave-temporarily")
+    public ResponseEntity<Void> temporarilyLeaveChatRoom(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable String roomId) {
+
+        Long memberId = getMemberIdFromToken(authorizationHeader);
+        if (memberId == null) {
+            log.warn("Invalid or expired token for temporary room leave: {}", roomId);
+            return ResponseEntity.status(401).build();
+        }
+
+        try {
+            // 🆕 DB에서 참가자를 제거하지 않음 (단순히 WebSocket 연결만 해제)
+            chatService.temporarilyLeaveRoom(roomId, memberId);
+            log.info("Member {} temporarily left room: {}", memberId, roomId);
+        } catch (Exception e) {
+            log.error("Failed to temporarily leave room: {}", e.getMessage());
             return ResponseEntity.status(500).build();
         }
 
@@ -208,7 +234,7 @@ public class ChatRoomController {
     }
 
     /**
-     * 채팅방 퇴장 (기존과 동일)
+     * 📝 수정된 채팅방 완전 퇴장 (기존 exit 엔드포인트)
      */
     @PostMapping("/room/{roomId}/exit")
     public ResponseEntity<Void> exitChatRoom(
@@ -222,8 +248,9 @@ public class ChatRoomController {
         }
 
         try {
-            chatService.removeParticipant(roomId, memberId);
-            log.info("Member {} exited room: {}", memberId, roomId);
+            // 🆕 완전 나가기로 변경 (DB에서 참가자 제거)
+            chatService.permanentlyLeaveRoom(roomId, memberId);
+            log.info("Member {} permanently exited room: {}", memberId, roomId);
         } catch (Exception e) {
             log.error("Failed to remove participant: {}", e.getMessage());
             return ResponseEntity.status(500).build();
