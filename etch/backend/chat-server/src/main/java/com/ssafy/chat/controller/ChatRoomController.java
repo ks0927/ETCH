@@ -270,15 +270,26 @@ public class ChatRoomController {
      * 토큰에서 사용자 ID 추출하는 헬퍼 메서드
      */
     private Long getMemberIdFromToken(String authorizationHeader) {
+        log.info("토큰 검증 시작. Authorization 헤더: {}",
+                authorizationHeader != null ? "존재함" : "없음");
+
         if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
             String token = authorizationHeader.substring(7);
+            log.info("토큰 추출 완료. 토큰 길이: {}", token.length());
+
             try {
                 if (jwtUtil.isValidToken(token)) {
-                    return jwtUtil.getId(token);
+                    Long userId = jwtUtil.getId(token);
+                    log.info("토큰 검증 성공. 사용자 ID: {}", userId);
+                    return userId;
+                } else {
+                    log.warn("토큰이 유효하지 않습니다");
                 }
             } catch (Exception e) {
-                log.error("Token validation failed: {}", e.getMessage());
+                log.error("토큰 검증 중 오류 발생: {}", e.getMessage(), e);
             }
+        } else {
+            log.warn("Authorization 헤더가 없거나 형식이 잘못되었습니다");
         }
         return null;
     }
