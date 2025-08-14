@@ -37,7 +37,7 @@ public class ChatRoomService {
         }
     }
 
-    // 🆕 손상된 ChatRoom 데이터 정리
+    // 🆕 손상된 ChatRoom 데이터 정리.
     private void cleanupCorruptedChatRooms() {
         try {
             List<ChatRoom> allRooms = chatRoomRepository.findAll();
