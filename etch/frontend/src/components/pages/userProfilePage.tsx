@@ -3,9 +3,7 @@ import { useParams } from "react-router";
 import type { ProjectData } from "../../types/project/projectDatas";
 import { getUserPublicProjects } from "../../api/projectApi";
 import { checkFollowExists, followUser, unfollowUser } from "../../api/followApi";
-import { chatApi } from "../../api/chatApi.tsx";
 import { useUserProfile } from "../../hooks/useUserProfile";
-import { useModalContext } from "../../contexts/modalContext";
 import UserProfileCard from "../organisms/userprofile/userProfileCard";
 import UserProjectList from "../organisms/userprofile/userProjectList";
 
@@ -15,14 +13,12 @@ function UserProfilePage() {
 
   // 훅을 사용한 사용자 프로필 데이터
   const { profileData, isLoading: profileLoading, error: profileError } = useUserProfile(userId ? Number(userId) : undefined);
-  const { openChatModal } = useModalContext();
   
   // 상태 관리
   const [userProjects, setUserProjects] = useState<ProjectData[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
-  const [chatLoading, setChatLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 프로젝트와 팔로우 상태 로딩
@@ -88,25 +84,9 @@ function UserProfilePage() {
   };
 
   // 채팅 핸들러
-  const handleChatClick = async () => {
-    if (!userId || chatLoading) return;
-
-    setChatLoading(true);
-    
-    try {
-      // 1:1 채팅방 생성 또는 기존 채팅방 가져오기
-      const chatRoom = await chatApi.createOneOnOneRoom(Number(userId));
-      
-      // 채팅 모달을 열고 해당 채팅방으로 이동
-      openChatModal(chatRoom.roomId);
-      
-      console.log("채팅방 생성/조회 성공:", chatRoom);
-    } catch (error) {
-      console.error("채팅방 생성 실패:", error);
-      alert("채팅을 시작할 수 없습니다. 다시 시도해주세요.");
-    } finally {
-      setChatLoading(false);
-    }
+  const handleChatClick = () => {
+    // 채팅 기능
+    console.log("채팅하기");
   };
 
   if (profileLoading || projectsLoading) {
@@ -149,7 +129,6 @@ function UserProfilePage() {
               followingCount={profileData.followingCount}
               isFollowing={isFollowing}
               isFollowLoading={followLoading}
-              isChatLoading={chatLoading}
               onFollowClick={handleFollowClick}
               onChatClick={handleChatClick}
             />

@@ -1,7 +1,8 @@
 // 채팅방 관련 타입들
 export interface ChatRoom {
   roomId: string;
-  roomName: string;
+  name: string;
+  createdAt?: string;
 }
 
 export interface ChatMessage {
@@ -30,7 +31,7 @@ export interface WebSocketChatMessage {
 export interface WebSocketReadMessage {
   roomId: string;
   memberId: number;
-  messageId: number;
+  messageId?: number;
 }
 
 // UI용 채팅 메시지 타입 (기존 컴포넌트와 호환)

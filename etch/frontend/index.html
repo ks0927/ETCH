@@ -8,12 +8,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // sockjs-client를 위한 global polyfill
-      if (typeof global === 'undefined') {
-        var global = globalThis;
-      }
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

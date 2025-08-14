@@ -1,14 +1,13 @@
 import { Outlet, useLocation } from "react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Footer from "../components/common/footer";
 import Header from "../components/common/header";
 import ChatButton from "../components/molecules/chat/chatButton";
 import ChatModalContainer from "../components/common/chatModalContainer";
-import { ModalProvider, useModalContext } from "../contexts/modalContext";
 
-function LayoutContent() {
+function Layout() {
   const { pathname } = useLocation();
-  const { showChatModal, openChatModal, closeChatModal } = useModalContext();
+  const [showChatModal, setShowChatModal] = useState(false);
   const chatModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,17 +24,13 @@ function LayoutContent() {
 
   // 채팅 버튼 클릭 핸들러 - 토글 기능
   const handleChatButtonClick = () => {
-    if (showChatModal) {
-      closeChatModal();
-    } else {
-      openChatModal();
-    }
+    setShowChatModal(prev => !prev);
   };
 
   // 모달 외부 클릭 핸들러
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (chatModalRef.current && !chatModalRef.current.contains(e.target as Node)) {
-      closeChatModal();
+      setShowChatModal(false);
     }
   };
 
@@ -69,21 +64,13 @@ function LayoutContent() {
                 className="border border-gray-400 shadow-lg w-80 h-[500px] rounded-lg overflow-hidden bg-white mb-24 mr-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ChatModalContainer onClose={closeChatModal} />
+                <ChatModalContainer onClose={() => setShowChatModal(false)} />
               </div>
             </div>
           )}
         </div>
       </div>
     </div>
-  );
-}
-
-function Layout() {
-  return (
-    <ModalProvider>
-      <LayoutContent />
-    </ModalProvider>
   );
 }
 

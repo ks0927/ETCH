@@ -73,7 +73,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       // API 응답을 UI 형태로 변환
       const uiRooms: UIChatRoom[] = apiRooms.map(room => ({
         id: room.roomId,
-        name: room.roomName,
+        name: room.name,
         lastMessage: '', // 최근 메시지는 별도로 관리 필요
         time: '',
         unreadCount: 0

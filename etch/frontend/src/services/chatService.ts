@@ -6,11 +6,11 @@ export class ChatService {
   private stompClient: Client | null = null;
   private subscriptions: Map<string, any> = new Map();
 
-  // WebSocket 연결
+  // WebSocket 연결 - 운영 환경
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.stompClient = new Client({
-        webSocketFactory: () => new SockJS('http://localhost:8083/ws-stomp'),
+        webSocketFactory: () => new SockJS('https://etch.it.kr/api/chat/ws-stomp'),
         connectHeaders: token ? {
           Authorization: `Bearer ${token}`
         } : {},
@@ -107,7 +107,7 @@ export class ChatService {
   }
 
   // 읽음 상태 전송
-  markAsRead(roomId: string, memberId: number, messageId: number): void {
+  markAsRead(roomId: string, memberId: number, messageId?: number): void {
     if (this.stompClient && this.stompClient.connected) {
       const readMessage: WebSocketReadMessage = {
         roomId: roomId,
