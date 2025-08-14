@@ -21,6 +21,7 @@ public class PortfolioController {
 
     private final PortfolioService portfolioService;
 
+
     @GetMapping("/list")
     public ResponseEntity<ApiResponse<List<PortfolioListResponseDTO>>> getPortfolioList(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User) {
