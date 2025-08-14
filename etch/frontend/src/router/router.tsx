@@ -189,7 +189,7 @@ const router = createBrowserRouter([
       {
         path: "members/:userId/projects",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute showMessage={true}>
             <Suspense fallback={<LoadingPage />}>
               <UserProfilePage />
             </Suspense>
