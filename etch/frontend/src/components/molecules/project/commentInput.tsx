@@ -31,9 +31,17 @@ function CommentInput({ onSubmit, isSubmitting = false }: CommentInputProps) {
         </div>
         <button
           type="submit"
-          disabled={!content.trim() || isSubmitting}
-          className="flex-shrink-0 px-3 py-1 text-xs font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center justify-center transition-colors duration-200 disabled:cursor-not-allowed"
-        >
+          disabled={isSubmitting}
+           className="
+            bg-blue-500 hover:bg-blue-600 text-white font-medium
+            px-5 py-2.5  
+            rounded-md
+            text-base 
+            flex items-center justify-center    
+            h-10          
+            min-w-[64px]  
+          "
+          >
           등록
         </button>
       </div>

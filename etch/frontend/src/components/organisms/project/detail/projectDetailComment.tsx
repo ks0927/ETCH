@@ -26,7 +26,12 @@ function ProjectDetailComment({ projectId, currentUserId }: Props) {
 
       setIsLoading(true);
       const response = await getCommentsByProjectId(projectId);
-      setComments(response.comments);
+
+      const sorted = [...response.comments].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setComments(sorted);
       setTotalCount(response.count);
     } catch (error) {
       console.error("댓글 조회 실패:", error);
@@ -78,11 +83,6 @@ function ProjectDetailComment({ projectId, currentUserId }: Props) {
     }
   };
 
-  // // 좋아요 처리 (구현해야됨됨)
-  // const handleLikeComment = (commentId: number) => {
-  //   console.log("좋아요 처리:", commentId);
-  // };
-
   useEffect(() => {
     if (projectId && !isNaN(projectId)) {
       fetchComments();
@@ -99,12 +99,12 @@ function ProjectDetailComment({ projectId, currentUserId }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 pt-2">
         <h3 className="text-lg font-semibold text-gray-900">
           댓글 ({totalCount})
         </h3>
       </div>
-      <div className="flex-shrink-0 py-4">
+      <div className="flex-shrink-0 pt-4 pb-3">
         <CommentInput onSubmit={handleSubmitComment} isSubmitting={isSubmitting} />
       </div>
       <div className="flex-1 space-y-4 overflow-y-auto min-h-0 border-t border-gray-200 pt-4">

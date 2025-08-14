@@ -29,33 +29,11 @@ function ProjectComment({
   });
   
   // 시간 포맷팅 함수
-  const formatTime = (timeString: string) => {
+  const formatDateTime = (timeString: string) => {
     try {
-      const date = new Date(timeString);
-      const now = new Date();
-      const diffInHours = Math.floor(
-        (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-      );
-
-      if (diffInHours < 1) {
-        const diffInMinutes = Math.floor(
-          (now.getTime() - date.getTime()) / (1000 * 60)
-        );
-        return diffInMinutes <= 0 ? "방금 전" : `${diffInMinutes}분 전`;
-      } else if (diffInHours < 24) {
-        return `${diffInHours}시간 전`;
-      } else {
-        const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays < 7) {
-          return `${diffInDays}일 전`;
-        } else {
-          return date.toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          });
-        }
-      }
+      const d = new Date(timeString);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     } catch {
       return timeString;
     }
@@ -78,12 +56,6 @@ function ProjectComment({
   const handleDelete = () => {
     if (onDelete && window.confirm("댓글을 삭제하시겠습니까?")) {
       onDelete(comment.id);
-    }
-  };
-
-  const handleLike = () => {
-    if (onLike) {
-      onLike(comment.id);
     }
   };
 
@@ -115,8 +87,9 @@ function ProjectComment({
               {comment.nickname}
             </button>
             <span className="text-xs text-gray-500">
-              {formatTime(comment.createdAt)}
+              {formatDateTime(comment.createdAt)}
             </span>
+
           </div>
           
           {isAuthor && (
@@ -133,16 +106,6 @@ function ProjectComment({
 
         <div className="text-gray-700 text-sm leading-relaxed break-words mb-3">
           {comment.content}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleLike}
-            className="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors duration-200"
-          >
-            <HeartSVG className="w-4 h-4" />
-            <span className="text-xs">0</span>
-          </button>
         </div>
       </div>
     </div>
