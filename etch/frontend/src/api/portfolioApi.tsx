@@ -41,6 +41,14 @@ interface PortfolioResponse {
   updatedAt: string;
 }
 
+// 포트폴리오 목록용 간단한 응답 타입 (목록에서는 간단한 정보만 필요)
+interface PortfolioListItem {
+  id: number; // portfolioId를 id로 매핑
+  introduce: string;
+  updatedAt: string;
+  name?: string; // 추가 정보로 이름도 포함
+}
+
 // 프로젝트 생성 요청 타입
 interface CreateProjectRequest {
   title: string;
@@ -159,10 +167,35 @@ export const createProject = async (
   }
 };
 
-// 내 포트폴리오 조회
+// 내 포트폴리오 목록 조회 (새로 추가)
+export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
+  try {
+    const response = await authInstance.get<ApiResponse<PortfolioResponse[]>>(
+      "/portfolios/my-list"
+    );
+
+    // API 응답을 DocumentItem에서 사용할 수 있는 형태로 변환
+    const portfolioList: PortfolioListItem[] = response.data.data.map(
+      (portfolio) => ({
+        id: portfolio.portfolioId,
+        introduce: portfolio.introduce,
+        updatedAt: portfolio.updatedAt,
+        name: portfolio.name,
+      })
+    );
+
+    return portfolioList;
+  } catch (error) {
+    console.error("=== 포트폴리오 목록 조회 API 에러 ===");
+    console.error("에러:", error);
+    throw error;
+  }
+};
+
+// 내 포트폴리오 조회 (단일)
 export const getMyPortfolio = async (): Promise<PortfolioResponse> => {
   const response = await authInstance.get<ApiResponse<PortfolioResponse>>(
-    "/portfolios/me"
+    "/portfolios/list"
   );
   return response.data.data;
 };

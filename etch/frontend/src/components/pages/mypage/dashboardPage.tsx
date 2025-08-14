@@ -23,14 +23,11 @@ const DashboardPage = () => {
     isLoading,
     error: documentsError,
     refetchCoverLetters,
+    refetchPortfolios, // 추가: 포트폴리오 리페치 함수
   } = useMyDocuments();
 
   // 사용자 통계 데이터
-  const {
-    stats,
-    isLoading: statsLoading,
-    error: statsError,
-  } = useUserStats();
+  const { stats, isLoading: statsLoading, error: statsError } = useUserStats();
 
   useEffect(() => {
     const loadLatestNews = async () => {
@@ -85,7 +82,10 @@ const DashboardPage = () => {
         {statsLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-6 bg-white rounded-lg shadow-sm animate-pulse">
+              <div
+                key={i}
+                className="p-6 bg-white rounded-lg shadow-sm animate-pulse"
+              >
                 <div className="flex items-center space-x-4">
                   <div className="w-8 h-8 bg-gray-300 rounded"></div>
                   <div className="flex-1">
@@ -135,6 +135,7 @@ const DashboardPage = () => {
             coverLetters={coverLetters}
             portfolios={portfolios}
             refetchCoverLetters={refetchCoverLetters}
+            refetchPortfolios={refetchPortfolios} // 추가: 포트폴리오 리페치 함수 전달
           />
         )}
       </div>
