@@ -4,6 +4,7 @@ import type { ProjectData } from "../../types/project/projectDatas";
 import ProjectDetailCard from "../organisms/project/detail/projectDetailCard";
 // 🎯 필요한 API 함수들 import
 import { likeProject, unlikeProject } from "../../api/projectApi";
+import useUserStore from "../../store/userStore";
 
 interface Props {
   project: ProjectData;
@@ -12,19 +13,27 @@ interface Props {
 }
 
 function ProjectModal({ project, onClose, onProjectUpdate }: Props) {
+  const { memberInfo } = useUserStore();
+  
   // ESC 키로 모달 닫기
   useEffect(() => {
+    // 모달이 마운트될 때 body 스크롤을 막습니다.
+    document.body.style.overflow = 'hidden';
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
-
     document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
+
+    // 모달이 언마운트될 때 body 스크롤을 복원합니다.
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [onClose]);
 
-  // 배경 클릭으로 모달 닫기
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -66,11 +75,11 @@ function ProjectModal({ project, onClose, onProjectUpdate }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-xl flex w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl relative">
-        {/* 닫기 버튼 */}
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="bg-white rounded-xl flex w-full max-w-5xl h-[70vh] overflow-hidden shadow-2xl relative">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -78,24 +87,16 @@ function ProjectModal({ project, onClose, onProjectUpdate }: Props) {
         >
           ✕
         </button>
-
-        {/* 왼쪽: 프로젝트 정보 */}
-        <div className="w-[60%] flex flex-col p-6 overflow-y-auto">
-          {/* 🎯 좋아요 핸들러를 ProjectDetailCard에 전달 */}
-          <ProjectDetailCard
-            project={project}
-            onLike={handleLike} // 좋아요 핸들러 전달
-          />
-        </div>
-
-        {/* 오른쪽: 댓글 섹션 */}
-        <div className="w-[40%] border-l border-gray-200 flex flex-col p-5 overflow-y-auto bg-gray-50">
-          <h2 className="text-base font-bold text-gray-900 mb-4">
-            댓글 ({project.commentCount || 0}) {/* commentCount 사용 */}
-          </h2>
-          <ProjectDetailComment
-            comment={[]} // 실제 댓글 데이터로 교체 필요
-          />
+  
+        <div className="flex h-full w-full gap-6"> {/* 좌/우 칼럼을 세로 꽉 채우도록 */}
+          <div className="flex-[0_0_60%] min-w-0 flex flex-col p-6 overflow-y-auto">
+            <ProjectDetailCard project={project} onLike={handleLike} />
+          </div>
+          <div className="flex-1 min-w-0 border-l border-gray-200 flex flex-col bg-gray-50 overflow-hidden px-6">
+            <div className="py-5 flex flex-col h-full overflow-hidden">
+              <ProjectDetailComment projectId={project.id} currentUserId={memberInfo?.id} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
