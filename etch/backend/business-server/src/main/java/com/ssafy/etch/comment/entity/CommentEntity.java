@@ -1,6 +1,9 @@
 package com.ssafy.etch.comment.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.ssafy.etch.comment.dto.CommentDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
@@ -31,8 +34,9 @@ public class CommentEntity {
 	@Column(columnDefinition = "TEXT")
 	private String content;
 
+	@CreationTimestamp
 	@Column(name = "created_at")
-	private LocalDate createdAt;
+	private LocalDateTime createdAt;
 
 	@Column(name = "is_deleted", nullable = false)
 	private Boolean isDeleted;
@@ -64,7 +68,7 @@ public class CommentEntity {
 		CommentEntity commentEntity = new CommentEntity();
 
 		commentEntity.content = content;
-		commentEntity.createdAt = LocalDate.now();
+		commentEntity.createdAt = LocalDateTime.now();
 		commentEntity.isDeleted = false;
 		commentEntity.member = member;
 		commentEntity.project = project;

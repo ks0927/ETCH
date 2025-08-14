@@ -1,6 +1,7 @@
 package com.ssafy.etch.comment.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.project.entity.ProjectEntity;
@@ -13,7 +14,7 @@ import lombok.Getter;
 public class CommentDTO {
 	private Long id;
 	private String content;
-	private LocalDate createdAt;
+	private LocalDateTime createdAt;
 	private Boolean isDeleted;
 	private MemberEntity member;
 	private ProjectEntity project;
