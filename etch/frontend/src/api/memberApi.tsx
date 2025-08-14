@@ -75,3 +75,8 @@ export const getRecommendNews = async (): Promise<RecommendNewsDTO[]> => {
   const response = await authInstance.get<ApiResponse<RecommendNewsDTO[]>>('/members/me/recommend-news');
   return response.data.data;
 };
+
+// 회원 탈퇴
+export const deleteMember = async (): Promise<void> => {
+  await authInstance.delete('/members');
+};
