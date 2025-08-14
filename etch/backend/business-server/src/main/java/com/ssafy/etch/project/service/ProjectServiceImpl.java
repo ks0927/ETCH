@@ -38,6 +38,7 @@ import com.ssafy.etch.project.dto.ProjectUpdateRequestDTO;
 import com.ssafy.etch.project.entity.ProjectEntity;
 import com.ssafy.etch.project.entity.ProjectTechEntity;
 import com.ssafy.etch.project.event.ProjectChangedEvent;
+import com.ssafy.etch.project.event.ProjectViewIncreasedEvent;
 import com.ssafy.etch.project.repository.ProjectRepository;
 import com.ssafy.etch.project.repository.ProjectTechRepository;
 import com.ssafy.etch.tech.entity.TechCodeEntity;
@@ -182,7 +183,11 @@ public class ProjectServiceImpl implements ProjectService {
 	@Transactional(readOnly = false)
 	public ProjectDetailDTO getProjectById(long id, Long memberId) {
 
-		projectRepository.increaseViewCount(id);
+		int updated = projectRepository.increaseViewCount(id);
+		if (updated == 1) {
+			// 트랜잭션 커밋 후 ES 반영
+			events.publishEvent(ProjectViewIncreasedEvent.one(id));
+		}
 
 		ProjectDTO p = projectRepository.findDetailById(id)
 			.map(ProjectEntity::toProjectDTO)
