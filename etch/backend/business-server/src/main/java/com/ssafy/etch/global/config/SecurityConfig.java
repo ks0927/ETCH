@@ -50,7 +50,7 @@ public class SecurityConfig {
 
 				configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173", "https://etch.it.kr"));
 				configuration.setAllowCredentials(true);
-				configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 명시적으로 허용
+				configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH")); // 명시적으로 허용
 				configuration.setAllowedHeaders(
 					Arrays.asList("Authorization", "Content-Type", "X-Requested-With")); // 필요한 헤더만
 				configuration.setMaxAge(3600L);
