@@ -56,7 +56,7 @@ function AdditionalInfoPage() {
 
       // FormData 생성 (multipart/form-data)
       const formData = new FormData();
-      
+
       // JSON 데이터를 'data' 파트에 추가
       const memberData = {
         nickname,
@@ -64,11 +64,11 @@ function AdditionalInfoPage() {
         gender,
         birth,
       };
-      formData.append('data', JSON.stringify(memberData));
-      
+      formData.append("data", JSON.stringify(memberData));
+
       // 프로필 이미지가 있으면 'profile' 파트에 추가
       if (profile) {
-        formData.append('profile', profile);
+        formData.append("profile", profile);
       }
 
       console.log("회원가입 데이터:", memberData);
