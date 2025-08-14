@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 public class CommentResponseDTO {
 	private Long id;
+	private Long memberId;
 	private String nickname;
 	private String content;
 	private LocalDate createdAt;
@@ -18,6 +19,7 @@ public class CommentResponseDTO {
 	public static CommentResponseDTO from(CommentDTO commentDTO) {
 		return CommentResponseDTO.builder()
 			.id(commentDTO.getId())
+			.memberId(commentDTO.getMember().getId())
 			.nickname(commentDTO.getMember().toMemberDTO().getNickname())
 			.content(commentDTO.getContent())
 			.createdAt(commentDTO.getCreatedAt())
