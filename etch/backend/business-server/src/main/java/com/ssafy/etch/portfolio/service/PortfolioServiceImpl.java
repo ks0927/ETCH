@@ -1,5 +1,7 @@
 package com.ssafy.etch.portfolio.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
 import com.ssafy.etch.member.entity.MemberEntity;
@@ -29,6 +31,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     private final ProjectRepository projectRepository;
     private final PortfolioProjectRepository portfolioProjectRepository;
     private final MemberRepository memberRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -50,7 +53,14 @@ public class PortfolioServiceImpl implements PortfolioService {
         MemberEntity memberEntity = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        PortfolioDTO portfolioDTO = portfolioRequestDTO.toPortfolioDTO().toBuilder().member(memberEntity).build();
+        String techList = techListToString(portfolioRequestDTO);
+
+        PortfolioDTO portfolioDTO = portfolioRequestDTO
+                .toPortfolioDTO(techList)
+                .toBuilder()
+                .member(memberEntity)
+                .build();
+
         PortfolioEntity savedPortfolio = portfolioRepository.save(PortfolioEntity.from(portfolioDTO));
         List<Long> projectIds = portfolioRequestDTO.getProjectIds();
         List<PortfolioProjectEntity> savedEntities = getSavedEntities(savedPortfolio, projectIds);
@@ -73,7 +83,8 @@ public class PortfolioServiceImpl implements PortfolioService {
         List<Long> projectIds = portfolioRequestDTO.getProjectIds();
         List<PortfolioProjectEntity> savedEntities = getSavedEntities(portfolioEntity, projectIds);
 
-        portfolioEntity.updateAll(portfolioRequestDTO, savedEntities);
+        String techList = techListToString(portfolioRequestDTO);
+        portfolioEntity.updateAll(portfolioRequestDTO, techList, savedEntities);
     }
 
     @Override
@@ -110,7 +121,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         PortfolioDTO portfolioDTO = portfolioEntity.toPortfolioDTO();
 
-        return PortfolioDetailResponseDTO.from(portfolioDTO);
+        return PortfolioDetailResponseDTO.from(portfolioDTO, stringToTechList(portfolioDTO.getTechList()));
     }
 
     private List<PortfolioProjectEntity> getSavedEntities(PortfolioEntity portfolioEntity, List<Long> projectIds) {
@@ -127,5 +138,25 @@ public class PortfolioServiceImpl implements PortfolioService {
             savedEntities.add(saved);
         }
         return savedEntities;
+    }
+
+    private String techListToString(PortfolioRequestDTO portfolioRequestDTO) {
+        String result = null;
+        List<String> list = portfolioRequestDTO.getTechList();
+        try {
+            result = objectMapper.writeValueAsString(list);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+        return result;
+    }
+    private List<String> stringToTechList(String techList) {
+        List<String> result;
+        try {
+            result = objectMapper.readValue(techList, new TypeReference<>() {});
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INVALID_INPUT);
+        }
+        return result;
     }
 }

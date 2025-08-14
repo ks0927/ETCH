@@ -17,6 +17,8 @@ public class PortfolioDTO {
     private String githubUrl;
     private String linkedInUrl;
     private String blogUrl;
+    private String email;
+    private String phoneNumber;
     private String techList;
     private String education;
     private String language;

@@ -60,7 +60,7 @@ public class PortfolioController {
     }
 
     @GetMapping("/{portfolioId}")
-    public ResponseEntity<ApiResponse<PortfolioDetailResponseDTO>> getCoverLetter(
+    public ResponseEntity<ApiResponse<PortfolioDetailResponseDTO>> getPortfolioInfo(
             @AuthenticationPrincipal CustomOAuth2User oAuth2User,
             @PathVariable Long portfolioId) {
 
