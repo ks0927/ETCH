@@ -14,6 +14,7 @@ export interface ProjectInfo {
   isPublic: boolean;
   popularityScore: number;
 }
+
 interface PortfolioDetailResponseDTO {
   portfolioId: number;
   name: string;
@@ -30,6 +31,25 @@ interface PortfolioDetailResponseDTO {
   createdAt: string;
   updatedAt: string;
 }
+
+// JSON 문자열을 안전하게 파싱하는 헬퍼 함수
+const safeParseJSON = (jsonString: string): string[] => {
+  if (!jsonString || jsonString.trim() === "") {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (Array.isArray(parsed)) {
+      return parsed.map((item) => String(item));
+    }
+    return [String(parsed)];
+  } catch (error) {
+    console.warn("JSON 파싱 실패:", error);
+    // JSON 파싱 실패 시 원본 문자열을 배열로 반환
+    return [jsonString];
+  }
+};
 
 function MypagePortfolioDetail() {
   // 라우터가 portfolios/:userId이므로 userId로 받아옴
@@ -78,6 +98,10 @@ function MypagePortfolioDetail() {
             );
           } else if (response?.status === 403) {
             setError("이 포트폴리오에 접근할 권한이 없습니다.");
+          } else if (response?.status === 500) {
+            setError(
+              "서버에서 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."
+            );
           } else if (response?.status) {
             setError(
               `포트폴리오를 불러오는데 실패했습니다. (에러 코드: ${response.status})`
@@ -86,7 +110,9 @@ function MypagePortfolioDetail() {
             setError("포트폴리오를 불러오는데 실패했습니다.");
           }
         } else {
-          setError("포트폴리오를 불러오는데 실패했습니다.");
+          setError(
+            "네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요."
+          );
         }
       } finally {
         setIsLoading(false);
@@ -134,6 +160,10 @@ function MypagePortfolioDetail() {
     );
   }
 
+  // JSON 문자열을 파싱하여 안전하게 렌더링
+  const educationList = safeParseJSON(portfolio.education);
+  const languageList = safeParseJSON(portfolio.language);
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       {/* 헤더 */}
@@ -163,117 +193,166 @@ function MypagePortfolioDetail() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               이름
             </label>
-            <p className="text-gray-900">{portfolio.name}</p>
+            <p className="text-gray-900">{portfolio.name || "-"}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               이메일
             </label>
-            <p className="text-gray-900">{portfolio.email}</p>
+            <p className="text-gray-900">{portfolio.email || "-"}</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               전화번호
             </label>
-            <p className="text-gray-900">{portfolio.phoneNumber}</p>
+            <p className="text-gray-900">{portfolio.phoneNumber || "-"}</p>
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               자기소개
             </label>
             <p className="text-gray-900 bg-gray-50 p-3 rounded-md">
-              {portfolio.introduce}
+              {portfolio.introduce || "자기소개가 없습니다."}
             </p>
           </div>
         </div>
       </div>
 
       {/* 링크 정보 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">링크</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {portfolio.githubUrl && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                GitHub
-              </label>
-              <a
-                href={portfolio.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 break-all"
-              >
-                {portfolio.githubUrl}
-              </a>
-            </div>
-          )}
-          {portfolio.blogUrl && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                블로그
-              </label>
-              <a
-                href={portfolio.blogUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 break-all"
-              >
-                {portfolio.blogUrl}
-              </a>
-            </div>
-          )}
+      {(portfolio.githubUrl || portfolio.blogUrl) && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">링크</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {portfolio.githubUrl && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  GitHub
+                </label>
+                <a
+                  href={portfolio.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 break-all"
+                >
+                  {portfolio.githubUrl}
+                </a>
+              </div>
+            )}
+            {portfolio.blogUrl && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  블로그
+                </label>
+                <a
+                  href={portfolio.blogUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 break-all"
+                >
+                  {portfolio.blogUrl}
+                </a>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 기술 스택 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">기술 스택</h2>
-        <div className="flex flex-wrap gap-2">
-          {portfolio.techList.map((tech, index) => (
-            <span
-              key={index}
-              className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-            >
-              {tech}
-            </span>
-          ))}
+      {portfolio.techList && portfolio.techList.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">기술 스택</h2>
+          <div className="flex flex-wrap gap-2">
+            {portfolio.techList.map((tech, index) => (
+              <span
+                key={index}
+                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 학력 정보 */}
-      {portfolio.education && (
+      {educationList.length > 0 && educationList[0] !== "" && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">학력</h2>
-          <div className="bg-gray-50 p-3 rounded-md">
-            <p className="text-gray-900 whitespace-pre-line">
-              {portfolio.education}
-            </p>
+          <div className="bg-gray-50 p-3 rounded-md space-y-2">
+            {educationList.map((edu, index) => (
+              <p key={index} className="text-gray-900">
+                {edu}
+              </p>
+            ))}
           </div>
         </div>
       )}
 
       {/* 어학 정보 */}
-      {portfolio.language && (
+      {languageList.length > 0 && languageList[0] !== "" && (
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold mb-4">어학</h2>
-          <div className="bg-gray-50 p-3 rounded-md">
-            <p className="text-gray-900 whitespace-pre-line">
-              {portfolio.language}
-            </p>
+          <div className="bg-gray-50 p-3 rounded-md space-y-2">
+            {languageList.map((lang, index) => (
+              <p key={index} className="text-gray-900">
+                {lang}
+              </p>
+            ))}
           </div>
         </div>
       )}
 
       {/* 프로젝트 정보 */}
-      {portfolio.projectList.map((project) => (
-        <div key={project.id} className="border border-gray-200 rounded-lg p-4">
-          <h3 className="font-semibold text-gray-900 mb-2">
-            프로젝트 ID: {project.id}
-          </h3>
-          <p className="text-sm text-gray-600">프로젝트명: {project.title}</p>
-          <img src={project.thumbnailUrl} alt={project.title} />
+      {portfolio.projectList && portfolio.projectList.length > 0 ? (
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">프로젝트</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {portfolio.projectList.map((project) => (
+              <div
+                key={project.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
+                {project.thumbnailUrl && (
+                  <img
+                    src={project.thumbnailUrl}
+                    alt={project.title}
+                    className="w-full h-32 object-cover rounded-md mb-3"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                )}
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {project.title}
+                </h3>
+                <div className="flex justify-between text-sm text-gray-500 mb-2">
+                  <span>{project.projectCategory}</span>
+                  <span>조회 {project.viewCount}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">{project.nickname}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-red-500">♥ {project.likeCount}</span>
+                    {project.isPublic && (
+                      <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-xs">
+                        공개
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">프로젝트</h2>
+          <div className="text-center py-8 text-gray-500">
+            <div className="mb-2">📁</div>
+            <p>등록된 프로젝트가 없습니다.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
