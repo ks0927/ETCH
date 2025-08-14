@@ -112,6 +112,49 @@ public class ChatService {
         }
     }
 
+    // ChatService.java에 추가할 메서드
+
+    /**
+     * 🆕 채팅방 참가자 제거 메서드
+     */
+    @Transactional
+    public void removeParticipant(String roomId, Long memberId) {
+        if (roomId == null || memberId == null) {
+            log.warn("Invalid parameters for removeParticipant: roomId={}, memberId={}", roomId, memberId);
+            return;
+        }
+
+        try {
+            // 기존 참가자 확인
+            Optional<ChatParticipant> participantOpt =
+                    chatParticipantRepository.findByRoomIdAndMemberId(roomId, memberId);
+
+            if (participantOpt.isPresent()) {
+                ChatParticipant participant = participantOpt.get();
+
+                // 참가자 삭제
+                chatParticipantRepository.delete(participant);
+                log.info("Member {} successfully removed from room {} (participant_id: {})",
+                        memberId, roomId, participant.getId());
+
+                // 해당 사용자의 읽음 상태도 삭제 (선택사항)
+                Optional<ChatReadStatus> readStatusOpt =
+                        chatReadStatusRepository.findByRoomIdAndMemberId(roomId, memberId);
+                if (readStatusOpt.isPresent()) {
+                    chatReadStatusRepository.delete(readStatusOpt.get());
+                    log.info("Read status for member {} in room {} also removed", memberId, roomId);
+                }
+
+            } else {
+                log.warn("Member {} is not a participant in room {}", memberId, roomId);
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to remove member {} from room {}: {}", memberId, roomId, e.getMessage(), e);
+            throw new RuntimeException("Failed to remove participant from chat room", e);
+        }
+    }
+
     /**
      * 🆕 채팅방의 모든 참가자 조회
      */
