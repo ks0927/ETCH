@@ -80,7 +80,7 @@ function ChatModalContent({ onClose }: ChatModalContainerProps) {
       {modalState === 'room' && currentRoom && (
         <>
           <ChatRoomHeader 
-            roomName={currentRoom.name} 
+            roomName={currentRoom.displayName} 
             onBack={handleBackToList} 
           />
           <div className="flex-1 overflow-hidden">

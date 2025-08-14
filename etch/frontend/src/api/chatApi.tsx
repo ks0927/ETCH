@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { ChatRoom, ChatMessage } from '../types/chat';
+import type { ChatRoom, ChatMessage, DirectChatRequest } from '../types/chat';
 
 // 채팅 전용 axios 인스턴스 (별도의 base URL 사용)
 const chatInstance = axios.create({
@@ -32,28 +32,10 @@ export const chatApi = {
     return response.data;
   },
 
-  // 1:1 채팅방 생성 (상대방 userId로)
-  createOneOnOneRoom: async (targetUserId: number): Promise<ChatRoom> => {
-    // 방법 1: 1:1 전용 엔드포인트 시도
-    try {
-      const response = await chatInstance.post(`/room/user/${targetUserId}`);
-      return response.data;
-    } catch (error) {
-      console.log('1:1 전용 엔드포인트 실패, POST body 방식 시도');
-      // 방법 2: POST body에 데이터 전송 시도
-      try {
-        const response = await chatInstance.post('/room', {
-          name: '1:1 채팅',
-          targetUserId: targetUserId
-        });
-        return response.data;
-      } catch (error2) {
-        console.log('POST body 방식 실패, Query 파라미터 방식 시도');
-        // 방법 3: Query 파라미터로 시도 (원래 방식)
-        const response = await chatInstance.post(`/room?name=${encodeURIComponent('1:1 채팅')}&targetUserId=${targetUserId}`);
-        return response.data;
-      }
-    }
+  // 1:1 채팅방 생성 (새로운 API 명세에 따라)
+  createDirectChat: async (request: DirectChatRequest): Promise<ChatRoom> => {
+    const response = await chatInstance.post('/direct', request);
+    return response.data;
   },
 
   // 특정 채팅방 정보 조회

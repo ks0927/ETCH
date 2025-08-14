@@ -6,6 +6,7 @@ import { checkFollowExists, followUser, unfollowUser } from "../../api/followApi
 import { chatApi } from "../../api/chatApi.tsx";
 import { useUserProfile } from "../../hooks/useUserProfile";
 import { useModalContext } from "../../contexts/modalContext";
+import { getCurrentUserName } from "../../utils/userUtils";
 import UserProfileCard from "../organisms/userprofile/userProfileCard";
 import UserProjectList from "../organisms/userprofile/userProjectList";
 
@@ -87,20 +88,28 @@ function UserProfilePage() {
     }
   };
 
-  // 채팅 핸들러
+  // 채팅 핸들러 (새로운 API 명세 적용)
   const handleChatClick = async () => {
-    if (!userId || chatLoading) return;
+    if (!userId || chatLoading || !profileData) return;
 
     setChatLoading(true);
     
     try {
-      // 1:1 채팅방 생성 또는 기존 채팅방 가져오기
-      const chatRoom = await chatApi.createOneOnOneRoom(Number(userId));
+      // 현재 사용자와 대상 사용자의 닉네임 가져오기
+      const myNickname = getCurrentUserName();
+      const targetNickname = profileData.nickname;
+      
+      // 1:1 채팅방 생성 (새로운 API 사용)
+      const chatRoom = await chatApi.createDirectChat({
+        targetUserId: Number(userId),
+        myNickname: myNickname,
+        targetNickname: targetNickname
+      });
       
       // 채팅 모달을 열고 해당 채팅방으로 이동
       openChatModal(chatRoom.roomId);
       
-      console.log("채팅방 생성/조회 성공:", chatRoom);
+      console.log("1:1 채팅방 생성/조회 성공:", chatRoom);
     } catch (error) {
       console.error("채팅방 생성 실패:", error);
       alert("채팅을 시작할 수 없습니다. 다시 시도해주세요.");

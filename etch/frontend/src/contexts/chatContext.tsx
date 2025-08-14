@@ -70,13 +70,16 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       setIsLoading(true);
       const apiRooms = await chatApi.getRooms();
       
-      // API 응답을 UI 형태로 변환
+      // API 응답을 UI 형태로 변환 (새로운 응답 구조 반영)
       const uiRooms: UIChatRoom[] = apiRooms.map(room => ({
         id: room.roomId,
-        name: room.name,
-        lastMessage: '', // 최근 메시지는 별도로 관리 필요
-        time: '',
-        unreadCount: 0
+        name: room.displayName,           // displayName 사용
+        lastMessage: room.lastMessage || '',
+        time: room.createdAt ? new Date(room.createdAt).toLocaleTimeString('ko-KR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }) : '',
+        unreadCount: room.unreadCount || 0
       }));
       
       setRooms(uiRooms);
@@ -98,7 +101,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
         chatService.unsubscribeFromRoom(currentRoom.roomId);
       }
 
-      // 새 방 정보 가져오기
+      // 새 방 정보 가져오기 (새로운 응답 구조 사용)
       const roomInfo = await chatApi.getRoom(roomId);
       setCurrentRoom(roomInfo);
 
