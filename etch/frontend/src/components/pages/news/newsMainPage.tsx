@@ -75,7 +75,7 @@ function NewsPage() {
   return (
     <div className="min-h-screen">
       {/* 헤더 섹션 */}
-      <div className="p-6 bg-white border-b border-gray-200">
+      <div className="px-6 py-6 bg-white border-b border-gray-200">
         <div className="flex items-center justify-between">
           {/* 왼쪽: 제목과 설명 */}
           <div className="flex items-center space-x-3">
@@ -121,8 +121,18 @@ function NewsPage() {
               <span>매일 새로운 뉴스 업데이트</span>
             </div>
             <div className="flex items-center space-x-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
               </svg>
               <span>관심 뉴스 등록 가능</span>
             </div>
@@ -130,9 +140,9 @@ function NewsPage() {
         </div>
       </div>
 
-      <div className="px-4 py-6 mx-auto space-y-8 max-w-7xl sm:px-6 lg:px-8 sm:py-8 sm:space-y-12">
+      <div className="mt-8 space-y-8 sm:mt-12 sm:space-y-12">
         {/* 주요 기업 섹션 */}
-        <section className="p-6 bg-white shadow-sm rounded-2xl sm:p-8">
+        <section className="px-6 py-6 bg-white rounded-lg shadow-sm sm:py-8">
           <div className="flex items-center mb-6 space-x-3">
             <div className="flex items-center justify-center w-6 h-6 bg-purple-100 rounded-full">
               <BuildingSVG className="w-4 h-4 text-purple-600" />
@@ -145,7 +155,7 @@ function NewsPage() {
         </section>
 
         {/* 최신 뉴스 섹션 */}
-        <section className="p-6 bg-white shadow-sm rounded-2xl sm:p-8">
+        <section className="px-6 py-6 bg-white rounded-lg shadow-sm sm:py-8">
           <div className="flex flex-col mb-6 space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
@@ -187,14 +197,16 @@ function NewsPage() {
 
         {/* 페이지네이션 */}
         {!loading && !error && newsPageData.totalPages > 0 && (
-          <Pagination
-            currentPage={newsPageData.currentPage}
-            totalPages={newsPageData.totalPages}
-            totalElements={newsPageData.totalElements}
-            isLast={newsPageData.isLast}
-            onPageChange={handlePageChange}
-            itemsPerPage={10}
-          />
+          <div className="px-6">
+            <Pagination
+              currentPage={newsPageData.currentPage}
+              totalPages={newsPageData.totalPages}
+              totalElements={newsPageData.totalElements}
+              isLast={newsPageData.isLast}
+              onPageChange={handlePageChange}
+              itemsPerPage={10}
+            />
+          </div>
         )}
       </div>
     </div>

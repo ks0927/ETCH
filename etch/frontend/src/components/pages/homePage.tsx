@@ -171,11 +171,10 @@ function HomePage() {
         </div>
       </section>
 
-      {/* 채용 정보 */}
-      <section className="py-12 sm:py-16">
-        <div className="px-6 mx-auto max-w-7xl">
-          <div className="p-3 bg-white shadow-sm rounded-2xl sm:p-4">
-            <div className="flex items-center mb-4 space-x-3">
+      <div className="mt-8 space-y-8 sm:mt-12 sm:space-y-12">
+        {/* 채용 정보 */}
+        <section className="px-6 py-8 bg-white shadow-sm rounded-lg sm:py-10">
+          <div className="flex items-center mb-6 space-x-3">
               <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
                 <svg
                   className="w-5 h-5 text-green-600"
@@ -199,22 +198,19 @@ function HomePage() {
                 <SeeMore />
               </Link>
             </div>
-            <ExpiringJobsCarousel
-              jobs={expiringJobs}
-              onJobClick={handleJobClick}
-              loading={jobsLoading}
-            />
-          </div>
-        </div>
-      </section>
+          <ExpiringJobsCarousel
+            jobs={expiringJobs}
+            onJobClick={handleJobClick}
+            loading={jobsLoading}
+          />
+        </section>
 
-      {/* 프로젝트 + 뉴스 */}
-      <section className="py-12 sm:py-16">
-        <div className="px-6 mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* 프로젝트 + 뉴스 */}
+        <section className="px-6 py-8 bg-white shadow-sm rounded-lg sm:py-10">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             {/* 인기 프로젝트 - 2/3 너비 */}
             <div className="xl:col-span-2">
-              <div className="h-full p-3 bg-white shadow-sm rounded-2xl sm:p-4">
+              <div className="h-full">
                 <div className="flex flex-col mb-4 space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-xl">
@@ -234,7 +230,7 @@ function HomePage() {
 
             {/* 뉴스 - 1/3 너비 */}
             <div className="xl:col-span-1">
-              <div className="h-full p-3 bg-white shadow-sm rounded-2xl sm:p-4">
+              <div className="h-full">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-xl">
@@ -263,25 +259,23 @@ function HomePage() {
                 <HomeNewsCard newsData={latestNewsData} />
               </div>
             </div>
-          </div>
         </div>
-      </section>
+        </section>
 
-      {/* 주요 기능 소개 */}
-      <section className="py-16 sm:py-20">
-        <div className="px-6 mx-auto max-w-7xl">
-          <div className="mb-16 text-center">
-            <h2 className="mb-6 text-3xl font-bold text-gray-900 sm:text-4xl">
-              ETCH의 주요 기능
-            </h2>
-            <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-600">
-              IT 취업 성공을 위한 모든 도구와 정보를 하나의 플랫폼에서
-              만나보세요
-            </p>
-          </div>
-          <HomeFuncComponent funcData={funcData} />
+        {/* 주요 기능 소개 */}
+        <section className="px-6 py-12 bg-white shadow-sm rounded-lg sm:py-16">
+        <div className="mb-8 text-center">
+          <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
+            ETCH의 주요 기능
+          </h2>
+          <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-600">
+            IT 취업 성공을 위한 모든 도구와 정보를 하나의 플랫폼에서
+            만나보세요
+          </p>
         </div>
-      </section>
+        <HomeFuncComponent funcData={funcData} />
+        </section>
+      </div>
 
       {/* 모달 */}
       {selectedJob && (
