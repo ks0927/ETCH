@@ -17,10 +17,8 @@ import ProjectWriteSubmitButton from "../../organisms/project/write/projectWrite
 import ProjectFileUpload from "../../organisms/project/write/projectFileUpload";
 import { getProjectById, updateProject } from "../../../api/projectApi";
 import { ProjectWriteTechData } from "../../../types/project/projectTechData";
-import type {
-  BackendProjectResponse,
-  ProjectUpdateRequest,
-} from "../../../types/project/projectUpdateFileUploadProps";
+import type { BackendProjectResponse } from "../../../types/project/projectUpdateFileUploadProps";
+import type { ProjectInputData } from "../../../types/project/projectDatas";
 import { useNavigate, useParams } from "react-router";
 
 // 수정 페이지용 폼 데이터 타입
@@ -88,50 +86,25 @@ function ProjectUpdatePage() {
 
       try {
         setLoading(true);
-        console.log("=== 프로젝트 데이터 로드 시작 ===");
-        console.log("프로젝트 ID:", id);
 
         const project: BackendProjectResponse = await getProjectById(
           parseInt(id)
         );
 
-        console.log("=== 로드된 프로젝트 전체 데이터 ===");
-        console.log(JSON.stringify(project, null, 2));
-
-        // 기술 스택 ID 추출 - BackendProjectResponse 타입 기준
-        let techIds: number[] = [];
-
-        console.log("=== 기술 스택 데이터 분석 ===");
-        console.log("project.projectTechs:", project.projectTechs);
-
-        if (project.projectTechs && Array.isArray(project.projectTechs)) {
-          // BackendProjectResponse.projectTechs 구조 사용
-          techIds = project.projectTechs.map((pt) => pt.techCode.id);
-          console.log("추출된 기술 스택 ID들:", techIds);
-        }
-
-        console.log("추출된 기술 스택 ID들:", techIds);
-
         // 폼 데이터 설정
-        const updatedFormData: ProjectUpdateFormData = {
+        setFormData({
           title: project.title || "",
           content: project.content || "",
           projectCategory: project.projectCategory || "",
-          projectTechs: techIds,
+          projectTechs: project.projectTechs?.map((pt) => pt.techCode.id) || [],
           githubUrl: project.githubUrl || "",
           youtubeUrl: project.youtubeUrl || "",
           isPublic: project.isPublic ?? true,
           files: [], // 새로 추가할 파일들만
-        };
-
-        console.log("=== 설정될 폼 데이터 ===");
-        console.log(JSON.stringify(updatedFormData, null, 2));
-
-        setFormData(updatedFormData);
+        });
 
         // 기존 썸네일 설정
         if (project.thumbnailUrl) {
-          console.log("기존 썸네일 URL:", project.thumbnailUrl);
           setExistingThumbnailUrl(project.thumbnailUrl);
         }
 
@@ -139,40 +112,25 @@ function ProjectUpdatePage() {
         const images: ExistingFile[] = [];
         let pdfFile: ExistingFile | null = null;
 
-        console.log("=== 파일 데이터 분석 ===");
-        console.log("project.files:", project.files);
+        project.files?.forEach((file) => {
+          const fileData: ExistingFile = {
+            id: file.id,
+            fileName: file.fileName,
+            fileUrl: file.fileUrl,
+            isPdf: file.isPdf || false,
+          };
 
-        if (project.files && Array.isArray(project.files)) {
-          project.files.forEach((file, index) => {
-            console.log(`파일 ${index}:`, file);
-
-            const fileData: ExistingFile = {
-              id: file.id,
-              fileName: file.fileName,
-              fileUrl: file.fileUrl,
-              isPdf: file.isPdf || false,
-            };
-
-            console.log(`변환된 파일 데이터 ${index}:`, fileData);
-
-            if (fileData.isPdf) {
-              pdfFile = fileData;
-            } else {
-              images.push(fileData);
-            }
-          });
-        }
-
-        console.log("=== 최종 파일 분류 결과 ===");
-        console.log("이미지 파일들:", images);
-        console.log("PDF 파일:", pdfFile);
+          if (fileData.isPdf) {
+            pdfFile = fileData;
+          } else {
+            images.push(fileData);
+          }
+        });
 
         setExistingFiles(images);
         setExistingPdf(pdfFile);
-
-        console.log("=== 프로젝트 데이터 로드 완료 ===");
       } catch (error) {
-        console.error("=== 프로젝트 로드 실패 ===", error);
+        console.error("프로젝트 로드 실패:", error);
         alert("프로젝트를 불러올 수 없습니다.");
         navigate("/projects");
       } finally {
@@ -220,13 +178,6 @@ function ProjectUpdatePage() {
         newIds = [...currentIds, techId];
       }
 
-      console.log("기술 스택 변경:", {
-        techId,
-        isSelected,
-        기존: currentIds,
-        변경후: newIds,
-      });
-
       return { ...prev, projectTechs: newIds };
     });
   };
@@ -269,13 +220,6 @@ function ProjectUpdatePage() {
     setExistingFiles((prev) => prev.filter((file) => file.id !== fileId));
   };
 
-  const handlePdfUpload = (file: File) => {
-    if (file.type === "application/pdf") {
-      setNewPdfFile(file);
-      setRemovePdf(false);
-    }
-  };
-
   const handlePdfRemove = () => {
     setNewPdfFile(null);
     if (existingPdf) {
@@ -307,11 +251,8 @@ function ProjectUpdatePage() {
         return;
       }
 
-      console.log("=== 수정 데이터 전송 ===");
-      console.log("선택된 기술 스택 ID들:", formData.projectTechs);
-
-      // 수정 데이터를 ProjectUpdateRequest 형태로 변환
-      const projectInput: ProjectUpdateRequest = {
+      // 수정 데이터를 ProjectInputData 형태로 변환
+      const projectInput: ProjectInputData = {
         title: formData.title,
         content: formData.content,
         projectCategory: formData.projectCategory as ProjectCategoryEnum,
@@ -330,8 +271,6 @@ function ProjectUpdatePage() {
         removeFileIds,
         removePdf,
       };
-
-      console.log("전송할 프로젝트 데이터:", projectInput);
 
       // API 호출
       await updateProject(parseInt(id), projectInput);
@@ -389,49 +328,6 @@ function ProjectUpdatePage() {
               acceptedTypes={["image/png", "image/jpeg"]}
             />
 
-            {/* PDF 업로드 섹션 (별도로 추가할 수 있다면) */}
-            {!existingPdf && !newPdfFile && (
-              <div className="mt-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
-                  PDF 파일 업로드 (선택사항)
-                </h3>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePdfUpload(file);
-                  }}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-              </div>
-            )}
-
-            {/* 새로 업로드한 PDF 표시 */}
-            {newPdfFile && (
-              <div className="mt-4 p-4 bg-green-50 rounded-lg border">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
-                      📄
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium">
-                        {newPdfFile.name}
-                      </div>
-                      <div className="text-xs text-gray-500">새 PDF 파일</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handlePdfRemove}
-                    className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50"
-                  >
-                    제거
-                  </button>
-                </div>
-              </div>
-            )}
-
             {/* 기존 파일들 표시 */}
             {(existingFiles.length > 0 ||
               existingThumbnailUrl ||
@@ -473,17 +369,9 @@ function ProjectUpdatePage() {
                   <div key={file.id} className="mb-2">
                     <div className="flex items-center justify-between bg-white p-3 rounded border">
                       <div className="flex items-center space-x-3">
-                        {file.fileUrl ? (
-                          <img
-                            src={file.fileUrl}
-                            alt={file.fileName}
-                            className="w-8 h-8 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
-                            🖼️
-                          </div>
-                        )}
+                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                          🖼️
+                        </div>
                         <div>
                           <div className="text-sm font-medium">
                             {file.fileName}
@@ -589,11 +477,6 @@ function ProjectUpdatePage() {
                   <p className="text-sm text-gray-600">
                     사용한 기술을 선택해주세요.
                   </p>
-                  {/* 디버깅을 위한 정보 표시 */}
-                  <p className="text-xs text-blue-600 mt-1">
-                    현재 선택된 기술 스택:{" "}
-                    {formData.projectTechs.join(", ") || "없음"}
-                  </p>
                 </div>
               </div>
 
@@ -653,13 +536,6 @@ function ProjectUpdatePage() {
         {/* 제출 버튼 */}
         <section className="mt-6 sm:mt-8 lg:mt-12">
           <div className="flex justify-center gap-4">
-            <button
-              onClick={() => navigate(-1)}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              취소
-            </button>
-
             {/* 제출 버튼 */}
             <ProjectWriteSubmitButton
               onSubmit={handleSubmit}
@@ -667,19 +543,6 @@ function ProjectUpdatePage() {
             />
           </div>
         </section>
-
-        {/* 제출 중 로딩 오버레이 */}
-        {submitting && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p>프로젝트를 수정하고 있습니다...</p>
-              <p className="text-sm text-gray-500 mt-2">
-                잠시만 기다려주세요...
-              </p>
-            </div>
-          </div>
-        )}
 
         <div className="h-20"></div>
       </div>
