@@ -48,7 +48,7 @@ function Footer() {
 
         <div className="flex flex-col items-center justify-center mt-8 md:flex-row md:justify-between">
           <p className="mb-2 text-sm text-center text-gray-600 md:text-left md:mb-0">
-            © 2025 E:TCH. All rights reserved.
+            © 2025 ETCH. All rights reserved.
           </p>
           <p className="text-xs text-center text-gray-500 md:text-left">
             Developer: SeungSu, JaeBin, HyunJi, SungHyun, YoonSu, SungMin

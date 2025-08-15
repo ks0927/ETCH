@@ -9,7 +9,7 @@ function JoinPage() {
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-2xl font-bold text-gray-900">회원가입</h1>
             <p className="mb-2 text-gray-600">
-              E:TCH와 함께 IT 취업을 시작하세요
+              ETCH와 함께 IT 취업을 시작하세요
             </p>
             <p className="text-sm text-gray-500">
               구글 계정으로 간편하게 가입하세요
@@ -40,7 +40,7 @@ function JoinPage() {
               </Link>
             </p>
             <p className="text-xs text-gray-500">
-              회원가입하면 E:TCH의 이용약관 및 개인정보처리방침 에 동의하는
+              회원가입하면 ETCH의 이용약관 및 개인정보처리방침 에 동의하는
               것으로 간주됩니다.
             </p>
           </div>

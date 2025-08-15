@@ -31,7 +31,7 @@ function Header() {
             to={"/"}
             className="transition-transform duration-200 hover:scale-105"
           >
-            <img src={LogoImg} alt="E:TCH 로고" className="w-36 md:w-40" />
+            <img src={LogoImg} alt="ETCH 로고" className="w-36 md:w-40" />
           </Link>
 
           {/* 네비게이션 메뉴 */}

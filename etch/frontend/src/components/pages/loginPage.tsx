@@ -37,7 +37,7 @@ function LoginPage() {
         <div className="w-full max-w-md p-8 bg-white border border-gray-100 rounded-lg shadow-sm">
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-2xl font-bold text-gray-900">로그인</h1>
-            <p className="mb-2 text-gray-600">E:TCH에 오신 것을 환영합니다</p>
+            <p className="mb-2 text-gray-600">ETCH에 오신 것을 환영합니다</p>
             <p className="text-sm text-gray-500">
               구글 계정으로 간편하게 로그인하세요
             </p>

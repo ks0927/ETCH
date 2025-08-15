@@ -90,7 +90,7 @@ function HomePage() {
                 IT 취업의 모든 것
               </span>
               <span className="block mb-2 text-3xl text-white sm:text-4xl lg:text-5xl xl:text-6xl">
-                E:TCH
+                ETCH
               </span>
               <span className="block text-2xl sm:text-3xl lg:text-4xl xl:text-5xl">
                 에서 시작하세요
@@ -137,7 +137,7 @@ function HomePage() {
                   >
                     <img
                       src={image}
-                      alt={`E:TCH 플랫폼 소개 ${index + 1}`}
+                      alt={`ETCH 플랫폼 소개 ${index + 1}`}
                       className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>

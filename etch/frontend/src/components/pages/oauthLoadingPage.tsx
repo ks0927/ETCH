@@ -52,7 +52,7 @@ const OAuthLoadingPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="max-w-xl mx-4 text-center">
         <div className="mb-8">
-          <h1 className="mb-2 text-4xl font-bold text-gray-800">E:TCH</h1>
+          <h1 className="mb-2 text-4xl font-bold text-gray-800">ETCH</h1>
           <p className="text-lg text-gray-600">IT 취업의 새로운 시작</p>
         </div>
 
