@@ -43,18 +43,15 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
 
 // 백엔드에서 반환하는 실제 데이터 타입들
 interface BackendEducationData {
-  companyName?: string;
-  startAt?: string;
-  endAt?: string;
-  active?: string;
+  name?: string;
+  description?: string;
   startDate?: string; // 실제 응답에서 사용되는 필드명
   endDate?: string; // 실제 응답에서 사용되는 필드명
 }
 
 interface BackendLanguageData {
-  licenseName?: string;
-  getAt?: string;
-  issuer?: string;
+  name?: string;
+  certificateIssuer?: string;
   date?: string; // 실제 응답에서 사용되는 필드명
 }
 
@@ -103,10 +100,10 @@ const formatEducationData = (
   educationArray: BackendEducationData[]
 ): string[] => {
   return educationArray.map((edu) => {
-    const companyName = edu.companyName || "";
-    const active = edu.active || "";
-    const startDate = edu.startAt || edu.startDate;
-    const endDate = edu.endAt || edu.endDate;
+    const companyName = edu.name || "";
+    const active = edu.description || "";
+    const startDate = edu.startDate || "";
+    const endDate = edu.endDate || "";
 
     const formattedStartDate = startDate
       ? new Date(startDate).toLocaleDateString("ko-KR")
@@ -142,9 +139,9 @@ const formatEducationData = (
 // 어학 데이터를 표시용 문자열로 변환
 const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
   return languageArray.map((lang) => {
-    const licenseName = lang.licenseName || "";
-    const issuer = lang.issuer || "";
-    const getAt = lang.getAt || lang.date;
+    const licenseName = lang.name || "";
+    const issuer = lang.certificateIssuer || "";
+    const getAt = lang.date || "";
 
     const formattedDate = getAt
       ? new Date(getAt).toLocaleDateString("ko-KR")
