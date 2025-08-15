@@ -119,6 +119,22 @@ public class ProjectController {
 	}
 
 	@Operation(
+		summary = "내 프로젝트 목록 조회 API",
+		description = "로그인된 사용자의 ID로 등록한 프로젝트 목록을 조회합니다."
+	)
+	@GetMapping("/my")
+	public ResponseEntity<ApiResponse<List<ProjectListDTO>>> getMyProjects(
+		@AuthenticationPrincipal CustomOAuth2User user
+	) {
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ApiResponse.error("로그인이 필요합니다."));
+		}
+		Long memberId = user.getId();
+		List<ProjectListDTO> projects = projectService.getProjectsByMemberId(memberId);
+		return ResponseEntity.ok(ApiResponse.success(projects));
+	}
+
+	@Operation(
 		summary = "프로젝트 삭제 API",
 		description = "본인이 등록한 프로젝트에 한정하여 해당 프로젝트를 삭제할 수 있습니다."
 	)

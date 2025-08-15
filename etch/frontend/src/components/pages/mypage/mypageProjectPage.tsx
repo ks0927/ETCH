@@ -1,353 +1,757 @@
-import { Link } from "react-router";
 import { useState, useEffect } from "react";
-import PlusSVG from "../../svg/plusSVG";
-import MypageProjectList from "../../organisms/mypage/favorite/project/mypageProjectList";
+import { useNavigate } from "react-router";
 import {
+  PortfolioWriteStackData,
+  type PortfolioStackEnum,
+} from "../../../types/portfolio/portfolioStack";
+import {
+  PortfolioState,
+  type portfolioDatas,
+  type education,
+  type language,
+} from "../../../types/portfolio/portfolioDatas";
+import PortfolioWriteInput from "../../organisms/portfolio/portfolioWriteInput";
+import PortfolioSubmitButton from "../../organisms/portfolio/portfolioSubmitButton";
+import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect";
+import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
+import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
+import PortfolioProjectPage from "./portfolioProjectPage";
+import {
+  convertPortfolioDataToRequest,
+  createPortfolio,
+} from "../../../api/portfolioApi";
+import {
+  createProject,
   getMyProjects,
-  getAllProjects,
   type MyProjectResponse,
 } from "../../../api/projectApi";
-import type { ProjectData } from "../../../types/project/projectDatas";
-import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 
-// getAllProjects용 확장된 응답 타입
-interface AllProjectResponse extends MyProjectResponse {
-  content?: string;
-  youtubeUrl?: string;
-  githubUrl?: string;
-  authorId?: number;
-  projectCategory?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  likedByMe?: boolean;
-}
-
-// 사용자 정보 타입
-interface UserInfo {
+// 포트폴리오에 포함할 프로젝트 ID 타입 (기존 프로젝트용)
+interface PortfolioProjectId {
   id: number;
-  nickname: string;
 }
 
-function MypageProjectPage() {
-  const [myProjects, setMyProjects] = useState<ProjectData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+// 프로젝트 데이터 타입 정의
+interface ProjectData {
+  title: string;
+  content: string;
+  projectCategory: ProjectCategoryEnum | "";
+  githubUrl: string;
+  youtubeUrl: string;
+  isPublic: boolean;
+  projectTechs: number[];
+  files: File[];
+  thumbnailFile: File | null;
+}
 
-  // JWT 토큰에서 사용자 정보 가져오는 함수
-  const getUserInfoFromToken = (): UserInfo | null => {
-    try {
-      const token = localStorage.getItem("access_token");
-      if (!token) return null;
+// 초기 프로젝트 상태
+const initialProjectData: ProjectData = {
+  title: "",
+  content: "",
+  projectCategory: "",
+  githubUrl: "",
+  youtubeUrl: "",
+  isPublic: true,
+  projectTechs: [],
+  files: [],
+  thumbnailFile: null,
+};
 
-      const base64Payload = token.split(".")[1];
-      const payload = JSON.parse(atob(base64Payload));
-
-      return {
-        id: payload.id || 0,
-        nickname: payload.nickname || "",
-      };
-    } catch (error) {
-      console.error("JWT 토큰 디코딩 실패:", error);
-      return null;
-    }
-  };
-
-  // MyProjectResponse를 ProjectData로 변환
-  const transformMyProjectToProjectData = (
-    myProject: MyProjectResponse,
-    currentUserId: number
-  ): ProjectData => ({
-    id: myProject.id,
-    title: myProject.title,
-    content: "프로젝트 상세 내용을 확인해보세요", // MyProjectResponse에는 content가 없음
-    thumbnailUrl: myProject.thumbnailUrl || "", // null을 빈 문자열로 변환
-    youtubeUrl: "", // MyProjectResponse에는 youtubeUrl이 없음
-    viewCount: myProject.viewCount,
-    projectCategory: "" as ProjectCategoryEnum, // MyProjectResponse에는 category가 없음
-    createdAt: new Date().toISOString(), // MyProjectResponse에는 createdAt이 없음
-    updatedAt: new Date().toISOString(), // MyProjectResponse에는 updatedAt이 없음
-    isDeleted: false,
-    githubUrl: "", // MyProjectResponse에는 githubUrl이 없음
-    isPublic: myProject.isPublic,
-    likeCount: myProject.likeCount,
-    likedByMe: false, // MyProjectResponse에는 likedByMe가 없음
-    nickname: myProject.nickname,
-    commentCount: 0,
-    popularityScore: myProject.popularityScore,
-    member: {
-      id: currentUserId,
-      nickname: myProject.nickname,
-    },
-    files: [],
-    projectTechs: [],
+function MypagePortfolioPage() {
+  const navigate = useNavigate();
+  const [portfolioData, setPortfolioData] = useState<portfolioDatas>({
+    ...PortfolioState,
+    stack: [] as PortfolioStackEnum[],
   });
 
-  // AllProjectResponse를 ProjectData로 변환 (기존 로직)
-  const transformAllProjectToProjectData = (
-    apiProject: AllProjectResponse,
-    currentUserId: number
-  ): ProjectData => ({
-    id: apiProject.id,
-    title: apiProject.title,
-    content: apiProject.content || "프로젝트 상세 내용을 확인해보세요",
-    thumbnailUrl: apiProject.thumbnailUrl || "", // null을 빈 문자열로 변환
-    youtubeUrl: apiProject.youtubeUrl || "",
-    viewCount: apiProject.viewCount,
-    projectCategory: (apiProject.projectCategory as ProjectCategoryEnum) || "",
-    createdAt: apiProject.createdAt || new Date().toISOString(),
-    updatedAt: apiProject.updatedAt || new Date().toISOString(),
-    isDeleted: false,
-    githubUrl: apiProject.githubUrl || "",
-    isPublic: apiProject.isPublic,
-    likeCount: apiProject.likeCount,
-    likedByMe: apiProject.likedByMe ?? false,
-    nickname: apiProject.nickname,
-    commentCount: 0,
-    popularityScore: apiProject.popularityScore,
-    member: {
-      id: apiProject.authorId || currentUserId,
-      nickname: apiProject.nickname,
-    },
-    files: [],
-    projectTechs: [],
-  });
+  // 프로젝트 관련 상태들
+  const [showProjectSection, setShowProjectSection] = useState(false);
+  const [projectData, setProjectData] =
+    useState<ProjectData>(initialProjectData);
+  const [registeredProjects, setRegisteredProjects] = useState<ProjectData[]>(
+    []
+  );
 
+  // 기존 프로젝트 관련 상태들
+  const [existingProjects, setExistingProjects] = useState<MyProjectResponse[]>(
+    []
+  );
+  const [selectedExistingProjects, setSelectedExistingProjects] = useState<
+    number[]
+  >([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
+
+  // 교육/활동과 자격증 폼 토글 상태들
+  const [showEducationForm, setShowEducationForm] = useState(false);
+  const [showLanguageForm, setShowLanguageForm] = useState(false);
+
+  // 제출 상태 관리
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 컴포넌트 마운트 시 기존 프로젝트 불러오기
   useEffect(() => {
     const fetchMyProjects = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
-        // 사용자 정보 확인
-        const currentUserInfo = getUserInfoFromToken();
-        if (!currentUserInfo || !currentUserInfo.id) {
-          throw new Error("로그인이 필요합니다.");
-        }
-
-        setUserInfo(currentUserInfo);
-        console.log("👤 현재 사용자:", currentUserInfo);
-
-        let transformedProjects: ProjectData[] = [];
-
-        try {
-          // 먼저 getMyProjects API 시도 (/members/projects)
-          console.log("📡 getMyProjects API 호출 중...");
-          const myProjectsData: MyProjectResponse[] = await getMyProjects();
-          console.log("✅ getMyProjects 성공:", myProjectsData.length, "개");
-
-          // MyProjectResponse를 ProjectData로 변환
-          transformedProjects = myProjectsData.map((project) =>
-            transformMyProjectToProjectData(project, currentUserInfo.id)
-          );
-        } catch (myProjectsError) {
-          console.warn(
-            "⚠️ getMyProjects 실패, getAllProjects로 대체:",
-            myProjectsError
-          );
-
-          try {
-            // getMyProjects가 실패하면 getAllProjects로 대체하고 필터링
-            console.log("📡 getAllProjects API 호출 중...");
-            const allProjects: AllProjectResponse[] = await getAllProjects();
-            console.log("✅ getAllProjects 성공:", allProjects.length, "개");
-
-            // 현재 사용자의 프로젝트만 필터링
-            const myProjectsFiltered = allProjects.filter((project) => {
-              // authorId가 있으면 그것으로 비교
-              if (project.authorId) {
-                return project.authorId === currentUserInfo.id;
-              }
-              // authorId가 없으면 nickname으로 비교
-              return project.nickname === currentUserInfo.nickname;
-            });
-
-            console.log("🔍 필터링 결과:", myProjectsFiltered.length, "개");
-
-            // AllProjectResponse를 ProjectData로 변환
-            transformedProjects = myProjectsFiltered.map((project) =>
-              transformAllProjectToProjectData(project, currentUserInfo.id)
-            );
-          } catch (allProjectsError) {
-            console.error("getAllProjects도 실패:", allProjectsError);
-            throw new Error("프로젝트 데이터를 가져올 수 없습니다.");
-          }
-        }
-
-        console.log("🔄 최종 변환된 데이터:", transformedProjects.length, "개");
-        setMyProjects(transformedProjects);
+        setLoadingProjects(true);
+        const projects = await getMyProjects();
+        setExistingProjects(projects);
+        console.log("기존 프로젝트들:", projects);
       } catch (error) {
-        console.error("❌ 프로젝트 로딩 실패:", error);
-
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError("프로젝트를 불러오는데 실패했습니다.");
-        }
+        console.error("기존 프로젝트 조회 실패:", error);
+        // 에러가 발생해도 포트폴리오 작성은 계속 진행할 수 있도록 함
       } finally {
-        setLoading(false);
+        setLoadingProjects(false);
       }
     };
 
     fetchMyProjects();
   }, []);
 
-  // 프로젝트 업데이트 핸들러
-  const handleProjectUpdate = (updatedProject: ProjectData) => {
-    setMyProjects((prevProjects) =>
-      prevProjects.map((project) =>
-        project.id === updatedProject.id ? updatedProject : project
+  // ============== 파싱 함수들 (화면 표시용만) ==============
+
+  // 문자열을 배열로 파싱 (화면 표시용)
+  const parseEducationData = (educationString: string): education[] => {
+    if (!educationString) return [];
+
+    const educationItems = educationString
+      .split("|")
+      .filter((item) => item.trim());
+    return educationItems.map((item) => {
+      const [companyName, active, startAt, endAt] = item.split("^");
+      return {
+        companyName: companyName || "",
+        active: active || "",
+        startAt: startAt || "",
+        endAt: endAt || "",
+      };
+    });
+  };
+
+  const parseLanguageData = (languageString: string): language[] => {
+    if (!languageString) return [];
+
+    const languageItems = languageString
+      .split("|")
+      .filter((item) => item.trim());
+    return languageItems.map((item) => {
+      const [licenseName, getAt, issuer] = item.split("^");
+      return {
+        licenseName: licenseName || "",
+        getAt: getAt || "",
+        issuer: issuer || "",
+      };
+    });
+  };
+
+  // 배열을 문자열로 변환 (삭제 기능용만)
+  const arrayToEducationString = (educations: education[]): string => {
+    return educations
+      .map(
+        (edu) => `${edu.companyName}^${edu.active}^${edu.startAt}^${edu.endAt}`
       )
-    );
+      .join("|");
   };
 
-  // 새로고침 핸들러
-  const handleRefresh = () => {
-    window.location.reload();
+  const arrayToLanguageString = (languages: language[]): string => {
+    return languages
+      .map((lang) => `${lang.licenseName}^${lang.getAt}^${lang.issuer}`)
+      .join("|");
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#007DFC] mx-auto mb-4"></div>
-          <p className="text-gray-600">내 프로젝트를 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
+  // ============== 기본 정보 핸들러들 ==============
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            오류가 발생했습니다
-          </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              onClick={handleRefresh}
-              className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              다시 시도
-            </button>
-            {error.includes("로그인") && (
-              <Link to="/login">
-                <button className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
-                  로그인하기
-                </button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleStacksChange = (stack: PortfolioStackEnum) => {
+    setPortfolioData((prev) => {
+      const currentStacks = prev.stack;
+      const isSelected = currentStacks.includes(stack);
 
-  const publicProjectsCount = myProjects.filter((p) => p.isPublic).length;
-  const privateProjectsCount = myProjects.length - publicProjectsCount;
+      let newStacks;
+      if (isSelected) {
+        newStacks = currentStacks.filter((s) => s !== stack);
+      } else {
+        newStacks = [...currentStacks, stack];
+      }
+
+      console.log("현재 스택들 : ", newStacks);
+
+      return {
+        ...prev,
+        stack: newStacks,
+      };
+    });
+  };
+
+  const handleNameChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      name: value,
+    }));
+  };
+
+  const handlePhoneNumberChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      phoneNumber: value,
+    }));
+  };
+
+  const handleEmailChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      email: value,
+    }));
+  };
+
+  const handleGithubUrlChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      githubUrl: value,
+    }));
+  };
+
+  const handleBlogUrlChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      blogUrl: value,
+    }));
+  };
+
+  const handleIntroChange = (value: string) => {
+    setPortfolioData((prev) => ({
+      ...prev,
+      introduce: value,
+    }));
+  };
+
+  // ============== 기존 프로젝트 선택 핸들러들 ==============
+
+  const handleExistingProjectToggle = (projectId: number) => {
+    setSelectedExistingProjects((prev) => {
+      if (prev.includes(projectId)) {
+        return prev.filter((id) => id !== projectId);
+      } else {
+        return [...prev, projectId];
+      }
+    });
+  };
+
+  const handleSelectAllExistingProjects = () => {
+    if (selectedExistingProjects.length === existingProjects.length) {
+      setSelectedExistingProjects([]);
+    } else {
+      setSelectedExistingProjects(
+        existingProjects.map((project) => project.id)
+      );
+    }
+  };
+
+  // ============== 프로젝트 관련 핸들러들 ==============
+
+  const handleProjectDataChange = (newProjectData: Partial<ProjectData>) => {
+    setProjectData((prev) => ({
+      ...prev,
+      ...newProjectData,
+    }));
+  };
+
+  const handleRegisterProject = () => {
+    // 프로젝트 유효성 검사
+    if (!projectData.title.trim()) {
+      alert("프로젝트 제목을 입력해주세요.");
+      return;
+    }
+
+    if (!projectData.content.trim()) {
+      alert("프로젝트 설명을 입력해주세요.");
+      return;
+    }
+
+    if (!projectData.projectCategory) {
+      alert("프로젝트 카테고리를 선택해주세요.");
+      return;
+    }
+
+    // 등록된 프로젝트 목록에 추가
+    setRegisteredProjects((prev) => [...prev, { ...projectData }]);
+
+    // 프로젝트 데이터 초기화
+    setProjectData(initialProjectData);
+
+    // 프로젝트 섹션 숨기기
+    setShowProjectSection(false);
+
+    alert("프로젝트가 임시 등록되었습니다!");
+  };
+
+  const handleRemoveProject = (index: number) => {
+    setRegisteredProjects((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // ============== 교육/자격증 관련 핸들러들 ==============
+
+  const handleActivityAdd = (educationString: string) => {
+    // 기존 문자열에 새 항목 추가
+    const newEducationString = portfolioData.education
+      ? `${portfolioData.education}|${educationString}`
+      : educationString;
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      education: newEducationString,
+    }));
+
+    // 폼 닫기
+    setShowEducationForm(false);
+    console.log("교육/활동 추가됨:", educationString);
+  };
+
+  const handleLicenseAdd = (languageString: string) => {
+    // 기존 문자열에 새 항목 추가
+    const newLanguageString = portfolioData.language
+      ? `${portfolioData.language}|${languageString}`
+      : languageString;
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      language: newLanguageString,
+    }));
+
+    // 폼 닫기
+    setShowLanguageForm(false);
+    console.log("자격증 추가됨:", languageString);
+  };
+
+  const handleEducationRemove = (index: number) => {
+    // 파싱 → 삭제 → 다시 문자열 변환
+    const parsedEducations = parseEducationData(portfolioData.education);
+    const filteredEducations = parsedEducations.filter((_, i) => i !== index);
+    const newEducationString = arrayToEducationString(filteredEducations);
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      education: newEducationString,
+    }));
+    console.log("교육/활동 삭제됨, 인덱스:", index);
+  };
+
+  const handleLanguageRemove = (index: number) => {
+    // 파싱 → 삭제 → 다시 문자열 변환
+    const parsedLanguages = parseLanguageData(portfolioData.language);
+    const filteredLanguages = parsedLanguages.filter((_, i) => i !== index);
+    const newLanguageString = arrayToLanguageString(filteredLanguages);
+
+    setPortfolioData((prev) => ({
+      ...prev,
+      language: newLanguageString,
+    }));
+    console.log("자격증 삭제됨, 인덱스:", index);
+  };
+
+  // ============== 수정된 제출 핸들러 ==============
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+
+      if (!portfolioData.name?.trim()) {
+        alert("이름을 입력해주세요.");
+        return;
+      }
+
+      if (!portfolioData.phoneNumber?.trim()) {
+        alert("연락처를 입력해주세요.");
+        return;
+      }
+
+      if (!portfolioData.introduce?.trim()) {
+        alert("자기소개를 입력해주세요.");
+        return;
+      }
+
+      console.log("=== 제출 시작 ===");
+      console.log("제출할 포트폴리오 데이터:", portfolioData);
+      console.log("제출할 새 프로젝트 데이터:", registeredProjects);
+      console.log("선택된 기존 프로젝트 ID들:", selectedExistingProjects);
+
+      // 1. 새로 등록할 프로젝트 생성 및 ID 수집
+      const createdProjectIds: PortfolioProjectId[] = [];
+
+      for (const project of registeredProjects) {
+        try {
+          const projectInput = {
+            title: project.title,
+            content: project.content,
+            projectCategory: project.projectCategory as ProjectCategoryEnum,
+            techCodeIds: project.projectTechs,
+            githubUrl: project.githubUrl,
+            youtubeUrl: project.youtubeUrl,
+            isPublic: project.isPublic,
+            thumbnailFile: project.thumbnailFile || undefined,
+            imageFiles: project.files.filter((file) =>
+              file.type.startsWith("image/")
+            ),
+          };
+
+          console.log(`프로젝트 "${project.title}" 생성 중...`);
+          const createdProject = await createProject(projectInput);
+          createdProjectIds.push({ id: createdProject.id || createdProject });
+          console.log(
+            `프로젝트 "${project.title}" 생성 완료, ID: ${createdProject}`
+          );
+        } catch (projectError) {
+          console.error(`프로젝트 "${project.title}" 생성 실패:`, projectError);
+          alert(
+            `프로젝트 "${project.title}" 등록에 실패했습니다. 계속 진행합니다.`
+          );
+        }
+      }
+
+      // 2. 기존 프로젝트 ID들을 PortfolioProjectId 형태로 변환
+      const existingProjectInfos: PortfolioProjectId[] =
+        selectedExistingProjects.map((id) => ({
+          id,
+        }));
+
+      // 3. 새로 생성된 프로젝트와 기존 프로젝트 ID들 합치기
+      const allProjectIds = [...createdProjectIds, ...existingProjectInfos];
+
+      console.log("생성된 프로젝트 ID들:", createdProjectIds);
+      console.log("선택된 기존 프로젝트 ID들:", existingProjectInfos);
+      console.log("전체 프로젝트 ID들:", allProjectIds);
+
+      // 4. portfolioData를 API 형식으로 변환
+      const requestData = convertPortfolioDataToRequest(
+        portfolioData,
+        allProjectIds
+      );
+
+      // 5. language와 education을 문자열로 변환
+      if (portfolioData.language && Array.isArray(portfolioData.language)) {
+        requestData.language = portfolioData.language
+          .map((lang) => [lang.name, lang.getAt, lang.issuer].join("^"))
+          .join("#");
+      }
+
+      if (portfolioData.education && Array.isArray(portfolioData.education)) {
+        requestData.education = portfolioData.education
+          .map((edu) => [edu.school, edu.graduationAt, edu.major].join("^"))
+          .join("#");
+      }
+
+      console.log("API 전송용 포트폴리오 데이터:", requestData);
+
+      // 6. 포트폴리오 생성 API 호출
+      const portfolioResponse = await createPortfolio(requestData);
+      console.log("포트폴리오 생성 성공:", portfolioResponse);
+
+      alert(
+        `포트폴리오가 성공적으로 등록되었습니다!\n- 새로 등록된 프로젝트 수: ${createdProjectIds.length}개\n- 기존 프로젝트 수: ${selectedExistingProjects.length}개\n- 총 프로젝트 수: ${allProjectIds.length}개`
+      );
+
+      navigate("/mypage");
+    } catch (error) {
+      console.error("=== 포트폴리오 등록 실패 ===", error);
+
+      let errorMessage = "포트폴리오 등록 중 오류가 발생했습니다.";
+      const err = error as {
+        response?: { data?: { message?: string }; status?: number };
+      };
+
+      if (err.response?.data?.message) {
+        errorMessage = `등록 실패: ${err.response.data.message}`;
+      } else if (err.response?.status) {
+        errorMessage = `서버 오류 (${err.response.status}): 잠시 후 다시 시도해주세요.`;
+      }
+
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 헤더 섹션 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-8 bg-gradient-to-b from-[#007DFC] to-blue-600 rounded-full"></div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  내 프로젝트
-                </h1>
-                {userInfo && (
-                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                    {userInfo.nickname}
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-600 text-lg leading-relaxed max-w-2xl">
-                당신의 프로젝트 지식을 다른 사람들과 공유하고{" "}
-                <br className="hidden sm:block" />
-                개발 커뮤니티에 기여해보세요
-              </p>
-              <div className="flex items-center gap-4 pt-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-gray-500">
-                    총 {myProjects.length}개 프로젝트
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-sm text-gray-500">
-                    공개: {publicProjectsCount}개
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                  <span className="text-sm text-gray-500">
-                    비공개: {privateProjectsCount}개
-                  </span>
-                </div>
-              </div>
-            </div>
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <h1 className="text-2xl font-bold text-center mb-8">포트폴리오 작성</h1>
 
-            {/* CTA 버튼 */}
-            <div className="flex-shrink-0">
-              <Link to="/projects/write">
-                <button className="group relative bg-gradient-to-r from-[#007DFC] to-blue-600 hover:from-blue-600 hover:to-[#007DFC] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-3">
-                  <PlusSVG />새 프로젝트 등록
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
+      {/* 기본 정보 섹션 */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">기본 정보</h2>
 
-        {/* 프로젝트 목록 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          {myProjects.length > 0 ? (
-            <div className="p-6">
-              <MypageProjectList
-                mockProjects={myProjects}
-                onProjectUpdate={handleProjectUpdate}
-              />
+        <PortfolioWriteInput
+          inputText="이름"
+          placeholderText="홍길동"
+          type="text"
+          value={portfolioData.name}
+          onChange={handleNameChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="한 줄 자기소개"
+          placeholderText="안녕하세요, 열정과 패기로 준비된 신입 개발자 홍길동입니다."
+          type="text"
+          value={portfolioData.introduce}
+          onChange={handleIntroChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="연락처"
+          placeholderText="010-1234-5678"
+          type="tel"
+          value={portfolioData.phoneNumber}
+          onChange={handlePhoneNumberChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="이메일"
+          placeholderText="etch@example.com"
+          type="email"
+          value={portfolioData.email}
+          onChange={handleEmailChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="GitHub"
+          placeholderText="http://github.com/username/repository"
+          type="url"
+          value={portfolioData.githubUrl}
+          onChange={handleGithubUrlChange}
+        />
+
+        <PortfolioWriteInput
+          inputText="블로그"
+          placeholderText="http://blog.yourblog.com"
+          type="url"
+          value={portfolioData.blogUrl || ""}
+          onChange={handleBlogUrlChange}
+        />
+      </div>
+
+      {/* 기술 스택 섹션 */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold border-b pb-2">보유 기술 스택</h2>
+        <PortfolioStackSelect
+          isStackData={PortfolioWriteStackData}
+          isSelect={portfolioData.stack}
+          onStackChange={handleStacksChange}
+        />
+      </div>
+
+      {/* 기존 프로젝트 선택 섹션 */}
+      <section>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold border-b pb-2">
+            기존 프로젝트 선택
+          </h2>
+
+          {loadingProjects ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-2">프로젝트를 불러오는 중...</span>
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                <svg
-                  className="w-10 h-10 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          ) : existingProjects.length > 0 ? (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-sm text-gray-600">
+                  기존에 작성한 프로젝트 중 포트폴리오에 포함할 프로젝트를
+                  선택하세요.
+                </p>
+                <button
+                  onClick={handleSelectAllExistingProjects}
+                  className="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                아직 프로젝트가 없습니다
-              </h3>
-              <p className="text-gray-500 mb-6 text-center">
-                첫 번째 프로젝트를 등록하고 다른 개발자들과 공유해보세요!
-              </p>
-              <Link to="/projects/write">
-                <button className="group relative bg-gradient-to-r from-[#007DFC] to-blue-600 hover:from-blue-600 hover:to-[#007DFC] text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-3">
-                  <PlusSVG />새 프로젝트 등록
+                  {selectedExistingProjects.length === existingProjects.length
+                    ? "전체 해제"
+                    : "전체 선택"}
                 </button>
-              </Link>
+              </div>
+
+              <div className="grid gap-3 max-h-60 overflow-y-auto">
+                {existingProjects.map((project) => (
+                  <div
+                    key={project.id}
+                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedExistingProjects.includes(project.id)
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => handleExistingProjectToggle(project.id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedExistingProjects.includes(
+                              project.id
+                            )}
+                            onChange={() =>
+                              handleExistingProjectToggle(project.id)
+                            }
+                            className="w-4 h-4 text-blue-600"
+                          />
+                          <h4 className="font-semibold text-lg">
+                            {project.title}
+                          </h4>
+                        </div>
+                        <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                          <span>조회수: {project.viewCount}</span>
+                          <span>좋아요: {project.likeCount}</span>
+                          <span>{project.isPublic ? "공개" : "비공개"}</span>
+                        </div>
+                      </div>
+                      {project.thumbnailUrl && (
+                        <img
+                          src={project.thumbnailUrl}
+                          alt={project.title}
+                          className="w-16 h-16 object-cover rounded ml-4"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {selectedExistingProjects.length > 0 && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm text-blue-700">
+                    선택된 프로젝트: {selectedExistingProjects.length}개
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>작성한 프로젝트가 없습니다.</p>
+              <p className="text-sm mt-1">
+                아래에서 새 프로젝트를 추가하거나 프로젝트를 먼저 작성해보세요.
+              </p>
             </div>
           )}
         </div>
-      </div>
+      </section>
+
+      {/* 새 프로젝트 추가 섹션 */}
+      <section>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-semibold">새 프로젝트 추가</h2>
+            <button
+              onClick={() => setShowProjectSection(!showProjectSection)}
+              className="flex items-center justify-center px-4 py-2 text-sm font-semibold transition-all duration-200 rounded cursor-pointer hover:brightness-90 border border-gray-300"
+            >
+              {showProjectSection ? "추가 -" : "추가 +"}
+            </button>
+          </div>
+          <div className="border-b pb-2 mb-4"></div>
+
+          {/* 프로젝트 작성 폼 */}
+          {showProjectSection && (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <PortfolioProjectPage
+                projectData={projectData}
+                onProjectDataChange={handleProjectDataChange}
+              />
+              <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
+                <button
+                  onClick={handleRegisterProject}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  프로젝트 등록
+                </button>
+                <button
+                  onClick={() => setShowProjectSection(false)}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                  취소
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 새로 등록된 프로젝트 목록 */}
+          {registeredProjects.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-medium">새로 등록할 프로젝트</h3>
+              {registeredProjects.map((project, index) => (
+                <div key={index} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg">{project.title}</h4>
+                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                        {project.content}
+                      </p>
+                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                        {project.githubUrl && (
+                          <span>
+                            GitHub: {project.githubUrl.substring(0, 30)}...
+                          </span>
+                        )}
+                        {project.youtubeUrl && (
+                          <span>
+                            YouTube: {project.youtubeUrl.substring(0, 30)}...
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveProject(index)}
+                      className="text-red-500 hover:text-red-700 text-sm ml-4"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 교육/자격증 섹션 */}
+      <section>
+        <PortfolioWriteTextCard
+          title="교육 / 수료 / 활동"
+          type="education"
+          education={parseEducationData(portfolioData.education)}
+          onEducationAdd={handleActivityAdd}
+          onEducationRemove={handleEducationRemove}
+          showForm={showEducationForm}
+          onToggleForm={() => setShowEducationForm(!showEducationForm)}
+        />
+
+        <PortfolioWriteTextCard
+          title="자격증 및 어학"
+          type="language"
+          language={parseLanguageData(portfolioData.language)}
+          onLanguageAdd={handleLicenseAdd}
+          onLanguageRemove={handleLanguageRemove}
+          showForm={showLanguageForm}
+          onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
+        />
+      </section>
+
+      <PortfolioSubmitButton
+        onSubmit={handleSubmit}
+        isDisabled={
+          isSubmitting ||
+          !portfolioData.name ||
+          !portfolioData.phoneNumber ||
+          !portfolioData.introduce
+        }
+      />
+
+      {/* 제출 중 표시 */}
+      {isSubmitting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p>포트폴리오를 등록하고 있습니다...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default MypageProjectPage;
+export default MypagePortfolioPage;

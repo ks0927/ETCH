@@ -25,8 +25,8 @@ function PortfolioLanguageTextCard({
           <div className="font-semibold text-green-700">
             {language.licenseName}
           </div>
-          <div className="text-sm text-gray-700">{language.issuer}</div>
           <div className="text-sm text-gray-600">{language.getAt}</div>
+          <div className="text-sm text-gray-700">{language.issuer}</div>
           {onRemove && (
             <button
               onClick={() => onRemove(index)}

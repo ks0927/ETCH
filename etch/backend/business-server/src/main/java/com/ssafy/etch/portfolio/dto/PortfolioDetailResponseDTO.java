@@ -18,6 +18,7 @@ public class PortfolioDetailResponseDTO {
     private static final String FIELD_DELIMITER = "\\^";
 
     private Long id;
+    private Long memberId;
     private String name;
     private String introduce;
     private String githubUrl;
@@ -34,6 +35,7 @@ public class PortfolioDetailResponseDTO {
     public static PortfolioDetailResponseDTO from(PortfolioDTO portfolioDTO, List<String> techList) {
         return builder()
                 .id(portfolioDTO.getId())
+                .memberId(portfolioDTO.getMember().getId())
                 .name(portfolioDTO.getName())
                 .introduce(portfolioDTO.getIntroduce())
                 .githubUrl(portfolioDTO.getGithubUrl())
@@ -60,7 +62,7 @@ public class PortfolioDetailResponseDTO {
                                 .certificateIssuer(getValue(info, 2))
                                 .build()
                 ))
-                .projectList(portfolioDTO.getProject().stream()
+                .projectList(portfolioDTO.getProject() == null ? Collections.emptyList() : portfolioDTO.getProject().stream()
                         .map(p -> ProjectListDTO.from(p.getProject().toProjectDTO()))
                         .toList())
                 .build();

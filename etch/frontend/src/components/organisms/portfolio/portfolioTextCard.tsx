@@ -39,7 +39,7 @@ function PortfolioWriteTextCard({
 
   const handleLanguageSubmit = (data: language) => {
     if (onLanguageAdd) {
-      const languageString = `${data.licenseName}^${data.issuer}^${data.getAt}`;
+      const languageString = `${data.licenseName}^${data.getAt}^${data.issuer}`;
       onLanguageAdd(languageString);
     }
   };
