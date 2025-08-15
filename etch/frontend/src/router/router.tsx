@@ -238,7 +238,7 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: "portfolios/:id",
+            path: "portfolios/edit/:id",
             element: (
               <Suspense fallback={<LoadingPage />}>
                 <MypagePortfolioEditPage />

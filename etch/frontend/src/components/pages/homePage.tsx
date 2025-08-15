@@ -272,7 +272,7 @@ function HomePage() {
         <div className="px-6 mx-auto max-w-7xl">
           <div className="mb-16 text-center">
             <h2 className="mb-6 text-3xl font-bold text-gray-900 sm:text-4xl">
-              E:TCH의 주요 기능
+              ETCH의 주요 기능
             </h2>
             <p className="max-w-2xl mx-auto text-lg leading-relaxed text-gray-600">
               IT 취업 성공을 위한 모든 도구와 정보를 하나의 플랫폼에서
