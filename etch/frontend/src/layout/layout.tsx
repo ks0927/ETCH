@@ -110,9 +110,9 @@ function LayoutContent() {
       </div>
 
       {/* 메인 콘텐츠 */}
-      <div className="md:pt-16">
+      <div className="bg-gray-50 md:pt-16">
         {/* 모바일/태블릿에서는 pt-0, 데스크톱에서만 pt-16 */}
-        <div className="px-6 py-2 mx-auto bg-gray-50 max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
+        <div className="px-6 py-2 mx-auto max-w-screen-2xl sm:px-8 lg:px-12 xl:px-16">
           <main className="pt-2 pb-8">
             <Outlet />
           </main>
