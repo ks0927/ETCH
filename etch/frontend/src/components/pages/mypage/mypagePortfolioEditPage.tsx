@@ -18,12 +18,16 @@ import {
   convertPortfolioDataToRequest,
   updatePortfolio,
   getPortfolioDetail,
-  createProject,
   type PortfolioProjectId,
+  type PortfolioDetailResponseDTO,
   type EduAndActDTO,
   type CertAndLangDTO,
 } from "../../../api/portfolioApi";
-import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi";
+import {
+  createProject,
+  getMyProjects,
+  type MyProjectResponse,
+} from "../../../api/projectApi";
 import PortfolioProjectPage from "./portfolioProjectPage";
 import type { ProjectCategoryEnum } from "../../../types/project/projectCategroyData";
 
@@ -63,18 +67,18 @@ const initialProjectData: ProjectData = {
   thumbnailFile: null,
 };
 
-function MypagePortfolioEditPage() {
+function MypagePortfolioPageEdit() {
   const navigate = useNavigate();
-  const { portfolioId } = useParams<{ portfolioId: string }>();
-
-  // 포트폴리오 로딩 상태
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { id: portfolioId } = useParams<{ id: string }>();
 
   const [portfolioData, setPortfolioData] = useState<portfolioDatas>({
     ...PortfolioState,
     stack: [] as PortfolioStackEnum[],
   });
+
+  // 로딩 및 에러 상태
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // 프로젝트 관련 상태들
   const [myProjects, setMyProjects] = useState<MyProjectResponse[]>([]);
@@ -97,46 +101,44 @@ function MypagePortfolioEditPage() {
   // 제출 상태 관리
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // 포트폴리오 상세 데이터 로드
+  // 포트폴리오 ID 유효성 검사
+  useEffect(() => {
+    if (!portfolioId || isNaN(Number(portfolioId))) {
+      setLoadError("유효하지 않은 포트폴리오 ID입니다.");
+      setIsLoading(false);
+      return;
+    }
+  }, [portfolioId]);
+
+  // 기존 포트폴리오 데이터 로드
   useEffect(() => {
     const loadPortfolioData = async (): Promise<void> => {
-      if (!portfolioId) {
-        setLoadError("포트폴리오 ID가 없습니다.");
-        setIsLoading(false);
-        return;
-      }
+      if (!portfolioId || isNaN(Number(portfolioId))) return;
 
       try {
         setIsLoading(true);
         setLoadError(null);
 
+        console.log("포트폴리오 데이터 로드 중...", portfolioId);
         const portfolioDetail = await getPortfolioDetail(Number(portfolioId));
-        console.log("포트폴리오 상세 데이터:", portfolioDetail);
 
-        // 백엔드 응답을 프론트엔드 형태로 변환
-        const convertedData: portfolioDatas = {
-          name: portfolioDetail.name,
-          phoneNumber: portfolioDetail.phoneNumber,
-          email: portfolioDetail.email,
-          blogUrl: portfolioDetail.blogUrl,
-          githubUrl: portfolioDetail.githubUrl,
-          introduce: portfolioDetail.introduce,
-          stack: portfolioDetail.techList.map(
-            (tech) => tech as PortfolioStackEnum
-          ),
-          // 백엔드 객체 배열을 프론트엔드 문자열 형태로 변환
-          education: convertEducationArrayToString(portfolioDetail.education),
-          language: convertLanguageArrayToString(portfolioDetail.language),
-        };
+        console.log("로드된 포트폴리오 데이터:", portfolioDetail);
 
+        // 백엔드 데이터를 프론트엔드 형식으로 변환
+        const convertedData = convertBackendDataToFrontend(portfolioDetail);
         setPortfolioData(convertedData);
 
-        // 기존에 선택된 프로젝트 ID들 설정
-        if (portfolioDetail.projectList) {
-          const projectIds = portfolioDetail.projectList.map(
-            (project) => project.id
-          );
-          setSelectedProjectIds(projectIds);
+        // 기존 선택된 프로젝트 ID들 설정
+        if (
+          portfolioDetail.projectList &&
+          portfolioDetail.projectList.length > 0
+        ) {
+          const existingProjectIds = portfolioDetail.projectList
+            .map((project) =>
+              typeof project === "object" ? project.id : project
+            )
+            .filter((id): id is number => typeof id === "number");
+          setSelectedProjectIds(existingProjectIds);
         }
 
         console.log("포트폴리오 데이터 로드 완료");
@@ -171,14 +173,31 @@ function MypagePortfolioEditPage() {
     fetchMyProjects();
   }, []);
 
-  // ============== 백엔드 DTO를 프론트엔드 문자열로 변환하는 함수들 ==============
+  // 백엔드 데이터를 프론트엔드 포트폴리오 데이터로 변환
+  const convertBackendDataToFrontend = (
+    backendData: PortfolioDetailResponseDTO
+  ): portfolioDatas => {
+    return {
+      name: backendData.name || "",
+      introduce: backendData.introduce || "",
+      githubUrl: backendData.githubUrl || "",
+      blogUrl: backendData.blogUrl || "",
+      phoneNumber: backendData.phoneNumber || "",
+      email: backendData.email || "",
+      stack:
+        backendData.techList?.map((tech) => tech as PortfolioStackEnum) || [],
+      education: convertEduAndActDTOArrayToString(backendData.education || []),
+      language: convertCertAndLangDTOArrayToString(backendData.language || []),
+    };
+  };
 
-  const convertEducationArrayToString = (
-    educationArray: EduAndActDTO[]
+  // EduAndActDTO 배열을 문자열로 변환
+  const convertEduAndActDTOArrayToString = (
+    eduArray: EduAndActDTO[]
   ): string => {
-    if (!educationArray || educationArray.length === 0) return "";
+    if (!Array.isArray(eduArray) || eduArray.length === 0) return "";
 
-    return educationArray
+    return eduArray
       .map(
         (edu) =>
           `${edu.name}^${edu.description}^${edu.startDate}^${edu.endDate}`
@@ -186,13 +205,14 @@ function MypagePortfolioEditPage() {
       .join("|");
   };
 
-  const convertLanguageArrayToString = (
-    languageArray: CertAndLangDTO[]
+  // CertAndLangDTO 배열을 문자열로 변환
+  const convertCertAndLangDTOArrayToString = (
+    certArray: CertAndLangDTO[]
   ): string => {
-    if (!languageArray || languageArray.length === 0) return "";
+    if (!Array.isArray(certArray) || certArray.length === 0) return "";
 
-    return languageArray
-      .map((lang) => `${lang.name}^${lang.certificateIssuer}^${lang.date}`)
+    return certArray
+      .map((cert) => `${cert.name}^${cert.date}^${cert.certificateIssuer}`)
       .join("|");
   };
 
@@ -222,7 +242,7 @@ function MypagePortfolioEditPage() {
       .split("|")
       .filter((item) => item.trim());
     return languageItems.map((item) => {
-      const [licenseName, issuer, getAt] = item.split("^");
+      const [licenseName, getAt, issuer] = item.split("^");
       return {
         licenseName: licenseName || "",
         getAt: getAt || "",
@@ -241,7 +261,7 @@ function MypagePortfolioEditPage() {
 
   const arrayToLanguageString = (languages: language[]): string => {
     return languages
-      .map((lang) => `${lang.licenseName}^${lang.issuer}^${lang.getAt}`)
+      .map((lang) => `${lang.licenseName}^${lang.getAt}^${lang.issuer}`)
       .join("|");
   };
 
@@ -443,6 +463,7 @@ function MypagePortfolioEditPage() {
       }
 
       console.log("=== 포트폴리오 수정 시작 ===");
+      console.log("포트폴리오 ID:", portfolioId);
       console.log("수정할 포트폴리오 데이터:", portfolioData);
       console.log("선택된 기존 프로젝트 ID들:", selectedProjectIds);
       console.log("새로 생성할 프로젝트들:", newProjectsCreated);
@@ -506,7 +527,7 @@ function MypagePortfolioEditPage() {
         projectIds
       );
 
-      // 4. 포트폴리오 수정 API 호출 (updatePortfolio 사용)
+      // 4. 포트폴리오 수정 API 호출
       await updatePortfolio(Number(portfolioId), requestData);
       console.log("포트폴리오 수정 성공");
 
@@ -514,7 +535,7 @@ function MypagePortfolioEditPage() {
         `포트폴리오가 성공적으로 수정되었습니다!\n- 기존 프로젝트: ${selectedProjectIds.length}개\n- 새 프로젝트: ${createdNewProjectIds.length}개\n- 총 프로젝트: ${allProjectIds.length}개`
       );
 
-      navigate("/mypage");
+      navigate("/mypage/portfolios");
     } catch (error) {
       console.error("=== 포트폴리오 수정 실패 ===", error);
 
@@ -533,40 +554,44 @@ function MypagePortfolioEditPage() {
     }
   };
 
-  // 로딩 중 표시
+  // 로딩 중일 때
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">포트폴리오 데이터를 불러오는 중...</p>
-        </div>
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p>포트폴리오 데이터를 불러오는 중...</p>
       </div>
     );
   }
 
-  // 에러 상태 표시
+  // 에러가 있을 때
   if (loadError) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {loadError}
-          </div>
-          <button
-            onClick={() => navigate("/mypage")}
-            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-          >
-            마이페이지로 돌아가기
-          </button>
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {loadError}
         </div>
+        <button
+          onClick={() => navigate("/mypage/portfolios")}
+          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+        >
+          포트폴리오 목록으로 돌아가기
+        </button>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-center mb-8">포트폴리오 수정</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-bold">포트폴리오 수정</h1>
+        <button
+          onClick={() => navigate("/mypage/portfolios")}
+          className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+        >
+          목록으로
+        </button>
+      </div>
 
       {/* 기본 정보 섹션 */}
       <div className="space-y-4">
@@ -887,4 +912,4 @@ function MypagePortfolioEditPage() {
   );
 }
 
-export default MypagePortfolioEditPage;
+export default MypagePortfolioPageEdit;
