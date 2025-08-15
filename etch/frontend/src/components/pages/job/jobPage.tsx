@@ -65,22 +65,24 @@ export default function JobPage() {
         onFilterClick={handleFilterClick}
       />
 
-      {currentView === "list" && (
+      <div className="mt-6">
+        {currentView === "list" && (
         <JobList 
           jobs={jobs} 
           onJobClick={handleJobClick}
           dateRange={currentDateRange}
         />
       )}
-      {currentView === "calendar" && (
-        <CalendarView
-          jobList={jobs}
-          onEventClick={handleJobClick}
-          onDateRangeChange={handleDateRangeChangeWrapper}
-          currentDate={currentCalendarDate}
-          onDateChange={setCurrentCalendarDate}
-        />
-      )}
+        {currentView === "calendar" && (
+          <CalendarView
+            jobList={jobs}
+            onEventClick={handleJobClick}
+            onDateRangeChange={handleDateRangeChangeWrapper}
+            currentDate={currentCalendarDate}
+            onDateChange={setCurrentCalendarDate}
+          />
+        )}
+      </div>
       
       {/* 로딩 중일 때 오버레이 */}
       {loading && (
