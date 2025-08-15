@@ -4,6 +4,8 @@ import {
   getPortfolioDetail,
   type BackendArrayData,
   type PortfolioDetailResponseDTO,
+  type EduAndActDTO,
+  type CertAndLangDTO,
 } from "../../../api/portfolioApi";
 
 // API에서 반환하는 타입
@@ -41,22 +43,9 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
   );
 };
 
-// 백엔드에서 반환하는 실제 데이터 타입들
-interface BackendEducationData {
-  companyName?: string;
-  startAt?: string;
-  endAt?: string;
-  active?: string;
-  startDate?: string; // 실제 응답에서 사용되는 필드명
-  endDate?: string; // 실제 응답에서 사용되는 필드명
-}
-
-interface BackendLanguageData {
-  licenseName?: string;
-  getAt?: string;
-  issuer?: string;
-  date?: string; // 실제 응답에서 사용되는 필드명
-}
+// 백엔드에서 실제로 반환하는 데이터 타입들은 이제 API에서 import
+type BackendEducationData = EduAndActDTO;
+type BackendLanguageData = CertAndLangDTO;
 
 // 백엔드 데이터를 2차원 배열로 파싱하는 함수 (기존 문자열 형태용)
 const parseBackendArrayData = (data: BackendArrayData): string[][] => {
@@ -103,10 +92,10 @@ const formatEducationData = (
   educationArray: BackendEducationData[]
 ): string[] => {
   return educationArray.map((edu) => {
-    const companyName = edu.companyName || "";
-    const active = edu.active || "";
-    const startDate = edu.startAt || edu.startDate;
-    const endDate = edu.endAt || edu.endDate;
+    const companyName = edu.name || "";
+    const active = edu.description || "";
+    const startDate = edu.startDate;
+    const endDate = edu.endDate;
 
     const formattedStartDate = startDate
       ? new Date(startDate).toLocaleDateString("ko-KR")
@@ -142,9 +131,9 @@ const formatEducationData = (
 // 어학 데이터를 표시용 문자열로 변환
 const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
   return languageArray.map((lang) => {
-    const licenseName = lang.licenseName || "";
-    const issuer = lang.issuer || "";
-    const getAt = lang.getAt || lang.date;
+    const licenseName = lang.name || "";
+    const issuer = lang.certificateIssuer || "";
+    const getAt = lang.date;
 
     const formattedDate = getAt
       ? new Date(getAt).toLocaleDateString("ko-KR")
@@ -224,7 +213,29 @@ function MypagePortfolioDetail() {
           "값:",
           data.activity
         );
+
+        // 추가 상세 디버깅
+        if (data.education && data.education.length > 0) {
+          console.log("education 배열의 첫 번째 항목:", data.education[0]);
+          console.log(
+            "education 배열 전체 구조:",
+            JSON.stringify(data.education, null, 2)
+          );
+        }
+
+        if (data.language && data.language.length > 0) {
+          console.log("language 배열의 첫 번째 항목:", data.language[0]);
+          console.log(
+            "language 배열 전체 구조:",
+            JSON.stringify(data.language, null, 2)
+          );
+        }
+
         console.log("===========================");
+
+        console.log(
+          "💡 개발자 도구에서 'window.portfolioDebugData'로 접근 가능합니다!"
+        );
 
         setPortfolio(data);
       } catch (err) {
@@ -341,28 +352,34 @@ function MypagePortfolioDetail() {
         </div>
       )}
 
-      {/* 학력 */}
+      {/* 교육/활동 */}
       {educationList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">학력</h2>
+          <h2 className="text-xl font-semibold mb-4">교육/활동</h2>
           <ul className="space-y-3">
             {educationList.map((edu, idx) => (
               <li key={idx} className="border-l-4 border-blue-500 pl-4 py-2">
-                {edu}
+                <div className="flex items-center">
+                  <span className="text-blue-600 mr-2">📚</span>
+                  {edu}
+                </div>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* 어학 */}
+      {/* 자격증/어학 */}
       {languageList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">어학</h2>
+          <h2 className="text-xl font-semibold mb-4">자격증/어학</h2>
           <ul className="space-y-3">
             {languageList.map((lang, idx) => (
               <li key={idx} className="border-l-4 border-green-500 pl-4 py-2">
-                {lang}
+                <div className="flex items-center">
+                  <span className="text-green-600 mr-2">🏆</span>
+                  {lang}
+                </div>
               </li>
             ))}
           </ul>
