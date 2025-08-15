@@ -60,8 +60,11 @@ authInstance.interceptors.response.use(
       const accessToken = TokenManager.getToken();
       if (!accessToken) {
         console.log("로그인되지 않은 상태에서 인증이 필요한 API 호출");
-        alert("로그인이 필요한 기능입니다. 로그인 후 이용해주세요.");
-        window.location.href = "/login";
+        // /members/me 호출이 아닌 경우에만 alert 표시
+        if (!originalRequest.url?.includes('/members/me')) {
+          alert("로그인이 필요한 기능입니다. 로그인 후 이용해주세요.");
+          window.location.href = "/login";
+        }
         return Promise.reject(error);
       }
 
