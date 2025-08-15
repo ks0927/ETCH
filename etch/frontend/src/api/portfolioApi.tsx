@@ -9,6 +9,11 @@ interface ApiResponse<T> {
   message: string | null;
 }
 
+// 포트폴리오에 포함할 프로젝트 ID 타입 (간단한 형태)
+interface PortfolioProjectId {
+  id: number;
+}
+
 // 백엔드에서 보낼 수 있는 데이터 타입들을 정의 (기존 문자열 형태용)
 type BackendArrayData =
   | string // 원본 문자열: "test^test^2025-08-10|test2^test2^2022-11-31"
@@ -42,7 +47,7 @@ interface CreatePortfolioRequest {
   techList?: string[];
   education?: string;
   language?: string;
-  projectList?: ProjectInfo[];
+  projectList?: PortfolioProjectId[]; // ProjectInfo 대신 PortfolioProjectId 사용
 }
 
 // 포트폴리오 응답 타입
@@ -236,7 +241,7 @@ export const getPortfolioByUserId = async (
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
-  projectList: ProjectInfo[] = []
+  projectList: PortfolioProjectId[] = [] // ProjectInfo 대신 PortfolioProjectId 사용
 ): CreatePortfolioRequest => {
   return {
     name: portfolioData.name || "",
@@ -262,4 +267,5 @@ export type {
   PortfolioDetailResponseDTO,
   EduAndActDTO,
   CertAndLangDTO,
+  PortfolioProjectId, // 새로운 타입 export
 };
