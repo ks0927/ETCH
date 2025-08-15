@@ -17,9 +17,34 @@ import ProjectWriteSubmitButton from "../../organisms/project/write/projectWrite
 import ProjectFileUpload from "../../organisms/project/write/projectFileUpload";
 import { getProjectById, updateProject } from "../../../api/projectApi";
 import { ProjectWriteTechData } from "../../../types/project/projectTechData";
-import type { BackendProjectResponse } from "../../../types/project/projectUpdateFileUploadProps";
 import type { ProjectInputData } from "../../../types/project/projectDatas";
 import { useNavigate, useParams } from "react-router";
+
+// 🔥 실제 백엔드 응답 구조에 맞는 타입 정의
+interface BackendProjectResponse {
+  id: number;
+  title: string;
+  content: string;
+  thumbnailUrl?: string;
+  youtubeUrl?: string;
+  githubUrl?: string;
+  projectCategory: ProjectCategoryEnum;
+  isPublic: boolean;
+  viewCount: number;
+  likeCount: number;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
+  likedByMe: boolean;
+  memberId: number;
+  nickname: string;
+  profileUrl?: string;
+
+  // 🔥 실제 백엔드 응답 필드들
+  techCodes: string[]; // ['CSS', 'JavaScript'] 형태
+  techCategories: string[]; // ['web'] 형태
+  fileUrls: string[]; // URL 문자열 배열
+}
 
 // 수정 페이지용 폼 데이터 타입
 interface ProjectUpdateFormData {
@@ -75,6 +100,45 @@ function ProjectUpdatePage() {
   const [removePdf, setRemovePdf] = useState(false);
   const [newPdfFile, setNewPdfFile] = useState<File | null>(null);
 
+  // 🔥 기술 스택 이름을 ID로 매핑하는 함수
+  const mapTechNamesToIds = (techNames: string[]): number[] => {
+    const mappedIds: number[] = [];
+
+    techNames.forEach((techName) => {
+      // ProjectWriteTechData에서 해당 기술 스택의 ID 찾기
+      const foundTech = ProjectWriteTechData.find(
+        (tech) => tech.text === techName || tech.stack === techName
+      );
+
+      if (foundTech) {
+        mappedIds.push(foundTech.id);
+        console.log(`기술 스택 매핑: ${techName} -> ID ${foundTech.id}`);
+      } else {
+        console.warn(`기술 스택을 찾을 수 없음: ${techName}`);
+      }
+    });
+
+    return mappedIds;
+  };
+
+  // 🔥 fileUrls를 ExistingFile 형태로 변환하는 함수
+  const mapFileUrlsToExistingFiles = (fileUrls: string[]): ExistingFile[] => {
+    return fileUrls.map((url, index) => {
+      // URL에서 파일명 추출
+      const fileName = url.split("/").pop() || `file_${index + 1}`;
+
+      // 파일 확장자로 PDF 여부 판단
+      const isPdf = fileName.toLowerCase().endsWith(".pdf");
+
+      return {
+        id: index + 1, // 임시 ID (실제로는 백엔드에서 파일 ID를 제공해야 함)
+        fileName,
+        fileUrl: url,
+        isPdf,
+      };
+    });
+  };
+
   // 1. 기존 프로젝트 데이터 로드
   useEffect(() => {
     const loadProjectData = async () => {
@@ -91,49 +155,25 @@ function ProjectUpdatePage() {
           parseInt(id)
         );
 
-        // 🔧 디버깅: 받아온 프로젝트 데이터를 콘솔에 출력
         console.log("=== 프로젝트 수정 페이지 데이터 디버깅 ===");
         console.log("전체 프로젝트 데이터:", project);
-        console.log("프로젝트 ID:", project.id);
-        console.log("제목:", project.title);
-        console.log("내용:", project.content);
-        console.log("카테고리:", project.projectCategory);
-        console.log("기술 스택 배열:", project.projectTechs);
-        console.log("GitHub URL:", project.githubUrl);
-        console.log("YouTube URL:", project.youtubeUrl);
-        console.log("공개 설정:", project.isPublic);
-        console.log("썸네일 URL:", project.thumbnailUrl);
-        console.log("파일 배열:", project.files);
+        console.log("기술 스택 이름들:", project.techCodes);
+        console.log("파일 URL들:", project.fileUrls);
 
-        // 기술 스택 상세 정보
-        if (project.projectTechs && project.projectTechs.length > 0) {
-          console.log("=== 기술 스택 상세 ===");
-          project.projectTechs.forEach((tech, index) => {
-            console.log(`기술 스택 ${index + 1}:`, tech);
-            console.log(`- techCode:`, tech.techCode);
-            console.log(`- techCode.id:`, tech.techCode?.id);
-            console.log(`- techCode.name:`, tech.techCode?.codeName);
-          });
-        }
+        // 🔥 기술 스택 이름을 ID로 변환
+        const mappedTechIds = mapTechNamesToIds(project.techCodes || []);
+        console.log("매핑된 기술 스택 ID들:", mappedTechIds);
 
-        // 파일 상세 정보
-        if (project.files && project.files.length > 0) {
-          console.log("=== 파일 상세 ===");
-          project.files.forEach((file, index) => {
-            console.log(`파일 ${index + 1}:`, file);
-            console.log(`- id:`, file.id);
-            console.log(`- fileName:`, file.fileName);
-            console.log(`- fileUrl:`, file.fileUrl);
-            console.log(`- isPdf:`, file.isPdf);
-          });
-        }
+        // 🔥 파일 URL들을 ExistingFile 형태로 변환
+        const mappedFiles = mapFileUrlsToExistingFiles(project.fileUrls || []);
+        console.log("매핑된 파일들:", mappedFiles);
 
         // 폼 데이터 설정
         const updatedFormData = {
           title: project.title || "",
           content: project.content || "",
           projectCategory: project.projectCategory || "",
-          projectTechs: project.projectTechs?.map((pt) => pt.techCode.id) || [],
+          projectTechs: mappedTechIds, // 🔥 매핑된 ID들 사용
           githubUrl: project.githubUrl || "",
           youtubeUrl: project.youtubeUrl || "",
           isPublic: project.isPublic ?? true,
@@ -152,22 +192,15 @@ function ProjectUpdatePage() {
           console.log("기존 썸네일 설정:", project.thumbnailUrl);
         }
 
-        // 기존 파일들 분리 (이미지 vs PDF)
+        // 🔥 파일들 분리 (이미지 vs PDF)
         const images: ExistingFile[] = [];
         let pdfFile: ExistingFile | null = null;
 
-        project.files?.forEach((file) => {
-          const fileData: ExistingFile = {
-            id: file.id,
-            fileName: file.fileName,
-            fileUrl: file.fileUrl,
-            isPdf: file.isPdf || false,
-          };
-
-          if (fileData.isPdf) {
-            pdfFile = fileData;
+        mappedFiles.forEach((file) => {
+          if (file.isPdf) {
+            pdfFile = file;
           } else {
-            images.push(fileData);
+            images.push(file);
           }
         });
 
@@ -600,7 +633,6 @@ function ProjectUpdatePage() {
         {/* 제출 버튼 */}
         <section className="mt-6 sm:mt-8 lg:mt-12">
           <div className="flex justify-center gap-4">
-            {/* 제출 버튼 */}
             <ProjectWriteSubmitButton
               onSubmit={handleSubmit}
               isDisabled={!formData.title || !formData.content || submitting}

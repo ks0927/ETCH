@@ -49,9 +49,9 @@ export interface ProjectData {
   memberId?: number; // API에서 오는 실제 필드
   profileUrl?: string; // 프로필 이미지 URL
 
-  member?: {
+  member: {
     id: number;
-    nickname?: string;
+    nickname: string;
   };
 
   // 🔥 기술 스택 - API 응답에 맞게 수정
@@ -108,6 +108,7 @@ export const ProjectState: ProjectData = {
   profileUrl: "",
   member: {
     id: 1,
+    nickname: "",
   },
   files: [],
   fileUrls: [],
