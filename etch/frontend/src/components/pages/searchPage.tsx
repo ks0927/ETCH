@@ -10,7 +10,7 @@ import type {
 import type { JobItemProps } from "../atoms/listItem";
 import type { ProjectData } from "../../types/project/projectDatas";
 import JobDetailModal from "../organisms/job/jobDetailModal";
-import JobList from "../organisms/job/jobList";
+import SearchJobList from "../organisms/job/searchJobList";
 import NewsCard from "../molecules/home/newsCard";
 import { useLikedNews } from "../../hooks/useLikedItems";
 import { searchJobs, searchNews, searchProjects } from "../../api/searchApi";
@@ -129,7 +129,7 @@ function SearchPage() {
       const results = await searchJobs({
         keyword: query,
         page,
-        size: 10,
+        size: 9,
       });
       setJobResults(results);
     } catch (error) {
@@ -373,14 +373,14 @@ function SearchPage() {
               </div>
               <div className="bg-white border-gray-200 rounded-lg shadow-sm">
                 {searchResults?.jobs.content.length ? (
-                  <div className="[&>div]:!grid-cols-1 [&>div]:!gap-3">
-                    <JobList
-                      jobs={searchResults.jobs.content.map((job) =>
-                        convertJobSearchResultToJobItem(job)
-                      )}
-                      onJobClick={(jobId) => handleJobClick(Number(jobId))}
-                    />
-                  </div>
+                  <SearchJobList
+                    jobs={searchResults.jobs.content.map((job) =>
+                      convertJobSearchResultToJobItem(job)
+                    )}
+                    onJobClick={(jobId) => handleJobClick(Number(jobId))}
+                    maxItems={4}
+                    gridCols="grid-cols-1 md:grid-cols-2"
+                  />
                 ) : (
                   <div className="flex items-center justify-center h-24 text-gray-500">
                     검색 결과가 없습니다
@@ -480,14 +480,14 @@ function SearchPage() {
                   <div className="w-8 h-8 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
                 </div>
               ) : jobResults?.content.length ? (
-                <div className="[&>div]:!grid-cols-1 [&>div]:!gap-4 p-4">
-                  <JobList
-                    jobs={jobResults.content.map((job) =>
-                      convertJobSearchResultToJobItem(job)
-                    )}
-                    onJobClick={(jobId) => handleJobClick(Number(jobId))}
-                  />
-                </div>
+                <SearchJobList
+                  jobs={jobResults.content.map((job) =>
+                    convertJobSearchResultToJobItem(job)
+                  )}
+                  onJobClick={(jobId) => handleJobClick(Number(jobId))}
+                  maxItems={jobResults.content.length}
+                  gridCols="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                />
               ) : (
                 <div className="flex items-center justify-center h-48 text-gray-500">
                   검색 결과가 없습니다
