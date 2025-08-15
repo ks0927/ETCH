@@ -1012,27 +1012,25 @@ function MypagePortfolioPageEdit() {
       </div>
 
       {/* 교육/자격증 섹션 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <PortfolioWriteTextCard
-          title="교육 / 수료 / 활동"
-          type="education"
-          education={parseEducationData(portfolioData.education)}
-          onEducationAdd={handleActivityAdd}
-          onEducationRemove={handleEducationRemove}
-          showForm={showEducationForm}
-          onToggleForm={() => setShowEducationForm(!showEducationForm)}
-        />
+      <PortfolioWriteTextCard
+        title="교육 / 수료 / 활동"
+        type="education"
+        education={parseEducationData(portfolioData.education)}
+        onEducationAdd={handleActivityAdd}
+        onEducationRemove={handleEducationRemove}
+        showForm={showEducationForm}
+        onToggleForm={() => setShowEducationForm(!showEducationForm)}
+      />
 
-        <PortfolioWriteTextCard
-          title="자격증 및 어학"
-          type="language"
-          language={parseLanguageData(portfolioData.language)}
-          onLanguageAdd={handleLicenseAdd}
-          onLanguageRemove={handleLanguageRemove}
-          showForm={showLanguageForm}
-          onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
-        />
-      </div>
+      <PortfolioWriteTextCard
+        title="자격증 및 어학"
+        type="language"
+        language={parseLanguageData(portfolioData.language)}
+        onLanguageAdd={handleLicenseAdd}
+        onLanguageRemove={handleLanguageRemove}
+        showForm={showLanguageForm}
+        onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
+      />
 
       {/* 제출 버튼 */}
       <div className="flex justify-center">
