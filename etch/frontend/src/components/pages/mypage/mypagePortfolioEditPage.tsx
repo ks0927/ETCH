@@ -535,7 +535,7 @@ function MypagePortfolioPageEdit() {
         `포트폴리오가 성공적으로 수정되었습니다!\n- 기존 프로젝트: ${selectedProjectIds.length}개\n- 새 프로젝트: ${createdNewProjectIds.length}개\n- 총 프로젝트: ${allProjectIds.length}개`
       );
 
-      navigate("/mypage/portfolios");
+      navigate("/mypage");
     } catch (error) {
       console.error("=== 포트폴리오 수정 실패 ===", error);
 

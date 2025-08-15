@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   getPortfolioDetail,
   type BackendArrayData,
@@ -246,6 +246,7 @@ const convertMyProjectToProjectData = (
 };
 
 function MypagePortfolioDetail() {
+  const navigate = useNavigate(); // 추가
   const { userId } = useParams<{ userId: string }>();
 
   const [portfolio, setPortfolio] = useState<PortfolioDetailResponseDTO | null>(
@@ -554,6 +555,22 @@ function MypagePortfolioDetail() {
           </ul>
         </div>
       )}
+      <button
+        onClick={() => navigate(-1)} // 바로 이전 페이지로
+        className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+      >
+        뒤로 가기
+      </button>
+      <button
+        onClick={() => {
+          if (portfolio?.portfolioId) {
+            navigate(`/mypage/portfolios/edit/${portfolio.portfolioId}`);
+          }
+        }}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        수정
+      </button>
     </div>
   );
 }
