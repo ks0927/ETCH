@@ -2,6 +2,10 @@ import axios from "axios";
 import { BASE_API } from "./BASE_API";
 import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
 import type { ProjectInputData } from "../types/project/projectDatas";
+import type {
+  BackendProjectResponse,
+  ProjectUpdateRequest,
+} from "../types/project/projectUpdateFileUploadProps";
 
 // 백엔드 요청 타입 (기존 유지)
 export interface ProjectCreateRequestData {
@@ -138,10 +142,10 @@ export async function createProject(projectInput: ProjectInputData) {
   }
 }
 
-// 프로젝트 수정 API
+// 프로젝트 수정 API - ProjectUpdateRequest 타입 사용
 export async function updateProject(
   projectId: number,
-  projectInput: ProjectInputData
+  projectInput: ProjectUpdateRequest
 ) {
   try {
     const token = getAuthToken();
@@ -151,6 +155,7 @@ export async function updateProject(
 
     const formData = new FormData();
 
+    // ProjectUpdateRequest를 백엔드 형식으로 변환
     const requestData = {
       title: projectInput.title,
       content: projectInput.content,
@@ -159,9 +164,9 @@ export async function updateProject(
       githubUrl: projectInput.githubUrl || null,
       youtubeUrl: projectInput.youtubeUrl || null,
       isPublic: projectInput.isPublic,
-      removeThumbnail: projectInput.removeThumbnail,
-      removeFileIds: projectInput.removeFileIds,
-      removePdf: projectInput.removePdf,
+      removeThumbnail: projectInput.removeThumbnail || false,
+      removeFileIds: projectInput.removeFileIds || [],
+      removePdf: projectInput.removePdf || false,
     };
 
     const dataBlob = new Blob([JSON.stringify(requestData)], {
@@ -421,9 +426,11 @@ export async function getAllProjectsWithPaging(
     throw error;
   }
 }
-// 🔧 projectApi.js 파일에서 getProjectById 함수를 이렇게 수정하세요
 
-export async function getProjectById(id: number) {
+// 프로젝트 상세 조회 API - BackendProjectResponse 타입 반환
+export async function getProjectById(
+  id: number
+): Promise<BackendProjectResponse> {
   try {
     const token = getAuthToken();
 
@@ -435,7 +442,7 @@ export async function getProjectById(id: number) {
 
     const response = await axios.get(`${BASE_API}/projects/${id}`, config);
 
-    const projectData = response.data.data;
+    const projectData: BackendProjectResponse = response.data.data;
 
     return projectData;
   } catch (error) {
@@ -447,9 +454,6 @@ export async function getProjectById(id: number) {
 
       try {
         const response = await axios.get(`${BASE_API}/projects/${id}`);
-
-        // 재시도에서도 같은 로깅
-
         return response.data.data;
       } catch (retryError) {
         console.error("재시도 실패:", retryError);
@@ -460,6 +464,7 @@ export async function getProjectById(id: number) {
     throw error;
   }
 }
+
 export async function getUserPublicProjects(userId: number) {
   try {
     // 토큰 가져오기
