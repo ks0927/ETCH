@@ -64,7 +64,7 @@ function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-[#007DFC] via-[#0066DD] to-[#0056CC] -mt-16 pt-16 md:-mt-16 md:pt-16">
+      <section className="relative w-full h-screen max-h-[900px] min-h-[600px] overflow-hidden bg-gradient-to-br from-[#007DFC] via-[#0066DD] to-[#0056CC] -mt-16 pt-16 md:-mt-16 md:pt-16">
         {/* 동적 배경 패턴 */}
         <div className="absolute inset-0">
           {/* 애니메이션 원들 */}
@@ -82,7 +82,7 @@ function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 mx-auto max-w-7xl lg:flex-row lg:gap-12">
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 mx-auto max-w-7xl lg:flex-row lg:gap-12">
           {/* 왼쪽: 텍스트 콘텐츠 */}
           <div className="flex-1 text-center lg:text-left">
             <h1 className="mb-6 font-bold leading-tight text-white">

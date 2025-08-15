@@ -95,11 +95,18 @@ function FavoriteProjectList({
           setFavoriteData(convertedFavoriteData);
           setMockProjects(convertedMockProjects);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("좋아요한 프로젝트 로딩 실패:", error);
-        setError("좋아요한 프로젝트를 불러오는데 실패했습니다.");
-        setFavoriteData([]);
-        setMockProjects([]);
+        // 400 에러는 데이터가 없음을 의미하므로 빈 배열로 처리
+        if (error.response?.status === 400) {
+          setFavoriteData([]);
+          setMockProjects([]);
+        } else {
+          console.error("예상치 못한 에러:", error);
+          setError("좋아요한 프로젝트를 불러오는데 실패했습니다.");
+          setFavoriteData([]);
+          setMockProjects([]);
+        }
       } finally {
         setLoading(false);
       }
