@@ -437,38 +437,48 @@ function MypagePortfolioDetail() {
   console.log("프로젝트 목록:", displayProjects);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <div className="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
       {/* 기본 정보 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+      <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
           기본 정보
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-3">
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-20">이름:</span>
-              <span className="text-gray-900">{portfolio.name || "-"}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <span className="font-semibold text-gray-600 w-24 flex-shrink-0">
+                이름
+              </span>
+              <span className="text-gray-900 font-medium">
+                {portfolio.name || "-"}
+              </span>
             </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-20">이메일:</span>
+            <div className="flex items-start">
+              <span className="font-semibold text-gray-600 w-24 flex-shrink-0">
+                이메일
+              </span>
               <span className="text-gray-900">{portfolio.email || "-"}</span>
             </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-20">전화번호:</span>
+            <div className="flex items-start">
+              <span className="font-semibold text-gray-600 w-24 flex-shrink-0">
+                전화번호
+              </span>
               <span className="text-gray-900">
                 {portfolio.phoneNumber || "-"}
               </span>
             </div>
           </div>
-          <div className="space-y-3">
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-20">GitHub:</span>
+          <div className="space-y-4">
+            <div className="flex items-start">
+              <span className="font-semibold text-gray-600 w-24 flex-shrink-0">
+                GitHub
+              </span>
               {portfolio.githubUrl ? (
                 <a
                   href={portfolio.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-700 hover:underline transition-colors break-all"
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 break-all"
                 >
                   {portfolio.githubUrl}
                 </a>
@@ -476,14 +486,16 @@ function MypagePortfolioDetail() {
                 <span className="text-gray-900">-</span>
               )}
             </div>
-            <div className="flex">
-              <span className="font-medium text-gray-700 w-20">블로그:</span>
+            <div className="flex items-start">
+              <span className="font-semibold text-gray-600 w-24 flex-shrink-0">
+                블로그
+              </span>
               {portfolio.blogUrl ? (
                 <a
                   href={portfolio.blogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-700 hover:underline transition-colors break-all"
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition-all duration-200 break-all"
                 >
                   {portfolio.blogUrl}
                 </a>
@@ -493,12 +505,12 @@ function MypagePortfolioDetail() {
             </div>
           </div>
         </div>
-        <div className="mt-6 pt-4 border-t border-gray-100">
-          <div className="mb-2">
-            <span className="font-medium text-gray-700">자기소개:</span>
+        <div className="mt-8 pt-6 border-t border-gray-100">
+          <div className="mb-3">
+            <span className="font-semibold text-gray-600">자기소개</span>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+            <p className="text-gray-800 whitespace-pre-line leading-relaxed text-base">
               {portfolio.introduce || "자기소개가 등록되지 않았습니다."}
             </p>
           </div>
@@ -507,15 +519,15 @@ function MypagePortfolioDetail() {
 
       {/* 기술 스택 */}
       {portfolio.techList && portfolio.techList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
             기술 스택
           </h2>
           <div className="flex flex-wrap gap-3">
             {portfolio.techList.map((tech, idx) => (
               <span
                 key={idx}
-                className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-sm font-medium hover:bg-blue-100 transition-colors"
+                className="px-5 py-2.5 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-800 border border-blue-200 rounded-full text-sm font-semibold hover:from-blue-100 hover:to-blue-200 transition-all duration-200 transform hover:scale-105"
               >
                 {tech}
               </span>
@@ -525,15 +537,15 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 프로젝트 - ProjectListCard 사용 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-        <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">프로젝트</h2>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
+      <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900">프로젝트</h2>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500 font-medium">
               총 {displayProjects.length}개
             </span>
             {isOwner && (
-              <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
+              <span className="text-xs bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-4 py-2 rounded-full font-semibold shadow-sm">
                 내 모든 프로젝트 표시
               </span>
             )}
@@ -552,12 +564,12 @@ function MypagePortfolioDetail() {
         certificateList.length === 0 &&
         activityList.length === 0 &&
         displayProjects.length === 0 && (
-          <div className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500 mb-6">
-            <div className="text-4xl mb-3">📝</div>
-            <p className="text-lg font-medium mb-2">
+          <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-12 text-center text-gray-500 mb-8 shadow-sm">
+            <div className="text-6xl mb-4 opacity-60">📝</div>
+            <p className="text-xl font-semibold mb-3 text-gray-600">
               추가 정보가 등록되지 않았습니다
             </p>
-            <p className="text-sm">
+            <p className="text-base text-gray-500">
               학력, 어학, 자격증, 활동, 프로젝트 정보를 등록해보세요.
             </p>
           </div>
@@ -565,18 +577,20 @@ function MypagePortfolioDetail() {
 
       {/* 교육/활동 */}
       {educationList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
             교육/활동
           </h2>
           <div className="space-y-4">
             {educationList.map((edu, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg"
+                className="flex items-start gap-4 p-5 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-r-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-200"
               >
-                <span className="text-blue-600 text-lg">📚</span>
-                <span className="text-gray-800 font-medium">{edu}</span>
+                <span className="text-blue-600 text-xl">📚</span>
+                <span className="text-gray-800 font-medium text-base leading-relaxed">
+                  {edu}
+                </span>
               </div>
             ))}
           </div>
@@ -585,18 +599,20 @@ function MypagePortfolioDetail() {
 
       {/* 자격증/어학 */}
       {languageList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
             자격증/어학
           </h2>
           <div className="space-y-4">
             {languageList.map((lang, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg"
+                className="flex items-start gap-4 p-5 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-r-xl hover:from-green-100 hover:to-green-200 transition-all duration-200"
               >
-                <span className="text-green-600 text-lg">🏆</span>
-                <span className="text-gray-800 font-medium">{lang}</span>
+                <span className="text-green-600 text-xl">🏆</span>
+                <span className="text-gray-800 font-medium text-base leading-relaxed">
+                  {lang}
+                </span>
               </div>
             ))}
           </div>
@@ -605,18 +621,20 @@ function MypagePortfolioDetail() {
 
       {/* 자격증 */}
       {certificateList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
             자격증
           </h2>
           <div className="space-y-4">
             {certificateList.map((cert, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-purple-50 border-l-4 border-purple-500 rounded-r-lg"
+                className="flex items-start gap-4 p-5 bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 rounded-r-xl hover:from-purple-100 hover:to-purple-200 transition-all duration-200"
               >
-                <span className="text-purple-600 text-lg">🎓</span>
-                <span className="text-gray-800 font-medium">{cert}</span>
+                <span className="text-purple-600 text-xl">🎓</span>
+                <span className="text-gray-800 font-medium text-base leading-relaxed">
+                  {cert}
+                </span>
               </div>
             ))}
           </div>
@@ -625,18 +643,20 @@ function MypagePortfolioDetail() {
 
       {/* 교육/활동 */}
       {activityList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900 mb-5 pb-3 border-b border-gray-200">
+        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
             교육/활동
           </h2>
           <div className="space-y-4">
             {activityList.map((activity, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-3 p-4 bg-orange-50 border-l-4 border-orange-500 rounded-r-lg"
+                className="flex items-start gap-4 p-5 bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-r-xl hover:from-orange-100 hover:to-orange-200 transition-all duration-200"
               >
-                <span className="text-orange-600 text-lg">🎯</span>
-                <span className="text-gray-800 font-medium">{activity}</span>
+                <span className="text-orange-600 text-xl">🎯</span>
+                <span className="text-gray-800 font-medium text-base leading-relaxed">
+                  {activity}
+                </span>
               </div>
             ))}
           </div>
@@ -644,10 +664,10 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 버튼 섹션 */}
-      <div className="flex justify-between items-center pt-6">
+      <div className="flex justify-between items-center pt-8 pb-4">
         <button
           onClick={handleGoBack}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+          className="px-8 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           뒤로 가기
         </button>
@@ -655,7 +675,7 @@ function MypagePortfolioDetail() {
         {isOwner && (
           <button
             onClick={handleEdit}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
           >
             수정하기
           </button>
