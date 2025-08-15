@@ -9,6 +9,14 @@ interface ApiResponse<T> {
   message: string | null;
 }
 
+// 백엔드에서 보낼 수 있는 데이터 타입들을 정의
+type BackendArrayData =
+  | string // 원본 문자열: "test^test^2025-08-10|test2^test2^2022-11-31"
+  | string[] // 1차원 배열: ["test^test^2025-08-10", "test2^test2^2022-11-31"]
+  | string[][] // 2차원 배열: [["test","test","2025-08-10"], ["test2","test2","2022-11-31"]]
+  | null
+  | undefined;
+
 // 포트폴리오 생성 요청 타입
 interface CreatePortfolioRequest {
   name: string;
@@ -48,7 +56,7 @@ interface PortfolioListResponseDTO {
   introduce: string;
 }
 
-// 포트폴리오 상세 응답 타입
+// 포트폴리오 상세 응답 타입 (수정된 부분)
 interface PortfolioDetailResponseDTO {
   portfolioId: number;
   name: string;
@@ -58,8 +66,8 @@ interface PortfolioDetailResponseDTO {
   githubUrl: string;
   introduce: string;
   techList: string[];
-  language: string;
-  education: string;
+  language: BackendArrayData; // string 대신 BackendArrayData 타입 사용
+  education: BackendArrayData; // string 대신 BackendArrayData 타입 사용
   memberId: number;
   projectList: ProjectInfo[];
   createdAt: string;
@@ -233,3 +241,6 @@ export const convertPortfolioDataToRequest = (
     projectList: projectList,
   };
 };
+
+// 타입들을 export (컴포넌트에서 사용하기 위해)
+export type { BackendArrayData, PortfolioDetailResponseDTO };
