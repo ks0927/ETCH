@@ -7,7 +7,7 @@ import {
   type EduAndActDTO,
   type CertAndLangDTO,
 } from "../../../api/portfolioApi";
-import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi"; // 추가
+import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi";
 
 // API에서 반환하는 타입
 export interface ProjectInfo {
@@ -48,21 +48,55 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
 type BackendEducationData = EduAndActDTO;
 type BackendLanguageData = CertAndLangDTO;
 
-// 현재 로그인한 사용자 ID를 가져오는 함수 (실제 구현에 맞게 수정 필요)
+// 현재 로그인한 사용자 ID를 가져오는 함수
 const getCurrentUserId = (): number | null => {
-  // 실제로는 인증 컨텍스트나 localStorage에서 가져와야 함
-  // 예: return authContext.user?.id || null;
-  // 임시로 localStorage에서 가져온다고 가정
-  const userInfo = localStorage.getItem("user");
-  if (userInfo) {
-    try {
+  try {
+    // 1. localStorage에서 user 정보 확인
+    const userInfo = localStorage.getItem("user");
+    if (userInfo) {
       const user = JSON.parse(userInfo);
-      return user.id || null;
-    } catch {
-      return null;
+      if (user && user.id) {
+        return Number(user.id);
+      }
     }
+
+    // 2. localStorage에서 userId 직접 확인
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      return Number(userId);
+    }
+
+    // 3. localStorage에서 memberId 확인
+    const memberId = localStorage.getItem("memberId");
+    if (memberId) {
+      return Number(memberId);
+    }
+
+    // 4. 토큰에서 사용자 정보 파싱 (JWT라면)
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      try {
+        // JWT 토큰의 payload 부분을 디코드 (간단한 방법)
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.userId) {
+          return Number(payload.userId);
+        }
+        if (payload.memberId) {
+          return Number(payload.memberId);
+        }
+        if (payload.id) {
+          return Number(payload.id);
+        }
+      } catch (tokenError) {
+        console.warn("토큰 파싱 실패:", tokenError);
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("getCurrentUserId 오류:", error);
+    return null;
   }
-  return null;
 };
 
 // 백엔드 데이터를 2차원 배열로 파싱하는 함수 (기존과 동일)
@@ -171,20 +205,38 @@ const formatArrayDataForDisplay = (arrayData: string[][]): string[] => {
   return arrayData.map((item) => item.join(", "));
 };
 
+// MyProjectResponse를 ProjectInfo로 변환하는 헬퍼 함수
+const convertMyProjectToProjectInfo = (
+  project: MyProjectResponse
+): ProjectInfo => {
+  return {
+    id: project.id,
+    title: project.title,
+    thumbnailUrl: project.thumbnailUrl || "",
+    projectCategory: "", // MyProjectResponse에는 카테고리가 없음
+    viewCount: project.viewCount,
+    likeCount: project.likeCount,
+    nickname: project.nickname,
+    isPublic: project.isPublic,
+    popularityScore: project.popularityScore,
+  };
+};
+
 function MypagePortfolioDetail() {
   const { userId } = useParams<{ userId: string }>();
 
   const [portfolio, setPortfolio] = useState<PortfolioDetailResponseDTO | null>(
     null
   );
-  const [myProjects, setMyProjects] = useState<MyProjectResponse[]>([]); // 추가: 내 모든 프로젝트
+  const [myProjects, setMyProjects] = useState<MyProjectResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     const fetchPortfolioDetail = async () => {
       if (!userId) {
-        setError("포트폴리오 ID가 없습니다.");
+        setError("사용자 ID가 없습니다.");
         setIsLoading(false);
         return;
       }
@@ -193,33 +245,45 @@ function MypagePortfolioDetail() {
         setIsLoading(true);
         setError(null);
 
-        // 1. 포트폴리오 조회
+        console.log("=== 포트폴리오 조회 시작 ===");
+        console.log("요청된 userId:", userId);
+
+        // 1. 현재 로그인한 사용자 ID 확인
+        const currentUserId = getCurrentUserId();
+        console.log("현재 로그인한 사용자 ID:", currentUserId);
+
+        // 2. 포트폴리오 조회
         const portfolioData = await getPortfolioDetail(Number(userId));
         console.log("포트폴리오 데이터:", portfolioData);
+        console.log("포트폴리오 소유자 ID:", portfolioData.memberId);
+        console.log("포트폴리오에 포함된 프로젝트:", portfolioData.projectList);
 
         setPortfolio(portfolioData);
 
-        // 2. 현재 로그인한 사용자와 포트폴리오 소유자가 같은지 확인
-        const currentUserId = getCurrentUserId();
-        const isOwner =
+        // 3. 소유자 여부 확인
+        const ownerCheck =
           currentUserId &&
           portfolioData.memberId &&
-          currentUserId === portfolioData.memberId;
+          Number(currentUserId) === Number(portfolioData.memberId);
+        console.log("소유자 여부:", ownerCheck);
+        setIsOwner(ownerCheck || false);
 
-        console.log("현재 사용자 ID:", currentUserId);
-        console.log("포트폴리오 소유자 ID:", portfolioData.memberId);
-        console.log("소유자 여부:", isOwner);
-
-        // 3. 본인의 포트폴리오인 경우 모든 프로젝트 조회
-        if (isOwner) {
+        // 4. 소유자인 경우 모든 프로젝트 조회
+        if (ownerCheck) {
+          console.log("=== 내 프로젝트 조회 시작 ===");
           try {
-            const allProjects = await getMyProjects(); // /projects/my 호출
-            console.log("내 모든 프로젝트:", allProjects);
+            const allProjects = await getMyProjects();
+            console.log("내 모든 프로젝트 조회 성공:", allProjects);
+            console.log("프로젝트 개수:", allProjects.length);
             setMyProjects(allProjects);
           } catch (projectError) {
             console.error("내 프로젝트 조회 실패:", projectError);
             // 프로젝트 조회 실패해도 포트폴리오는 표시
+            setMyProjects([]);
           }
+        } else {
+          console.log("소유자가 아니므로 내 프로젝트를 조회하지 않습니다.");
+          setMyProjects([]);
         }
       } catch (err) {
         console.error("포트폴리오 상세 조회 실패:", err);
@@ -232,9 +296,15 @@ function MypagePortfolioDetail() {
     fetchPortfolioDetail();
   }, [userId]);
 
-  if (isLoading) return <div>포트폴리오 로딩 중...</div>;
-  if (error) return <div>{error}</div>;
-  if (!portfolio) return <div>포트폴리오를 찾을 수 없습니다.</div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-64">
+        포트폴리오 로딩 중...
+      </div>
+    );
+  if (error) return <div className="text-red-500 text-center">{error}</div>;
+  if (!portfolio)
+    return <div className="text-center">포트폴리오를 찾을 수 없습니다.</div>;
 
   // 타입 안전한 파싱 (기존과 동일)
   const educationList: string[] = Array.isArray(portfolio.education)
@@ -258,20 +328,30 @@ function MypagePortfolioDetail() {
     : [];
 
   // 프로젝트 목록 결정: 내 프로젝트가 있으면 그걸 사용, 없으면 포트폴리오의 프로젝트 사용
-  const displayProjects =
-    myProjects.length > 0
-      ? myProjects.map((project) => ({
-          id: project.id,
-          title: project.title,
-          thumbnailUrl: project.thumbnailUrl || "",
-          projectCategory: "", // MyProjectResponse에는 카테고리가 없음
-          viewCount: project.viewCount,
-          likeCount: project.likeCount,
-          nickname: project.nickname,
-          isPublic: project.isPublic,
-          popularityScore: project.popularityScore,
-        }))
-      : portfolio.projectList;
+  const displayProjects: ProjectInfo[] = (() => {
+    if (isOwner && myProjects.length > 0) {
+      console.log(
+        "소유자이며 내 프로젝트 데이터 사용:",
+        myProjects.length,
+        "개"
+      );
+      return myProjects.map(convertMyProjectToProjectInfo);
+    } else if (portfolio.projectList && portfolio.projectList.length > 0) {
+      console.log(
+        "포트폴리오의 프로젝트 데이터 사용:",
+        portfolio.projectList.length,
+        "개"
+      );
+      return portfolio.projectList;
+    } else {
+      console.log("표시할 프로젝트가 없음");
+      return [];
+    }
+  })();
+
+  console.log("=== 최종 표시할 프로젝트 ===");
+  console.log("개수:", displayProjects.length);
+  console.log("프로젝트 목록:", displayProjects);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -413,16 +493,20 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 프로젝트 */}
-      {displayProjects.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">
-            프로젝트
-            {myProjects.length > 0 && (
-              <span className="text-sm text-gray-500 ml-2">
-                (총 {displayProjects.length}개)
-              </span>
-            )}
-          </h2>
+      <div className="bg-white border p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">
+          프로젝트
+          <span className="text-sm text-gray-500 ml-2">
+            (총 {displayProjects.length}개)
+          </span>
+          {isOwner && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">
+              내 모든 프로젝트 표시
+            </span>
+          )}
+        </h2>
+
+        {displayProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayProjects.map((project) => (
               <div
@@ -434,6 +518,10 @@ function MypagePortfolioDetail() {
                     src={project.thumbnailUrl}
                     alt={project.title}
                     className="w-full h-32 object-cover rounded mb-3"
+                    onError={(e) => {
+                      console.log("이미지 로드 실패:", project.thumbnailUrl);
+                      e.currentTarget.style.display = "none";
+                    }}
                   />
                 )}
                 <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
@@ -461,8 +549,15 @@ function MypagePortfolioDetail() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>등록된 프로젝트가 없습니다.</p>
+            {isOwner && (
+              <p className="text-sm mt-2">프로젝트를 등록해보세요!</p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* 데이터가 없는 경우 안내 메시지 */}
       {educationList.length === 0 &&
