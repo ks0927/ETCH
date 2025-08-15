@@ -48,65 +48,60 @@ function PortfolioWriteTextCard({
     switch (type) {
       case "education":
         return (
-          <div className="space-y-6">
-            {showForm && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <PortfolioEducationForm onSubmit={handleEducationSubmit} />
-                <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-                  <button
-                    onClick={() => onToggleForm?.()}
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="space-y-4">
+            {/* 기존 교육/활동 목록 표시 */}
             <PortfolioEducationTextCard
               education={education || []}
               onRemove={onActivityRemove}
             />
+
+            {/* 폼이 열려있을 때만 표시 */}
+            {showForm && (
+              <PortfolioEducationForm onSubmit={handleEducationSubmit} />
+            )}
           </div>
         );
       case "language":
         return (
-          <div className="space-y-6">
-            {showForm && (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                <PortfolioLangugaeForm onSubmit={handleLanguageSubmit} />
-                <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-                  <button
-                    onClick={() => onToggleForm?.()}
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="space-y-4">
+            {/* 기존 자격증 목록 표시 */}
             <PortfolioLanguageTextCard
               language={language || []}
               onRemove={onLicenseRemove}
             />
+
+            {/* 폼이 열려있을 때만 표시 */}
+            {showForm && (
+              <PortfolioLangugaeForm onSubmit={handleLanguageSubmit} />
+            )}
           </div>
         );
       default:
-        return <div>잘못된 타입입니다.</div>;
+        return <div className="text-red-500">잘못된 타입입니다.</div>;
     }
   };
 
   return (
-    <div className="mb-8">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-xl font-bold">{title}</h2>
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      {/* 제목과 추가 버튼이 있는 헤더 */}
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
         <button
           onClick={() => onToggleForm?.()}
-          className="flex items-center justify-center px-4 py-2 text-sm font-semibold transition-all duration-200 rounded cursor-pointer hover:brightness-90 border border-gray-300"
+          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+            showForm
+              ? "bg-gray-500 text-white hover:bg-gray-600"
+              : "bg-gray-900 text-white hover:bg-gray-800"
+          }`}
         >
-          {showForm ? "추가 -" : "추가 +"}
+          {showForm ? "폼 닫기" : "+ 추가"}
         </button>
       </div>
-      <div className="border-b pb-2 mb-4"></div>
+
+      {/* 구분선 */}
+      <div className="border-b border-gray-200 mb-5"></div>
+
+      {/* 컨텐츠 영역 */}
       {renderContent()}
     </div>
   );

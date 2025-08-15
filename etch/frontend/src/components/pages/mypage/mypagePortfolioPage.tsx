@@ -11,7 +11,6 @@ import {
   type language,
 } from "../../../types/portfolio/portfolioDatas";
 import PortfolioWriteInput from "../../organisms/portfolio/portfolioWriteInput";
-import PortfolioSubmitButton from "../../organisms/portfolio/portfolioSubmitButton";
 import PortfolioStackSelect from "../../organisms/portfolio/portfolioStackSelect";
 import PortfolioWriteTextCard from "../../organisms/portfolio/portfolioTextCard";
 import {
@@ -448,62 +447,94 @@ function MypagePortfolioPage() {
     }
   };
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 bg-white">
-      <h1 className="text-2xl font-medium text-gray-900 mb-8">
-        포트폴리오 작성
-      </h1>
+  <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
+    <h1 className="text-2xl font-bold text-center mb-8 text-gray-900">
+      포트폴리오 작성
+    </h1>
 
-      {/* 기본 정보 섹션 */}
-      <div className="mb-8">
-        <h2 className="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
-          기본 정보
-        </h2>
+    {/* 1. 기본 정보 섹션 */}
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-5 pb-2 border-b border-gray-200">
+        1. 기본 정보
+      </h2>
 
-        <div className="space-y-4">
+      {/* 2열 레이아웃: 포트폴리오 이름 + 이름 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            포트폴리오 이름
+          </label>
           <PortfolioWriteInput
-            inputText="이름"
+            inputText=""
+            placeholderText="예: 홍길동의 개발자 포트폴리오"
+            type="text"
+            value={portfolioData.name}
+            onChange={handleNameChange}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            이름
+          </label>
+          <PortfolioWriteInput
+            inputText=""
             placeholderText="홍길동"
             type="text"
             value={portfolioData.name}
             onChange={handleNameChange}
           />
+        </div>
+      </div>
 
+      {/* 2열 레이아웃: 연락처 + 이메일 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            연락처
+          </label>
           <PortfolioWriteInput
-            inputText="한 줄 자기소개"
-            placeholderText="안녕하세요, 열정과 패기로 준비된 신입 개발자 홍길동입니다."
-            type="text"
-            value={portfolioData.introduce}
-            onChange={handleIntroChange}
-          />
-
-          <PortfolioWriteInput
-            inputText="연락처"
+            inputText=""
             placeholderText="010-1234-5678"
             type="tel"
             value={portfolioData.phoneNumber}
             onChange={handlePhoneNumberChange}
           />
-
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            이메일
+          </label>
           <PortfolioWriteInput
-            inputText="이메일"
-            placeholderText="etch@example.com"
+            inputText=""
+            placeholderText="hong-dev@example.com"
             type="email"
             value={portfolioData.email}
             onChange={handleEmailChange}
           />
+        </div>
+      </div>
 
+      {/* 2열 레이아웃: GitHub + 블로그 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            GitHub
+          </label>
           <PortfolioWriteInput
-            inputText="GitHub"
-            placeholderText="http://github.com/username/repository"
+            inputText=""
+            placeholderText="https://github.com/hong-dev"
             type="url"
             value={portfolioData.githubUrl}
             onChange={handleGithubUrlChange}
           />
-
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            블로그/기술 노트 (선택)
+          </label>
           <PortfolioWriteInput
-            inputText="블로그"
-            placeholderText="http://blog.yourblog.com"
+            inputText=""
+            placeholderText="https://velog.io/@hongdev"
             type="url"
             value={portfolioData.blogUrl || ""}
             onChange={handleBlogUrlChange}
@@ -511,274 +542,345 @@ function MypagePortfolioPage() {
         </div>
       </div>
 
-      {/* 기술 스택 섹션 */}
-      <div className="mb-8">
-        <h2 className="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
-          보유 기술 스택
-        </h2>
+      {/* 자기소개 */}
+      <div className="mb-0">
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          자기소개
+        </label>
+        <textarea
+          placeholder="신입 백엔드 개발자로 Node.js 기반의 REST API 개발, MySQL/Redis를 활용한 데이터 설계, AWS 인프라 운영에 관심이 있습니다..."
+          value={portfolioData.introduce}
+          onChange={(e) => handleIntroChange(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors min-h-[100px] resize-y bg-white"
+        />
+      </div>
+    </div>
+
+    {/* 3. 기술 스택 섹션 */}
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      <h2 className="text-lg font-semibold text-gray-900 mb-5 pb-2 border-b border-gray-200">
+        3. 보유 기술 (Skills)
+      </h2>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-3">
+          기술 스택
+        </label>
         <PortfolioStackSelect
           isStackData={PortfolioWriteStackData}
           isSelect={portfolioData.stack}
           onStackChange={handleStacksChange}
         />
+        <div className="text-right mt-4">
+          <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
+            추가
+          </button>
+        </div>
       </div>
+    </div>
 
-      {/* 프로젝트 섹션 */}
-      <section className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium text-gray-900">프로젝트</h2>
-          <div className="text-sm text-gray-500">
+    {/* 4. 프로젝트 섹션 */}
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-semibold text-gray-900">
+          4. 프로젝트 경험
+        </h2>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">
             선택된 기존: {selectedProjectIds.length}개, 새로 생성:{" "}
             {newProjectsCreated.length}개
-          </div>
+          </span>
+          <button
+            onClick={() => setShowNewProjectForm(!showNewProjectForm)}
+            className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 transition-colors"
+          >
+            + 새 프로젝트 추가
+          </button>
         </div>
-        <div className="border-b border-gray-200 mb-6"></div>
-
-        {/* 기존 프로젝트 선택 섹션 */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-medium text-gray-900">
-              기존 프로젝트 선택
-            </h3>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-500">
-                ({selectedProjectIds.length}/{myProjects.length}개 선택됨)
-              </span>
-              {myProjects.length > 0 && (
-                <button
-                  onClick={handleSelectAllProjects}
-                  className="px-3 py-1 text-sm text-gray-600 border border-gray-300 rounded bg-white hover:bg-gray-50"
-                >
-                  {selectedProjectIds.length === myProjects.length
-                    ? "전체 해제"
-                    : "전체 선택"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* 프로젝트 로딩/에러/빈 상태 */}
-          {projectsLoading && (
-            <div className="text-center py-8">
-              <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2"></div>
-              <p className="text-gray-500">프로젝트 목록을 불러오는 중...</p>
-            </div>
-          )}
-
-          {projectsError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
-              {projectsError}
-            </div>
-          )}
-
-          {!projectsLoading && !projectsError && myProjects.length === 0 && (
-            <div className="text-center py-6 text-gray-500 border border-gray-200 rounded bg-gray-50">
-              <p className="mb-1">등록된 프로젝트가 없습니다.</p>
-              <p className="text-sm">아래에서 새 프로젝트를 등록해보세요.</p>
-            </div>
-          )}
-
-          {/* 기존 프로젝트 목록 */}
-          {!projectsLoading && !projectsError && myProjects.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className={`border rounded p-4 cursor-pointer ${
-                    selectedProjectIds.includes(project.id)
-                      ? "border-blue-300 bg-blue-50"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
-                  onClick={() =>
-                    handleProjectSelect(
-                      project.id,
-                      !selectedProjectIds.includes(project.id)
-                    )
-                  }
-                >
-                  <div className="flex items-start space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedProjectIds.includes(project.id)}
-                      onChange={(e) =>
-                        handleProjectSelect(project.id, e.target.checked)
-                      }
-                      className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-
-                    <div className="flex-1 min-w-0">
-                      {project.thumbnailUrl && (
-                        <img
-                          src={project.thumbnailUrl}
-                          alt={project.title}
-                          className="w-full h-24 object-cover rounded mb-2"
-                        />
-                      )}
-
-                      <h4 className="font-medium text-base mb-1 text-gray-900 truncate">
-                        {project.title}
-                      </h4>
-
-                      <div className="text-sm text-gray-600 space-y-1">
-                        <p>작성자: {project.nickname}</p>
-                        <div className="flex justify-between items-center">
-                          <span>조회수: {project.viewCount}</span>
-                          <span>좋아요: {project.likeCount}</span>
-                        </div>
-
-                        <div className="flex items-center space-x-2 mt-2">
-                          {!project.isPublic && (
-                            <span className="inline-block px-2 py-1 bg-red-100 text-red-700 text-xs rounded">
-                              비공개
-                            </span>
-                          )}
-                          <span className="text-xs text-gray-500">
-                            인기도: {project.popularityScore}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 새 프로젝트 등록 섹션 */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-base font-medium text-gray-900">
-              새 프로젝트 등록
-            </h3>
-            <button
-              onClick={() => setShowNewProjectForm(!showNewProjectForm)}
-              className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded bg-white hover:bg-gray-50"
-            >
-              {showNewProjectForm ? "등록 폼 닫기" : "새 프로젝트 등록 +"}
-            </button>
-          </div>
-
-          {/* 새 프로젝트 작성 폼 */}
-          {showNewProjectForm && (
-            <div className="border border-gray-200 rounded p-4 bg-gray-50 mb-4">
-              <PortfolioProjectPage
-                projectData={newProjectData}
-                onProjectDataChange={handleNewProjectDataChange}
-              />
-              <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200">
-                <button
-                  onClick={handleRegisterNewProject}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  새 프로젝트 등록
-                </button>
-                <button
-                  onClick={() => setShowNewProjectForm(false)}
-                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  취소
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* 새로 등록된 프로젝트 목록 */}
-          {newProjectsCreated.length > 0 && (
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-green-700">
-                새로 등록된 프로젝트 ({newProjectsCreated.length}개)
-              </h4>
-              {newProjectsCreated.map((project, index) => (
-                <div
-                  key={index}
-                  className="border border-green-200 rounded p-4 bg-green-50"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h5 className="font-medium text-base text-gray-900">
-                        {project.title}
-                      </h5>
-                      <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-                        {project.content}
-                      </p>
-                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                        {project.githubUrl && (
-                          <span>
-                            GitHub: {project.githubUrl.substring(0, 30)}...
-                          </span>
-                        )}
-                        {project.youtubeUrl && (
-                          <span>
-                            YouTube: {project.youtubeUrl.substring(0, 30)}...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveNewProject(index)}
-                      className="text-red-600 hover:text-red-700 text-sm ml-4"
-                    >
-                      삭제
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* 교육/자격증 섹션 */}
-      <section className="space-y-6">
-        <PortfolioWriteTextCard
-          title="교육 / 수료 / 활동"
-          type="education"
-          education={parseEducationData(portfolioData.education)}
-          onEducationAdd={handleActivityAdd}
-          onEducationRemove={handleEducationRemove}
-          showForm={showEducationForm}
-          onToggleForm={() => setShowEducationForm(!showEducationForm)}
-        />
-
-        <PortfolioWriteTextCard
-          title="자격증 및 어학"
-          type="language"
-          language={parseLanguageData(portfolioData.language)}
-          onLanguageAdd={handleLicenseAdd}
-          onLanguageRemove={handleLanguageRemove}
-          showForm={showLanguageForm}
-          onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
-        />
-      </section>
-
-      <div className="mt-8">
-        <PortfolioSubmitButton
-          onSubmit={handleSubmit}
-          isDisabled={
-            isSubmitting ||
-            !portfolioData.name ||
-            !portfolioData.phoneNumber ||
-            !portfolioData.introduce
-          }
-        />
       </div>
 
-      {/* 제출 중 표시 */}
-      {isSubmitting && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded p-6 text-center">
-            <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p>포트폴리오를 등록하고 있습니다...</p>
-            <p className="text-sm text-gray-500 mt-2">
-              새 프로젝트 생성 및 포트폴리오 등록 중...
-            </p>
+      {/* 기존 프로젝트 선택 섹션 */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-base font-medium text-gray-900">
+            내가 등록한 프로젝트에서 추가
+          </h3>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">
+              ({selectedProjectIds.length}/{myProjects.length}개 선택됨)
+            </span>
+            {myProjects.length > 0 && (
+              <button
+                onClick={handleSelectAllProjects}
+                className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+              >
+                {selectedProjectIds.length === myProjects.length
+                  ? "전체 해제"
+                  : "전체 선택"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 프로젝트 로딩/에러/빈 상태 */}
+        {projectsLoading && (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-gray-500">프로젝트 목록을 불러오는 중...</p>
+          </div>
+        )}
+
+        {projectsError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+            {projectsError}
+          </div>
+        )}
+
+        {!projectsLoading && !projectsError && myProjects.length === 0 && (
+          <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+            <p className="mb-1">등록된 프로젝트가 없습니다.</p>
+            <p className="text-sm">아래에서 새 프로젝트를 등록해보세요.</p>
+          </div>
+        )}
+
+        {/* 기존 프로젝트 목록 - 카드 스타일 */}
+        {!projectsLoading && !projectsError && myProjects.length > 0 && (
+          <div className="space-y-4">
+            {myProjects.map((project) => (
+              <div
+                key={project.id}
+                className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                  selectedProjectIds.includes(project.id)
+                    ? "border-blue-500 bg-blue-50 shadow-md"
+                    : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                }`}
+                onClick={() =>
+                  handleProjectSelect(
+                    project.id,
+                    !selectedProjectIds.includes(project.id)
+                  )
+                }
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedProjectIds.includes(project.id)}
+                        onChange={(e) =>
+                          handleProjectSelect(project.id, e.target.checked)
+                        }
+                        className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex-1">
+                        {project.thumbnailUrl && (
+                          <img
+                            src={project.thumbnailUrl}
+                            alt={project.title}
+                            className="w-full h-24 object-cover rounded mb-2"
+                          />
+                        )}
+                        <h4 className="text-base font-semibold text-gray-900 mb-1">
+                          {project.title}
+                        </h4>
+                        <p className="text-sm text-gray-600 mb-2">
+                          React와 Node.js를 구현한 온라인 쇼핑몰
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
+                      selectedProjectIds.includes(project.id)
+                        ? "bg-green-100 text-green-800 border border-green-300"
+                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProjectSelect(
+                        project.id,
+                        !selectedProjectIds.includes(project.id)
+                      );
+                    }}
+                  >
+                    {selectedProjectIds.includes(project.id)
+                      ? "추가됨"
+                      : "추가"}
+                  </button>
+                </div>
+
+                {/* 기술 스택 태그들 */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                    React
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                    Node.js
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                    MySQL
+                  </span>
+                  <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                    AWS
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center text-xs text-gray-500">
+                  <span>2024.01 - 2024.03</span>
+                  <div className="flex gap-4">
+                    <span>조회수: {project.viewCount}</span>
+                    <span>좋아요: {project.likeCount}</span>
+                    {!project.isPublic && (
+                      <span className="px-2 py-1 bg-red-100 text-red-800 rounded">
+                        비공개
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 새 프로젝트 작성 폼 */}
+      {showNewProjectForm && (
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 mb-6">
+          <PortfolioProjectPage
+            projectData={newProjectData}
+            onProjectDataChange={handleNewProjectDataChange}
+          />
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+            <button
+              onClick={() => setShowNewProjectForm(false)}
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleRegisterNewProject}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              새 프로젝트 등록
+            </button>
           </div>
         </div>
       )}
+
+      {/* 새로 등록된 프로젝트 목록 */}
+      {newProjectsCreated.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-base font-medium text-green-700 mb-3">
+            새로 등록된 프로젝트 ({newProjectsCreated.length}개)
+          </h4>
+          {newProjectsCreated.map((project, index) => (
+            <div
+              key={index}
+              className="border border-green-200 rounded-lg p-4 bg-green-50"
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h5 className="font-semibold text-base text-gray-900">
+                    {project.title}
+                  </h5>
+                  <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                    {project.content}
+                  </p>
+                  <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                    {project.githubUrl && (
+                      <span>
+                        GitHub: {project.githubUrl.substring(0, 30)}...
+                      </span>
+                    )}
+                    {project.youtubeUrl && (
+                      <span>
+                        YouTube: {project.youtubeUrl.substring(0, 30)}...
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemoveNewProject(index)}
+                  className="text-red-500 hover:text-red-700 text-sm ml-4 px-2 py-1"
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  );
+
+    {/* 하단 두 섹션을 2열로 배치 */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      {/* 교육/자격증 섹션 */}
+      <PortfolioWriteTextCard
+        title="5. 교육 / 수료 / 활동"
+        type="education"
+        education={parseEducationData(portfolioData.education)}
+        onEducationAdd={handleActivityAdd}
+        onEducationRemove={handleEducationRemove}
+        showForm={showEducationForm}
+        onToggleForm={() => setShowEducationForm(!showEducationForm)}
+      />
+
+      <PortfolioWriteTextCard
+        title="7. 자격증 및 어학"
+        type="language"
+        language={parseLanguageData(portfolioData.language)}
+        onLanguageAdd={handleLicenseAdd}
+        onLanguageRemove={handleLanguageRemove}
+        showForm={showLanguageForm}
+        onToggleForm={() => setShowLanguageForm(!showLanguageForm)}
+      />
+    </div>
+
+    {/* 하단 제출 버튼 */}
+    <div className="flex justify-center gap-4">
+      <button
+        onClick={() => navigate("/mypage")}
+        className="px-8 py-3 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+      >
+        취소
+      </button>
+      <button
+        onClick={handleSubmit}
+        disabled={
+          isSubmitting ||
+          !portfolioData.name ||
+          !portfolioData.phoneNumber ||
+          !portfolioData.introduce
+        }
+        className={`px-8 py-3 rounded-md font-medium transition-colors ${
+          isSubmitting ||
+          !portfolioData.name ||
+          !portfolioData.phoneNumber ||
+          !portfolioData.introduce
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        }`}
+      >
+        포트폴리오 생성하기
+      </button>
+    </div>
+
+    {/* 제출 중 표시 */}
+    {isSubmitting && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 text-center max-w-sm mx-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-900 font-medium">
+            포트폴리오를 등록하고 있습니다...
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            새 프로젝트 생성 및 포트폴리오 등록 중...
+          </p>
+        </div>
+      </div>
+    )}
+  </div>;
 }
 
 export default MypagePortfolioPage;

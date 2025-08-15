@@ -9,30 +9,35 @@ function PortfolioLanguageTextCard({
 }) {
   if (language.length === 0) {
     return (
-      <div className="text-gray-500 p-4 text-center">
-        등록된 자격증이 없습니다.
+      <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+        <p>등록된 자격증이 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      {language.map((language, index) => (
+    <div className="space-y-3">
+      {language.map((lang, index) => (
         <div
           key={index}
-          className="relative p-4 bg-green-50 border-l-4 border-green-400 rounded"
+          className="bg-gray-50 border border-gray-200 rounded-md p-3 flex justify-between items-center hover:bg-gray-100 transition-colors"
         >
-          <div className="font-semibold text-green-700">
-            {language.licenseName}
+          <div className="flex-1">
+            <div className="font-medium text-gray-900 text-sm mb-1">
+              {lang.licenseName}
+            </div>
+            <div className="text-xs text-gray-600">
+              {lang.getAt && `(${lang.getAt})`}
+              {lang.issuer && ` | ${lang.issuer}`}
+            </div>
           </div>
-          <div className="text-sm text-gray-600">{language.getAt}</div>
-          <div className="text-sm text-gray-700">{language.issuer}</div>
           {onRemove && (
             <button
               onClick={() => onRemove(index)}
-              className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600"
+              className="text-red-500 hover:text-red-700 text-lg px-2 py-1 ml-3 transition-colors"
+              title="삭제"
             >
-              삭제
+              ×
             </button>
           )}
         </div>

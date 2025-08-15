@@ -62,88 +62,113 @@ function PortfolioEducationForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 p-4 border rounded-lg bg-blue-50"
-    >
-      <h3 className="text-lg font-semibold text-blue-700">활동 정보 입력</h3>
+    <div className="bg-white border border-gray-200 rounded-lg p-6 mt-4">
+      <h3 className="text-base font-semibold text-gray-900 mb-4">
+        활동 정보 입력
+      </h3>
 
-      <div>
-        <label className="block text-sm font-medium mb-1">기관/회사명</label>
-        <input
-          type="text"
-          value={formData.companyName}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, companyName: e.target.value }))
-          }
-          className="w-full p-2 border rounded"
-          placeholder="삼성전자"
-          required
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">활동명/설명</label>
-        <input
-          type="text"
-          value={formData.active}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, active: e.target.value }))
-          }
-          className="w-full p-2 border rounded"
-          placeholder="인턴십, 교육과정명 등"
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">시작일</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            기관/회사명
+          </label>
           <input
-            type="date"
-            value={formData.startAt}
-            onChange={(e) => handleStartDateChange(e.target.value)}
-            max={today}
-            className={`w-full p-2 border rounded ${
-              dateError ? "border-red-500" : ""
-            }`}
+            type="text"
+            value={formData.companyName}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, companyName: e.target.value }))
+            }
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+            placeholder="삼성전자"
             required
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium mb-1">종료일</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            활동명/설명
+          </label>
           <input
-            type="date"
-            value={formData.endAt}
-            onChange={(e) => handleEndDateChange(e.target.value)}
-            max={today}
-            className={`w-full p-2 border rounded ${
-              dateError ? "border-red-500" : ""
-            }`}
+            type="text"
+            value={formData.active}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, active: e.target.value }))
+            }
+            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+            placeholder="인턴십, 교육과정명 등"
             required
           />
         </div>
-      </div>
 
-      {/* 에러 메시지 표시 */}
-      {dateError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
-          <span className="font-medium">⚠️ {dateError}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              시작일
+            </label>
+            <input
+              type="date"
+              value={formData.startAt}
+              onChange={(e) => handleStartDateChange(e.target.value)}
+              max={today}
+              className={`w-full px-4 py-3 border rounded-md transition-colors bg-white focus:ring-2 focus:ring-blue-500 ${
+                dateError
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:border-blue-500"
+              }`}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              종료일
+            </label>
+            <input
+              type="date"
+              value={formData.endAt}
+              onChange={(e) => handleEndDateChange(e.target.value)}
+              max={today}
+              className={`w-full px-4 py-3 border rounded-md transition-colors bg-white focus:ring-2 focus:ring-blue-500 ${
+                dateError
+                  ? "border-red-500 focus:border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:border-blue-500"
+              }`}
+              required
+            />
+          </div>
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={!!dateError} // 에러가 있으면 버튼 비활성화
-        className={`w-full p-2 rounded transition-colors ${
-          dateError
-            ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-            : "bg-blue-500 text-white hover:bg-blue-600"
-        }`}
-      >
-        활동 추가
-      </button>
-    </form>
+        {/* 에러 메시지 표시 */}
+        {dateError && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <span className="font-medium">⚠️ {dateError}</span>
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setFormData({ ...ActivityState });
+              setDateError("");
+            }}
+            className="flex-1 px-4 py-3 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            disabled={!!dateError} // 에러가 있으면 버튼 비활성화
+            className={`flex-1 px-4 py-3 rounded-md font-medium transition-colors ${
+              dateError
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+          >
+            활동 추가
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
