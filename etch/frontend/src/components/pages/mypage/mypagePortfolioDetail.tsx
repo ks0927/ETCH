@@ -282,6 +282,12 @@ function MypagePortfolioDetail() {
         console.log("포트폴리오 소유자 ID:", portfolioData.memberId);
         console.log("포트폴리오에 포함된 프로젝트:", portfolioData.projectList);
 
+        // 🔥 포트폴리오 ID 디버깅 추가
+        console.log("=== 포트폴리오 ID 디버깅 ===");
+        console.log("portfolioData.portfolioId:", portfolioData.portfolioId);
+        console.log("portfolioData.id:", (portfolioData as any).id);
+        console.log("전체 포트폴리오 객체 키들:", Object.keys(portfolioData));
+
         setPortfolio(portfolioData);
 
         // 3. 소유자 여부 확인
@@ -331,12 +337,39 @@ function MypagePortfolioDetail() {
     navigate(-1); // 브라우저 히스토리에서 이전 페이지로
   };
 
-  // 수정 페이지로 이동 핸들러
+  // 🔥 수정 페이지로 이동 핸들러 - 수정됨
   const handleEdit = () => {
-    if (portfolio?.portfolioId) {
-      navigate(`/mypage/portfolios/edit/${portfolio.portfolioId}`);
+    if (!portfolio) {
+      console.error("포트폴리오 데이터가 없습니다.");
+      return;
+    }
+
+    // 🔥 포트폴리오 ID를 찾는 로직 수정
+    let portfolioId: number | null = null;
+
+    // 1. portfolioId 필드 확인
+    if (portfolio.portfolioId) {
+      portfolioId = portfolio.portfolioId;
+      console.log("portfolioId 필드 사용:", portfolioId);
+    }
+    // 2. id 필드 확인 (백엔드에서 다른 필드명을 사용할 가능성)
+    else if ((portfolio as any).id) {
+      portfolioId = (portfolio as any).id;
+      console.log("id 필드 사용:", portfolioId);
+    }
+    // 3. URL 파라미터의 userId 사용 (최후의 수단)
+    else if (userId) {
+      portfolioId = Number(userId);
+      console.log("URL userId 사용:", portfolioId);
+    }
+
+    if (portfolioId) {
+      console.log("포트폴리오 수정 페이지로 이동:", portfolioId);
+      navigate(`/mypage/portfolios/edit/${portfolioId}`);
     } else {
       console.error("포트폴리오 ID를 찾을 수 없습니다.");
+      console.log("포트폴리오 객체:", portfolio);
+      alert("포트폴리오 ID를 찾을 수 없습니다. 다시 시도해주세요.");
     }
   };
 
