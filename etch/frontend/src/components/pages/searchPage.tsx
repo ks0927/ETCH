@@ -234,7 +234,7 @@ function SearchPage() {
       likedByMe: projectSearchResult.likedByMe || false, // 실제 백엔드 값 사용
       memberId: 0,
       profileUrl: "",
-      member: { id: 0 },
+      member: { id: 0, nickname: "" },
       files: [],
       fileUrls: [],
       techCodes: [],
@@ -252,19 +252,23 @@ function SearchPage() {
   // 현재 활성 탭에 따라 올바른 데이터 소스에서 selectedJob 찾기
   const findSelectedJob = () => {
     if (!selectedJobId) return null;
-    
+
     let foundJob = null;
-    
+
     // 현재 탭에 따라 해당 탭의 데이터에서 먼저 찾기
     if (activeTab === "jobs" && jobResults?.content) {
-      foundJob = jobResults.content.find((job) => job.id === Number(selectedJobId));
+      foundJob = jobResults.content.find(
+        (job) => job.id === Number(selectedJobId)
+      );
     }
-    
+
     // 찾지 못했거나 전체 탭인 경우 전체 검색 결과에서 찾기
     if (!foundJob && searchResults?.jobs.content) {
-      foundJob = searchResults.jobs.content.find((job) => job.id === Number(selectedJobId));
+      foundJob = searchResults.jobs.content.find(
+        (job) => job.id === Number(selectedJobId)
+      );
     }
-    
+
     return foundJob;
   };
 
@@ -400,8 +404,18 @@ function SearchPage() {
                   onClick={() => setActiveTab("jobs")}
                 >
                   더보기
-                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -434,8 +448,18 @@ function SearchPage() {
                   onClick={() => setActiveTab("news")}
                 >
                   더보기
-                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
@@ -468,8 +492,18 @@ function SearchPage() {
                   onClick={() => setActiveTab("projects")}
                 >
                   더보기
-                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </button>
               </div>
