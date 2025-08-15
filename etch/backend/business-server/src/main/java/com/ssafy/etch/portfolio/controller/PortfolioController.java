@@ -9,6 +9,7 @@ import com.ssafy.etch.portfolio.dto.PortfolioListResponseDTO;
 import com.ssafy.etch.portfolio.dto.PortfolioRequestDTO;
 import com.ssafy.etch.portfolio.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -76,5 +77,19 @@ public class PortfolioController {
         PortfolioDetailResponseDTO portfolioDetailResponseDTO = portfolioService.getPortfolioDetail(oAuth2User.getId(), portfolioId);
 
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(portfolioDetailResponseDTO, "포트폴리오 상세조회"));
+    }
+
+    @GetMapping("/{portfolioId}/markdown")
+    public ResponseEntity<String> getPortfolioAsMarkdown(
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User,
+            @PathVariable Long portfolioId) {
+        checkAuthentication(oAuth2User);
+        String markdownContent = portfolioService.getPortfolioAsMarkdown(oAuth2User.getId(), portfolioId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "text/markdown; charset=UTF-8");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"portfolio.md\"");
+
+        return new ResponseEntity<>(markdownContent, headers, HttpStatus.OK);
     }
 }
