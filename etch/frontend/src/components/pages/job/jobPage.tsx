@@ -12,9 +12,16 @@ export default function JobPage() {
     "calendar"
   );
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [currentCalendarDate, setCurrentCalendarDate] = useState<Date>(new Date());
+  const [currentDateRange, setCurrentDateRange] = useState<{start: Date, end: Date} | undefined>(undefined);
   
   // custom hook 사용
   const { jobs, loading, error, handleDateRangeChange } = useJobs();
+
+  const handleDateRangeChangeWrapper = (startDate: Date, endDate: Date) => {
+    setCurrentDateRange({ start: startDate, end: endDate });
+    handleDateRangeChange(startDate, endDate);
+  };
   
   console.log('[JobPage] Current state:', {
     currentView,
@@ -59,13 +66,19 @@ export default function JobPage() {
       />
 
       {currentView === "list" && (
-        <JobList jobs={jobs} onJobClick={handleJobClick} />
+        <JobList 
+          jobs={jobs} 
+          onJobClick={handleJobClick}
+          dateRange={currentDateRange}
+        />
       )}
       {currentView === "calendar" && (
         <CalendarView
           jobList={jobs}
           onEventClick={handleJobClick}
-          onDateRangeChange={handleDateRangeChange}
+          onDateRangeChange={handleDateRangeChangeWrapper}
+          currentDate={currentCalendarDate}
+          onDateChange={setCurrentCalendarDate}
         />
       )}
       

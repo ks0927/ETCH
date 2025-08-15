@@ -11,12 +11,16 @@ interface CalendarViewProps {
   jobList: JobItemProps[];
   onEventClick?: (jobId: string) => void;
   onDateRangeChange?: (startDate: Date, endDate: Date) => void;
+  currentDate?: Date;
+  onDateChange?: (date: Date) => void;
 }
 
 function CalendarView({
   jobList,
   onEventClick,
   onDateRangeChange,
+  currentDate,
+  onDateChange,
 }: CalendarViewProps) {
   const { isJobLiked, addLikedJob, removeLikedJob } = useLikedJobs();
   const [bookmarkingJobs, setBookmarkingJobs] = useState<Set<string>>(new Set());
@@ -135,6 +139,14 @@ function CalendarView({
 
   const handleDatesSet = (dateInfo: any) => {
     console.log("[CalendarView] handleDatesSet called with:", dateInfo);
+    
+    // 현재 달력의 중심 날짜를 상위 컴포넌트에 전달 (날짜 상태 유지용)
+    if (onDateChange) {
+      const centerDate = new Date(dateInfo.view.currentStart);
+      centerDate.setDate(15); // 달의 중간 날짜로 설정
+      onDateChange(centerDate);
+    }
+    
     // dateInfo.start: 달력에서 보이는 첫 번째 날짜 (7월 27일)
     // dateInfo.end: 달력에서 보이는 마지막 날짜 + 1 (9월 7일)
     const startDate = new Date(dateInfo.start);
@@ -307,20 +319,40 @@ function CalendarView({
           .fc-theme-standard th {
             border-color: #e5e7eb !important;
           }
+          .fc-toolbar {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-bottom: 1rem !important;
+            position: relative !important;
+            gap: 1.5rem !important;
+            transform: translateX(15px) !important;
+          }
+          .fc-toolbar-chunk {
+            display: flex !important;
+            align-items: center !important;
+          }
+          .fc-toolbar-chunk:nth-child(3) {
+            gap: 0.5rem !important;
+          }
         `}</style>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
+        initialDate={currentDate}
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev",
           center: "title",
-          right: "dayGridMonth",
+          right: "next today",
         }}
         events={events}
         eventClick={handleEventClick}
         datesSet={handleDatesSet}
         height="auto"
         locale="ko"
+        buttonText={{
+          today: "오늘"
+        }}
         displayEventTime={false}
         aspectRatio={1.2}
         eventDisplay="block"
