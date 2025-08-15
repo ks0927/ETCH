@@ -1,7 +1,6 @@
 import { authInstance } from "./instances";
 import type { portfolioDatas } from "../types/portfolio/portfolioDatas";
-import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
-import type { ProjectInfo } from "../components/pages/mypage/mypagePortfolioDetail";
+// import type { ProjectCategoryEnum } from "../types/project/projectCategroyData";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -12,6 +11,19 @@ interface ApiResponse<T> {
 // 포트폴리오에 포함할 프로젝트 ID 타입 (간단한 형태)
 interface PortfolioProjectId {
   id: number;
+}
+
+// 프로젝트 정보 타입 (포트폴리오 상세 조회용)
+interface ProjectInfo {
+  id: number;
+  title: string;
+  thumbnailUrl: string;
+  projectCategory: string;
+  viewCount: number;
+  likeCount: number;
+  nickname: string;
+  isPublic: boolean;
+  popularityScore: number;
 }
 
 // 백엔드에서 보낼 수 있는 데이터 타입들을 정의 (기존 문자열 형태용)
@@ -104,34 +116,35 @@ interface PortfolioListItem {
 }
 
 // 프로젝트 생성 요청 타입
-interface CreateProjectRequest {
-  title: string;
-  content: string;
-  projectCategory: ProjectCategoryEnum;
-  techCodeIds: number[];
-  githubUrl: string;
-  youtubeUrl: string;
-  isPublic: boolean;
-  thumbnailFile?: File | null;
-  imageFiles?: File[];
-}
+// interface CreateProjectRequest {
+//   title: string;
+//   content: string;
+//   projectCategory: ProjectCategoryEnum;
+//   techCodeIds: number[];
+//   githubUrl: string;
+//   youtubeUrl: string;
+//   isPublic: boolean;
+//   thumbnailFile?: File | null;
+//   imageFiles?: File[];
+// }
 
-// 프로젝트 응답 타입
-interface ProjectResponse {
-  projectList: number;
-  title: string;
-  content: string;
-  projectCategory: ProjectCategoryEnum;
-  techCodeIds: number[];
-  githubUrl: string;
-  youtubeUrl: string;
-  isPublic: boolean;
-  memberId: number;
-  createdAt: string;
-  updatedAt: string;
-  thumbnailUrl?: string;
-  imageUrls?: string[];
-}
+// // 프로젝트 응답 타입
+// interface ProjectResponse {
+//   id: number; // ID 필드 추가
+//   projectList: number;
+//   title: string;
+//   content: string;
+//   projectCategory: ProjectCategoryEnum;
+//   techCodeIds: number[];
+//   githubUrl: string;
+//   youtubeUrl: string;
+//   isPublic: boolean;
+//   memberId: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   thumbnailUrl?: string;
+//   imageUrls?: string[];
+// }
 
 // 포트폴리오 생성
 export const createPortfolio = async (
@@ -144,49 +157,12 @@ export const createPortfolio = async (
   return response.data.data;
 };
 
-// 프로젝트 생성
-export const createProject = async (
-  projectData: CreateProjectRequest
-): Promise<ProjectResponse> => {
-  const formData = new FormData();
-
-  const projectInfo = {
-    title: projectData.title,
-    content: projectData.content,
-    projectCategory: projectData.projectCategory,
-    techCodeIds: projectData.techCodeIds,
-    githubUrl: projectData.githubUrl,
-    youtubeUrl: projectData.youtubeUrl,
-    isPublic: projectData.isPublic,
-  };
-
-  formData.append(
-    "projectCreateRequest",
-    new Blob([JSON.stringify(projectInfo)], { type: "application/json" })
-  );
-
-  if (projectData.thumbnailFile) {
-    formData.append("thumbnailFile", projectData.thumbnailFile);
-  }
-
-  if (projectData.imageFiles && projectData.imageFiles.length > 0) {
-    projectData.imageFiles.forEach((file) => {
-      formData.append("imageFiles", file);
-    });
-  }
-
-  const response = await authInstance.post<ApiResponse<ProjectResponse>>(
-    "/projects",
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
-
-  return response.data.data;
-};
+// 프로젝트 생성 (portfolioApi에서는 제거, projectApi만 사용)
+// export const createProject = async (
+//   projectData: CreateProjectRequest
+// ): Promise<ProjectResponse> => {
+//   // 이 함수는 projectApi.ts의 createProject를 사용하세요
+// };
 
 // 내 포트폴리오 목록 조회
 export const getMyPortfolios = async (): Promise<PortfolioListItem[]> => {
@@ -267,5 +243,6 @@ export type {
   PortfolioDetailResponseDTO,
   EduAndActDTO,
   CertAndLangDTO,
-  PortfolioProjectId, // 새로운 타입 export
+  PortfolioProjectId,
+  ProjectInfo, // ProjectInfo 타입도 export
 };
