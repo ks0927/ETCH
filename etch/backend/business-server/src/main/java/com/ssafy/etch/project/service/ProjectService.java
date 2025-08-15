@@ -17,4 +17,5 @@ public interface ProjectService {
 	Long createProject(Long memberId, ProjectCreateRequestDTO req, MultipartFile thumbnail, List<MultipartFile> images);
 	void deleteProject(Long projectId, Long memberId);
 	void updateProject(Long projectId, Long memberId, ProjectUpdateRequestDTO req, MultipartFile thumbnail, List<MultipartFile> images);
+	List<ProjectListDTO> getProjectsByMemberId(Long memberId);
 }
