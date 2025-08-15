@@ -41,7 +41,24 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
   );
 };
 
-// 백엔드 데이터를 2차원 배열로 파싱하는 함수
+// 백엔드에서 반환하는 실제 데이터 타입들
+interface BackendEducationData {
+  companyName?: string;
+  startAt?: string;
+  endAt?: string;
+  active?: string;
+  startDate?: string; // 실제 응답에서 사용되는 필드명
+  endDate?: string; // 실제 응답에서 사용되는 필드명
+}
+
+interface BackendLanguageData {
+  licenseName?: string;
+  getAt?: string;
+  issuer?: string;
+  date?: string; // 실제 응답에서 사용되는 필드명
+}
+
+// 백엔드 데이터를 2차원 배열로 파싱하는 함수 (기존 문자열 형태용)
 const parseBackendArrayData = (data: BackendArrayData): string[][] => {
   // null, undefined 체크
   if (!data) return [];
@@ -81,7 +98,79 @@ const parseBackendArrayData = (data: BackendArrayData): string[][] => {
   }
 };
 
-// 교육/언어/자격증/활동 데이터를 표시용 문자열로 변환
+// 교육 데이터를 표시용 문자열로 변환
+const formatEducationData = (
+  educationArray: BackendEducationData[]
+): string[] => {
+  return educationArray.map((edu) => {
+    const companyName = edu.companyName || "";
+    const active = edu.active || "";
+    const startDate = edu.startAt || edu.startDate;
+    const endDate = edu.endAt || edu.endDate;
+
+    const formattedStartDate = startDate
+      ? new Date(startDate).toLocaleDateString("ko-KR")
+      : "";
+    const formattedEndDate = endDate
+      ? new Date(endDate).toLocaleDateString("ko-KR")
+      : "";
+
+    let result = "";
+
+    // 회사명과 활동 내용
+    if (companyName && active) {
+      result = `${companyName} - ${active}`;
+    } else if (companyName) {
+      result = companyName;
+    } else if (active) {
+      result = active;
+    }
+
+    // 날짜 정보 추가
+    if (formattedStartDate && formattedEndDate) {
+      result += ` (${formattedStartDate} ~ ${formattedEndDate})`;
+    } else if (formattedStartDate) {
+      result += ` (${formattedStartDate} ~)`;
+    } else if (formattedEndDate) {
+      result += ` (~ ${formattedEndDate})`;
+    }
+
+    return result || "정보 없음";
+  });
+};
+
+// 어학 데이터를 표시용 문자열로 변환
+const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
+  return languageArray.map((lang) => {
+    const licenseName = lang.licenseName || "";
+    const issuer = lang.issuer || "";
+    const getAt = lang.getAt || lang.date;
+
+    const formattedDate = getAt
+      ? new Date(getAt).toLocaleDateString("ko-KR")
+      : "";
+
+    let result = "";
+
+    // 자격증명과 발급기관
+    if (licenseName && issuer) {
+      result = `${licenseName} (${issuer})`;
+    } else if (licenseName) {
+      result = licenseName;
+    } else if (issuer) {
+      result = issuer;
+    }
+
+    // 취득 날짜 추가
+    if (formattedDate) {
+      result += ` - ${formattedDate}`;
+    }
+
+    return result || "정보 없음";
+  });
+};
+
+// 교육/언어/자격증/활동 데이터를 표시용 문자열로 변환 (기존 문자열 형태용)
 const formatArrayDataForDisplay = (arrayData: string[][]): string[] => {
   return arrayData.map((item) => item.join(", "));
 };
@@ -154,18 +243,26 @@ function MypagePortfolioDetail() {
   if (!portfolio) return <div>포트폴리오를 찾을 수 없습니다.</div>;
 
   // 타입 안전한 파싱
-  const educationArray: string[][] = parseBackendArrayData(portfolio.education);
-  const languageArray: string[][] = parseBackendArrayData(portfolio.language);
-  const certificateArray: string[][] = parseBackendArrayData(
-    portfolio.certificate
-  );
-  const activityArray: string[][] = parseBackendArrayData(portfolio.activity);
+  const educationList: string[] = Array.isArray(portfolio.education)
+    ? formatEducationData(portfolio.education as BackendEducationData[])
+    : [];
 
-  // 표시용 문자열 배열 (기존 방식과 호환)
-  const educationList: string[] = formatArrayDataForDisplay(educationArray);
-  const languageList: string[] = formatArrayDataForDisplay(languageArray);
-  const certificateList: string[] = formatArrayDataForDisplay(certificateArray);
-  const activityList: string[] = formatArrayDataForDisplay(activityArray);
+  const languageList: string[] = Array.isArray(portfolio.language)
+    ? formatLanguageData(portfolio.language as BackendLanguageData[])
+    : [];
+
+  // certificate와 activity는 아직 구현되지 않은 것 같으므로 빈 배열로 처리
+  const certificateList: string[] = portfolio.certificate
+    ? Array.isArray(portfolio.certificate)
+      ? formatArrayDataForDisplay(parseBackendArrayData(portfolio.certificate))
+      : []
+    : [];
+
+  const activityList: string[] = portfolio.activity
+    ? Array.isArray(portfolio.activity)
+      ? formatArrayDataForDisplay(parseBackendArrayData(portfolio.activity))
+      : []
+    : [];
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
