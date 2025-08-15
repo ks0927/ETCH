@@ -375,13 +375,19 @@ function MypagePortfolioDetail() {
 
   if (isLoading)
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex justify-center items-center h-64 bg-white">
+        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mr-3"></div>
         포트폴리오 로딩 중...
       </div>
     );
-  if (error) return <div className="text-red-500 text-center">{error}</div>;
+  if (error)
+    return <div className="text-red-600 text-center bg-white p-6">{error}</div>;
   if (!portfolio)
-    return <div className="text-center">포트폴리오를 찾을 수 없습니다.</div>;
+    return (
+      <div className="text-center bg-white p-6">
+        포트폴리오를 찾을 수 없습니다.
+      </div>
+    );
 
   // 타입 안전한 파싱 (기존과 동일)
   const educationList: string[] = Array.isArray(portfolio.education)
@@ -431,33 +437,34 @@ function MypagePortfolioDetail() {
   console.log("프로젝트 목록:", displayProjects);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 bg-white">
       {/* 기본 정보 */}
-      <div className="bg-white border p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">기본 정보</h2>
+      <div className="border border-gray-200 p-6 rounded mb-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">기본 정보</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="mb-2">
-              <span className="font-medium">이름:</span> {portfolio.name || "-"}
+              <span className="font-medium text-gray-700">이름:</span>{" "}
+              {portfolio.name || "-"}
             </p>
             <p className="mb-2">
-              <span className="font-medium">이메일:</span>{" "}
+              <span className="font-medium text-gray-700">이메일:</span>{" "}
               {portfolio.email || "-"}
             </p>
             <p className="mb-2">
-              <span className="font-medium">전화번호:</span>{" "}
+              <span className="font-medium text-gray-700">전화번호:</span>{" "}
               {portfolio.phoneNumber || "-"}
             </p>
           </div>
           <div>
             <p className="mb-2">
-              <span className="font-medium">GitHub:</span>
+              <span className="font-medium text-gray-700">GitHub:</span>
               {portfolio.githubUrl ? (
                 <a
                   href={portfolio.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline ml-1"
+                  className="text-blue-600 hover:text-blue-700 ml-1 underline"
                 >
                   {portfolio.githubUrl}
                 </a>
@@ -466,13 +473,13 @@ function MypagePortfolioDetail() {
               )}
             </p>
             <p className="mb-2">
-              <span className="font-medium">블로그:</span>
+              <span className="font-medium text-gray-700">블로그:</span>
               {portfolio.blogUrl ? (
                 <a
                   href={portfolio.blogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline ml-1"
+                  className="text-blue-600 hover:text-blue-700 ml-1 underline"
                 >
                   {portfolio.blogUrl}
                 </a>
@@ -483,8 +490,8 @@ function MypagePortfolioDetail() {
           </div>
         </div>
         <div className="mt-4">
-          <p className="font-medium">자기소개:</p>
-          <p className="mt-2 text-gray-700 whitespace-pre-line">
+          <p className="font-medium text-gray-700">자기소개:</p>
+          <p className="mt-2 text-gray-600 whitespace-pre-line">
             {portfolio.introduce || "-"}
           </p>
         </div>
@@ -492,13 +499,13 @@ function MypagePortfolioDetail() {
 
       {/* 기술 스택 */}
       {portfolio.techList && portfolio.techList.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">기술 스택</h2>
+        <div className="border border-gray-200 p-6 rounded mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">기술 스택</h2>
           <div className="flex flex-wrap gap-2">
             {portfolio.techList.map((tech, idx) => (
               <span
                 key={idx}
-                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm"
               >
                 {tech}
               </span>
@@ -508,8 +515,8 @@ function MypagePortfolioDetail() {
       )}
 
       {/* 프로젝트 - ProjectListCard 사용 */}
-      <div className="bg-white border p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="border border-gray-200 p-6 rounded mb-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">
           프로젝트
           <span className="text-sm text-gray-500 ml-2">
             (총 {displayProjects.length}개)
@@ -533,7 +540,7 @@ function MypagePortfolioDetail() {
         certificateList.length === 0 &&
         activityList.length === 0 &&
         displayProjects.length === 0 && (
-          <div className="bg-gray-50 border p-6 rounded-lg text-center text-gray-600">
+          <div className="bg-gray-50 border border-gray-200 p-6 rounded text-center text-gray-600 mb-6">
             <p>추가 정보가 등록되지 않았습니다.</p>
             <p className="text-sm mt-2">
               학력, 어학, 자격증, 활동, 프로젝트 정보를 등록해보세요.
@@ -543,14 +550,17 @@ function MypagePortfolioDetail() {
 
       {/* 교육/활동 */}
       {educationList.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">교육/활동</h2>
+        <div className="border border-gray-200 p-6 rounded mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">교육/활동</h2>
           <ul className="space-y-3">
             {educationList.map((edu, idx) => (
-              <li key={idx} className="border-l-4 border-blue-500 pl-4 py-2">
+              <li
+                key={idx}
+                className="border-l-4 border-blue-500 pl-4 py-2 bg-gray-50"
+              >
                 <div className="flex items-center">
                   <span className="text-blue-600 mr-2">📚</span>
-                  {edu}
+                  <span className="text-gray-700">{edu}</span>
                 </div>
               </li>
             ))}
@@ -560,14 +570,19 @@ function MypagePortfolioDetail() {
 
       {/* 자격증/어학 */}
       {languageList.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">자격증/어학</h2>
+        <div className="border border-gray-200 p-6 rounded mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            자격증/어학
+          </h2>
           <ul className="space-y-3">
             {languageList.map((lang, idx) => (
-              <li key={idx} className="border-l-4 border-green-500 pl-4 py-2">
+              <li
+                key={idx}
+                className="border-l-4 border-green-500 pl-4 py-2 bg-gray-50"
+              >
                 <div className="flex items-center">
                   <span className="text-green-600 mr-2">🏆</span>
-                  {lang}
+                  <span className="text-gray-700">{lang}</span>
                 </div>
               </li>
             ))}
@@ -577,12 +592,15 @@ function MypagePortfolioDetail() {
 
       {/* 자격증 */}
       {certificateList.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">자격증</h2>
+        <div className="border border-gray-200 p-6 rounded mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">자격증</h2>
           <ul className="space-y-3">
             {certificateList.map((cert, idx) => (
-              <li key={idx} className="border-l-4 border-purple-500 pl-4 py-2">
-                {cert}
+              <li
+                key={idx}
+                className="border-l-4 border-purple-500 pl-4 py-2 bg-gray-50"
+              >
+                <span className="text-gray-700">{cert}</span>
               </li>
             ))}
           </ul>
@@ -591,12 +609,15 @@ function MypagePortfolioDetail() {
 
       {/* 교육/활동 */}
       {activityList.length > 0 && (
-        <div className="bg-white border p-6 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">교육/활동</h2>
+        <div className="border border-gray-200 p-6 rounded mb-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">교육/활동</h2>
           <ul className="space-y-3">
             {activityList.map((activity, idx) => (
-              <li key={idx} className="border-l-4 border-orange-500 pl-4 py-2">
-                {activity}
+              <li
+                key={idx}
+                className="border-l-4 border-orange-500 pl-4 py-2 bg-gray-50"
+              >
+                <span className="text-gray-700">{activity}</span>
               </li>
             ))}
           </ul>
@@ -607,7 +628,7 @@ function MypagePortfolioDetail() {
       <div className="flex justify-between items-center pt-6">
         <button
           onClick={handleGoBack}
-          className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+          className="px-6 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
         >
           뒤로 가기
         </button>
@@ -615,7 +636,7 @@ function MypagePortfolioDetail() {
         {isOwner && (
           <button
             onClick={handleEdit}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             수정
           </button>
