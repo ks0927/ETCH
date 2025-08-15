@@ -249,10 +249,26 @@ function SearchPage() {
     return converted;
   };
 
-  // JobSearchResult에서 직접 찾은 후 변환
-  const selectedJob = searchResults?.jobs.content.find(
-    (job) => job.id === selectedJobId
-  );
+  // 현재 활성 탭에 따라 올바른 데이터 소스에서 selectedJob 찾기
+  const findSelectedJob = () => {
+    if (!selectedJobId) return null;
+    
+    let foundJob = null;
+    
+    // 현재 탭에 따라 해당 탭의 데이터에서 먼저 찾기
+    if (activeTab === "jobs" && jobResults?.content) {
+      foundJob = jobResults.content.find((job) => job.id === Number(selectedJobId));
+    }
+    
+    // 찾지 못했거나 전체 탭인 경우 전체 검색 결과에서 찾기
+    if (!foundJob && searchResults?.jobs.content) {
+      foundJob = searchResults.jobs.content.find((job) => job.id === Number(selectedJobId));
+    }
+    
+    return foundJob;
+  };
+
+  const selectedJob = findSelectedJob();
   const convertedSelectedJob = selectedJob
     ? convertJobSearchResultToJobItem(selectedJob)
     : null;
