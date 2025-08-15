@@ -7,7 +7,6 @@ import {
   type EduAndActDTO,
   type CertAndLangDTO,
 } from "../../../api/portfolioApi";
-import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi";
 import type { ProjectData } from "../../../types/project/projectDatas";
 import ProjectListCard from "../../organisms/project/list/projectListCard";
 
@@ -24,7 +23,7 @@ export interface ProjectInfo {
   popularityScore: number;
 }
 
-// 타입 가드 함수들 (기존과 동일)
+// 타입 가드 함수들
 const isString = (value: unknown): value is string => {
   return typeof value === "string";
 };
@@ -46,7 +45,7 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
   );
 };
 
-// 백엔드에서 실제로 반환하는 데이터 타입들은 이제 API에서 import
+// 백엔드에서 실제로 반환하는 데이터 타입들
 type BackendEducationData = EduAndActDTO;
 type BackendLanguageData = CertAndLangDTO;
 
@@ -78,7 +77,7 @@ const getCurrentUserId = (): number | null => {
     const token = localStorage.getItem("access_token");
     if (token) {
       try {
-        // JWT 토큰의 payload 부분을 디코드 (간단한 방법)
+        // JWT 토큰의 payload 부분을 디코드
         const payload = JSON.parse(atob(token.split(".")[1]));
         if (payload.userId) {
           return Number(payload.userId);
@@ -101,7 +100,7 @@ const getCurrentUserId = (): number | null => {
   }
 };
 
-// 백엔드 데이터를 2차원 배열로 파싱하는 함수 (기존과 동일)
+// 백엔드 데이터를 2차원 배열로 파싱하는 함수
 const parseBackendArrayData = (data: BackendArrayData): string[][] => {
   if (!data) return [];
 
@@ -135,7 +134,7 @@ const parseBackendArrayData = (data: BackendArrayData): string[][] => {
   }
 };
 
-// 교육 데이터를 표시용 문자열로 변환 (기존과 동일)
+// 교육 데이터를 표시용 문자열로 변환
 const formatEducationData = (
   educationArray: BackendEducationData[]
 ): string[] => {
@@ -174,7 +173,7 @@ const formatEducationData = (
   });
 };
 
-// 어학 데이터를 표시용 문자열로 변환 (기존과 동일)
+// 어학 데이터를 표시용 문자열로 변환
 const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
   return languageArray.map((lang) => {
     const licenseName = lang.name || "";
@@ -207,7 +206,7 @@ const formatArrayDataForDisplay = (arrayData: string[][]): string[] => {
   return arrayData.map((item) => item.join(", "));
 };
 
-// ProjectInfo를 ProjectData로 변환하는 헬퍼 함수 (새로 추가)
+// ProjectInfo를 ProjectData로 변환하는 헬퍼 함수
 const convertProjectInfoToProjectData = (project: ProjectInfo): ProjectData => {
   return {
     id: project.id,
@@ -216,32 +215,11 @@ const convertProjectInfoToProjectData = (project: ProjectInfo): ProjectData => {
     viewCount: project.viewCount,
     likeCount: project.likeCount,
     nickname: project.nickname,
-    likedByMe: false, // 기본값, 필요시 추가 API 호출로 확인
-    // ProjectData에 필요한 다른 필드들이 있다면 여기에 추가
-    // 예: content, projectCategory, techList 등
+    likedByMe: false, // 기본값
     content: "", // 기본값
     projectCategory: project.projectCategory || "",
     isPublic: project.isPublic,
     popularityScore: project.popularityScore,
-  } as ProjectData;
-};
-
-// MyProjectResponse를 ProjectData로 변환하는 헬퍼 함수 (수정)
-const convertMyProjectToProjectData = (
-  project: MyProjectResponse
-): ProjectData => {
-  return {
-    id: project.id,
-    title: project.title,
-    thumbnailUrl: project.thumbnailUrl,
-    viewCount: project.viewCount,
-    likeCount: project.likeCount,
-    nickname: project.nickname,
-    isPublic: project.isPublic,
-    popularityScore: project.popularityScore,
-    likedByMe: false, // 기본값
-    content: "", // 기본값
-    projectCategory: "", // MyProjectResponse에는 카테고리가 없음
   } as ProjectData;
 };
 
@@ -252,7 +230,6 @@ function MypagePortfolioDetail() {
   const [portfolio, setPortfolio] = useState<PortfolioDetailResponseDTO | null>(
     null
   );
-  const [myProjects, setMyProjects] = useState<MyProjectResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
@@ -282,12 +259,6 @@ function MypagePortfolioDetail() {
         console.log("포트폴리오 소유자 ID:", portfolioData.memberId);
         console.log("포트폴리오에 포함된 프로젝트:", portfolioData.projectList);
 
-        // 🔥 포트폴리오 ID 디버깅 추가
-        console.log("=== 포트폴리오 ID 디버깅 ===");
-        console.log("portfolioData.portfolioId:", portfolioData.portfolioId);
-        console.log("portfolioData.id:", (portfolioData as any).id);
-        console.log("전체 포트폴리오 객체 키들:", Object.keys(portfolioData));
-
         setPortfolio(portfolioData);
 
         // 3. 소유자 여부 확인
@@ -297,24 +268,6 @@ function MypagePortfolioDetail() {
           Number(currentUserId) === Number(portfolioData.memberId);
         console.log("소유자 여부:", ownerCheck);
         setIsOwner(ownerCheck || false);
-
-        // 4. 소유자인 경우 모든 프로젝트 조회
-        if (ownerCheck) {
-          console.log("=== 내 프로젝트 조회 시작 ===");
-          try {
-            const allProjects = await getMyProjects();
-            console.log("내 모든 프로젝트 조회 성공:", allProjects);
-            console.log("프로젝트 개수:", allProjects.length);
-            setMyProjects(allProjects);
-          } catch (projectError) {
-            console.error("내 프로젝트 조회 실패:", projectError);
-            // 프로젝트 조회 실패해도 포트폴리오는 표시
-            setMyProjects([]);
-          }
-        } else {
-          console.log("소유자가 아니므로 내 프로젝트를 조회하지 않습니다.");
-          setMyProjects([]);
-        }
       } catch (err) {
         console.error("포트폴리오 상세 조회 실패:", err);
         setError("포트폴리오를 불러오는데 실패했습니다.");
@@ -326,7 +279,7 @@ function MypagePortfolioDetail() {
     fetchPortfolioDetail();
   }, [userId]);
 
-  // 프로젝트 업데이트 핸들러 (새로 추가)
+  // 프로젝트 업데이트 핸들러
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     console.log("프로젝트 업데이트:", updatedProject);
     // 필요시 프로젝트 리스트 업데이트 로직 추가
@@ -334,31 +287,26 @@ function MypagePortfolioDetail() {
 
   // 뒤로 가기 핸들러
   const handleGoBack = () => {
-    navigate(-1); // 브라우저 히스토리에서 이전 페이지로
+    navigate(-1);
   };
 
-  // 🔥 수정 페이지로 이동 핸들러 - 수정됨
+  // 수정 페이지로 이동 핸들러
   const handleEdit = () => {
     if (!portfolio) {
       console.error("포트폴리오 데이터가 없습니다.");
       return;
     }
 
-    // 🔥 포트폴리오 ID를 찾는 로직 수정
+    // 포트폴리오 ID를 찾는 로직
     let portfolioId: number | null = null;
 
-    // 1. portfolioId 필드 확인
     if (portfolio.portfolioId) {
       portfolioId = portfolio.portfolioId;
       console.log("portfolioId 필드 사용:", portfolioId);
-    }
-    // 2. id 필드 확인 (백엔드에서 다른 필드명을 사용할 가능성)
-    else if ((portfolio as any).id) {
+    } else if ((portfolio as any).id) {
       portfolioId = (portfolio as any).id;
       console.log("id 필드 사용:", portfolioId);
-    }
-    // 3. URL 파라미터의 userId 사용 (최후의 수단)
-    else if (userId) {
+    } else if (userId) {
       portfolioId = Number(userId);
       console.log("URL userId 사용:", portfolioId);
     }
@@ -368,7 +316,6 @@ function MypagePortfolioDetail() {
       navigate(`/mypage/portfolios/edit/${portfolioId}`);
     } else {
       console.error("포트폴리오 ID를 찾을 수 없습니다.");
-      console.log("포트폴리오 객체:", portfolio);
       alert("포트폴리오 ID를 찾을 수 없습니다. 다시 시도해주세요.");
     }
   };
@@ -389,7 +336,7 @@ function MypagePortfolioDetail() {
       </div>
     );
 
-  // 타입 안전한 파싱 (기존과 동일)
+  // 타입 안전한 파싱
   const educationList: string[] = Array.isArray(portfolio.education)
     ? formatEducationData(portfolio.education as BackendEducationData[])
     : [];
@@ -410,24 +357,17 @@ function MypagePortfolioDetail() {
       : []
     : [];
 
-  // 프로젝트 목록을 ProjectData 타입으로 변환
+  // 🔥 수정: 항상 포트폴리오에 포함된 프로젝트만 표시
   const displayProjects: ProjectData[] = (() => {
-    if (isOwner && myProjects.length > 0) {
+    if (portfolio.projectList && portfolio.projectList.length > 0) {
       console.log(
-        "소유자이며 내 프로젝트 데이터 사용:",
-        myProjects.length,
-        "개"
-      );
-      return myProjects.map(convertMyProjectToProjectData);
-    } else if (portfolio.projectList && portfolio.projectList.length > 0) {
-      console.log(
-        "포트폴리오의 프로젝트 데이터 사용:",
+        "포트폴리오에 포함된 프로젝트만 표시:",
         portfolio.projectList.length,
         "개"
       );
       return portfolio.projectList.map(convertProjectInfoToProjectData);
     } else {
-      console.log("표시할 프로젝트가 없음");
+      console.log("포트폴리오에 포함된 프로젝트가 없음");
       return [];
     }
   })();
@@ -536,7 +476,7 @@ function MypagePortfolioDetail() {
         </div>
       )}
 
-      {/* 프로젝트 - ProjectListCard 사용 */}
+      {/* 프로젝트 */}
       <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
         <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900">프로젝트</h2>
@@ -544,11 +484,6 @@ function MypagePortfolioDetail() {
             <span className="text-sm text-gray-500 font-medium">
               총 {displayProjects.length}개
             </span>
-            {isOwner && (
-              <span className="text-xs bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-4 py-2 rounded-full font-semibold shadow-sm">
-                내 모든 프로젝트 표시
-              </span>
-            )}
           </div>
         </div>
 

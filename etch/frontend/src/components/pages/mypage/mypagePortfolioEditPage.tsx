@@ -26,7 +26,6 @@ import {
 import {
   createProject,
   getMyProjects,
-  deleteProject,
   type MyProjectResponse,
 } from "../../../api/projectApi";
 import PortfolioProjectPage from "./portfolioProjectPage";
@@ -374,32 +373,34 @@ function MypagePortfolioPageEdit() {
 
   // ============== 임시 삭제 관련 핸들러들 ==============
 
+  // ============== 포트폴리오에서 제외 관련 핸들러들 (텍스트 수정) ==============
+
   const handleTempDeleteSelectedProjects = (): void => {
     if (selectedProjectIds.length === 0) {
-      alert("삭제할 프로젝트를 선택해주세요.");
+      alert("포트폴리오에서 제외할 프로젝트를 선택해주세요.");
       return;
     }
 
-    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 임시 삭제하시겠습니까?\n\n임시 삭제된 프로젝트는 수정 완료 시 실제로 삭제됩니다.`;
+    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 이 포트폴리오에서 제외하시겠습니까?\n\n※ 프로젝트 자체는 삭제되지 않으며, 다른 포트폴리오에서 계속 사용할 수 있습니다.`;
 
     if (!confirm(confirmMessage)) {
       return;
     }
 
-    // 원래 선택되었던 프로젝트들만 임시 삭제 목록에 추가
-    const projectsToTempDelete = selectedProjectIds.filter((id) =>
+    // 원래 포트폴리오에 포함되었던 프로젝트들만 제외 목록에 추가
+    const projectsToExclude = selectedProjectIds.filter((id) =>
       originalSelectedProjectIds.includes(id)
     );
 
-    setTempDeletedProjectIds((prev) => [...prev, ...projectsToTempDelete]);
+    setTempDeletedProjectIds((prev) => [...prev, ...projectsToExclude]);
     setSelectedProjectIds([]);
 
     alert(
-      `${selectedProjectIds.length}개의 프로젝트가 임시 삭제되었습니다.\n수정 완료 시 실제로 삭제됩니다.`
+      `${selectedProjectIds.length}개의 프로젝트가 포트폴리오에서 제외되었습니다.\n※ 프로젝트는 삭제되지 않았습니다.`
     );
   };
 
-  // 임시 삭제 취소 함수
+  // 제외 취소 함수
   const handleCancelTempDelete = (projectId: number): void => {
     setTempDeletedProjectIds((prev) => prev.filter((id) => id !== projectId));
     setSelectedProjectIds((prev) => [...prev, projectId]);
@@ -507,6 +508,7 @@ function MypagePortfolioPageEdit() {
   };
 
   // ============== 제출 핸들러 (수정용) ==============
+  // ============== 제출 핸들러 (수정된 버전 - 실제 프로젝트 삭제 제거) ==============
   const handleSubmit = async (): Promise<void> => {
     if (isSubmitting || !portfolioId) return;
 
@@ -531,39 +533,11 @@ function MypagePortfolioPageEdit() {
       console.log("=== 포트폴리오 수정 시작 ===");
       console.log("포트폴리오 ID:", portfolioId);
       console.log("수정할 포트폴리오 데이터:", portfolioData);
-      console.log("선택된 기존 프로젝트 ID들:", selectedProjectIds);
+      console.log("현재 선택된 프로젝트 ID들:", selectedProjectIds);
       console.log("새로 생성할 프로젝트들:", newProjectsCreated);
-      console.log("임시 삭제할 프로젝트들:", tempDeletedProjectIds);
+      console.log("포트폴리오에서 제외할 프로젝트들:", tempDeletedProjectIds);
 
-      // 1. 임시 삭제된 프로젝트들을 실제로 삭제
-      if (tempDeletedProjectIds.length > 0) {
-        console.log("임시 삭제된 프로젝트들을 실제로 삭제 중...");
-        const deleteResults = await Promise.allSettled(
-          tempDeletedProjectIds.map(async (projectId) => {
-            try {
-              await deleteProject(projectId);
-              console.log(`프로젝트 ${projectId} 삭제 완료`);
-              return { success: true, projectId };
-            } catch (error) {
-              console.error(`프로젝트 ${projectId} 삭제 실패:`, error);
-              return { success: false, projectId, error };
-            }
-          })
-        );
-
-        const failedDeletes = deleteResults.filter(
-          (result) =>
-            result.status === "rejected" ||
-            (result.status === "fulfilled" && !result.value.success)
-        );
-
-        if (failedDeletes.length > 0) {
-          console.warn("일부 프로젝트 삭제 실패:", failedDeletes);
-          // 실패한 삭제가 있어도 계속 진행
-        }
-      }
-
-      // 2. 새로 생성된 프로젝트들을 실제로 생성
+      // 1. 새로 생성된 프로젝트들을 실제로 생성
       const createdNewProjectIds: number[] = [];
 
       for (const project of newProjectsCreated) {
@@ -586,17 +560,29 @@ function MypagePortfolioPageEdit() {
           const createdProject = await createProject(projectInput);
 
           // createProject 응답에서 ID 추출
-          if (
-            typeof createdProject === "object" &&
-            createdProject !== null &&
-            "id" in createdProject
-          ) {
-            createdNewProjectIds.push(createdProject.id as number);
-          } else if (typeof createdProject === "number") {
-            createdNewProjectIds.push(createdProject);
+          let projectId: number | null = null;
+
+          if (typeof createdProject === "number") {
+            projectId = createdProject;
+          } else if (createdProject && typeof createdProject === "object") {
+            projectId =
+              (createdProject as any).id ||
+              (createdProject as any).projectId ||
+              (createdProject as any).projectList;
           }
 
-          console.log(`새 프로젝트 "${project.title}" 생성 완료`);
+          if (projectId && typeof projectId === "number") {
+            createdNewProjectIds.push(projectId);
+            console.log(
+              `새 프로젝트 "${project.title}" 생성 완료, ID: ${projectId}`
+            );
+          } else {
+            console.error(
+              `새 프로젝트 "${project.title}" ID 추출 실패:`,
+              createdProject
+            );
+            alert(`새 프로젝트 "${project.title}"의 ID를 가져올 수 없습니다.`);
+          }
         } catch (projectError) {
           console.error(
             `새 프로젝트 "${project.title}" 생성 실패:`,
@@ -608,28 +594,43 @@ function MypagePortfolioPageEdit() {
         }
       }
 
-      // 3. 모든 프로젝트 ID 통합 (현재 선택된 것 + 새로 생성된 것)
-      const allProjectIds = [...selectedProjectIds, ...createdNewProjectIds];
-      const projectIds: PortfolioProjectId[] = allProjectIds.map((id) => ({
+      // 2. 최종 포트폴리오에 포함할 프로젝트 ID들
+      // 현재 선택된 프로젝트들 + 새로 생성된 프로젝트들
+      const finalProjectIds = [...selectedProjectIds, ...createdNewProjectIds];
+      const projectIds: PortfolioProjectId[] = finalProjectIds.map((id) => ({
         id,
       }));
 
-      console.log("포트폴리오에 포함할 모든 프로젝트들:", projectIds);
+      console.log("=== 🎯 최종 포트폴리오 프로젝트 구성 ===");
+      console.log("원래 포함되었던 프로젝트들:", originalSelectedProjectIds);
+      console.log("현재 선택된 기존 프로젝트들:", selectedProjectIds);
+      console.log("새로 생성된 프로젝트들:", createdNewProjectIds);
+      console.log("포트폴리오에서 제외될 프로젝트들:", tempDeletedProjectIds);
+      console.log("최종 포트폴리오에 포함될 프로젝트들:", finalProjectIds);
 
-      // 4. portfolioData를 API 형식으로 변환
+      // 3. portfolioData를 API 형식으로 변환
       const requestData = convertPortfolioDataToRequest(
         portfolioData,
         projectIds
       );
 
-      // 5. 포트폴리오 수정 API 호출
+      console.log("📨 포트폴리오 수정 API 요청 데이터:", requestData);
+
+      // 4. 포트폴리오 수정 API 호출
       await updatePortfolio(Number(portfolioId), requestData);
       console.log("포트폴리오 수정 성공");
 
-      alert(
-        `포트폴리오가 성공적으로 수정되었습니다!\n- 기존 프로젝트: ${selectedProjectIds.length}개\n- 새 프로젝트: ${createdNewProjectIds.length}개\n- 삭제된 프로젝트: ${tempDeletedProjectIds.length}개\n- 총 프로젝트: ${allProjectIds.length}개`
-      );
+      // 성공 메시지
+      const successMessage =
+        `포트폴리오가 성공적으로 수정되었습니다!\n\n` +
+        `📊 수정 내용:\n` +
+        `- 기존 프로젝트 유지: ${selectedProjectIds.length}개\n` +
+        `- 새로 추가된 프로젝트: ${createdNewProjectIds.length}개\n` +
+        `- 포트폴리오에서 제외된 프로젝트: ${tempDeletedProjectIds.length}개\n` +
+        `- 최종 포트폴리오 프로젝트 수: ${finalProjectIds.length}개\n\n` +
+        `※ 제외된 프로젝트는 삭제되지 않았으며, 다른 포트폴리오에서 사용할 수 있습니다.`;
 
+      alert(successMessage);
       navigate("/mypage");
     } catch (error) {
       console.error("=== 포트폴리오 수정 실패 ===", error);
