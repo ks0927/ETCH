@@ -115,6 +115,28 @@ export default function JobFilterModal({
     }
   }, [isOpen, initialFilters]);
 
+  // 모달 열림/닫힘에 따른 body 스크롤 제어
+  useEffect(() => {
+    if (isOpen) {
+      // 모달이 열릴 때 body 스크롤 막기
+      document.body.style.overflow = "hidden";
+      // 현재 스크롤 위치 저장
+      document.body.style.position = "fixed";
+      document.body.style.width = "100%";
+    } else {
+      // 모달이 닫힐 때 원래대로 복구
+      document.body.style.overflow = "unset";
+      document.body.style.position = "static";
+    }
+
+    // 컴포넌트 언마운트 시 cleanup
+    return () => {
+      document.body.style.overflow = "unset";
+      document.body.style.position = "static";
+      document.body.style.width = "auto";
+    };
+  }, [isOpen]);
+
   // 필터 토글 함수
   const toggleFilter = (category: keyof JobFilters, value: string) => {
     setFilters((prev) => ({
@@ -159,6 +181,18 @@ export default function JobFilterModal({
 
   if (!isOpen) return null;
 
+  // 카테고리별 아이콘 매핑
+  const getCategoryIcon = (category: keyof JobFilters) => {
+    const icons = {
+      regions: "📍",
+      industries: "🏢",
+      jobCategories: "💻",
+      workTypes: "👔",
+      educationLevels: "🎓",
+    };
+    return icons[category];
+  };
+
   // 필터 섹션 렌더링 컴포넌트
   const FilterSection = ({
     title,
@@ -168,73 +202,132 @@ export default function JobFilterModal({
     title: string;
     category: keyof JobFilters;
     options: string[];
-  }) => (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="font-semibold text-gray-900">{title}</h4>
-        <button
-          onClick={() => toggleAll(category)}
-          className="text-sm text-blue-600 hover:text-blue-700"
-        >
-          {options.every((option) => filters[category].includes(option))
-            ? "전체 해제"
-            : "전체 선택"}
-        </button>
-      </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {options.map((option) => (
-          <label
-            key={option}
-            className="flex items-center p-2 rounded cursor-pointer hover:bg-gray-50"
+  }) => {
+    const selectedCount = filters[category].length;
+
+    return (
+      <div className="p-6 mb-8 bg-white border border-gray-200 rounded-sm shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <span className="text-xl">{getCategoryIcon(category)}</span>
+            <h4 className="text-lg font-bold text-gray-900">{title}</h4>
+            {selectedCount > 0 && (
+              <span className="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-sm">
+                {selectedCount}개 선택됨
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => toggleAll(category)}
+            className="px-3 py-2 text-sm font-medium text-blue-600 transition-colors duration-200 rounded-sm bg-blue-50 hover:bg-blue-100 hover:text-blue-700"
           >
-            <input
-              type="checkbox"
-              checked={filters[category].includes(option)}
-              onChange={() => toggleFilter(category, option)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm text-gray-700">{option}</span>
-          </label>
-        ))}
+            {options.every((option) => filters[category].includes(option))
+              ? "전체 해제"
+              : "전체 선택"}
+          </button>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {options.map((option) => {
+            const isSelected = filters[category].includes(option);
+            return (
+              <label
+                key={option}
+                className={`flex items-center p-3 cursor-pointer transition-all duration-200 border rounded-sm ${
+                  isSelected
+                    ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleFilter(category, option)}
+                  className="sr-only"
+                />
+                <div
+                  className={`flex items-center justify-center w-4 h-4 border mr-3 ${
+                    isSelected
+                      ? "bg-white border-white"
+                      : "border-gray-300 bg-white"
+                  }`}
+                >
+                  {isSelected && (
+                    <svg
+                      className="w-3 h-3 text-blue-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <span className="text-sm font-medium truncate">{option}</span>
+              </label>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-5xl max-h-[90vh] overflow-hidden border border-gray-200">
         {/* 헤더 */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              채용공고 필터
-            </h3>
-            <p className="text-sm text-gray-600">
-              원하는 조건으로 채용공고를 필터링하세요
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        <div className="px-8 py-6 bg-white border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-center w-10 h-10 text-white bg-blue-600 rounded-sm">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  채용공고 필터
+                </h3>
+                <p className="mt-1 text-sm text-gray-600">
+                  원하는 조건으로 채용공고를 필터링하세요
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 transition-colors duration-200 rounded-sm hover:text-gray-600 hover:bg-gray-100"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* 필터 내용 */}
-        <div className="p-6 overflow-y-auto max-h-[60vh]">
+        <div className="p-8 overflow-y-auto max-h-[60vh] bg-gray-50">
           <FilterSection
             title="지역"
             category="regions"
@@ -263,26 +356,55 @@ export default function JobFilterModal({
         </div>
 
         {/* 하단 버튼 */}
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-          >
-            초기화
-          </button>
-          <div className="flex space-x-3">
+        <div className="px-8 py-6 bg-white border-t border-gray-200">
+          <div className="flex items-center justify-between">
             <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              onClick={handleReset}
+              className="flex items-center px-6 py-3 text-sm font-medium text-gray-600 transition-colors duration-200 bg-white border border-gray-300 rounded-sm hover:border-red-400 hover:text-red-600 hover:bg-red-50"
             >
-              취소
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              초기화
             </button>
-            <button
-              onClick={handleApply}
-              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-            >
-              적용
-            </button>
+
+            <div className="flex space-x-4">
+              <button
+                onClick={onClose}
+                className="px-6 py-3 text-sm font-medium text-gray-600 transition-colors duration-200 bg-white border border-gray-300 rounded-sm hover:border-gray-400 hover:bg-gray-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleApply}
+                className="flex items-center px-8 py-3 text-sm font-semibold text-white transition-all duration-200 bg-blue-600 rounded-sm shadow-md hover:bg-blue-700 hover:shadow-lg"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                필터 적용
+              </button>
+            </div>
           </div>
         </div>
       </div>
