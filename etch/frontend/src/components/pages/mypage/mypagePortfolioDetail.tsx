@@ -510,88 +510,112 @@ function MypagePortfolioDetail() {
           </div>
         )}
 
-      {/* 교육/활동 */}
-      {educationList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
-            교육/활동
+      {/* 자격 및 경력사항 - 컬러풀 버전 */}
+      {(educationList.length > 0 ||
+        languageList.length > 0 ||
+        certificateList.length > 0 ||
+        activityList.length > 0) && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-200">
+            자격 및 경력사항
           </h2>
-          <div className="space-y-4">
-            {educationList.map((edu, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-4 p-5 bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 rounded-r-xl hover:from-blue-100 hover:to-blue-200 transition-all duration-200"
-              >
-                <span className="text-blue-600 text-xl">📚</span>
-                <span className="text-gray-800 font-medium text-base leading-relaxed">
-                  {edu}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* 자격증/어학 */}
-      {languageList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
-            자격증/어학
-          </h2>
-          <div className="space-y-4">
-            {languageList.map((lang, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-4 p-5 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-r-xl hover:from-green-100 hover:to-green-200 transition-all duration-200"
-              >
-                <span className="text-gray-800 font-medium text-base leading-relaxed">
-                  {lang}
-                </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 교육/활동 */}
+            {educationList.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <h3 className="text-base font-medium text-gray-900">
+                    교육/활동
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {educationList.map((edu, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    >
+                      <span className="text-sm text-blue-800 font-medium">
+                        {edu}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
 
-      {/* 자격증 */}
-      {certificateList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
-            자격증
-          </h2>
-          <div className="space-y-4">
-            {certificateList.map((cert, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-4 p-5 bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 rounded-r-xl hover:from-purple-100 hover:to-purple-200 transition-all duration-200"
-              >
-                <span className="text-gray-800 font-medium text-base leading-relaxed">
-                  {cert}
-                </span>
+            {/* 자격증/어학 */}
+            {languageList.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <h3 className="text-base font-medium text-gray-900">
+                    자격증/어학
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {languageList.map((lang, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                    >
+                      <span className="text-sm text-green-800 font-medium">
+                        {lang}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            )}
 
-      {/* 교육/활동 */}
-      {activityList.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 mb-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
-            교육/활동
-          </h2>
-          <div className="space-y-4">
-            {activityList.map((activity, idx) => (
-              <div
-                key={idx}
-                className="flex items-start gap-4 p-5 bg-gradient-to-r from-orange-50 to-orange-100 border-l-4 border-orange-500 rounded-r-xl hover:from-orange-100 hover:to-orange-200 transition-all duration-200"
-              >
-                <span className="text-orange-600 text-xl">🎯</span>
-                <span className="text-gray-800 font-medium text-base leading-relaxed">
-                  {activity}
-                </span>
+            {/* 기타 자격증 */}
+            {certificateList.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <h3 className="text-base font-medium text-gray-900">
+                    기타 자격증
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {certificateList.map((cert, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition-colors"
+                    >
+                      <span className="text-sm text-purple-800 font-medium">
+                        {cert}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+
+            {/* 기타 활동 */}
+            {activityList.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <h3 className="text-base font-medium text-gray-900">
+                    기타 활동
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  {activityList.map((activity, idx) => (
+                    <div
+                      key={idx}
+                      className="p-4 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                    >
+                      <span className="text-sm text-orange-800 font-medium">
+                        {activity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
