@@ -459,6 +459,40 @@ function MypagePortfolioDetail() {
         </div>
       )}
 
+      {/* 프로젝트 - ProjectListCard 사용 */}
+      <div className="bg-white border p-6 rounded-lg">
+        <h2 className="text-xl font-semibold mb-4">
+          프로젝트
+          <span className="text-sm text-gray-500 ml-2">
+            (총 {displayProjects.length}개)
+          </span>
+          {isOwner && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">
+              내 모든 프로젝트 표시
+            </span>
+          )}
+        </h2>
+
+        <ProjectListCard
+          projects={displayProjects}
+          onProjectUpdate={handleProjectUpdate}
+        />
+      </div>
+
+      {/* 데이터가 없는 경우 안내 메시지 */}
+      {educationList.length === 0 &&
+        languageList.length === 0 &&
+        certificateList.length === 0 &&
+        activityList.length === 0 &&
+        displayProjects.length === 0 && (
+          <div className="bg-gray-50 border p-6 rounded-lg text-center text-gray-600">
+            <p>추가 정보가 등록되지 않았습니다.</p>
+            <p className="text-sm mt-2">
+              학력, 어학, 자격증, 활동, 프로젝트 정보를 등록해보세요.
+            </p>
+          </div>
+        )}
+
       {/* 교육/활동 */}
       {educationList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
@@ -520,40 +554,6 @@ function MypagePortfolioDetail() {
           </ul>
         </div>
       )}
-
-      {/* 프로젝트 - ProjectListCard 사용 */}
-      <div className="bg-white border p-6 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">
-          프로젝트
-          <span className="text-sm text-gray-500 ml-2">
-            (총 {displayProjects.length}개)
-          </span>
-          {isOwner && (
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded ml-2">
-              내 모든 프로젝트 표시
-            </span>
-          )}
-        </h2>
-
-        <ProjectListCard
-          projects={displayProjects}
-          onProjectUpdate={handleProjectUpdate}
-        />
-      </div>
-
-      {/* 데이터가 없는 경우 안내 메시지 */}
-      {educationList.length === 0 &&
-        languageList.length === 0 &&
-        certificateList.length === 0 &&
-        activityList.length === 0 &&
-        displayProjects.length === 0 && (
-          <div className="bg-gray-50 border p-6 rounded-lg text-center text-gray-600">
-            <p>추가 정보가 등록되지 않았습니다.</p>
-            <p className="text-sm mt-2">
-              학력, 어학, 자격증, 활동, 프로젝트 정보를 등록해보세요.
-            </p>
-          </div>
-        )}
     </div>
   );
 }

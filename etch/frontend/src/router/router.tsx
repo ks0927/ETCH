@@ -87,6 +87,9 @@ const UserProfilePage = lazy(
 const MypagePortfolioDetail = lazy(
   () => import("../components/pages/mypage/mypagePortfolioDetail.tsx")
 );
+const MypagePortfolioEditPage = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioEditPage.tsx")
+);
 
 const router = createBrowserRouter([
   {
@@ -231,6 +234,14 @@ const router = createBrowserRouter([
             element: (
               <Suspense fallback={<LoadingPage />}>
                 <MypagePortfolioDetail />
+              </Suspense>
+            ),
+          },
+          {
+            path: "portfolios/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioEditPage />
               </Suspense>
             ),
           },
