@@ -8,6 +8,8 @@ import {
   type CertAndLangDTO,
 } from "../../../api/portfolioApi";
 import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi";
+import type { ProjectData } from "../../../types/project/projectDatas";
+import ProjectListCard from "../../organisms/project/list/projectListCard";
 
 // API에서 반환하는 타입
 export interface ProjectInfo {
@@ -205,21 +207,42 @@ const formatArrayDataForDisplay = (arrayData: string[][]): string[] => {
   return arrayData.map((item) => item.join(", "));
 };
 
-// MyProjectResponse를 ProjectInfo로 변환하는 헬퍼 함수
-const convertMyProjectToProjectInfo = (
-  project: MyProjectResponse
-): ProjectInfo => {
+// ProjectInfo를 ProjectData로 변환하는 헬퍼 함수 (새로 추가)
+const convertProjectInfoToProjectData = (project: ProjectInfo): ProjectData => {
   return {
     id: project.id,
     title: project.title,
-    thumbnailUrl: project.thumbnailUrl || "",
-    projectCategory: "", // MyProjectResponse에는 카테고리가 없음
+    thumbnailUrl: project.thumbnailUrl || null,
+    viewCount: project.viewCount,
+    likeCount: project.likeCount,
+    nickname: project.nickname,
+    likedByMe: false, // 기본값, 필요시 추가 API 호출로 확인
+    // ProjectData에 필요한 다른 필드들이 있다면 여기에 추가
+    // 예: content, projectCategory, techList 등
+    content: "", // 기본값
+    projectCategory: project.projectCategory || "",
+    isPublic: project.isPublic,
+    popularityScore: project.popularityScore,
+  } as ProjectData;
+};
+
+// MyProjectResponse를 ProjectData로 변환하는 헬퍼 함수 (수정)
+const convertMyProjectToProjectData = (
+  project: MyProjectResponse
+): ProjectData => {
+  return {
+    id: project.id,
+    title: project.title,
+    thumbnailUrl: project.thumbnailUrl,
     viewCount: project.viewCount,
     likeCount: project.likeCount,
     nickname: project.nickname,
     isPublic: project.isPublic,
     popularityScore: project.popularityScore,
-  };
+    likedByMe: false, // 기본값
+    content: "", // 기본값
+    projectCategory: "", // MyProjectResponse에는 카테고리가 없음
+  } as ProjectData;
 };
 
 function MypagePortfolioDetail() {
@@ -296,6 +319,12 @@ function MypagePortfolioDetail() {
     fetchPortfolioDetail();
   }, [userId]);
 
+  // 프로젝트 업데이트 핸들러 (새로 추가)
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    console.log("프로젝트 업데이트:", updatedProject);
+    // 필요시 프로젝트 리스트 업데이트 로직 추가
+  };
+
   if (isLoading)
     return (
       <div className="flex justify-center items-center h-64">
@@ -327,22 +356,22 @@ function MypagePortfolioDetail() {
       : []
     : [];
 
-  // 프로젝트 목록 결정: 내 프로젝트가 있으면 그걸 사용, 없으면 포트폴리오의 프로젝트 사용
-  const displayProjects: ProjectInfo[] = (() => {
+  // 프로젝트 목록을 ProjectData 타입으로 변환
+  const displayProjects: ProjectData[] = (() => {
     if (isOwner && myProjects.length > 0) {
       console.log(
         "소유자이며 내 프로젝트 데이터 사용:",
         myProjects.length,
         "개"
       );
-      return myProjects.map(convertMyProjectToProjectInfo);
+      return myProjects.map(convertMyProjectToProjectData);
     } else if (portfolio.projectList && portfolio.projectList.length > 0) {
       console.log(
         "포트폴리오의 프로젝트 데이터 사용:",
         portfolio.projectList.length,
         "개"
       );
-      return portfolio.projectList;
+      return portfolio.projectList.map(convertProjectInfoToProjectData);
     } else {
       console.log("표시할 프로젝트가 없음");
       return [];
@@ -492,7 +521,7 @@ function MypagePortfolioDetail() {
         </div>
       )}
 
-      {/* 프로젝트 */}
+      {/* 프로젝트 - ProjectListCard 사용 */}
       <div className="bg-white border p-6 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">
           프로젝트
@@ -506,57 +535,10 @@ function MypagePortfolioDetail() {
           )}
         </h2>
 
-        {displayProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayProjects.map((project) => (
-              <div
-                key={project.id}
-                className="border p-4 rounded-lg hover:shadow-md transition-shadow"
-              >
-                {project.thumbnailUrl && (
-                  <img
-                    src={project.thumbnailUrl}
-                    alt={project.title}
-                    className="w-full h-32 object-cover rounded mb-3"
-                    onError={(e) => {
-                      console.log("이미지 로드 실패:", project.thumbnailUrl);
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                )}
-                <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  {project.projectCategory && (
-                    <p>
-                      <span className="font-medium">카테고리:</span>{" "}
-                      {project.projectCategory}
-                    </p>
-                  )}
-                  <p>
-                    <span className="font-medium">작성자:</span>{" "}
-                    {project.nickname}
-                  </p>
-                  <div className="flex justify-between mt-2">
-                    <span>조회수: {project.viewCount}</span>
-                    <span>좋아요: {project.likeCount}</span>
-                  </div>
-                  {!project.isPublic && (
-                    <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                      비공개
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p>등록된 프로젝트가 없습니다.</p>
-            {isOwner && (
-              <p className="text-sm mt-2">프로젝트를 등록해보세요!</p>
-            )}
-          </div>
-        )}
+        <ProjectListCard
+          projects={displayProjects}
+          onProjectUpdate={handleProjectUpdate}
+        />
       </div>
 
       {/* 데이터가 없는 경우 안내 메시지 */}
