@@ -91,8 +91,45 @@ function ProjectUpdatePage() {
           parseInt(id)
         );
 
+        // 🔧 디버깅: 받아온 프로젝트 데이터를 콘솔에 출력
+        console.log("=== 프로젝트 수정 페이지 데이터 디버깅 ===");
+        console.log("전체 프로젝트 데이터:", project);
+        console.log("프로젝트 ID:", project.id);
+        console.log("제목:", project.title);
+        console.log("내용:", project.content);
+        console.log("카테고리:", project.projectCategory);
+        console.log("기술 스택 배열:", project.projectTechs);
+        console.log("GitHub URL:", project.githubUrl);
+        console.log("YouTube URL:", project.youtubeUrl);
+        console.log("공개 설정:", project.isPublic);
+        console.log("썸네일 URL:", project.thumbnailUrl);
+        console.log("파일 배열:", project.files);
+
+        // 기술 스택 상세 정보
+        if (project.projectTechs && project.projectTechs.length > 0) {
+          console.log("=== 기술 스택 상세 ===");
+          project.projectTechs.forEach((tech, index) => {
+            console.log(`기술 스택 ${index + 1}:`, tech);
+            console.log(`- techCode:`, tech.techCode);
+            console.log(`- techCode.id:`, tech.techCode?.id);
+            console.log(`- techCode.name:`, tech.techCode?.codeName);
+          });
+        }
+
+        // 파일 상세 정보
+        if (project.files && project.files.length > 0) {
+          console.log("=== 파일 상세 ===");
+          project.files.forEach((file, index) => {
+            console.log(`파일 ${index + 1}:`, file);
+            console.log(`- id:`, file.id);
+            console.log(`- fileName:`, file.fileName);
+            console.log(`- fileUrl:`, file.fileUrl);
+            console.log(`- isPdf:`, file.isPdf);
+          });
+        }
+
         // 폼 데이터 설정
-        setFormData({
+        const updatedFormData = {
           title: project.title || "",
           content: project.content || "",
           projectCategory: project.projectCategory || "",
@@ -101,11 +138,18 @@ function ProjectUpdatePage() {
           youtubeUrl: project.youtubeUrl || "",
           isPublic: project.isPublic ?? true,
           files: [], // 새로 추가할 파일들만
-        });
+        };
+
+        console.log("=== 설정될 폼 데이터 ===");
+        console.log("폼 데이터:", updatedFormData);
+        console.log("추출된 기술 스택 ID들:", updatedFormData.projectTechs);
+
+        setFormData(updatedFormData);
 
         // 기존 썸네일 설정
         if (project.thumbnailUrl) {
           setExistingThumbnailUrl(project.thumbnailUrl);
+          console.log("기존 썸네일 설정:", project.thumbnailUrl);
         }
 
         // 기존 파일들 분리 (이미지 vs PDF)
@@ -127,8 +171,14 @@ function ProjectUpdatePage() {
           }
         });
 
+        console.log("=== 파일 분리 결과 ===");
+        console.log("이미지 파일들:", images);
+        console.log("PDF 파일:", pdfFile);
+
         setExistingFiles(images);
         setExistingPdf(pdfFile);
+
+        console.log("=== 데이터 로딩 완료 ===");
       } catch (error) {
         console.error("프로젝트 로드 실패:", error);
         alert("프로젝트를 불러올 수 없습니다.");
@@ -159,14 +209,17 @@ function ProjectUpdatePage() {
   };
 
   const handleCategoryChange = (category: ProjectCategoryEnum) => {
+    console.log("카테고리 변경:", category);
     setFormData((prev) => ({ ...prev, projectCategory: category }));
   };
 
   const handleIsPublicChange = (isPublic: boolean) => {
+    console.log("공개 설정 변경:", isPublic);
     setFormData((prev) => ({ ...prev, isPublic }));
   };
 
   const handleStacksChange = (techId: number) => {
+    console.log("기술 스택 변경 시도:", techId);
     setFormData((prev) => {
       const currentIds = prev.projectTechs;
       const isSelected = currentIds.includes(techId);
@@ -174,8 +227,10 @@ function ProjectUpdatePage() {
       let newIds;
       if (isSelected) {
         newIds = currentIds.filter((id) => id !== techId);
+        console.log("기술 스택 제거:", techId, "남은 ID들:", newIds);
       } else {
         newIds = [...currentIds, techId];
+        console.log("기술 스택 추가:", techId, "전체 ID들:", newIds);
       }
 
       return { ...prev, projectTechs: newIds };
@@ -272,6 +327,9 @@ function ProjectUpdatePage() {
         removePdf,
       };
 
+      console.log("=== 제출할 데이터 ===");
+      console.log("projectInput:", projectInput);
+
       // API 호출
       await updateProject(parseInt(id), projectInput);
 
@@ -296,6 +354,12 @@ function ProjectUpdatePage() {
       </div>
     );
   }
+
+  // 🔧 디버깅: 현재 상태를 콘솔에 주기적으로 출력
+  console.log("=== 현재 렌더링 상태 ===");
+  console.log("현재 formData:", formData);
+  console.log("선택된 기술 스택 ID들:", formData.projectTechs);
+  console.log("선택된 카테고리:", formData.projectCategory);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">

@@ -334,7 +334,7 @@ function MypagePortfolioDetail() {
   // 수정 페이지로 이동 핸들러
   const handleEdit = () => {
     if (portfolio?.portfolioId) {
-      navigate(`/mypage/portfolios/${portfolio.portfolioId}`);
+      navigate(`/mypage/portfolios/edit/${portfolio.portfolioId}`);
     } else {
       console.error("포트폴리오 ID를 찾을 수 없습니다.");
     }
