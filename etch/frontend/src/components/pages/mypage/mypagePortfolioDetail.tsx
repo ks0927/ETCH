@@ -519,55 +519,53 @@ function MypagePortfolioDetail() {
 
           <div className="space-y-3">
             {/* 교육 목록 */}
-            {parseEducationData(portfolio.education).map((edu, index) => (
+            {educationList.map((edu, idx) => (
               <div
-                key={index}
-                className="bg-gray-50 border border-gray-200 rounded-md p-3 hover:bg-gray-100 transition-colors"
+                key={idx}
+                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm mb-1">
-                    {edu.companyName}
-                  </div>
-                  {edu.active && (
-                    <div className="text-sm text-gray-700 mb-1">
-                      {edu.active}
-                    </div>
-                  )}
-                  <div className="text-xs text-gray-600">
-                    {edu.startAt &&
-                      edu.endAt &&
-                      `(${edu.startAt} ~ ${edu.endAt})`}
-                  </div>
-                </div>
+                <div className="text-sm text-gray-700">{edu}</div>
+              </div>
+            ))}
+
+            {/* 기타 활동 목록 */}
+            {activityList.map((activity, idx) => (
+              <div
+                key={`activity-${idx}`}
+                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+              >
+                <div className="text-sm text-gray-700">{activity}</div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* 자격증/어학 섹션 */}
-      {languageList.length > 0 && (
+      {/* 자격증 섹션 */}
+      {(languageList.length > 0 || certificateList.length > 0) && (
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-6 pb-3 border-b border-gray-200">
             자격증 / 어학
           </h2>
 
           <div className="space-y-3">
-            {parseLanguageData(portfolio.language).map((lang, index) => (
+            {/* 자격증/어학 목록 */}
+            {languageList.map((lang, idx) => (
               <div
-                key={index}
-                className="bg-gray-50 border border-gray-200 rounded-md p-3 hover:bg-gray-100 transition-colors"
+                key={idx}
+                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm mb-1">
-                    {lang.licenseName}
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {lang.getAt &&
-                      lang.issuer &&
-                      `(${lang.getAt}) | ${lang.issuer}`}
-                  </div>
-                </div>
+                <div className="text-sm text-gray-700">{lang}</div>
+              </div>
+            ))}
+
+            {/* 기타 자격증 목록 */}
+            {certificateList.map((cert, idx) => (
+              <div
+                key={`cert-${idx}`}
+                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+              >
+                <div className="text-sm text-gray-700">{cert}</div>
               </div>
             ))}
           </div>
