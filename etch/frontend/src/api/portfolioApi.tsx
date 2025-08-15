@@ -9,13 +9,27 @@ interface ApiResponse<T> {
   message: string | null;
 }
 
-// 백엔드에서 보낼 수 있는 데이터 타입들을 정의
+// 백엔드에서 보낼 수 있는 데이터 타입들을 정의 (기존 문자열 형태용)
 type BackendArrayData =
   | string // 원본 문자열: "test^test^2025-08-10|test2^test2^2022-11-31"
   | string[] // 1차원 배열: ["test^test^2025-08-10", "test2^test2^2022-11-31"]
   | string[][] // 2차원 배열: [["test","test","2025-08-10"], ["test2","test2","2022-11-31"]]
   | null
   | undefined;
+
+// 백엔드 DTO 타입들 (실제 응답 구조)
+interface EduAndActDTO {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+interface CertAndLangDTO {
+  name: string;
+  date: string;
+  certificateIssuer: string;
+}
 
 // 포트폴리오 생성 요청 타입
 interface CreatePortfolioRequest {
@@ -56,7 +70,7 @@ interface PortfolioListResponseDTO {
   introduce: string;
 }
 
-// 포트폴리오 상세 응답 타입 (수정된 부분)
+// 포트폴리오 상세 응답 타입 (실제 백엔드 응답에 맞게 수정)
 interface PortfolioDetailResponseDTO {
   portfolioId: number;
   name: string;
@@ -66,10 +80,10 @@ interface PortfolioDetailResponseDTO {
   githubUrl: string;
   introduce: string;
   techList: string[];
-  language: BackendArrayData; // 어학능력
-  education: BackendArrayData; // 학력
-  certificate: BackendArrayData; // 자격증 (추가)
-  activity: BackendArrayData; // 교육활동 (추가)
+  language: CertAndLangDTO[]; // 자격증/어학 객체 배열
+  education: EduAndActDTO[]; // 교육/활동 객체 배열
+  certificate?: BackendArrayData; // 자격증 (아직 구현되지 않음)
+  activity?: BackendArrayData; // 교육활동 (아직 구현되지 않음)
   memberId: number;
   projectList: ProjectInfo[];
   createdAt: string;
@@ -219,9 +233,7 @@ export const getPortfolioByUserId = async (
   return response.data.data;
 };
 
-// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수 (빈 배열/문자열까지 안전 처리)
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
-// projectIds: number[] 형태로 전달
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
   projectList: ProjectInfo[] = []
@@ -245,4 +257,9 @@ export const convertPortfolioDataToRequest = (
 };
 
 // 타입들을 export (컴포넌트에서 사용하기 위해)
-export type { BackendArrayData, PortfolioDetailResponseDTO };
+export type {
+  BackendArrayData,
+  PortfolioDetailResponseDTO,
+  EduAndActDTO,
+  CertAndLangDTO,
+};
