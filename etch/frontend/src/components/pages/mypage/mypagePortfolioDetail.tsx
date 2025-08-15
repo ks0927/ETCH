@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import {
   getPortfolioDetail,
   type BackendArrayData,
@@ -246,8 +246,8 @@ const convertMyProjectToProjectData = (
 };
 
 function MypagePortfolioDetail() {
-  const navigate = useNavigate(); // 추가
   const { userId } = useParams<{ userId: string }>();
+  const navigate = useNavigate();
 
   const [portfolio, setPortfolio] = useState<PortfolioDetailResponseDTO | null>(
     null
@@ -324,6 +324,20 @@ function MypagePortfolioDetail() {
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     console.log("프로젝트 업데이트:", updatedProject);
     // 필요시 프로젝트 리스트 업데이트 로직 추가
+  };
+
+  // 뒤로 가기 핸들러
+  const handleGoBack = () => {
+    navigate(-1); // 브라우저 히스토리에서 이전 페이지로
+  };
+
+  // 수정 페이지로 이동 핸들러
+  const handleEdit = () => {
+    if (portfolio?.portfolioId) {
+      navigate(`/mypage/portfolios/${portfolio.portfolioId}`);
+    } else {
+      console.error("포트폴리오 ID를 찾을 수 없습니다.");
+    }
   };
 
   if (isLoading)
@@ -555,22 +569,25 @@ function MypagePortfolioDetail() {
           </ul>
         </div>
       )}
-      <button
-        onClick={() => navigate(-1)} // 바로 이전 페이지로
-        className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-      >
-        뒤로 가기
-      </button>
-      <button
-        onClick={() => {
-          if (portfolio?.portfolioId) {
-            navigate(`/mypage/portfolios/edit/${portfolio.portfolioId}`);
-          }
-        }}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        수정
-      </button>
+
+      {/* 버튼 섹션 */}
+      <div className="flex justify-between items-center pt-6">
+        <button
+          onClick={handleGoBack}
+          className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+        >
+          뒤로 가기
+        </button>
+
+        {isOwner && (
+          <button
+            onClick={handleEdit}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            수정
+          </button>
+        )}
+      </div>
     </div>
   );
 }

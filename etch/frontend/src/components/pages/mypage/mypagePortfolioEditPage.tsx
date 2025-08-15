@@ -26,6 +26,7 @@ import {
 import {
   createProject,
   getMyProjects,
+  deleteProject,
   type MyProjectResponse,
 } from "../../../api/projectApi";
 import PortfolioProjectPage from "./portfolioProjectPage";
@@ -85,6 +86,10 @@ function MypagePortfolioPageEdit() {
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [projectsLoading, setProjectsLoading] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
+
+  // 프로젝트 삭제 관련 상태들
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deletingProjectIds, setDeletingProjectIds] = useState<number[]>([]);
 
   // 새 프로젝트 등록 상태들
   const [showNewProjectForm, setShowNewProjectForm] = useState<boolean>(false);
@@ -343,6 +348,100 @@ function MypagePortfolioPageEdit() {
       setSelectedProjectIds([]);
     } else {
       setSelectedProjectIds(myProjects.map((project) => project.id));
+    }
+  };
+
+  // ============== 프로젝트 삭제 관련 핸들러들 ==============
+
+  const handleDeleteSelectedProjects = async (): Promise<void> => {
+    if (selectedProjectIds.length === 0) {
+      alert("삭제할 프로젝트를 선택해주세요.");
+      return;
+    }
+
+    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 삭제하시겠습니까?\n\n삭제된 프로젝트는 복구할 수 없습니다.`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      setDeletingProjectIds(selectedProjectIds);
+
+      console.log("프로젝트 삭제 시작:", selectedProjectIds);
+
+      // 선택된 프로젝트들을 하나씩 삭제
+      const deleteResults = await Promise.allSettled(
+        selectedProjectIds.map(async (projectId) => {
+          try {
+            await deleteProject(projectId);
+            console.log(`프로젝트 ${projectId} 삭제 완료`);
+            return { success: true, projectId };
+          } catch (error) {
+            console.error(`프로젝트 ${projectId} 삭제 실패:`, error);
+            return { success: false, projectId, error };
+          }
+        })
+      );
+
+      // 삭제 결과 분석
+      const successfulDeletes = deleteResults
+        .filter(
+          (
+            result
+          ): result is PromiseFulfilledResult<{
+            success: true;
+            projectId: number;
+          }> => result.status === "fulfilled" && result.value.success
+        )
+        .map((result) => result.value.projectId);
+
+      const failedDeletes = deleteResults.filter(
+        (
+          result
+        ): result is PromiseFulfilledResult<{
+          success: false;
+          projectId: number;
+        }> =>
+          result.status === "rejected" ||
+          (result.status === "fulfilled" && !result.value.success)
+      );
+
+      console.log("삭제 성공:", successfulDeletes);
+      console.log("삭제 실패:", failedDeletes);
+
+      // 성공한 삭제들에 대해 로컬 상태 업데이트
+      if (successfulDeletes.length > 0) {
+        // 내 프로젝트 목록에서 삭제된 프로젝트들 제거
+        setMyProjects((prev) =>
+          prev.filter((project) => !successfulDeletes.includes(project.id))
+        );
+
+        // 선택된 프로젝트 ID 목록에서 삭제된 프로젝트들 제거
+        setSelectedProjectIds((prev) =>
+          prev.filter((id) => !successfulDeletes.includes(id))
+        );
+      }
+
+      // 결과 메시지 표시
+      if (successfulDeletes.length === selectedProjectIds.length) {
+        alert(
+          `모든 프로젝트(${successfulDeletes.length}개)가 성공적으로 삭제되었습니다.`
+        );
+      } else if (successfulDeletes.length > 0) {
+        alert(
+          `${successfulDeletes.length}개 프로젝트는 삭제되었으나, ${failedDeletes.length}개 프로젝트 삭제에 실패했습니다.\n\n삭제 실패한 프로젝트는 다시 시도해주세요.`
+        );
+      } else {
+        alert("모든 프로젝트 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
+    } catch (error) {
+      console.error("프로젝트 삭제 중 예상치 못한 오류:", error);
+      alert("프로젝트 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsDeleting(false);
+      setDeletingProjectIds([]);
     }
   };
 
@@ -679,14 +778,32 @@ function MypagePortfolioPageEdit() {
                   ({selectedProjectIds.length}/{myProjects.length}개 선택됨)
                 </span>
                 {myProjects.length > 0 && (
-                  <button
-                    onClick={handleSelectAllProjects}
-                    className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
-                  >
-                    {selectedProjectIds.length === myProjects.length
-                      ? "전체 해제"
-                      : "전체 선택"}
-                  </button>
+                  <>
+                    <button
+                      onClick={handleSelectAllProjects}
+                      className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                    >
+                      {selectedProjectIds.length === myProjects.length
+                        ? "전체 해제"
+                        : "전체 선택"}
+                    </button>
+                    {selectedProjectIds.length > 0 && (
+                      <button
+                        onClick={handleDeleteSelectedProjects}
+                        disabled={isDeleting}
+                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        {isDeleting ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
+                            삭제 중...
+                          </>
+                        ) : (
+                          `선택한 ${selectedProjectIds.length}개 삭제`
+                        )}
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -718,10 +835,14 @@ function MypagePortfolioPageEdit() {
                 {myProjects.map((project) => (
                   <div
                     key={project.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 relative ${
                       selectedProjectIds.includes(project.id)
                         ? "border-blue-500 bg-blue-50 shadow-md"
                         : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                    } ${
+                      deletingProjectIds.includes(project.id)
+                        ? "opacity-50 pointer-events-none"
+                        : ""
                     }`}
                     onClick={() =>
                       handleProjectSelect(
@@ -730,6 +851,18 @@ function MypagePortfolioPageEdit() {
                       )
                     }
                   >
+                    {/* 삭제 중 표시 */}
+                    {deletingProjectIds.includes(project.id) && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+                        <div className="flex items-center gap-2 text-red-600">
+                          <div className="animate-spin rounded-full h-4 w-4 border border-red-600 border-t-transparent"></div>
+                          <span className="text-sm font-medium">
+                            삭제 중...
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-start space-x-3">
                       <input
                         type="checkbox"
@@ -739,6 +872,7 @@ function MypagePortfolioPageEdit() {
                         }
                         className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
                         onClick={(e) => e.stopPropagation()}
+                        disabled={deletingProjectIds.includes(project.id)}
                       />
 
                       <div className="flex-1 min-w-0">
@@ -904,6 +1038,19 @@ function MypagePortfolioPageEdit() {
             <p>포트폴리오를 수정하고 있습니다...</p>
             <p className="text-sm text-gray-500 mt-2">
               새 프로젝트 생성 및 포트폴리오 수정 중...
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 프로젝트 삭제 중 전체 화면 오버레이 */}
+      {isDeleting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+            <p>선택한 프로젝트를 삭제하고 있습니다...</p>
+            <p className="text-sm text-gray-500 mt-2">
+              삭제 중인 프로젝트: {deletingProjectIds.length}개
             </p>
           </div>
         </div>
