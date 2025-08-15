@@ -99,7 +99,7 @@ function MypagePortfolioPage() {
       .split("|")
       .filter((item) => item.trim());
     return languageItems.map((item) => {
-      const [licenseName, getAt,issuer] = item.split("^");
+      const [licenseName, getAt, issuer] = item.split("^");
       return {
         licenseName: licenseName || "",
         getAt: getAt || "",
