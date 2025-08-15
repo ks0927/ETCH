@@ -66,8 +66,10 @@ interface PortfolioDetailResponseDTO {
   githubUrl: string;
   introduce: string;
   techList: string[];
-  language: BackendArrayData; // string 대신 BackendArrayData 타입 사용
-  education: BackendArrayData; // string 대신 BackendArrayData 타입 사용
+  language: BackendArrayData; // 어학능력
+  education: BackendArrayData; // 학력
+  certificate: BackendArrayData; // 자격증 (추가)
+  activity: BackendArrayData; // 교육활동 (추가)
   memberId: number;
   projectList: ProjectInfo[];
   createdAt: string;

@@ -81,7 +81,7 @@ const parseBackendArrayData = (data: BackendArrayData): string[][] => {
   }
 };
 
-// 교육/언어 데이터를 표시용 문자열로 변환
+// 교육/언어/자격증/활동 데이터를 표시용 문자열로 변환
 const formatArrayDataForDisplay = (arrayData: string[][]): string[] => {
   return arrayData.map((item) => item.join(", "));
 };
@@ -123,6 +123,18 @@ function MypagePortfolioDetail() {
           "값:",
           data.language
         );
+        console.log(
+          "certificate 타입:",
+          typeof data.certificate,
+          "값:",
+          data.certificate
+        );
+        console.log(
+          "activity 타입:",
+          typeof data.activity,
+          "값:",
+          data.activity
+        );
         console.log("===========================");
 
         setPortfolio(data);
@@ -144,31 +156,103 @@ function MypagePortfolioDetail() {
   // 타입 안전한 파싱
   const educationArray: string[][] = parseBackendArrayData(portfolio.education);
   const languageArray: string[][] = parseBackendArrayData(portfolio.language);
+  const certificateArray: string[][] = parseBackendArrayData(
+    portfolio.certificate
+  );
+  const activityArray: string[][] = parseBackendArrayData(portfolio.activity);
 
   // 표시용 문자열 배열 (기존 방식과 호환)
   const educationList: string[] = formatArrayDataForDisplay(educationArray);
   const languageList: string[] = formatArrayDataForDisplay(languageArray);
+  const certificateList: string[] = formatArrayDataForDisplay(certificateArray);
+  const activityList: string[] = formatArrayDataForDisplay(activityArray);
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* 디버깅 정보 (개발 환경에서만) */}
-
       {/* 기본 정보 */}
       <div className="bg-white border p-6 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">기본 정보</h2>
-        <p>이름: {portfolio.name || "-"}</p>
-        <p>이메일: {portfolio.email || "-"}</p>
-        <p>전화번호: {portfolio.phoneNumber || "-"}</p>
-        <p>자기소개: {portfolio.introduce || "-"}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <p className="mb-2">
+              <span className="font-medium">이름:</span> {portfolio.name || "-"}
+            </p>
+            <p className="mb-2">
+              <span className="font-medium">이메일:</span>{" "}
+              {portfolio.email || "-"}
+            </p>
+            <p className="mb-2">
+              <span className="font-medium">전화번호:</span>{" "}
+              {portfolio.phoneNumber || "-"}
+            </p>
+          </div>
+          <div>
+            <p className="mb-2">
+              <span className="font-medium">GitHub:</span>
+              {portfolio.githubUrl ? (
+                <a
+                  href={portfolio.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline ml-1"
+                >
+                  {portfolio.githubUrl}
+                </a>
+              ) : (
+                " -"
+              )}
+            </p>
+            <p className="mb-2">
+              <span className="font-medium">블로그:</span>
+              {portfolio.blogUrl ? (
+                <a
+                  href={portfolio.blogUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline ml-1"
+                >
+                  {portfolio.blogUrl}
+                </a>
+              ) : (
+                " -"
+              )}
+            </p>
+          </div>
+        </div>
+        <div className="mt-4">
+          <p className="font-medium">자기소개:</p>
+          <p className="mt-2 text-gray-700 whitespace-pre-line">
+            {portfolio.introduce || "-"}
+          </p>
+        </div>
       </div>
+
+      {/* 기술 스택 */}
+      {portfolio.techList && portfolio.techList.length > 0 && (
+        <div className="bg-white border p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">기술 스택</h2>
+          <div className="flex flex-wrap gap-2">
+            {portfolio.techList.map((tech, idx) => (
+              <span
+                key={idx}
+                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 학력 */}
       {educationList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">학력</h2>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {educationList.map((edu, idx) => (
-              <li key={idx}>{edu}</li>
+              <li key={idx} className="border-l-4 border-blue-500 pl-4 py-2">
+                {edu}
+              </li>
             ))}
           </ul>
         </div>
@@ -178,9 +262,39 @@ function MypagePortfolioDetail() {
       {languageList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">어학</h2>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {languageList.map((lang, idx) => (
-              <li key={idx}>{lang}</li>
+              <li key={idx} className="border-l-4 border-green-500 pl-4 py-2">
+                {lang}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 자격증 */}
+      {certificateList.length > 0 && (
+        <div className="bg-white border p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">자격증</h2>
+          <ul className="space-y-3">
+            {certificateList.map((cert, idx) => (
+              <li key={idx} className="border-l-4 border-purple-500 pl-4 py-2">
+                {cert}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* 교육/활동 */}
+      {activityList.length > 0 && (
+        <div className="bg-white border p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">교육/활동</h2>
+          <ul className="space-y-3">
+            {activityList.map((activity, idx) => (
+              <li key={idx} className="border-l-4 border-orange-500 pl-4 py-2">
+                {activity}
+              </li>
             ))}
           </ul>
         </div>
@@ -190,17 +304,58 @@ function MypagePortfolioDetail() {
       {portfolio.projectList.length > 0 && (
         <div className="bg-white border p-6 rounded-lg">
           <h2 className="text-xl font-semibold mb-4">프로젝트</h2>
-          {portfolio.projectList.map((project) => (
-            <div key={project.id} className="mb-4 border p-3 rounded">
-              <h3>{project.title}</h3>
-              <p>카테고리: {project.projectCategory}</p>
-              <p>조회수: {project.viewCount}</p>
-              <p>좋아요: {project.likeCount}</p>
-              <p>작성자: {project.nickname}</p>
-            </div>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {portfolio.projectList.map((project) => (
+              <div
+                key={project.id}
+                className="border p-4 rounded-lg hover:shadow-md transition-shadow"
+              >
+                {project.thumbnailUrl && (
+                  <img
+                    src={project.thumbnailUrl}
+                    alt={project.title}
+                    className="w-full h-32 object-cover rounded mb-3"
+                  />
+                )}
+                <h3 className="font-semibold text-lg mb-2">{project.title}</h3>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p>
+                    <span className="font-medium">카테고리:</span>{" "}
+                    {project.projectCategory}
+                  </p>
+                  <p>
+                    <span className="font-medium">작성자:</span>{" "}
+                    {project.nickname}
+                  </p>
+                  <div className="flex justify-between mt-2">
+                    <span>조회수: {project.viewCount}</span>
+                    <span>좋아요: {project.likeCount}</span>
+                  </div>
+                  {!project.isPublic && (
+                    <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                      비공개
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* 데이터가 없는 경우 안내 메시지 */}
+      {educationList.length === 0 &&
+        languageList.length === 0 &&
+        certificateList.length === 0 &&
+        activityList.length === 0 &&
+        portfolio.projectList.length === 0 && (
+          <div className="bg-gray-50 border p-6 rounded-lg text-center text-gray-600">
+            <p>추가 정보가 등록되지 않았습니다.</p>
+            <p className="text-sm mt-2">
+              학력, 어학, 자격증, 활동, 프로젝트 정보를 등록해보세요.
+            </p>
+          </div>
+        )}
     </div>
   );
 }
