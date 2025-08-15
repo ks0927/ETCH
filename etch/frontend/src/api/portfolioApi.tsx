@@ -47,7 +47,10 @@ interface CreatePortfolioRequest {
   techList?: string[];
   education?: string;
   language?: string;
-  projectList?: PortfolioProjectId[]; // ProjectInfo 대신 PortfolioProjectId 사용
+  projectIds?: number[]; // 🔥 변경: PortfolioProjectId[] → number[]
+}
+interface PortfolioProjectId {
+  id: number;
 }
 
 // 포트폴리오 응답 타입
@@ -239,11 +242,20 @@ export const getPortfolioByUserId = async (
 };
 
 // portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수
+// portfolioDatas 타입을 API 요청 형태로 변환하는 헬퍼 함수 (수정된 버전)
 export const convertPortfolioDataToRequest = (
   portfolioData: portfolioDatas,
-  projectList: PortfolioProjectId[] = [] // ProjectInfo 대신 PortfolioProjectId 사용
+  projectList: PortfolioProjectId[] = []
 ): CreatePortfolioRequest => {
-  return {
+  console.log("🔄 convertPortfolioDataToRequest 호출됨");
+  console.log("📥 입력 projectList:", projectList);
+
+  // 프로젝트 ID만 추출 (백엔드에서 기대하는 형태)
+  const projectIds = projectList.map((project) => project.id);
+
+  console.log("📤 변환된 projectIds:", projectIds);
+
+  const convertedData = {
     name: portfolioData.name || "",
     introduce: portfolioData.introduce || "",
     githubUrl: portfolioData.githubUrl || "",
@@ -253,12 +265,16 @@ export const convertPortfolioDataToRequest = (
     techList: Array.isArray(portfolioData.stack)
       ? portfolioData.stack.map((stackEnum) => String(stackEnum))
       : [],
-    // 서버에서 문자열 JSON 형태로 파싱되므로 빈 문자열도 "[]"로
     language: portfolioData.language ? `${portfolioData.language}` : "",
     education: portfolioData.education ? `${portfolioData.education}` : "",
-    // projectList는 이미 배열이면 그대로, 빈 배열도 안전하게 전달
-    projectList: projectList,
+
+    // 🔥 핵심 수정: projectList 대신 projectIds로 변경
+    projectIds: projectIds, // [67, 65, 66, 63, 62] 형태로 전송
   };
+
+  console.log("📤 최종 변환된 데이터:", convertedData);
+
+  return convertedData;
 };
 
 // 타입들을 export (컴포넌트에서 사용하기 위해)

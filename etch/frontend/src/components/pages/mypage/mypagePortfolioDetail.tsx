@@ -609,7 +609,6 @@ function MypagePortfolioDetail() {
                 key={idx}
                 className="flex items-start gap-4 p-5 bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 rounded-r-xl hover:from-green-100 hover:to-green-200 transition-all duration-200"
               >
-                <span className="text-green-600 text-xl">🏆</span>
                 <span className="text-gray-800 font-medium text-base leading-relaxed">
                   {lang}
                 </span>
@@ -631,7 +630,6 @@ function MypagePortfolioDetail() {
                 key={idx}
                 className="flex items-start gap-4 p-5 bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-500 rounded-r-xl hover:from-purple-100 hover:to-purple-200 transition-all duration-200"
               >
-                <span className="text-purple-600 text-xl">🎓</span>
                 <span className="text-gray-800 font-medium text-base leading-relaxed">
                   {cert}
                 </span>
