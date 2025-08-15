@@ -467,6 +467,28 @@ public class ProjectServiceImpl implements ProjectService {
 			if (!saved.isEmpty())
 				fileRepository.saveAll(saved);
 		}
-		events.publishEvent(new ProjectChangedEvent(p.getId(), ProjectChangedEvent.ChangeType.UPSERT));
+				events.publishEvent(new ProjectChangedEvent(p.getId(), ProjectChangedEvent.ChangeType.UPSERT));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public List<ProjectListDTO> getProjectsByMemberId(Long memberId) {
+		List<ProjectEntity> projects = projectRepository.findAllByMemberId(memberId);
+		return projects.stream()
+				.map(projectEntity -> {
+					long likeCount = likeRepository.countByTargetIdAndType(projectEntity.getId(), LikeType.PROJECT);
+					return ProjectListDTO.builder()
+							.id(projectEntity.getId())
+							.title(projectEntity.getTitle())
+							.projectCategory(projectEntity.getProjectCategory())
+							.thumbnailUrl(projectEntity.getThumbnailUrl())
+							.viewCount(projectEntity.getViewCount())
+							.likeCount(likeCount)
+							.nickname(projectEntity.getMember().toMemberDTO().getNickname())
+							.isPublic(projectEntity.getIsPublic())
+							.popularityScore(projectEntity.getPopularityScore())
+							.build();
+				})
+				.collect(Collectors.toList());
 	}
 }
