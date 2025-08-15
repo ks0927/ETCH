@@ -307,7 +307,7 @@ function SearchPage() {
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="검색어를 입력하세요"
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
                   type="submit"
@@ -334,20 +334,35 @@ function SearchPage() {
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-gray-100 shadow-sm">
         <div className="px-6 mx-auto max-w-7xl">
-          <div className="flex space-x-0">
+          <div className="flex space-x-1">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-4 font-medium border-b-2 transition-colors ${
+                className={`relative px-6 py-4 font-semibold transition-all duration-300 transform ${
                   activeTab === tab.id
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
+                    ? "text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg scale-105 -mb-px"
+                    : "text-gray-600 bg-gray-50 hover:text-gray-800 hover:bg-gray-100 hover:scale-102"
                 }`}
               >
-                {tab.label} ({tab.count})
+                <div className="flex items-center space-x-2">
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                      activeTab === tab.id
+                        ? "bg-white/20 text-white"
+                        : "bg-blue-100 text-blue-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </div>
+                {/* 활성 탭 하단 인디케이터 */}
+                {activeTab === tab.id && (
+                  <div className="absolute bottom-0 w-4 h-1 transform -translate-x-1/2 bg-white rounded-t-full left-1/2"></div>
+                )}
               </button>
             ))}
           </div>
@@ -365,10 +380,13 @@ function SearchPage() {
                   채용 ({searchResults?.jobs.page.totalElements ?? 0})
                 </h2>
                 <button
-                  className="text-blue-600 hover:text-blue-700"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 group"
                   onClick={() => setActiveTab("jobs")}
                 >
                   더보기
+                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
               <div className="bg-white border-gray-200 rounded-lg shadow-sm">
@@ -396,10 +414,13 @@ function SearchPage() {
                   뉴스 ({searchResults?.news.page.totalElements ?? 0})
                 </h2>
                 <button
-                  className="text-blue-600 hover:text-blue-700"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 group"
                   onClick={() => setActiveTab("news")}
                 >
                   더보기
+                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
               <div className="p-6 bg-white border-gray-200 rounded-lg shadow-sm">
@@ -427,10 +448,13 @@ function SearchPage() {
                   프로젝트 ({searchResults?.projects.page.totalElements ?? 0})
                 </h2>
                 <button
-                  className="text-blue-600 hover:text-blue-700"
+                  className="flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all duration-200 group"
                   onClick={() => setActiveTab("projects")}
                 >
                   더보기
+                  <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
               <div className="p-6 bg-white border-gray-200 rounded-lg shadow-sm">
