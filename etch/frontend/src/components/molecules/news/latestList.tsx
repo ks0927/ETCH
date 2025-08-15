@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import type { NewsCardProps } from "../../atoms/card";
 import HeartSVG from "../../svg/heartSVG";
 import { likeApi } from "../../../api/likeApi";
+import noImg from "../../../assets/noImg.png";
 
 interface LatestCardWithLikeProps extends NewsCardProps {
   isLiked?: boolean;
@@ -56,6 +57,20 @@ function LatestCard({
       setIsLiking(false);
     }
   };
+
+  // 이미지 에러 처리 함수
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = noImg;
+  };
+
+  // 유효한 이미지 URL 검사
+  const getImageSrc = () => {
+    if (!thumbnailUrl || thumbnailUrl.trim() === '') {
+      return noImg;
+    }
+    return thumbnailUrl;
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <div className="relative">
@@ -65,9 +80,10 @@ function LatestCard({
             {/* 모바일에서는 이미지가 위에 */}
             <div className="w-full sm:hidden mb-3">
               <img
-                src={thumbnailUrl}
+                src={getImageSrc()}
                 alt="카드 이미지"
                 className="w-full h-32 object-cover rounded-lg"
+                onError={handleImageError}
               />
             </div>
 
@@ -94,9 +110,10 @@ function LatestCard({
             {/* 태블릿 이상에서만 보이는 우측 이미지 */}
             <div className="hidden sm:block flex-shrink-0 w-24 sm:w-28 lg:w-32 aspect-[3/2]">
               <img
-                src={thumbnailUrl}
+                src={getImageSrc()}
                 alt="카드 이미지"
                 className="w-full h-full object-cover rounded-lg"
+                onError={handleImageError}
               />
             </div>
           </div>

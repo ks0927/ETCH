@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { UserStats } from '../types/userStats';
 import { getAppliedJobsList } from '../api/appliedJobApi';
 import { likeApi } from '../api/likeApi';
-import { getUserProjects } from '../api/projectApi';
+import { getMyProjects } from '../api/projectApi';
 import useUserStore from '../store/userStore';
 
 export const useUserStats = () => {
@@ -27,10 +27,10 @@ export const useUserStats = () => {
         setError(null);
 
         // 병렬로 3개 API 호출
-        const [appliedJobs, favoriteCompanies, userProjects] = await Promise.all([
+        const [appliedJobs, favoriteCompanies, myProjects] = await Promise.all([
           getAppliedJobsList().catch(() => []), // 실패시 빈 배열
           likeApi.companies.getLikes().catch(() => []), // 실패시 빈 배열  
-          getUserProjects(memberInfo.id).catch(() => []), // 실패시 빈 배열
+          getMyProjects().catch(() => []), // 내 프로젝트 조회로 변경
         ]);
 
         // 진행중인 지원 카운트 (상태별 필터링 필요시)
@@ -40,7 +40,7 @@ export const useUserStats = () => {
         const favoriteCompanyCount = favoriteCompanies.length;
         
         // 내 프로젝트 카운트
-        const projectCount = userProjects.length;
+        const projectCount = myProjects.length;
 
         setStats({
           applicationCount,
