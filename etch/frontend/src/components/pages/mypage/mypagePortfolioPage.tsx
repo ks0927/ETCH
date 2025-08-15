@@ -8,36 +8,6 @@ import {
   type CertAndLangDTO,
 } from "../../../api/portfolioApi";
 import { getMyProjects, type MyProjectResponse } from "../../../api/projectApi";
-import { jwtDecode } from "jwt-decode";
-
-// JWT 토큰의 payload 타입 정의
-interface JWTPayload {
-  category: string;
-  email: string;
-  id: number;
-  role: string;
-  iat: number;
-  exp: number;
-}
-
-// 현재 사용자 ID를 가져오는 함수
-const getCurrentUserId = (): number | null => {
-  try {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      console.log("토큰이 없습니다.");
-      return null;
-    }
-
-    const decoded = jwtDecode<JWTPayload>(token);
-    console.log("디코딩된 토큰:", decoded);
-
-    return decoded.id || null;
-  } catch (error) {
-    console.error("토큰 디코딩 실패:", error);
-    return null;
-  }
-};
 
 // API에서 반환하는 타입
 export interface ProjectInfo {
@@ -74,39 +44,33 @@ const isStringArrayArray = (value: unknown): value is string[][] => {
   );
 };
 
-// 백엔드에서 실제로 반환하는 데이터 타입들은 이제 API에서 import
+// 백엔드에서 실제로 반환하는 데이터 타입들
 type BackendEducationData = EduAndActDTO;
 type BackendLanguageData = CertAndLangDTO;
 
 // 백엔드 데이터를 2차원 배열로 파싱하는 함수 (기존 문자열 형태용)
 const parseBackendArrayData = (data: BackendArrayData): string[][] => {
-  // null, undefined 체크
   if (!data) return [];
 
   try {
-    // 이미 2차원 배열인 경우
     if (isStringArrayArray(data)) {
       return data;
     }
 
-    // 1차원 문자열 배열인 경우 (각 항목을 ^ 기준으로 분리)
     if (isStringArray(data)) {
       return data
         .filter((item) => item.trim() !== "")
         .map((item) => item.split("^").map((subItem) => subItem.trim()));
     }
 
-    // 문자열인 경우
     if (isString(data)) {
       if (data.trim() === "") return [];
 
-      // | 기준으로 먼저 분리 (각 항목)
       return data
         .split("|")
         .map((item) => item.trim())
         .filter((item) => item !== "")
         .map((item) => {
-          // ^ 기준으로 세부 항목 분리
           return item.split("^").map((subItem) => subItem.trim());
         });
     }
@@ -137,7 +101,6 @@ const formatEducationData = (
 
     let result = "";
 
-    // 회사명과 활동 내용
     if (companyName && active) {
       result = `${companyName} - ${active}`;
     } else if (companyName) {
@@ -146,7 +109,6 @@ const formatEducationData = (
       result = active;
     }
 
-    // 날짜 정보 추가
     if (formattedStartDate && formattedEndDate) {
       result += ` (${formattedStartDate} ~ ${formattedEndDate})`;
     } else if (formattedStartDate) {
@@ -172,7 +134,6 @@ const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
 
     let result = "";
 
-    // 자격증명과 발급기관
     if (licenseName && issuer) {
       result = `${licenseName} (${issuer})`;
     } else if (licenseName) {
@@ -181,7 +142,6 @@ const formatLanguageData = (languageArray: BackendLanguageData[]): string[] => {
       result = issuer;
     }
 
-    // 취득 날짜 추가
     if (formattedDate) {
       result += ` - ${formattedDate}`;
     }
@@ -205,6 +165,22 @@ function MypagePortfolioDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 현재 사용자 정보 조회 (내 프로젝트를 통해 확인)
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const myProjectsList = await getMyProjects();
+        console.log("내 프로젝트 조회 성공, 총", myProjectsList.length, "개");
+        setMyProjects(myProjectsList);
+      } catch (error) {
+        console.log("로그인되지 않았거나 프로젝트가 없음:", error);
+        // 에러가 나도 괜찮음 - 로그인하지 않은 사용자일 수 있음
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
   useEffect(() => {
     const fetchPortfolioDetail = async () => {
       if (!userId) {
@@ -217,34 +193,12 @@ function MypagePortfolioDetail() {
         setIsLoading(true);
         setError(null);
 
-        // 1. 포트폴리오 조회
         const portfolioData = await getPortfolioDetail(Number(userId));
         console.log("포트폴리오 데이터:", portfolioData);
-
         setPortfolio(portfolioData);
 
-        // 2. 현재 로그인한 사용자와 포트폴리오 소유자가 같은지 확인
-        const currentUserId = getCurrentUserId();
-        const isOwner =
-          currentUserId &&
-          portfolioData.memberId &&
-          currentUserId === portfolioData.memberId;
-
-        console.log("현재 사용자 ID:", currentUserId);
         console.log("포트폴리오 소유자 ID:", portfolioData.memberId);
-        console.log("소유자 여부:", isOwner);
-
-        // 3. 본인의 포트폴리오인 경우 모든 프로젝트 조회
-        if (isOwner) {
-          try {
-            const allProjects = await getMyProjects();
-            console.log("내 모든 프로젝트:", allProjects);
-            setMyProjects(allProjects);
-          } catch (projectError) {
-            console.error("내 프로젝트 조회 실패:", projectError);
-            // 프로젝트 조회 실패해도 포트폴리오는 표시
-          }
-        }
+        console.log("내 프로젝트 수:", myProjects.length);
       } catch (err) {
         console.error("포트폴리오 상세 조회 실패:", err);
         setError("포트폴리오를 불러오는데 실패했습니다.");
@@ -254,7 +208,7 @@ function MypagePortfolioDetail() {
     };
 
     fetchPortfolioDetail();
-  }, [userId]);
+  }, [userId, myProjects.length]);
 
   if (isLoading) return <div>포트폴리오 로딩 중...</div>;
   if (error) return <div>{error}</div>;
@@ -269,7 +223,6 @@ function MypagePortfolioDetail() {
     ? formatLanguageData(portfolio.language as BackendLanguageData[])
     : [];
 
-  // certificate와 activity는 아직 구현되지 않은 것 같으므로 빈 배열로 처리
   const certificateList: string[] = portfolio.certificate
     ? Array.isArray(portfolio.certificate)
       ? formatArrayDataForDisplay(parseBackendArrayData(portfolio.certificate))
