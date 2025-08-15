@@ -83,13 +83,15 @@ function MypagePortfolioPageEdit() {
 
   // 프로젝트 관련 상태들
   const [myProjects, setMyProjects] = useState<MyProjectResponse[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+  const [originalSelectedProjectIds, setOriginalSelectedProjectIds] = useState<
+    number[]
+  >([]); // 원본 선택된 프로젝트들
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]); // 현재 선택된 프로젝트들
+  const [tempDeletedProjectIds, setTempDeletedProjectIds] = useState<number[]>(
+    []
+  ); // 임시 삭제된 프로젝트들
   const [projectsLoading, setProjectsLoading] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
-
-  // 프로젝트 삭제 관련 상태들
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [deletingProjectIds, setDeletingProjectIds] = useState<number[]>([]);
 
   // 새 프로젝트 등록 상태들
   const [showNewProjectForm, setShowNewProjectForm] = useState<boolean>(false);
@@ -143,7 +145,9 @@ function MypagePortfolioPageEdit() {
               typeof project === "object" ? project.id : project
             )
             .filter((id): id is number => typeof id === "number");
-          setSelectedProjectIds(existingProjectIds);
+
+          setOriginalSelectedProjectIds(existingProjectIds); // 원본 저장
+          setSelectedProjectIds(existingProjectIds); // 현재 선택된 것도 동일하게 설정
         }
 
         console.log("포트폴리오 데이터 로드 완료");
@@ -338,111 +342,67 @@ function MypagePortfolioPageEdit() {
   const handleProjectSelect = (projectId: number, selected: boolean): void => {
     if (selected) {
       setSelectedProjectIds((prev) => [...prev, projectId]);
+      // 임시 삭제 목록에서 제거
+      setTempDeletedProjectIds((prev) => prev.filter((id) => id !== projectId));
     } else {
       setSelectedProjectIds((prev) => prev.filter((id) => id !== projectId));
+      // 원래 선택되었던 프로젝트라면 임시 삭제 목록에 추가
+      if (originalSelectedProjectIds.includes(projectId)) {
+        setTempDeletedProjectIds((prev) => [...prev, projectId]);
+      }
     }
   };
 
   const handleSelectAllProjects = (): void => {
-    if (selectedProjectIds.length === myProjects.length) {
+    const availableProjects = myProjects.filter(
+      (project) => !tempDeletedProjectIds.includes(project.id)
+    );
+
+    if (selectedProjectIds.length === availableProjects.length) {
+      // 모든 선택 해제
+      const originallySelected = selectedProjectIds.filter((id) =>
+        originalSelectedProjectIds.includes(id)
+      );
+      setTempDeletedProjectIds((prev) => [...prev, ...originallySelected]);
       setSelectedProjectIds([]);
     } else {
-      setSelectedProjectIds(myProjects.map((project) => project.id));
+      // 모든 선택
+      setSelectedProjectIds(availableProjects.map((project) => project.id));
+      setTempDeletedProjectIds([]);
     }
   };
 
-  // ============== 프로젝트 삭제 관련 핸들러들 ==============
+  // ============== 임시 삭제 관련 핸들러들 ==============
 
-  const handleDeleteSelectedProjects = async (): Promise<void> => {
+  const handleTempDeleteSelectedProjects = (): void => {
     if (selectedProjectIds.length === 0) {
       alert("삭제할 프로젝트를 선택해주세요.");
       return;
     }
 
-    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 삭제하시겠습니까?\n\n삭제된 프로젝트는 복구할 수 없습니다.`;
+    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 임시 삭제하시겠습니까?\n\n임시 삭제된 프로젝트는 수정 완료 시 실제로 삭제됩니다.`;
 
     if (!confirm(confirmMessage)) {
       return;
     }
 
-    try {
-      setIsDeleting(true);
-      setDeletingProjectIds(selectedProjectIds);
+    // 원래 선택되었던 프로젝트들만 임시 삭제 목록에 추가
+    const projectsToTempDelete = selectedProjectIds.filter((id) =>
+      originalSelectedProjectIds.includes(id)
+    );
 
-      console.log("프로젝트 삭제 시작:", selectedProjectIds);
+    setTempDeletedProjectIds((prev) => [...prev, ...projectsToTempDelete]);
+    setSelectedProjectIds([]);
 
-      // 선택된 프로젝트들을 하나씩 삭제
-      const deleteResults = await Promise.allSettled(
-        selectedProjectIds.map(async (projectId) => {
-          try {
-            await deleteProject(projectId);
-            console.log(`프로젝트 ${projectId} 삭제 완료`);
-            return { success: true, projectId };
-          } catch (error) {
-            console.error(`프로젝트 ${projectId} 삭제 실패:`, error);
-            return { success: false, projectId, error };
-          }
-        })
-      );
+    alert(
+      `${selectedProjectIds.length}개의 프로젝트가 임시 삭제되었습니다.\n수정 완료 시 실제로 삭제됩니다.`
+    );
+  };
 
-      // 삭제 결과 분석
-      const successfulDeletes = deleteResults
-        .filter(
-          (
-            result
-          ): result is PromiseFulfilledResult<{
-            success: true;
-            projectId: number;
-          }> => result.status === "fulfilled" && result.value.success
-        )
-        .map((result) => result.value.projectId);
-
-      const failedDeletes = deleteResults.filter(
-        (
-          result
-        ): result is PromiseFulfilledResult<{
-          success: false;
-          projectId: number;
-        }> =>
-          result.status === "rejected" ||
-          (result.status === "fulfilled" && !result.value.success)
-      );
-
-      console.log("삭제 성공:", successfulDeletes);
-      console.log("삭제 실패:", failedDeletes);
-
-      // 성공한 삭제들에 대해 로컬 상태 업데이트
-      if (successfulDeletes.length > 0) {
-        // 내 프로젝트 목록에서 삭제된 프로젝트들 제거
-        setMyProjects((prev) =>
-          prev.filter((project) => !successfulDeletes.includes(project.id))
-        );
-
-        // 선택된 프로젝트 ID 목록에서 삭제된 프로젝트들 제거
-        setSelectedProjectIds((prev) =>
-          prev.filter((id) => !successfulDeletes.includes(id))
-        );
-      }
-
-      // 결과 메시지 표시
-      if (successfulDeletes.length === selectedProjectIds.length) {
-        alert(
-          `모든 프로젝트(${successfulDeletes.length}개)가 성공적으로 삭제되었습니다.`
-        );
-      } else if (successfulDeletes.length > 0) {
-        alert(
-          `${successfulDeletes.length}개 프로젝트는 삭제되었으나, ${failedDeletes.length}개 프로젝트 삭제에 실패했습니다.\n\n삭제 실패한 프로젝트는 다시 시도해주세요.`
-        );
-      } else {
-        alert("모든 프로젝트 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      }
-    } catch (error) {
-      console.error("프로젝트 삭제 중 예상치 못한 오류:", error);
-      alert("프로젝트 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-    } finally {
-      setIsDeleting(false);
-      setDeletingProjectIds([]);
-    }
+  // 임시 삭제 취소 함수
+  const handleCancelTempDelete = (projectId: number): void => {
+    setTempDeletedProjectIds((prev) => prev.filter((id) => id !== projectId));
+    setSelectedProjectIds((prev) => [...prev, projectId]);
   };
 
   // ============== 새 프로젝트 등록 관련 핸들러들 ==============
@@ -539,6 +499,13 @@ function MypagePortfolioPageEdit() {
     }));
   };
 
+  // ============== 취소 핸들러 ==============
+  const handleCancel = (): void => {
+    if (confirm("수정을 취소하시겠습니까? 변경사항이 모두 사라집니다.")) {
+      navigate("/mypage/portfolios");
+    }
+  };
+
   // ============== 제출 핸들러 (수정용) ==============
   const handleSubmit = async (): Promise<void> => {
     if (isSubmitting || !portfolioId) return;
@@ -566,8 +533,37 @@ function MypagePortfolioPageEdit() {
       console.log("수정할 포트폴리오 데이터:", portfolioData);
       console.log("선택된 기존 프로젝트 ID들:", selectedProjectIds);
       console.log("새로 생성할 프로젝트들:", newProjectsCreated);
+      console.log("임시 삭제할 프로젝트들:", tempDeletedProjectIds);
 
-      // 1. 새로 생성된 프로젝트들을 실제로 생성
+      // 1. 임시 삭제된 프로젝트들을 실제로 삭제
+      if (tempDeletedProjectIds.length > 0) {
+        console.log("임시 삭제된 프로젝트들을 실제로 삭제 중...");
+        const deleteResults = await Promise.allSettled(
+          tempDeletedProjectIds.map(async (projectId) => {
+            try {
+              await deleteProject(projectId);
+              console.log(`프로젝트 ${projectId} 삭제 완료`);
+              return { success: true, projectId };
+            } catch (error) {
+              console.error(`프로젝트 ${projectId} 삭제 실패:`, error);
+              return { success: false, projectId, error };
+            }
+          })
+        );
+
+        const failedDeletes = deleteResults.filter(
+          (result) =>
+            result.status === "rejected" ||
+            (result.status === "fulfilled" && !result.value.success)
+        );
+
+        if (failedDeletes.length > 0) {
+          console.warn("일부 프로젝트 삭제 실패:", failedDeletes);
+          // 실패한 삭제가 있어도 계속 진행
+        }
+      }
+
+      // 2. 새로 생성된 프로젝트들을 실제로 생성
       const createdNewProjectIds: number[] = [];
 
       for (const project of newProjectsCreated) {
@@ -612,7 +608,7 @@ function MypagePortfolioPageEdit() {
         }
       }
 
-      // 2. 모든 프로젝트 ID 통합 (기존 선택된 것 + 새로 생성된 것)
+      // 3. 모든 프로젝트 ID 통합 (현재 선택된 것 + 새로 생성된 것)
       const allProjectIds = [...selectedProjectIds, ...createdNewProjectIds];
       const projectIds: PortfolioProjectId[] = allProjectIds.map((id) => ({
         id,
@@ -620,18 +616,18 @@ function MypagePortfolioPageEdit() {
 
       console.log("포트폴리오에 포함할 모든 프로젝트들:", projectIds);
 
-      // 3. portfolioData를 API 형식으로 변환
+      // 4. portfolioData를 API 형식으로 변환
       const requestData = convertPortfolioDataToRequest(
         portfolioData,
         projectIds
       );
 
-      // 4. 포트폴리오 수정 API 호출
+      // 5. 포트폴리오 수정 API 호출
       await updatePortfolio(Number(portfolioId), requestData);
       console.log("포트폴리오 수정 성공");
 
       alert(
-        `포트폴리오가 성공적으로 수정되었습니다!\n- 기존 프로젝트: ${selectedProjectIds.length}개\n- 새 프로젝트: ${createdNewProjectIds.length}개\n- 총 프로젝트: ${allProjectIds.length}개`
+        `포트폴리오가 성공적으로 수정되었습니다!\n- 기존 프로젝트: ${selectedProjectIds.length}개\n- 새 프로젝트: ${createdNewProjectIds.length}개\n- 삭제된 프로젝트: ${tempDeletedProjectIds.length}개\n- 총 프로젝트: ${allProjectIds.length}개`
       );
 
       navigate("/mypage");
@@ -652,6 +648,11 @@ function MypagePortfolioPageEdit() {
       setIsSubmitting(false);
     }
   };
+
+  // 화면에 표시할 프로젝트들 필터링 (임시 삭제된 것들 제외)
+  const displayProjects = myProjects.filter(
+    (project) => !tempDeletedProjectIds.includes(project.id)
+  );
 
   // 로딩 중일 때
   if (isLoading) {
@@ -685,10 +686,10 @@ function MypagePortfolioPageEdit() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold">포트폴리오 수정</h1>
         <button
-          onClick={() => navigate("/mypage/portfolios")}
+          onClick={handleCancel}
           className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
         >
-          목록으로
+          취소
         </button>
       </div>
 
@@ -763,11 +764,49 @@ function MypagePortfolioPageEdit() {
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-500">
                 선택된 기존: {selectedProjectIds.length}개, 새로 생성:{" "}
-                {newProjectsCreated.length}개
+                {newProjectsCreated.length}개, 임시 삭제:{" "}
+                {tempDeletedProjectIds.length}개
               </span>
             </div>
           </div>
           <div className="border-b pb-2"></div>
+
+          {/* 임시 삭제된 프로젝트들 표시 */}
+          {tempDeletedProjectIds.length > 0 && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h3 className="text-md font-medium text-red-800 mb-3">
+                임시 삭제된 프로젝트 ({tempDeletedProjectIds.length}개)
+              </h3>
+              <div className="space-y-2">
+                {tempDeletedProjectIds.map((projectId) => {
+                  const project = myProjects.find((p) => p.id === projectId);
+                  if (!project) return null;
+
+                  return (
+                    <div
+                      key={projectId}
+                      className="flex items-center justify-between bg-white border border-red-300 rounded p-3"
+                    >
+                      <div>
+                        <span className="font-medium text-red-700">
+                          {project.title}
+                        </span>
+                        <span className="text-sm text-red-600 ml-2">
+                          (수정 완료 시 삭제됩니다)
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleCancelTempDelete(projectId)}
+                        className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+                      >
+                        삭제 취소
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* 기존 프로젝트 선택 섹션 */}
           <div className="space-y-4">
@@ -775,32 +814,25 @@ function MypagePortfolioPageEdit() {
               <h3 className="text-lg font-medium">기존 프로젝트 선택</h3>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">
-                  ({selectedProjectIds.length}/{myProjects.length}개 선택됨)
+                  ({selectedProjectIds.length}/{displayProjects.length}개
+                  선택됨)
                 </span>
-                {myProjects.length > 0 && (
+                {displayProjects.length > 0 && (
                   <>
                     <button
                       onClick={handleSelectAllProjects}
                       className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
                     >
-                      {selectedProjectIds.length === myProjects.length
+                      {selectedProjectIds.length === displayProjects.length
                         ? "전체 해제"
                         : "전체 선택"}
                     </button>
                     {selectedProjectIds.length > 0 && (
                       <button
-                        onClick={handleDeleteSelectedProjects}
-                        disabled={isDeleting}
-                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-red-300 disabled:cursor-not-allowed flex items-center gap-1"
+                        onClick={handleTempDeleteSelectedProjects}
+                        className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
                       >
-                        {isDeleting ? (
-                          <>
-                            <div className="animate-spin rounded-full h-3 w-3 border border-white border-t-transparent"></div>
-                            삭제 중...
-                          </>
-                        ) : (
-                          `선택한 ${selectedProjectIds.length}개 삭제`
-                        )}
+                        선택한 {selectedProjectIds.length}개 임시 삭제
                       </button>
                     )}
                   </>
@@ -822,96 +854,89 @@ function MypagePortfolioPageEdit() {
               </div>
             )}
 
-            {!projectsLoading && !projectsError && myProjects.length === 0 && (
-              <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="mb-1">등록된 프로젝트가 없습니다.</p>
-                <p className="text-sm">아래에서 새 프로젝트를 등록해보세요.</p>
-              </div>
-            )}
+            {!projectsLoading &&
+              !projectsError &&
+              displayProjects.length === 0 && (
+                <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+                  <p className="mb-1">
+                    {tempDeletedProjectIds.length > 0
+                      ? "모든 프로젝트가 임시 삭제되었습니다."
+                      : "등록된 프로젝트가 없습니다."}
+                  </p>
+                  <p className="text-sm">
+                    아래에서 새 프로젝트를 등록해보세요.
+                  </p>
+                </div>
+              )}
 
             {/* 기존 프로젝트 목록 */}
-            {!projectsLoading && !projectsError && myProjects.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {myProjects.map((project) => (
-                  <div
-                    key={project.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 relative ${
-                      selectedProjectIds.includes(project.id)
-                        ? "border-blue-500 bg-blue-50 shadow-md"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                    } ${
-                      deletingProjectIds.includes(project.id)
-                        ? "opacity-50 pointer-events-none"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      handleProjectSelect(
-                        project.id,
-                        !selectedProjectIds.includes(project.id)
-                      )
-                    }
-                  >
-                    {/* 삭제 중 표시 */}
-                    {deletingProjectIds.includes(project.id) && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
-                        <div className="flex items-center gap-2 text-red-600">
-                          <div className="animate-spin rounded-full h-4 w-4 border border-red-600 border-t-transparent"></div>
-                          <span className="text-sm font-medium">
-                            삭제 중...
-                          </span>
-                        </div>
-                      </div>
-                    )}
+            {!projectsLoading &&
+              !projectsError &&
+              displayProjects.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {displayProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
+                        selectedProjectIds.includes(project.id)
+                          ? "border-blue-500 bg-blue-50 shadow-md"
+                          : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                      }`}
+                      onClick={() =>
+                        handleProjectSelect(
+                          project.id,
+                          !selectedProjectIds.includes(project.id)
+                        )
+                      }
+                    >
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedProjectIds.includes(project.id)}
+                          onChange={(e) =>
+                            handleProjectSelect(project.id, e.target.checked)
+                          }
+                          className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
+                          onClick={(e) => e.stopPropagation()}
+                        />
 
-                    <div className="flex items-start space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedProjectIds.includes(project.id)}
-                        onChange={(e) =>
-                          handleProjectSelect(project.id, e.target.checked)
-                        }
-                        className="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300"
-                        onClick={(e) => e.stopPropagation()}
-                        disabled={deletingProjectIds.includes(project.id)}
-                      />
+                        <div className="flex-1 min-w-0">
+                          {project.thumbnailUrl && (
+                            <img
+                              src={project.thumbnailUrl}
+                              alt={project.title}
+                              className="w-full h-24 object-cover rounded mb-2"
+                            />
+                          )}
 
-                      <div className="flex-1 min-w-0">
-                        {project.thumbnailUrl && (
-                          <img
-                            src={project.thumbnailUrl}
-                            alt={project.title}
-                            className="w-full h-24 object-cover rounded mb-2"
-                          />
-                        )}
+                          <h4 className="font-semibold text-lg mb-1 truncate">
+                            {project.title}
+                          </h4>
 
-                        <h4 className="font-semibold text-lg mb-1 truncate">
-                          {project.title}
-                        </h4>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p>작성자: {project.nickname}</p>
+                            <div className="flex justify-between items-center">
+                              <span>조회수: {project.viewCount}</span>
+                              <span>좋아요: {project.likeCount}</span>
+                            </div>
 
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p>작성자: {project.nickname}</p>
-                          <div className="flex justify-between items-center">
-                            <span>조회수: {project.viewCount}</span>
-                            <span>좋아요: {project.likeCount}</span>
-                          </div>
-
-                          <div className="flex items-center space-x-2 mt-2">
-                            {!project.isPublic && (
-                              <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                                비공개
+                            <div className="flex items-center space-x-2 mt-2">
+                              {!project.isPublic && (
+                                <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
+                                  비공개
+                                </span>
+                              )}
+                              <span className="text-xs text-gray-500">
+                                인기도: {project.popularityScore}
                               </span>
-                            )}
-                            <span className="text-xs text-gray-500">
-                              인기도: {project.popularityScore}
-                            </span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
           </div>
 
           {/* 새 프로젝트 등록 섹션 */}
@@ -1037,20 +1062,7 @@ function MypagePortfolioPageEdit() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p>포트폴리오를 수정하고 있습니다...</p>
             <p className="text-sm text-gray-500 mt-2">
-              새 프로젝트 생성 및 포트폴리오 수정 중...
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* 프로젝트 삭제 중 전체 화면 오버레이 */}
-      {isDeleting && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
-            <p>선택한 프로젝트를 삭제하고 있습니다...</p>
-            <p className="text-sm text-gray-500 mt-2">
-              삭제 중인 프로젝트: {deletingProjectIds.length}개
+              새 프로젝트 생성, 프로젝트 삭제 및 포트폴리오 수정 중...
             </p>
           </div>
         </div>
