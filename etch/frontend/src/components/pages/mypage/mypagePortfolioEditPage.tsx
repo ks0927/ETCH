@@ -384,11 +384,6 @@ function MypagePortfolioPageEdit() {
   };
 
   // ============== 취소 핸들러 ==============
-  const handleCancel = (): void => {
-    if (confirm("수정을 취소하시겠습니까? 변경사항이 모두 사라집니다.")) {
-      navigate("/mypage/portfolios");
-    }
-  };
 
   // ============== 제출 핸들러 (단순화) ==============
   const handleSubmit = async (): Promise<void> => {
