@@ -376,6 +376,52 @@ function MypagePortfolioDetail() {
   console.log("개수:", displayProjects.length);
   console.log("프로젝트 목록:", displayProjects);
 
+  const handleDownloadMarkdown = async () => {
+    if (!portfolio?.portfolioId) {
+      alert("포트폴리오 정보를 찾을 수 없습니다.");
+      return;
+    }
+
+    try {
+      console.log("마크다운 다운로드 요청 중...", portfolio.portfolioId);
+
+      const token = localStorage.getItem("access_token");
+      const response = await fetch(
+        `/api/v1/portfolios/${portfolio.portfolioId}/markdown`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // 마크다운 내용을 가져와서 파일로 다운로드
+      const markdownContent = await response.text();
+
+      // Blob 생성 및 다운로드
+      const blob = new Blob([markdownContent], { type: "text/markdown" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${portfolio.name || "portfolio"}_portfolio.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log("마크다운 파일 다운로드 완료");
+    } catch (error) {
+      console.error("마크다운 다운로드 실패:", error);
+      alert("마크다운 파일 다운로드에 실패했습니다.");
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-6 bg-gray-50 min-h-screen">
       {/* 기본 정보 */}
@@ -383,6 +429,25 @@ function MypagePortfolioDetail() {
         <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-4 border-b-2 border-gray-100">
           기본 정보
         </h2>
+        <button
+          onClick={handleDownloadMarkdown}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          MD 다운로드
+        </button>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-4">
             <div className="flex items-start">
