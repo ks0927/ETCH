@@ -184,28 +184,6 @@ function ProjectListPage() {
   }, []);
 
   // 새로고침 버튼 핸들러
-  const handleRefresh = async () => {
-    try {
-      setLoading(true);
-      const projectData = await fetchProjects();
-
-      // ID 기준으로 최신순 정렬
-      const sortedData = [...projectData].sort((a, b) => {
-        return (b.id || 0) - (a.id || 0);
-      });
-
-      setProjects(sortedData);
-      setSelectedSort("LATEST");
-      setSelectedCategory("ALL");
-      setSearchTerm("");
-      setCurrentPage(1);
-    } catch (err) {
-      setError("프로젝트 데이터를 불러오는데 실패했습니다.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -270,12 +248,6 @@ function ProjectListPage() {
                     새 프로젝트 등록
                   </button>
                 </Link>
-                <button
-                  onClick={handleRefresh}
-                  className="px-6 py-3 font-semibold text-white transition-colors bg-gray-500 hover:bg-gray-600 rounded-xl"
-                >
-                  🔄 새로고침
-                </button>
               </div>
             </section>
 
