@@ -380,21 +380,25 @@ function MypagePortfolioDetail() {
     console.log("=== 마크다운 다운로드 함수 시작 ===");
     console.log("portfolio 객체:", portfolio);
 
-    if (!portfolio?.portfolioId) {
+    // 타입 단언을 사용해서 id 속성에 접근
+    const portfolioWithId = portfolio as any;
+    const portfolioId = portfolioWithId?.portfolioId || portfolioWithId?.id;
+
+    if (!portfolioId) {
       console.error("포트폴리오 ID가 없습니다:", portfolio);
       alert("포트폴리오 정보를 찾을 수 없습니다.");
       return;
     }
 
     try {
-      console.log("포트폴리오 ID:", portfolio.portfolioId);
+      console.log("포트폴리오 ID:", portfolioId);
       console.log("포트폴리오 이름:", portfolio.name);
 
       const token = localStorage.getItem("access_token");
       console.log("토큰 존재 여부:", !!token);
       console.log("토큰 길이:", token ? token.length : 0);
 
-      const apiUrl = `/api/v1/portfolios/${portfolio.portfolioId}/markdown`;
+      const apiUrl = `/api/v1/portfolios/${portfolioId}/markdown`;
       console.log("API URL:", apiUrl);
 
       console.log("요청 헤더:", {
