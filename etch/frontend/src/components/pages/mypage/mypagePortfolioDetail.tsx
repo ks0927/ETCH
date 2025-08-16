@@ -519,24 +519,55 @@ function MypagePortfolioDetail() {
 
           <div className="space-y-3">
             {/* 교육 목록 */}
-            {educationList.map((edu, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
-              >
-                <div className="text-sm text-gray-700">{edu}</div>
-              </div>
-            ))}
+            {educationList.map((edu, idx) => {
+              // 날짜 부분 추출 (마지막 괄호 안의 내용)
+              const dateMatch = edu.match(/\(([^)]+)\)$/);
+              const dateText = dateMatch ? dateMatch[1] : "";
+              const mainContent = edu.replace(/\s*\([^)]+\)$/, "");
+
+              return (
+                <div
+                  key={idx}
+                  className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 text-sm text-gray-700">
+                      {mainContent}
+                    </div>
+                    {dateText && (
+                      <div className="text-xs text-gray-500 ml-4 whitespace-nowrap">
+                        {dateText}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
 
             {/* 기타 활동 목록 */}
-            {activityList.map((activity, idx) => (
-              <div
-                key={`activity-${idx}`}
-                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
-              >
-                <div className="text-sm text-gray-700">{activity}</div>
-              </div>
-            ))}
+            {activityList.map((activity, idx) => {
+              const dateMatch = activity.match(/\(([^)]+)\)$/);
+              const dateText = dateMatch ? dateMatch[1] : "";
+              const mainContent = activity.replace(/\s*\([^)]+\)$/, "");
+
+              return (
+                <div
+                  key={`activity-${idx}`}
+                  className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 text-sm text-gray-700">
+                      {mainContent}
+                    </div>
+                    {dateText && (
+                      <div className="text-xs text-gray-500 ml-4 whitespace-nowrap">
+                        {dateText}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -550,24 +581,55 @@ function MypagePortfolioDetail() {
 
           <div className="space-y-3">
             {/* 자격증/어학 목록 */}
-            {languageList.map((lang, idx) => (
-              <div
-                key={idx}
-                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
-              >
-                <div className="text-sm text-gray-700">{lang}</div>
-              </div>
-            ))}
+            {languageList.map((lang, idx) => {
+              // 날짜와 발급기관 추출
+              const dateMatch = lang.match(/-\s*(.+)$/);
+              const dateAndIssuer = dateMatch ? dateMatch[1] : "";
+              const mainContent = lang.replace(/\s*-\s*.+$/, "");
+
+              return (
+                <div
+                  key={idx}
+                  className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 text-sm text-gray-700">
+                      {mainContent}
+                    </div>
+                    {dateAndIssuer && (
+                      <div className="text-xs text-gray-500 ml-4 whitespace-nowrap">
+                        {dateAndIssuer}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
 
             {/* 기타 자격증 목록 */}
-            {certificateList.map((cert, idx) => (
-              <div
-                key={`cert-${idx}`}
-                className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
-              >
-                <div className="text-sm text-gray-700">{cert}</div>
-              </div>
-            ))}
+            {certificateList.map((cert, idx) => {
+              const dateMatch = cert.match(/-\s*(.+)$/);
+              const dateAndIssuer = dateMatch ? dateMatch[1] : "";
+              const mainContent = cert.replace(/\s*-\s*.+$/, "");
+
+              return (
+                <div
+                  key={`cert-${idx}`}
+                  className="bg-gray-50 border border-gray-200 rounded-md p-4 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 text-sm text-gray-700">
+                      {mainContent}
+                    </div>
+                    {dateAndIssuer && (
+                      <div className="text-xs text-gray-500 ml-4 whitespace-nowrap">
+                        {dateAndIssuer}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
