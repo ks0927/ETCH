@@ -208,7 +208,7 @@ function MypageProjectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#007DFC] mx-auto mb-4"></div>
           <p className="text-gray-600">내 프로젝트를 불러오는 중...</p>
@@ -219,14 +219,14 @@ function MypageProjectPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="max-w-md px-4 mx-auto text-center">
+          <div className="mb-4 text-6xl text-red-500">⚠️</div>
+          <h2 className="mb-2 text-2xl font-bold text-gray-900">
             오류가 발생했습니다
           </h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <p className="mb-6 text-gray-600">{error}</p>
+          <div className="flex flex-wrap justify-center gap-4">
             <button
               onClick={handleRefresh}
               className="bg-[#007DFC] hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
@@ -235,7 +235,7 @@ function MypageProjectPage() {
             </button>
             {error.includes("로그인") && (
               <Link to="/login">
-                <button className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors">
+                <button className="px-6 py-2 text-white transition-colors bg-gray-500 rounded-lg hover:bg-gray-600">
                   로그인하기
                 </button>
               </Link>
@@ -250,11 +250,11 @@ function MypageProjectPage() {
   const privateProjectsCount = myProjects.length - publicProjectsCount;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen">
+      <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* 헤더 섹션 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="p-8 mb-8 bg-white border border-gray-100 shadow-sm rounded-2xl">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-8 bg-gradient-to-b from-[#007DFC] to-blue-600 rounded-full"></div>
@@ -262,17 +262,17 @@ function MypageProjectPage() {
                   내 프로젝트
                 </h1>
                 {userInfo && (
-                  <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  <span className="px-3 py-1 text-sm text-gray-500 bg-gray-100 rounded-full">
                     {userInfo.nickname}
                   </span>
                 )}
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed max-w-2xl">
+              <p className="max-w-2xl text-lg leading-relaxed text-gray-600">
                 당신의 프로젝트 지식을 다른 사람들과 공유하고{" "}
                 <br className="hidden sm:block" />
                 개발 커뮤니티에 기여해보세요
               </p>
-              <div className="flex items-center gap-4 pt-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="text-sm text-gray-500">
@@ -306,7 +306,7 @@ function MypageProjectPage() {
         </div>
 
         {/* 프로젝트 목록 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-hidden bg-white border border-gray-100 shadow-sm rounded-2xl">
           {myProjects.length > 0 ? (
             <div className="p-6">
               <MypageProjectList
@@ -316,7 +316,7 @@ function MypageProjectPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <div className="flex items-center justify-center w-20 h-20 mb-6 bg-gray-100 rounded-full">
                 <svg
                   className="w-10 h-10 text-gray-400"
                   fill="none"
@@ -331,10 +331,10 @@ function MypageProjectPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="mb-2 text-xl font-semibold text-gray-900">
                 아직 프로젝트가 없습니다
               </h3>
-              <p className="text-gray-500 mb-6 text-center">
+              <p className="mb-6 text-center text-gray-500">
                 첫 번째 프로젝트를 등록하고 다른 개발자들과 공유해보세요!
               </p>
               <Link to="/projects/write">
