@@ -48,6 +48,7 @@ function ProjectListPage() {
 
     loadProjects();
   }, []);
+
   useEffect(() => {
     if (projects.length > 0) {
       console.log("=== 프로젝트 데이터 구조 확인 ===");
