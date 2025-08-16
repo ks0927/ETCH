@@ -85,8 +85,6 @@ function MypagePortfolioPageEdit() {
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [projectsLoading, setProjectsLoading] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
-
-  // 새 프로젝트 등록 상태들
   const [showNewProjectForm, setShowNewProjectForm] = useState<boolean>(false);
   const [newProjectData, setNewProjectData] =
     useState<ProjectData>(initialProjectData);
@@ -176,9 +174,7 @@ function MypagePortfolioPageEdit() {
   }, []);
 
   // 포트폴리오에 포함된 프로젝트들 계산
-  const portfolioProjects = allMyProjects.filter((project) =>
-    selectedProjectIds.includes(project.id)
-  );
+  // 새 프로젝트 등록 상태들
 
   // 백엔드 데이터를 프론트엔드 포트폴리오 데이터로 변환
   const convertBackendDataToFrontend = (
@@ -617,64 +613,6 @@ function MypagePortfolioPageEdit() {
           isSelect={portfolioData.stack}
           onStackChange={handleStacksChange}
         />
-      </div>
-
-      {/* 현재 포트폴리오에 포함된 프로젝트 섹션 */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-5 pb-2 border-b border-gray-200">
-          현재 포트폴리오에 포함된 프로젝트
-        </h2>
-        {portfolioProjects.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {portfolioProjects.map((project) => (
-              <div
-                key={project.id}
-                className="border border-green-200 rounded-lg p-4 bg-green-50"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="flex-1 min-w-0">
-                    {project.thumbnailUrl && (
-                      <img
-                        src={project.thumbnailUrl}
-                        alt={project.title}
-                        className="w-full h-24 object-cover rounded mb-2"
-                      />
-                    )}
-                    <h4 className="font-semibold text-base mb-1 text-gray-900 truncate">
-                      {project.title}
-                    </h4>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>작성자: {project.nickname}</p>
-                      <div className="flex justify-between items-center">
-                        <span>조회수: {project.viewCount}</span>
-                        <span>좋아요: {project.likeCount}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 mt-2">
-                        {!project.isPublic && (
-                          <span className="inline-block px-2 py-1 bg-red-100 text-red-800 text-xs rounded">
-                            비공개
-                          </span>
-                        )}
-                        <span className="text-xs text-gray-500">
-                          인기도: {project.popularityScore}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-            <p className="mb-1">
-              현재 포트폴리오에 포함된 프로젝트가 없습니다.
-            </p>
-            <p className="text-sm">
-              아래에서 프로젝트를 선택하거나 새로 등록해보세요.
-            </p>
-          </div>
-        )}
       </div>
 
       {/* 프로젝트 관리 섹션 */}
