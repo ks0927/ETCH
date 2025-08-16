@@ -540,12 +540,6 @@ function MypagePortfolioPageEdit() {
     <div className="max-w-4xl mx-auto p-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">포트폴리오 수정</h1>
-        <button
-          onClick={handleCancel}
-          className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
-          취소
-        </button>
       </div>
 
       {/* 기본 정보 섹션 */}
