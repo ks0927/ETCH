@@ -96,6 +96,8 @@ function ProjectListPage() {
   };
 
   // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
+  // ProjectListPage.tsx의 filteredProjects useMemo 부분을 이렇게 수정하세요
+
   const filteredProjects = useMemo(() => {
     let filtered = [...projects];
 
@@ -136,34 +138,69 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 클라이언트 사이드 정렬 - createdAt이 없으므로 대안 사용
+    // 3. ✅ 수정된 클라이언트 사이드 정렬
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case "LATEST": {
-          // ⚠️ createdAt이 없으므로 ID를 기준으로 최신순 (높은 ID = 최신)
-          const result = (b.id || 0) - (a.id || 0);
-          return result;
+          // ID 기준 최신순 (높은 ID = 최신)
+          return (b.id || 0) - (a.id || 0);
         }
 
         case "POPULAR": {
-          // 인기순 - popularityScore 기준 내림차순
-          const popularityA = a.popularityScore || a.likeCount || 0;
-          const popularityB = b.popularityScore || b.likeCount || 0;
-          return popularityB - popularityA;
+          // ✅ popularityScore를 우선 기준으로 사용
+          const popularityA = Number(a.popularityScore || 0);
+          const popularityB = Number(b.popularityScore || 0);
+
+          console.log(
+            `인기순 정렬: ${a.title}(score: ${popularityA}, likes: ${
+              a.likeCount || 0
+            }) vs ${b.title}(score: ${popularityB}, likes: ${b.likeCount || 0})`
+          );
+
+          const result = popularityB - popularityA;
+
+          // popularityScore가 같으면 likeCount로 2차 정렬
+          if (result === 0) {
+            const likesA = Number(a.likeCount || 0);
+            const likesB = Number(b.likeCount || 0);
+            const secondResult = likesB - likesA;
+
+            // 그것도 같으면 최신순으로 3차 정렬
+            if (secondResult === 0) {
+              return (b.id || 0) - (a.id || 0);
+            }
+            return secondResult;
+          }
+
+          return result;
         }
 
         case "VIEWS": {
           // 조회순 - viewCount 기준 내림차순
-          const viewsA = a.viewCount || 0;
-          const viewsB = b.viewCount || 0;
-          return viewsB - viewsA;
+          const viewsA = Number(a.viewCount || 0);
+          const viewsB = Number(b.viewCount || 0);
+          const result = viewsB - viewsA;
+
+          // 조회수가 같으면 최신순으로 2차 정렬
+          if (result === 0) {
+            return (b.id || 0) - (a.id || 0);
+          }
+
+          return result;
         }
 
         case "LIKES": {
           // 좋아요순 - likeCount 기준 내림차순
-          const likesA = a.likeCount || 0;
-          const likesB = b.likeCount || 0;
-          return likesB - likesA;
+          const likesA = Number(a.likeCount || 0);
+          const likesB = Number(b.likeCount || 0);
+          const result = likesB - likesA;
+
+          // 좋아요가 같으면 최신순으로 2차 정렬
+          if (result === 0) {
+            return (b.id || 0) - (a.id || 0);
+          }
+
+          return result;
         }
 
         default: {
@@ -174,7 +211,7 @@ function ProjectListPage() {
     });
 
     return filtered;
-  }, [projects, searchTerm, selectedCategory, selectedSort]); // 의존성 배열
+  }, [projects, searchTerm, selectedCategory, selectedSort]);
 
   // 페이지네이션 계산
   const totalElements = filteredProjects.length;
@@ -283,7 +320,7 @@ function ProjectListPage() {
             <section>
               <ProjectListSearch onSearch={handleSearch} />
             </section>
-            검색 결과 정보
+            {/* 검색 결과 정보
             {(searchTerm || selectedCategory !== "ALL") && (
               <section className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                 <div className="flex items-center justify-between">
@@ -313,7 +350,7 @@ function ProjectListPage() {
                   </button>
                 </div>
               </section>
-            )}
+            )} */}
             {/* 프로젝트 카드 섹션 */}
             <section>
               {currentProjects.length > 0 ? (
