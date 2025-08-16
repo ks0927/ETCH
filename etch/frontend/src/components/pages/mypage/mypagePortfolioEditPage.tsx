@@ -80,18 +80,9 @@ function MypagePortfolioPageEdit() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // 🔥 수정: 전체 프로젝트 목록과 포트폴리오 프로젝트를 분리
-  const [allMyProjects, setAllMyProjects] = useState<MyProjectResponse[]>([]); // 전체 프로젝트 목록 (선택용)
-  const [portfolioProjects, setPortfolioProjects] = useState<
-    MyProjectResponse[]
-  >([]); // 포트폴리오에 포함된 프로젝트들
-  const [originalSelectedProjectIds, setOriginalSelectedProjectIds] = useState<
-    number[]
-  >([]);
+  // 단순화된 프로젝트 상태
+  const [allMyProjects, setAllMyProjects] = useState<MyProjectResponse[]>([]);
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
-  const [tempDeletedProjectIds, setTempDeletedProjectIds] = useState<number[]>(
-    []
-  );
   const [projectsLoading, setProjectsLoading] = useState<boolean>(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
 
@@ -137,7 +128,7 @@ function MypagePortfolioPageEdit() {
         const convertedData = convertBackendDataToFrontend(portfolioDetail);
         setPortfolioData(convertedData);
 
-        // 🔥 수정: 포트폴리오에 포함된 프로젝트 ID들 설정
+        // 포트폴리오에 포함된 프로젝트 ID들 설정
         if (
           portfolioDetail.projectList &&
           portfolioDetail.projectList.length > 0
@@ -148,9 +139,7 @@ function MypagePortfolioPageEdit() {
             )
             .filter((id): id is number => typeof id === "number");
 
-          setOriginalSelectedProjectIds(existingProjectIds);
           setSelectedProjectIds(existingProjectIds);
-
           console.log("포트폴리오에 포함된 프로젝트 ID들:", existingProjectIds);
         }
 
@@ -166,7 +155,7 @@ function MypagePortfolioPageEdit() {
     loadPortfolioData();
   }, [portfolioId]);
 
-  // 🔥 수정: 전체 프로젝트 목록 조회
+  // 전체 프로젝트 목록 조회
   useEffect(() => {
     const fetchMyProjects = async (): Promise<void> => {
       try {
@@ -186,18 +175,10 @@ function MypagePortfolioPageEdit() {
     fetchMyProjects();
   }, []);
 
-  // 🔥 추가: 포트폴리오에 포함된 프로젝트들만 필터링
-  useEffect(() => {
-    if (selectedProjectIds.length > 0 && allMyProjects.length > 0) {
-      const filteredProjects = allMyProjects.filter((project) =>
-        selectedProjectIds.includes(project.id)
-      );
-      setPortfolioProjects(filteredProjects);
-      console.log("포트폴리오에 포함된 프로젝트들:", filteredProjects);
-    } else {
-      setPortfolioProjects([]);
-    }
-  }, [selectedProjectIds, allMyProjects]);
+  // 포트폴리오에 포함된 프로젝트들 계산
+  const portfolioProjects = allMyProjects.filter((project) =>
+    selectedProjectIds.includes(project.id)
+  );
 
   // 백엔드 데이터를 프론트엔드 포트폴리오 데이터로 변환
   const convertBackendDataToFrontend = (
@@ -325,61 +306,23 @@ function MypagePortfolioPageEdit() {
     setPortfolioData((prev) => ({ ...prev, introduce: value }));
   };
 
-  // ============== 프로젝트 선택 관련 핸들러들 ==============
+  // ============== 프로젝트 선택 관련 핸들러들 (단순화) ==============
   const handleProjectSelect = (projectId: number, selected: boolean): void => {
     if (selected) {
       setSelectedProjectIds((prev) => [...prev, projectId]);
-      setTempDeletedProjectIds((prev) => prev.filter((id) => id !== projectId));
     } else {
       setSelectedProjectIds((prev) => prev.filter((id) => id !== projectId));
-      if (originalSelectedProjectIds.includes(projectId)) {
-        setTempDeletedProjectIds((prev) => [...prev, projectId]);
-      }
     }
   };
 
   const handleSelectAllProjects = (): void => {
-    const availableProjects = allMyProjects.filter(
-      (project) => !tempDeletedProjectIds.includes(project.id)
-    );
-
-    if (selectedProjectIds.length === availableProjects.length) {
-      const originallySelected = selectedProjectIds.filter((id) =>
-        originalSelectedProjectIds.includes(id)
-      );
-      setTempDeletedProjectIds((prev) => [...prev, ...originallySelected]);
+    if (selectedProjectIds.length === allMyProjects.length) {
+      // 전체 해제
       setSelectedProjectIds([]);
     } else {
-      setSelectedProjectIds(availableProjects.map((project) => project.id));
-      setTempDeletedProjectIds([]);
+      // 전체 선택
+      setSelectedProjectIds(allMyProjects.map((project) => project.id));
     }
-  };
-
-  const handleTempDeleteSelectedProjects = (): void => {
-    if (selectedProjectIds.length === 0) {
-      alert("포트폴리오에서 제외할 프로젝트를 선택해주세요.");
-      return;
-    }
-
-    const confirmMessage = `선택된 ${selectedProjectIds.length}개의 프로젝트를 이 포트폴리오에서 제외하시겠습니까?\n\n※ 프로젝트 자체는 삭제되지 않으며, 다른 포트폴리오에서 계속 사용할 수 있습니다.`;
-
-    if (!confirm(confirmMessage)) return;
-
-    const projectsToExclude = selectedProjectIds.filter((id) =>
-      originalSelectedProjectIds.includes(id)
-    );
-
-    setTempDeletedProjectIds((prev) => [...prev, ...projectsToExclude]);
-    setSelectedProjectIds([]);
-
-    alert(
-      `${selectedProjectIds.length}개의 프로젝트가 포트폴리오에서 제외되었습니다.\n※ 프로젝트는 삭제되지 않았습니다.`
-    );
-  };
-
-  const handleCancelTempDelete = (projectId: number): void => {
-    setTempDeletedProjectIds((prev) => prev.filter((id) => id !== projectId));
-    setSelectedProjectIds((prev) => [...prev, projectId]);
   };
 
   // ============== 새 프로젝트 등록 관련 핸들러들 ==============
@@ -451,7 +394,7 @@ function MypagePortfolioPageEdit() {
     }
   };
 
-  // ============== 제출 핸들러 ==============
+  // ============== 제출 핸들러 (단순화) ==============
   const handleSubmit = async (): Promise<void> => {
     if (isSubmitting || !portfolioId) return;
 
@@ -475,7 +418,6 @@ function MypagePortfolioPageEdit() {
       console.log("포트폴리오 ID:", portfolioId);
       console.log("현재 선택된 프로젝트 ID들:", selectedProjectIds);
       console.log("새로 생성할 프로젝트들:", newProjectsCreated);
-      console.log("포트폴리오에서 제외할 프로젝트들:", tempDeletedProjectIds);
 
       // 1. 새로 생성된 프로젝트들을 실제로 생성
       const createdNewProjectIds: number[] = [];
@@ -539,10 +481,8 @@ function MypagePortfolioPageEdit() {
       }));
 
       console.log("=== 🎯 최종 포트폴리오 프로젝트 구성 ===");
-      console.log("원래 포함되었던 프로젝트들:", originalSelectedProjectIds);
       console.log("현재 선택된 기존 프로젝트들:", selectedProjectIds);
       console.log("새로 생성된 프로젝트들:", createdNewProjectIds);
-      console.log("포트폴리오에서 제외될 프로젝트들:", tempDeletedProjectIds);
       console.log("최종 포트폴리오에 포함될 프로젝트들:", finalProjectIds);
 
       // 3. portfolioData를 API 형식으로 변환
@@ -556,9 +496,7 @@ function MypagePortfolioPageEdit() {
       await updatePortfolio(Number(portfolioId), requestData);
       console.log("포트폴리오 수정 성공");
 
-      const successMessage = `포트폴리오가 성공적으로 수정되었습니다!\n\n`;
-
-      alert(successMessage);
+      alert("포트폴리오가 성공적으로 수정되었습니다!");
       navigate("/mypage");
     } catch (error) {
       console.error("=== 포트폴리오 수정 실패 ===", error);
@@ -574,11 +512,6 @@ function MypagePortfolioPageEdit() {
       setIsSubmitting(false);
     }
   };
-
-  // 🔥 수정: 화면에 표시할 프로젝트들 - 전체 프로젝트가 아닌 포트폴리오 프로젝트만
-  const displayProjects = allMyProjects.filter(
-    (project) => !tempDeletedProjectIds.includes(project.id)
-  );
 
   // 로딩 중일 때
   if (isLoading) {
@@ -686,7 +619,7 @@ function MypagePortfolioPageEdit() {
         />
       </div>
 
-      {/* 🔥 수정: 포트폴리오에 포함된 프로젝트만 표시하는 섹션 추가 */}
+      {/* 현재 포트폴리오에 포함된 프로젝트 섹션 */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-5 pb-2 border-b border-gray-200">
           현재 포트폴리오에 포함된 프로젝트
@@ -749,48 +682,10 @@ function MypagePortfolioPageEdit() {
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-lg font-semibold text-gray-900">프로젝트 관리</h2>
           <div className="text-sm text-gray-500">
-            선택된 기존: {selectedProjectIds.length}개, 새로 생성:{" "}
-            {newProjectsCreated.length}개, 제외: {tempDeletedProjectIds.length}
-            개
+            선택된 프로젝트: {selectedProjectIds.length}개, 새로 생성:{" "}
+            {newProjectsCreated.length}개
           </div>
         </div>
-
-        {/* 제외된 프로젝트들 표시 */}
-        {tempDeletedProjectIds.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <h3 className="text-sm font-medium text-red-800 mb-3">
-              포트폴리오에서 제외된 프로젝트 ({tempDeletedProjectIds.length}개)
-            </h3>
-            <div className="space-y-2">
-              {tempDeletedProjectIds.map((projectId) => {
-                const project = allMyProjects.find((p) => p.id === projectId);
-                if (!project) return null;
-
-                return (
-                  <div
-                    key={projectId}
-                    className="flex items-center justify-between bg-white border border-red-200 rounded-md p-3"
-                  >
-                    <div>
-                      <span className="font-medium text-red-700">
-                        {project.title}
-                      </span>
-                      <span className="text-sm text-red-600 ml-2">
-                        (수정 완료 시 포트폴리오에서 제외됩니다)
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleCancelTempDelete(projectId)}
-                      className="px-3 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                    >
-                      제외 취소
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* 기존 프로젝트 선택 섹션 */}
         <div className="mb-6">
@@ -800,27 +695,17 @@ function MypagePortfolioPageEdit() {
             </h3>
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-500">
-                ({selectedProjectIds.length}/{displayProjects.length}개 선택됨)
+                ({selectedProjectIds.length}/{allMyProjects.length}개 선택됨)
               </span>
-              {displayProjects.length > 0 && (
-                <>
-                  <button
-                    onClick={handleSelectAllProjects}
-                    className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                  >
-                    {selectedProjectIds.length === displayProjects.length
-                      ? "전체 해제"
-                      : "전체 선택"}
-                  </button>
-                  {selectedProjectIds.length > 0 && (
-                    <button
-                      onClick={handleTempDeleteSelectedProjects}
-                      className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-                    >
-                      선택한 {selectedProjectIds.length}개 포트폴리오에서 제외
-                    </button>
-                  )}
-                </>
+              {allMyProjects.length > 0 && (
+                <button
+                  onClick={handleSelectAllProjects}
+                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+                >
+                  {selectedProjectIds.length === allMyProjects.length
+                    ? "전체 해제"
+                    : "전체 선택"}
+                </button>
               )}
             </div>
           </div>
@@ -839,23 +724,17 @@ function MypagePortfolioPageEdit() {
             </div>
           )}
 
-          {!projectsLoading &&
-            !projectsError &&
-            displayProjects.length === 0 && (
-              <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
-                <p className="mb-1">
-                  {tempDeletedProjectIds.length > 0
-                    ? "모든 프로젝트가 제외되었습니다."
-                    : "등록된 프로젝트가 없습니다."}
-                </p>
-                <p className="text-sm">아래에서 새 프로젝트를 등록해보세요.</p>
-              </div>
-            )}
+          {!projectsLoading && !projectsError && allMyProjects.length === 0 && (
+            <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="mb-1">등록된 프로젝트가 없습니다.</p>
+              <p className="text-sm">아래에서 새 프로젝트를 등록해보세요.</p>
+            </div>
+          )}
 
           {/* 전체 프로젝트 목록 */}
-          {!projectsLoading && !projectsError && displayProjects.length > 0 && (
+          {!projectsLoading && !projectsError && allMyProjects.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displayProjects.map((project) => (
+              {allMyProjects.map((project) => (
                 <div
                   key={project.id}
                   className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
