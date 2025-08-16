@@ -117,16 +117,28 @@ function ProjectListPage() {
   }, [projects]);
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
-    console.log("🔄 모달에서 프로젝트 업데이트 받음:", {
-      id: updatedProject.id,
-      title: updatedProject.title,
-      이전점수: projects.find((p) => p.id === updatedProject.id)
-        ?.popularityScore,
-      새점수: updatedProject.popularityScore,
-      조회수: updatedProject.viewCount,
-      좋아요: updatedProject.likeCount,
-    });
+    console.log("🔄 모달에서 프로젝트 업데이트 받음:", updatedProject);
 
+    // ✅ popularityScore가 없으면 전체 데이터 새로고침
+    if (updatedProject.popularityScore === undefined) {
+      console.log("📊 popularityScore가 없어서 전체 데이터 새로고침");
+
+      const refreshAllData = async () => {
+        try {
+          const freshData = await getAllProjects();
+          const sortedData = [...freshData].sort(
+            (a, b) => (b.id || 0) - (a.id || 0)
+          );
+          setProjects(sortedData);
+        } catch (error) {
+          console.error("전체 데이터 새로고침 실패:", error);
+        }
+      };
+      refreshAllData();
+      return;
+    }
+
+    // popularityScore가 있으면 기존 로직 실행
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
         project.id === updatedProject.id ? updatedProject : project
