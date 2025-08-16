@@ -117,6 +117,16 @@ function ProjectListPage() {
   }, [projects]);
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
+    console.log("🔄 모달에서 프로젝트 업데이트 받음:", {
+      id: updatedProject.id,
+      title: updatedProject.title,
+      이전점수: projects.find((p) => p.id === updatedProject.id)
+        ?.popularityScore,
+      새점수: updatedProject.popularityScore,
+      조회수: updatedProject.viewCount,
+      좋아요: updatedProject.likeCount,
+    });
+
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
         project.id === updatedProject.id ? updatedProject : project
