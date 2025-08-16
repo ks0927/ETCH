@@ -461,9 +461,7 @@ function MypagePortfolioPage() {
       const portfolioResponse = await createPortfolio(requestData);
       console.log("포트폴리오 생성 성공:", portfolioResponse);
 
-      alert(
-        `포트폴리오가 성공적으로 등록되었습니다!\n- 선택한 기존 프로젝트: ${selectedProjectIds.length}개\n- 새로 생성한 프로젝트: ${createdNewProjectIds.length}개\n- 총 포함된 프로젝트: ${finalProjectIds.length}개`
-      );
+      alert(`포트폴리오가 성공적으로 등록되었습니다!`);
 
       navigate("/mypage");
     } catch (error) {

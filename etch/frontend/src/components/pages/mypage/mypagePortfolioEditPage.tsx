@@ -556,14 +556,7 @@ function MypagePortfolioPageEdit() {
       await updatePortfolio(Number(portfolioId), requestData);
       console.log("포트폴리오 수정 성공");
 
-      const successMessage =
-        `포트폴리오가 성공적으로 수정되었습니다!\n\n` +
-        `📊 수정 내용:\n` +
-        `- 기존 프로젝트 유지: ${selectedProjectIds.length}개\n` +
-        `- 새로 추가된 프로젝트: ${createdNewProjectIds.length}개\n` +
-        `- 포트폴리오에서 제외된 프로젝트: ${tempDeletedProjectIds.length}개\n` +
-        `- 최종 포트폴리오 프로젝트 수: ${finalProjectIds.length}개\n\n` +
-        `※ 제외된 프로젝트는 삭제되지 않았으며, 다른 포트폴리오에서 사용할 수 있습니다.`;
+      const successMessage = `포트폴리오가 성공적으로 수정되었습니다!\n\n`;
 
       alert(successMessage);
       navigate("/mypage");
