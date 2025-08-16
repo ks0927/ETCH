@@ -78,11 +78,9 @@ function ProjectListPage() {
     }
   }, [projects]);
 
-  const fetchProjects = async (
-    sortType = "POPULAR"
-  ): Promise<ProjectData[]> => {
+  const fetchProjects = async (): Promise<ProjectData[]> => {
     try {
-      const data = await getAllProjects(sortType); // 정렬 파라미터 전달
+      const data = await getAllProjects(); // 정렬 파라미터 제거
       return data;
     } catch (error) {
       console.error("❌ 프로젝트 데이터 fetch 에러:", error);
@@ -95,8 +93,14 @@ function ProjectListPage() {
     const loadProjects = async () => {
       try {
         setLoading(true);
-        const projectData = await fetchProjects(selectedSort); // 정렬 파라미터 전달
-        setProjects(projectData);
+        const projectData = await fetchProjects();
+
+        // ID 기준으로 최신순 정렬 (높은 ID = 최신)
+        const sortedData = [...projectData].sort((a, b) => {
+          return (b.id || 0) - (a.id || 0);
+        });
+
+        setProjects(sortedData);
       } catch (err) {
         setError("프로젝트 데이터를 불러오는데 실패했습니다.");
         console.error(err);
@@ -106,7 +110,7 @@ function ProjectListPage() {
     };
 
     loadProjects();
-  }, [selectedSort]);
+  }, []); // selectedSort 의존성 제거
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
@@ -147,23 +151,49 @@ function ProjectListPage() {
         ) {
           return project.projectCategory === selectedCategory;
         }
-
         if (typeof project.projectCategory === "number") {
           const projectCategoryEnum = getCategoryFromNumber(
             project.projectCategory
           );
           return projectCategoryEnum === selectedCategory;
         }
-
         return false;
       });
     }
 
-    // ✅ 3. 정렬은 백엔드에서 이미 처리되었으므로 클라이언트 정렬 제거
-    // 백엔드에서 정렬된 순서를 그대로 유지
-    console.log(
-      `📋 필터 결과: ${filtered.length}개 프로젝트 (${selectedSort} 정렬 적용됨)`
-    );
+    // 3. ✅ 클라이언트 사이드 정렬 (수정된 버전)
+    filtered.sort((a, b) => {
+      switch (selectedSort) {
+        case "LATEST": {
+          return (b.id || 0) - (a.id || 0);
+        }
+
+        case "POPULAR": {
+          const popularityA = Number(a.popularityScore || 0);
+          const popularityB = Number(b.popularityScore || 0);
+          const result = popularityB - popularityA;
+          return result !== 0 ? result : (b.id || 0) - (a.id || 0);
+        }
+
+        case "VIEWS": {
+          const viewsA = Number(a.viewCount || 0);
+          const viewsB = Number(b.viewCount || 0);
+          const result = viewsB - viewsA;
+          return result !== 0 ? result : (b.id || 0) - (a.id || 0);
+        }
+
+        case "LIKES": {
+          const likesA = Number(a.likeCount || 0);
+          const likesB = Number(b.likeCount || 0);
+          const result = likesB - likesA;
+          return result !== 0 ? result : (b.id || 0) - (a.id || 0);
+        }
+
+        default: {
+          return (b.id || 0) - (a.id || 0);
+        }
+      }
+    });
 
     return filtered;
   }, [projects, searchTerm, selectedCategory, selectedSort]);
