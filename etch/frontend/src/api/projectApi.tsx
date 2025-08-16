@@ -352,7 +352,7 @@ export async function getMyProjects(): Promise<MyProjectResponse[]> {
   }
 }
 
-export async function getAllProjects(sortType = "POPULAR") {
+export async function getAllProjects(sortType: string = "POPULAR") {
   try {
     const token = getAuthToken();
     const config = token
@@ -360,7 +360,7 @@ export async function getAllProjects(sortType = "POPULAR") {
       : {};
 
     // 프론트엔드 정렬 타입을 백엔드 정렬 파라미터로 매핑
-    const backendSortMap = {
+    const backendSortMap: Record<string, string> = {
       LATEST: "latest",
       POPULAR: "popular",
       VIEWS: "views",
@@ -395,7 +395,7 @@ export async function getAllProjects(sortType = "POPULAR") {
       localStorage.removeItem("access_token");
 
       try {
-        const backendSortMap = {
+        const backendSortMap: Record<string, string> = {
           LATEST: "latest",
           POPULAR: "popular",
           VIEWS: "views",
