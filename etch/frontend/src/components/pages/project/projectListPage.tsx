@@ -57,6 +57,35 @@ function ProjectListPage() {
 
     loadProjects();
   }, []);
+  useEffect(() => {
+    if (projects.length > 0) {
+      console.log("=== 프로젝트 데이터 구조 확인 ===");
+      console.log("전체 프로젝트 수:", projects.length);
+      console.log("첫 번째 프로젝트:", projects[0]);
+      console.log("사용 가능한 필드들:", Object.keys(projects[0]));
+
+      // 각 프로젝트의 인기도 관련 필드 확인
+      const popularityData = projects.slice(0, 5).map((project) => ({
+        id: project.id,
+        title: project.title,
+        likeCount: project.likeCount,
+        popularityScore: project.popularityScore,
+        viewCount: project.viewCount,
+      }));
+
+      console.log("상위 5개 프로젝트의 인기도 데이터:", popularityData);
+
+      // 모든 프로젝트의 likeCount 분포 확인
+      const likeCounts = projects.map((p) => p.likeCount || 0);
+      const uniqueLikeCounts = [...new Set(likeCounts)];
+      console.log("likeCount 분포:", {
+        min: Math.min(...likeCounts),
+        max: Math.max(...likeCounts),
+        unique: uniqueLikeCounts,
+        allZero: likeCounts.every((count) => count === 0),
+      });
+    }
+  }, [projects]);
 
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
@@ -250,13 +279,11 @@ function ProjectListPage() {
                 </Link>
               </div>
             </section>
-
             {/* 검색 섹션 */}
             <section>
               <ProjectListSearch onSearch={handleSearch} />
             </section>
-
-            {/* 검색 결과 정보 */}
+            검색 결과 정보
             {(searchTerm || selectedCategory !== "ALL") && (
               <section className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                 <div className="flex items-center justify-between">
@@ -287,7 +314,6 @@ function ProjectListPage() {
                 </div>
               </section>
             )}
-
             {/* 프로젝트 카드 섹션 */}
             <section>
               {currentProjects.length > 0 ? (
@@ -309,7 +335,6 @@ function ProjectListPage() {
                 </div>
               )}
             </section>
-
             {/* 페이지네이션 */}
             {totalPages > 1 && (
               <Pagination
