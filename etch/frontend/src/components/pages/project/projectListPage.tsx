@@ -9,7 +9,17 @@ import type { ProjectData } from "../../../types/project/projectDatas";
 import { getAllProjects } from "../../../api/projectApi";
 import { getCategoryFromNumber } from "../../../types/project/projectCategroyData";
 
-// API 호출 함수 - 정렬 파라미터 제거
+// ✅ TypeScript를 위한 window 객체 확장
+declare global {
+  interface Window {
+    debugData?: {
+      projects: ProjectData[];
+      selectedSort: string;
+      searchTerm: string;
+      selectedCategory: string;
+    };
+  }
+}
 
 function ProjectListPage() {
   const [projects, setProjects] = useState<ProjectData[]>([]);
@@ -24,6 +34,16 @@ function ProjectListPage() {
   // 페이지네이션 상태
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
+
+  const fetchProjects = async (): Promise<ProjectData[]> => {
+    try {
+      const data = await getAllProjects(); // 정렬 파라미터 제거
+      return data;
+    } catch (error) {
+      console.error("❌ 프로젝트 데이터 fetch 에러:", error);
+      throw error;
+    }
+  };
 
   // 컴포넌트 마운트 시 프로젝트 데이터 로드
   useEffect(() => {
@@ -48,6 +68,23 @@ function ProjectListPage() {
 
     loadProjects();
   }, []);
+
+  // ✅ 디버깅 데이터 설정
+  useEffect(() => {
+    // 전역 디버깅 데이터 설정
+    window.debugData = {
+      projects,
+      selectedSort,
+      searchTerm,
+      selectedCategory,
+    };
+
+    console.log("🔍 ProjectListPage 상태 업데이트:", {
+      projectsCount: projects.length,
+      selectedSort,
+      firstProject: projects[0]?.title,
+    });
+  }, [projects, selectedSort, selectedCategory, searchTerm]);
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -79,40 +116,6 @@ function ProjectListPage() {
     }
   }, [projects]);
 
-  const fetchProjects = async (): Promise<ProjectData[]> => {
-    try {
-      const data = await getAllProjects(); // 정렬 파라미터 제거
-      return data;
-    } catch (error) {
-      console.error("❌ 프로젝트 데이터 fetch 에러:", error);
-      throw error;
-    }
-  };
-
-  // ✅ 2. 컴포넌트 마운트 시 프로젝트 데이터 로드 - selectedSort 의존성 추가
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        setLoading(true);
-        const projectData = await fetchProjects();
-
-        // ID 기준으로 최신순 정렬 (높은 ID = 최신)
-        const sortedData = [...projectData].sort((a, b) => {
-          return (b.id || 0) - (a.id || 0);
-        });
-
-        setProjects(sortedData);
-      } catch (err) {
-        setError("프로젝트 데이터를 불러오는데 실패했습니다.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProjects();
-  }, []); // selectedSort 의존성 제거
-
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
@@ -121,9 +124,7 @@ function ProjectListPage() {
     );
   };
 
-  // ✅ useMemo로 필터링된 프로젝트 계산 - 의존성 배열 변경 시 자동 재계산
-  // ProjectListPage.tsx의 filteredProjects useMemo 부분을 이렇게 수정하세요
-
+  // ✅ useMemo로 필터링된 프로젝트 계산 - 디버깅 로그 추가
   const filteredProjects = useMemo(() => {
     let filtered = [...projects];
 
@@ -162,17 +163,25 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 클라이언트 사이드 정렬 (수정된 버전)
+    // 3. ✅ 클라이언트 사이드 정렬 (디버깅 로그 추가)
+    console.log("🎯 정렬 시작 - selectedSort:", selectedSort);
+
     filtered.sort((a, b) => {
       switch (selectedSort) {
         case "LATEST": {
-          return (b.id || 0) - (a.id || 0);
+          const result = (b.id || 0) - (a.id || 0);
+          return result;
         }
 
         case "POPULAR": {
           const popularityA = Number(a.popularityScore || 0);
           const popularityB = Number(b.popularityScore || 0);
           const result = popularityB - popularityA;
+
+          console.log(
+            `인기순 비교: ${a.title}(${popularityA}) vs ${b.title}(${popularityB}) = ${result}`
+          );
+
           return result !== 0 ? result : (b.id || 0) - (a.id || 0);
         }
 
@@ -196,8 +205,19 @@ function ProjectListPage() {
       }
     });
 
+    console.log(
+      "✅ 정렬 완료 - 상위 3개:",
+      filtered.slice(0, 3).map((p) => ({
+        id: p.id,
+        title: p.title,
+        popularityScore: p.popularityScore,
+        selectedSort,
+      }))
+    );
+
     return filtered;
   }, [projects, searchTerm, selectedCategory, selectedSort]);
+
   // 페이지네이션 계산
   const totalElements = filteredProjects.length;
   const totalPages = Math.ceil(totalElements / itemsPerPage);
@@ -224,17 +244,17 @@ function ProjectListPage() {
 
   // 카테고리 필터 핸들러
   const handleCategoryFilter = useCallback((category: string) => {
+    console.log("📂 ProjectListPage 카테고리 필터 받음:", category);
     setSelectedCategory(category);
     setCurrentPage(1);
   }, []);
 
-  // 정렬 핸들러
+  // ✅ 정렬 핸들러 - 디버깅 로그 추가
   const handleSortChange = useCallback((sortType: string) => {
+    console.log("🔥 ProjectListPage handleSortChange 받음:", sortType);
     setSelectedSort(sortType);
     setCurrentPage(1);
   }, []);
-
-  // 새로고침 버튼 핸들러
 
   if (loading) {
     return (
@@ -305,37 +325,7 @@ function ProjectListPage() {
             <section>
               <ProjectListSearch onSearch={handleSearch} />
             </section>
-            {/* 검색 결과 정보
-            {(searchTerm || selectedCategory !== "ALL") && (
-              <section className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <div className="flex items-center justify-between">
-                  <div className="text-blue-800">
-                    <span className="font-medium">{totalElements}개</span>의
-                    프로젝트를 찾았습니다
-                    {searchTerm && (
-                      <span className="ml-2">
-                        (검색어: <strong>"{searchTerm}"</strong>)
-                      </span>
-                    )}
-                    {selectedCategory !== "ALL" && (
-                      <span className="ml-2">
-                        (카테고리: <strong>{selectedCategory}</strong>)
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedCategory("ALL");
-                      setSelectedSort("LATEST"); // 초기화 시에도 최신순으로
-                    }}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                  >
-                    필터 초기화
-                  </button>
-                </div>
-              </section>
-            )} */}
+
             {/* 프로젝트 카드 섹션 */}
             <section>
               {currentProjects.length > 0 ? (

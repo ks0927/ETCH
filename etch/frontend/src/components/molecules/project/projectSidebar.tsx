@@ -30,7 +30,13 @@ function ProjectSidebar({
               <input
                 type="checkbox"
                 checked={item.checked}
-                onChange={(e) => onChange(e.target.checked, item.value)}
+                onChange={(e) => {
+                  console.log("📂 카테고리 체크박스 클릭:", {
+                    checked: e.target.checked,
+                    value: item.value,
+                  });
+                  onChange(e.target.checked, item.value);
+                }}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">{item.list}</span>
@@ -39,7 +45,6 @@ function ProjectSidebar({
         </div>
       </section>
 
-      {/* 정렬 섹션 */}
       {/* 정렬 섹션 */}
       <section className="space-y-3">
         <h3 className="text-md font-semibold text-gray-800 pb-2 border-b border-gray-200">
@@ -54,9 +59,15 @@ function ProjectSidebar({
               <input
                 type="radio"
                 name="sort"
-                value={item.value} // ✅ 이 줄 추가!
+                value={item.value}
                 checked={item.checked}
-                onChange={() => onSortChange(true, item.value)}
+                onChange={() => {
+                  console.log("🎯 정렬 라디오 버튼 클릭:", {
+                    value: item.value,
+                    checked: true,
+                  });
+                  onSortChange(true, item.value);
+                }}
                 className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
               />
               <span className="text-sm text-gray-700">{item.list}</span>
