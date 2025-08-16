@@ -10,15 +10,6 @@ import { getAllProjects } from "../../../api/projectApi";
 import { getCategoryFromNumber } from "../../../types/project/projectCategroyData";
 
 // API 호출 함수 - 정렬 파라미터 제거
-const fetchProjects = async (): Promise<ProjectData[]> => {
-  try {
-    const data = await getAllProjects(); // 정렬 파라미터 제거
-    return data;
-  } catch (error) {
-    console.error("❌ 프로젝트 데이터 fetch 에러:", error);
-    throw error;
-  }
-};
 
 function ProjectListPage() {
   const [projects, setProjects] = useState<ProjectData[]>([]);
@@ -87,6 +78,36 @@ function ProjectListPage() {
     }
   }, [projects]);
 
+  const fetchProjects = async (
+    sortType = "POPULAR"
+  ): Promise<ProjectData[]> => {
+    try {
+      const data = await getAllProjects(sortType); // 정렬 파라미터 전달
+      return data;
+    } catch (error) {
+      console.error("❌ 프로젝트 데이터 fetch 에러:", error);
+      throw error;
+    }
+  };
+
+  // ✅ 2. 컴포넌트 마운트 시 프로젝트 데이터 로드 - selectedSort 의존성 추가
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        setLoading(true);
+        const projectData = await fetchProjects(selectedSort); // 정렬 파라미터 전달
+        setProjects(projectData);
+      } catch (err) {
+        setError("프로젝트 데이터를 불러오는데 실패했습니다.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProjects();
+  }, [selectedSort]);
+
   const handleProjectUpdate = (updatedProject: ProjectData) => {
     setProjects((prevProjects) =>
       prevProjects.map((project) =>
@@ -138,81 +159,14 @@ function ProjectListPage() {
       });
     }
 
-    // 3. ✅ 수정된 클라이언트 사이드 정렬
-    filtered.sort((a, b) => {
-      switch (selectedSort) {
-        case "LATEST": {
-          // ID 기준 최신순 (높은 ID = 최신)
-          return (b.id || 0) - (a.id || 0);
-        }
-
-        case "POPULAR": {
-          // ✅ popularityScore를 우선 기준으로 사용
-          const popularityA = Number(a.popularityScore || 0);
-          const popularityB = Number(b.popularityScore || 0);
-
-          console.log(
-            `인기순 정렬: ${a.title}(score: ${popularityA}, likes: ${
-              a.likeCount || 0
-            }) vs ${b.title}(score: ${popularityB}, likes: ${b.likeCount || 0})`
-          );
-
-          const result = popularityB - popularityA;
-
-          // popularityScore가 같으면 likeCount로 2차 정렬
-          if (result === 0) {
-            const likesA = Number(a.likeCount || 0);
-            const likesB = Number(b.likeCount || 0);
-            const secondResult = likesB - likesA;
-
-            // 그것도 같으면 최신순으로 3차 정렬
-            if (secondResult === 0) {
-              return (b.id || 0) - (a.id || 0);
-            }
-            return secondResult;
-          }
-
-          return result;
-        }
-
-        case "VIEWS": {
-          // 조회순 - viewCount 기준 내림차순
-          const viewsA = Number(a.viewCount || 0);
-          const viewsB = Number(b.viewCount || 0);
-          const result = viewsB - viewsA;
-
-          // 조회수가 같으면 최신순으로 2차 정렬
-          if (result === 0) {
-            return (b.id || 0) - (a.id || 0);
-          }
-
-          return result;
-        }
-
-        case "LIKES": {
-          // 좋아요순 - likeCount 기준 내림차순
-          const likesA = Number(a.likeCount || 0);
-          const likesB = Number(b.likeCount || 0);
-          const result = likesB - likesA;
-
-          // 좋아요가 같으면 최신순으로 2차 정렬
-          if (result === 0) {
-            return (b.id || 0) - (a.id || 0);
-          }
-
-          return result;
-        }
-
-        default: {
-          // 기본값도 ID 기준 최신순
-          return (b.id || 0) - (a.id || 0);
-        }
-      }
-    });
+    // ✅ 3. 정렬은 백엔드에서 이미 처리되었으므로 클라이언트 정렬 제거
+    // 백엔드에서 정렬된 순서를 그대로 유지
+    console.log(
+      `📋 필터 결과: ${filtered.length}개 프로젝트 (${selectedSort} 정렬 적용됨)`
+    );
 
     return filtered;
   }, [projects, searchTerm, selectedCategory, selectedSort]);
-
   // 페이지네이션 계산
   const totalElements = filteredProjects.length;
   const totalPages = Math.ceil(totalElements / itemsPerPage);

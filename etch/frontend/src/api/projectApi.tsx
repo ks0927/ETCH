@@ -352,24 +352,39 @@ export async function getMyProjects(): Promise<MyProjectResponse[]> {
   }
 }
 
-export async function getAllProjects() {
+export async function getAllProjects(sortType = "POPULAR") {
   try {
     const token = getAuthToken();
-
     const config = token
-      ? {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      ? { headers: { Authorization: `Bearer ${token}` } }
       : {};
 
-    // 정렬 파라미터 제거하고 모든 데이터를 가져옴
+    // 프론트엔드 정렬 타입을 백엔드 정렬 파라미터로 매핑
+    const backendSortMap = {
+      LATEST: "latest",
+      POPULAR: "popular",
+      VIEWS: "views",
+      LIKES: "popular", // 백엔드에서 likes 정렬이 없으므로 popular 사용
+    };
+
+    const backendSort = backendSortMap[sortType] || "popular";
+
+    console.log(
+      `🔄 API 호출: sortType=${sortType} → backendSort=${backendSort}`
+    );
+
+    // 백엔드에 정렬 파라미터 전달
     const response = await axios.get(
-      `${BASE_API}/projects?pageSize=100`, // 모든 데이터를 가져오기 위해 pageSize 증가
+      `${BASE_API}/projects?pageSize=100&sort=${backendSort}`,
       config
     );
 
     const pageData = response.data.data;
     const projects = pageData.content || [];
+
+    console.log(
+      `✅ 받은 프로젝트 개수: ${projects.length}개 (${backendSort} 정렬)`
+    );
 
     return projects;
   } catch (error) {
@@ -379,7 +394,54 @@ export async function getAllProjects() {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       localStorage.removeItem("access_token");
 
-      // 토큰 없이 재시도
+      try {
+        const backendSortMap = {
+          LATEST: "latest",
+          POPULAR: "popular",
+          VIEWS: "views",
+          LIKES: "popular",
+        };
+        const backendSort = backendSortMap[sortType] || "popular";
+
+        const response = await axios.get(
+          `${BASE_API}/projects?pageSize=100&sort=${backendSort}`
+        );
+        const pageData = response.data.data;
+        const projects = pageData.content || [];
+        return projects;
+      } catch (retryError) {
+        console.error("재시도 실패:", retryError);
+        throw retryError;
+      }
+    }
+
+    throw error;
+  }
+}
+
+// ✅ 새로운 함수: 정렬없이 모든 프로젝트 가져오기 (기존 동작 유지용)
+export async function getAllProjectsUnsorted() {
+  try {
+    const token = getAuthToken();
+    const config = token
+      ? { headers: { Authorization: `Bearer ${token}` } }
+      : {};
+
+    const response = await axios.get(
+      `${BASE_API}/projects?pageSize=100`, // 정렬 파라미터 없음
+      config
+    );
+
+    const pageData = response.data.data;
+    const projects = pageData.content || [];
+    return projects;
+  } catch (error) {
+    console.error("프로젝트 목록 조회 실패:", error);
+
+    // 401 오류 시 토큰 제거하고 재시도
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      localStorage.removeItem("access_token");
+
       try {
         const response = await axios.get(`${BASE_API}/projects?pageSize=100`);
         const pageData = response.data.data;
