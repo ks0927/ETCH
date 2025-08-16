@@ -135,9 +135,6 @@ export default function JobDetailTabContent({
             </dl>
 
             <div className="pt-2 border-t border-gray-100">
-              <h4 className="mb-3 text-sm font-medium text-gray-700">
-                요약 정보
-              </h4>
               <div className="flex flex-wrap items-center gap-2">
                 {anyJob.employmentType &&
                   renderBadge(anyJob.employmentType, "gray")}
