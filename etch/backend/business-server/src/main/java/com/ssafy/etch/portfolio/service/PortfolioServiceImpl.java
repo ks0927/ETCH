@@ -244,7 +244,9 @@ public class PortfolioServiceImpl implements PortfolioService {
                     pm.put("youtubeUrl", Optional.ofNullable(p.getYoutubeUrl()).orElse("미입력"));
                     pm.put("githubUrl", Optional.ofNullable(p.getGithubUrl()).orElse("미입력"));
                     pm.put("category",p.getProjectCategory());
-                    pm.put("techList", p.getProjectTechs().toString());
+                    pm.put("techList", p.getProjectTechs().stream()
+                            .map(tech -> tech.getTechCode().getCodeName())
+                            .collect(Collectors.joining(", ")));
                     
                     return pm;
                 })
