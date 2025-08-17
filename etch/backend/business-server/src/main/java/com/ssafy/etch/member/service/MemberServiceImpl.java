@@ -46,7 +46,7 @@ public class MemberServiceImpl implements MemberService {
         String profileUrl = null;
         if (profile != null && !profile.isEmpty()) {
             if (!FileUtil.isImageOk(profile)) {
-                throw new IllegalArgumentException("이미지 파일이 올바르지 않습니다.");
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
             }
             profileUrl = s3Service.uploadFile(profile);
         }
@@ -104,7 +104,7 @@ public class MemberServiceImpl implements MemberService {
 
         if (profile != null && !profile.isEmpty()) {
             if (!FileUtil.isImageOk(profile)) {
-                throw new IllegalArgumentException("이미지 파일이 올바르지 않습니다.");
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
             }
             if (profileUrl != null && !profileUrl.isEmpty()) {
                 s3Service.deleteFileByUrl(profileUrl);
@@ -136,7 +136,7 @@ public class MemberServiceImpl implements MemberService {
 
         if (profile != null && !profile.isEmpty()) {
             if (!FileUtil.isImageOk(profile)) {
-                throw new IllegalArgumentException("이미지 파일이 올바르지 않습니다.");
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
             }
             if (profileUrl != null && !profileUrl.isEmpty()) {
                 s3Service.deleteFileByUrl(profileUrl);
