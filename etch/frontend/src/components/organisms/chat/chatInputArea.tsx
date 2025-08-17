@@ -8,7 +8,10 @@ interface ChatInputAreaProps {
   onFileUpload?: () => void;
 }
 
-export default function ChatInputArea({ onSendMessage, onFileUpload }: ChatInputAreaProps) {
+export default function ChatInputArea({
+  onSendMessage,
+  onFileUpload,
+}: ChatInputAreaProps) {
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = () => {
@@ -19,7 +22,7 @@ export default function ChatInputArea({ onSendMessage, onFileUpload }: ChatInput
   };
 
   const handleKeyEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       handleSend();
     }
   };
@@ -31,7 +34,7 @@ export default function ChatInputArea({ onSendMessage, onFileUpload }: ChatInput
         <ChatInput
           value={inputValue}
           type="text"
-          placeholder="메시지를 입력하세요..."
+          placeholderText="메시지를 입력하세요..."
           onChange={setInputValue}
           onKeyEnter={handleKeyEnter}
         />

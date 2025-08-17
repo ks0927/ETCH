@@ -1,4 +1,4 @@
-import { mockFavoriteCompanyData } from "../../../../types/mockFavoriteCompanyData";
+import { mockFavoriteCompanyData } from "../../../../types/mock/mockFavoriteCompanyData";
 import DetailCompanyList from "../../../organisms/mypage/favorite/detail/detailCompanyList";
 
 function DetailFavoriteCompany() {

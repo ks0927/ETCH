@@ -2,6 +2,8 @@ package com.ssafy.etch.member.service;
 
 import com.ssafy.etch.global.exception.CustomException;
 import com.ssafy.etch.global.exception.ErrorCode;
+import com.ssafy.etch.global.service.S3Service;
+import com.ssafy.etch.global.util.FileUtil;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
 import com.ssafy.etch.member.entity.MemberEntity;
@@ -13,9 +15,9 @@ import com.ssafy.etch.project.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -24,29 +26,50 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final ProjectRepository projectRepository;
     private final JWTUtil jwtUtil;
+    private final S3Service s3Service;
 
     @Override
     public MemberDTO findById(long id) {
         MemberEntity memberEntity = memberRepository.findById(id)
                 .orElseThrow(()-> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        if (memberEntity.toMemberDTO().isDeleted()) {
+            throw new CustomException(ErrorCode.USER_WITHDRAWN);
+        }
+
         return memberEntity.toMemberDTO();
     }
 
     @Override
     @Transactional
-    public MemberDTO registerNewMember(String email, MemberDTO memberDTO) {
-        // role 설정
-        memberDTO = memberDTO.toBuilder().role("USER").email(email).build();
+    public MemberDTO registerNewMember(String email, MemberRequestDTO requestDTO, MultipartFile profile) {
+        String profileUrl = null;
+        if (profile != null && !profile.isEmpty()) {
+            if (!FileUtil.isImageOk(profile)) {
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
+            }
+            profileUrl = s3Service.uploadFile(profile);
+        }
+
+        MemberDTO memberDTO = MemberDTO.builder()
+                .nickname(requestDTO.getNickname())
+                .gender(requestDTO.getGender())
+                .phoneNumber(requestDTO.getPhoneNumber())
+                .birth(requestDTO.getBirth())
+                .email(email)
+                .profile(profileUrl)
+                .role("USER")
+                .refreshToken("") // 초기값 설정
+                .build();
+
         MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
         MemberEntity savedEntity = memberRepository.save(memberEntity);
-        memberDTO = savedEntity.toMemberDTO();
-        // refreshToken 생성
+
         String refreshToken = jwtUtil.createJwt(
                 "refresh",
-                memberDTO.getEmail(),
-                memberDTO.getRole(),
-                memberDTO.getId(),
+                savedEntity.toMemberDTO().getEmail(),
+                savedEntity.toMemberDTO().getRole(),
+                savedEntity.toMemberDTO().getId(),
                 24 * 60 * 60 * 1000L // 1일
         );
         MemberEntity.updateRefreshToken(savedEntity, refreshToken);
@@ -73,11 +96,23 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public MemberDTO updateMember(Long id, MemberRequestDTO memberRequestDTO) {
+    public MemberDTO updateMember(Long id, MemberRequestDTO memberRequestDTO, MultipartFile profile) {
         MemberEntity memberEntity = memberRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        MemberEntity.updateMemberInfo(memberEntity, memberRequestDTO);
+        String profileUrl = memberEntity.toMemberDTO().getProfile();
+
+        if (profile != null && !profile.isEmpty()) {
+            if (!FileUtil.isImageOk(profile)) {
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
+            }
+            if (profileUrl != null && !profileUrl.isEmpty()) {
+                s3Service.deleteFileByUrl(profileUrl);
+            }
+            profileUrl = s3Service.uploadFile(profile);
+        }
+
+        MemberEntity.updateMemberInfo(memberEntity, memberRequestDTO, profileUrl);
 
         return memberEntity.toMemberDTO();
     }
@@ -89,5 +124,33 @@ public class MemberServiceImpl implements MemberService {
                 .map(ProjectEntity::toProjectDTO)
                 .map(ProjectListDTO::from)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public String updateProfileImage(Long id, MultipartFile profile) {
+        MemberEntity memberEntity = memberRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String profileUrl = memberEntity.toMemberDTO().getProfile();
+
+        if (profile != null && !profile.isEmpty()) {
+            if (!FileUtil.isImageOk(profile)) {
+                throw new CustomException(ErrorCode.INVALID_FILE_EXTENSION);
+            }
+            if (profileUrl != null && !profileUrl.isEmpty()) {
+                s3Service.deleteFileByUrl(profileUrl);
+            }
+            profileUrl = s3Service.uploadFile(profile);
+        } else {
+            if (profileUrl != null && !profileUrl.isEmpty()) {
+                s3Service.deleteFileByUrl(profileUrl);
+                profileUrl = null;
+            }
+        }
+
+        MemberEntity.updateProfileImage(memberEntity, profileUrl);
+
+        return profileUrl;
     }
 }

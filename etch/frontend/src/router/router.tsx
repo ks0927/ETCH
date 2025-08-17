@@ -4,6 +4,7 @@ import Layout from "../layout/layout.tsx";
 import ErrorPage from "../components/pages/errorPage.tsx";
 import LoadingPage from "../components/pages/loadingPage.tsx";
 import SearchPage from "../components/pages/searchPage.tsx";
+import ProtectedRoute from "../components/common/ProtectedRoute.tsx";
 
 const HomePage = lazy(() => import("../components/pages/homePage.tsx"));
 const NewsPage = lazy(
@@ -12,9 +13,7 @@ const NewsPage = lazy(
 const NewsLatestPage = lazy(
   () => import("../components/pages/news/newsLatestPage.tsx")
 );
-const NewsRecommendPage = lazy(
-  () => import("../components/pages/news/newsRecommendPage.tsx")
-);
+
 const JoinPage = lazy(() => import("../components/pages/join/joinPage.tsx"));
 const LoginPage = lazy(() => import("../components/pages/loginPage.tsx"));
 const OAuthLoadingPage = lazy(
@@ -29,6 +28,9 @@ const ProjectListPage = lazy(
 );
 const ProjectWritePage = lazy(
   () => import("../components/pages/project/projectWritePage.tsx")
+);
+const ProjectUpdatePage = lazy(
+  () => import("../components/pages/project/projectUpdatePage.tsx")
 );
 const JobPage = lazy(() => import("../components/pages/job/jobPage.tsx"));
 const MyPageLayout = lazy(() => import("../layout/mypageLayout.tsx"));
@@ -55,7 +57,8 @@ const DetailFavoriteProject = lazy(
 );
 
 const MypageCoverLetterPage = lazy(
-  () => import("../components/pages/mypage/mypageCoverLetterPage.tsx")
+  () =>
+    import("../components/pages/mypage/coverletter/mypageCoverLetterPage.tsx")
 );
 const MypageFollowerPage = lazy(
   () => import("../components/pages/mypage/mypageFollowerPage.tsx")
@@ -63,6 +66,31 @@ const MypageFollowerPage = lazy(
 const MypageFollowingPage = lazy(
   () => import("../components/pages/mypage/mypageFollowingPage.tsx")
 );
+const MypagePortfolioPage = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioPage.tsx")
+);
+const MyPageCoverLetterEditPage = lazy(
+  () =>
+    import(
+      "../components/pages/mypage/coverletter/MyPageCoverLetterEditPage.tsx"
+    )
+);
+const MyPageCoverLetterDetailPage = lazy(
+  () =>
+    import(
+      "../components/pages/mypage/coverletter/MyPageCoverLetterDetailPage.tsx"
+    )
+);
+const UserProfilePage = lazy(
+  () => import("../components/pages/userProfilePage.tsx")
+);
+const MypagePortfolioDetail = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioDetail.tsx")
+);
+const MypagePortfolioEditPage = lazy(
+  () => import("../components/pages/mypage/mypagePortfolioEditPage.tsx")
+);
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -75,10 +103,6 @@ const router = createBrowserRouter([
             <HomePage />
           </Suspense>
         ),
-      },
-      {
-        path: "/test",
-        element: <DetailFavoriteCompany />,
       },
       {
         path: "*",
@@ -112,14 +136,7 @@ const router = createBrowserRouter([
           </Suspense>
         ),
       },
-      {
-        path: "/news/recommend",
-        element: (
-          <Suspense fallback={<LoadingPage />}>
-            <NewsRecommendPage />
-          </Suspense>
-        ),
-      },
+
       {
         path: "/join",
         element: (
@@ -150,18 +167,46 @@ const router = createBrowserRouter([
       },
       {
         path: "/projects/write",
-        element: <ProjectWritePage />,
+        element: (
+          <ProtectedRoute showMessage={true}>
+            <Suspense fallback={<LoadingPage />}>
+              <ProjectWritePage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/projects/:id/edit",
+        element: (
+          <ProtectedRoute showMessage={true}>
+            <Suspense fallback={<LoadingPage />}>
+              <ProjectUpdatePage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/jobs",
         element: <JobPage />,
       },
       {
+        path: "members/:userId/projects",
+        element: (
+          <ProtectedRoute showMessage={true}>
+            <Suspense fallback={<LoadingPage />}>
+              <UserProfilePage />
+            </Suspense>
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "/mypage",
         element: (
-          <Suspense fallback={<LoadingPage />}>
-            <MyPageLayout />
-          </Suspense>
+          <ProtectedRoute showMessage={true}>
+            <Suspense fallback={<LoadingPage />}>
+              <MyPageLayout />
+            </Suspense>
+          </ProtectedRoute>
         ),
         children: [
           {
@@ -176,6 +221,31 @@ const router = createBrowserRouter([
             path: "applications",
             element: <MypageApplicationsPage />,
           },
+          {
+            path: "portfolios",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "portfolios/:userId",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioDetail />
+              </Suspense>
+            ),
+          },
+          {
+            path: "portfolios/edit/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MypagePortfolioEditPage />
+              </Suspense>
+            ),
+          },
+
           {
             path: "favorites",
             element: (
@@ -207,6 +277,22 @@ const router = createBrowserRouter([
           {
             path: "coverletters",
             element: <MypageCoverLetterPage />,
+          },
+          {
+            path: "cover-letter-edit/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MyPageCoverLetterEditPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: "cover-letter-detail/:id",
+            element: (
+              <Suspense fallback={<LoadingPage />}>
+                <MyPageCoverLetterDetailPage />
+              </Suspense>
+            ),
           },
           {
             path: "followers",

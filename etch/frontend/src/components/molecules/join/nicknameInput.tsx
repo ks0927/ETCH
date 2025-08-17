@@ -1,6 +1,11 @@
 import type { InputProps } from "../../atoms/input";
 
-function NicknameInput({ value, type, placeholder, onChange }: InputProps) {
+function NicknameInput({
+  value,
+  type,
+  placeholderText: placeholder,
+  onChange,
+}: InputProps) {
   return (
     <input
       value={value}

@@ -1,14 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
+import axios from "axios";
 import NicknameInput from "../../molecules/join/nicknameInput";
 import TelInput from "../../molecules/join/telInput";
 import BirthDateSelector from "../../organisms/join/BirthDateSelector";
 import GenderRadioGroup from "../../organisms/join/genderRadioGroup";
 import ProfileImageUploader from "../../organisms/join/profileImageUploader";
 import CompletionButton from "../../molecules/join/completionButton";
+import TokenManager from "../../../utils/tokenManager";
 
 function AdditionalInfoPage() {
+  const navigate = useNavigate();
   const [nickname, setNickname] = useState("");
   const [tel, setTel] = useState("");
+  const [birth, setBirth] = useState("");
+  const [gender, setGender] = useState("");
+  const [profile, setProfile] = useState<File | null>(null);
 
   const handleNicknameChange = (value: string) => {
     setNickname(value);
@@ -18,8 +25,79 @@ function AdditionalInfoPage() {
     setTel(value);
   };
 
+  const handleBirthChange = (value: string) => {
+    setBirth(value);
+  };
+
+  const handleGenderChange = (value: string) => {
+    setGender(value);
+  };
+
+  const handleProfileChange = (file: File | null) => {
+    setProfile(file);
+  };
+
+  const handleSubmit = async () => {
+    console.log("=== 디버깅 ===");
+    console.log("nickname:", nickname);
+    console.log("tel:", tel);
+    console.log("birth:", birth);
+    console.log("gender:", gender);
+    console.log("profile:", profile?.name || "No file selected");
+
+    try {
+      const accessToken = TokenManager.getToken();
+
+      if (!accessToken) {
+        alert("비정상적인 접근입니다.");
+        navigate("/join", { replace: true });
+        return;
+      }
+
+      // FormData 생성 (multipart/form-data)
+      const formData = new FormData();
+
+      // JSON 데이터를 'data' 파트에 추가
+      const memberData = {
+        nickname,
+        phoneNumber: tel,
+        gender,
+        birth,
+      };
+      formData.append("data", JSON.stringify(memberData));
+
+      // 프로필 이미지가 있으면 'profile' 파트에 추가
+      if (profile) {
+        formData.append("profile", profile);
+      }
+
+      console.log("회원가입 데이터:", memberData);
+      console.log("프로필 파일:", profile?.name || "No file selected");
+      console.log("Access Token:", accessToken);
+
+      const response = await axios.post(
+        "https://etch.it.kr/api/v1/members",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        alert("회원가입이 완료되었습니다! 로그인 해주세요!");
+        navigate("/login", { replace: true });
+      }
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      alert("회원가입 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen px-4">
       <div className="w-full max-w-md p-8 bg-white border border-gray-100 rounded-lg shadow-sm">
         <div className="mb-8 text-center">
           <h1 className="mb-4 text-2xl font-bold text-gray-900">프로필 설정</h1>
@@ -37,21 +115,21 @@ function AdditionalInfoPage() {
           <NicknameInput
             value={nickname}
             type="text"
-            placeholder="사용할 닉네임을 입력하세요"
+            placeholderText="사용할 닉네임을 입력하세요"
             onChange={handleNicknameChange}
           />
           <div>
             <p className="block mb-2 text-sm font-medium text-gray-700">
               *생년월일
             </p>
-            <BirthDateSelector />
+            <BirthDateSelector onChange={handleBirthChange} />
           </div>
 
           <div>
             <p className="block mb-2 text-sm font-medium text-gray-700">
               *성별
             </p>
-            <GenderRadioGroup />
+            <GenderRadioGroup value={gender} onChange={handleGenderChange} />
           </div>
 
           <div>
@@ -61,7 +139,7 @@ function AdditionalInfoPage() {
             <TelInput
               value={tel}
               type="tel"
-              placeholder="01000000000"
+              placeholderText="01000000000"
               onChange={handleTelChange}
             />
           </div>
@@ -70,16 +148,11 @@ function AdditionalInfoPage() {
             <p className="block mb-2 text-sm font-medium text-gray-700">
               프로필 사진
             </p>
-            <ProfileImageUploader />
+            <ProfileImageUploader onChange={handleProfileChange} />
           </div>
 
           <div className="pt-4">
-            <CompletionButton
-              text="완료"
-              onClick={() => {
-                console.log("프로필 설정 완료");
-              }}
-            />
+            <CompletionButton text="완료" onClick={handleSubmit} />
           </div>
         </div>
       </div>

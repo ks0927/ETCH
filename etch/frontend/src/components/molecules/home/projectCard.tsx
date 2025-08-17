@@ -1,14 +1,14 @@
 import { Link } from "react-router";
 import type { ProjectCardProps } from "../../atoms/card";
 
-function ProcjectCard({ id, title, content, img }: ProjectCardProps) {
+function ProcjectCard({ id, title, content, thumbnailUrl }: ProjectCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <Link to={`/projects/${id}`}>
         <section className="w-full h-36">
           <img
             className="w-full object-cover h-full "
-            src={img}
+            src={thumbnailUrl}
             alt="카드 이미지"
           />
         </section>

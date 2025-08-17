@@ -8,5 +8,5 @@ import org.springframework.stereotype.Repository;
 import com.ssafy.etch.comment.entity.CommentEntity;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-	List<CommentEntity> findAllByProjectIdOrderByCreatedAtDesc(Long projectId);
+	List<CommentEntity> findAllByProject_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long projectId);
 }

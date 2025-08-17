@@ -1,5 +1,7 @@
 package com.ssafy.etch.project.entity;
 
+import com.ssafy.etch.tech.entity.TechCodeEntity;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -19,4 +21,11 @@ public class ProjectTechEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tech_code_id")
     private TechCodeEntity techCode;
+
+    public static ProjectTechEntity of(ProjectEntity project, TechCodeEntity tech) {
+        ProjectTechEntity e = new ProjectTechEntity();
+        e.project = project;
+        e.techCode = tech;
+        return e;
+    }
 }

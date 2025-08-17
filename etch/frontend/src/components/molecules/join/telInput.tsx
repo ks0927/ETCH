@@ -1,6 +1,11 @@
 import type { InputProps } from "../../atoms/input";
 
-function TelInput({ type, value, placeholder, onChange }: InputProps) {
+function TelInput({
+  type,
+  value,
+  placeholderText: placeholder,
+  onChange,
+}: InputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const numericValue = e.target.value.replace(/[^0-9]/g, "");
     onChange(numericValue);

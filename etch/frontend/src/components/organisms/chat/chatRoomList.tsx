@@ -1,8 +1,8 @@
-import type { ChatRoomItemProps } from "../../atoms/listItem";
+import type { UIChatRoom } from "../../../types/chat";
 import ChatRoomItem from "../../molecules/chat/chatRoomItem";
 
 interface ChatRoomListProps {
-  chatRooms: ChatRoomItemProps[];
+  chatRooms: UIChatRoom[];
   onRoomClick: (roomId: string) => void;
 }
 
@@ -13,7 +13,9 @@ export default function ChatRoomList({
   return (
     <div>
       {chatRooms.length === 0 ? (
-        <div>채팅방이 없습니다</div>
+        <div className="p-4 text-center text-gray-500">
+          채팅방이 없습니다
+        </div>
       ) : (
         chatRooms.map((room) => (
           <ChatRoomItem

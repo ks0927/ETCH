@@ -1,22 +1,15 @@
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import GoogleAuthButton from "../../molecules/googleAuthButton";
 
 function JoinPage() {
-  const navigate = useNavigate();
-
-  const handleGoogleAuth = () => {
-    // OAuth 로딩 페이지로 이동
-    navigate("/Oauth");
-  };
-
   return (
     <>
-      <div className="flex items-center justify-center min-h-screen px-4 bg-gray-100">
+      <div className="flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md p-8 bg-white border border-gray-100 rounded-lg shadow-sm">
           <div className="mb-8 text-center">
             <h1 className="mb-4 text-2xl font-bold text-gray-900">회원가입</h1>
             <p className="mb-2 text-gray-600">
-              E:TCH와 함께 IT 취업을 시작하세요
+              ETCH와 함께 IT 취업을 시작하세요
             </p>
             <p className="text-sm text-gray-500">
               구글 계정으로 간편하게 가입하세요
@@ -24,10 +17,7 @@ function JoinPage() {
           </div>
 
           <div className="mb-6">
-            <GoogleAuthButton
-              text="Google로 회원가입"
-              onClick={handleGoogleAuth}
-            />
+            <GoogleAuthButton text="Google로 회원가입" />
           </div>
 
           <div className="p-4 mb-6 border border-blue-100 rounded-lg bg-blue-50">
@@ -50,7 +40,7 @@ function JoinPage() {
               </Link>
             </p>
             <p className="text-xs text-gray-500">
-              회원가입하면 E:TCH의 이용약관 및 개인정보처리방침 에 동의하는
+              회원가입하면 ETCH의 이용약관 및 개인정보처리방침 에 동의하는
               것으로 간주됩니다.
             </p>
           </div>

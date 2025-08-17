@@ -1,0 +1,109 @@
+import pymysql
+from pymysql.cursors import DictCursor
+import os
+from dotenv import load_dotenv
+
+# .env 파일에서 환경 변수 로드
+load_dotenv()
+
+
+def get_liked_items(user_id: int):
+    conn = pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        db=os.getenv("DB_NAME"),
+        charset='utf8mb4',
+        ssl={'ca': os.getenv("DB_SSL_CA")}  # CA 인증서 경로
+    )
+    print("Connected to MySQL database successfully.")
+    
+    results_by_type = {
+        "NEWS": [],
+        "PROJECT": [],
+        "JOB": []
+    }
+    
+    try:
+        with conn.cursor(DictCursor) as cursor:
+            # 1. Get liked NEWS from news table
+            query_news = """
+                SELECT n.id, n.description, n.title
+                FROM news n
+                JOIN liked_content lc ON n.id = lc.targetId
+                WHERE lc.member_id = %s AND lc.type = 'NEWS'
+            """
+            cursor.execute(query_news, (user_id,))
+            results_by_type["NEWS"] = cursor.fetchall()
+
+            # 2. Get liked PROJECTS from project_post table
+            query_projects = """
+                SELECT p.title, p.content
+                FROM project_post p
+                JOIN liked_content lc ON p.id = lc.targetId
+                WHERE lc.member_id = %s AND lc.type = 'PROJECT'
+            """
+            cursor.execute(query_projects, (user_id,))
+            results_by_type["PROJECT"] = cursor.fetchall()
+
+            # 3. Get liked JOBS from job table
+            query_jobs = """
+                SELECT j.id, j.title, j.company_name, j.industry, j.job_category
+                FROM job j
+                JOIN liked_content lc ON j.id = lc.targetId
+                WHERE lc.member_id = %s AND lc.type = 'JOB'
+            """
+            cursor.execute(query_jobs, (user_id,))
+            results_by_type["JOB"] = cursor.fetchall()
+            
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SQL Query Result~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    finally:
+        conn.close()
+        
+    return results_by_type
+
+def get_latest_items():
+    conn = pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        port=int(os.getenv("DB_PORT")),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        db=os.getenv("DB_NAME"),
+        charset='utf8mb4',
+        ssl={'ca': os.getenv("DB_SSL_CA")}  # CA 인증서 경로
+    )
+    print("Connected to MySQL database for latest items.")
+    
+    latest_items = {
+        "NEWS": [],
+        "JOB": []
+    }
+    
+    try:
+        with conn.cursor(DictCursor) as cursor:
+            # Get latest 5 NEWS
+            query_latest_news = """
+                SELECT id, description, title
+                FROM news
+                ORDER BY id DESC
+                LIMIT 5
+            """
+            cursor.execute(query_latest_news)
+            latest_items["NEWS"] = cursor.fetchall()
+
+            # Get latest 5 JOBS
+            query_latest_jobs = """
+                SELECT id, title, company_name, industry, job_category
+                FROM job
+                ORDER BY id DESC
+                LIMIT 5
+            """
+            cursor.execute(query_latest_jobs)
+            latest_items["JOB"] = cursor.fetchall()
+            
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Latest Items Query Result~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    finally:
+        conn.close()
+        
+    return latest_items

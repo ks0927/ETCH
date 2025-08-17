@@ -1,11 +1,9 @@
 package com.ssafy.etch.oauth.jwt.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.etch.global.exception.ErrorCode;
-import com.ssafy.etch.global.response.ApiResponse;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.oauth.dto.CustomOAuth2User;
 import com.ssafy.etch.oauth.jwt.util.JWTUtil;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +18,6 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public JWTFilter(JWTUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
@@ -28,6 +25,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // "/auth/reissue" 경로로 오는 요청은 필터를 건너뛰도록 처리
+        if (request.getRequestURI().equals("/auth/reissue")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 헤더에서 "access" 토큰을 찾음
         String accessToken = extractToken(request);
 
@@ -37,23 +40,19 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 토큰 만료 여부 확인
-        if (jwtUtil.isExpired(accessToken)) {
-            sendErrorResponse(response, ErrorCode.ACCESS_TOKEN_EXPIRED);
-            return;
-        }
-
         // 토큰이 "access" 카테고리인지 확인 (리프레시 토큰으로 API 접근 방지)
         String category = jwtUtil.getCategory(accessToken);
-        if (!category.equals("access")) {
-            sendErrorResponse(response, ErrorCode.ACCESS_TOKEN_INVALID);
-            return;
+        if (!"access".equals(category)) {
+            throw new JwtException("Invalid token category");
         }
 
         // 토큰에서 id와 role 추출
+        Long id = -1L;
         String email = jwtUtil.getEmail(accessToken);
         String role = jwtUtil.getRole(accessToken);
-        Long id = jwtUtil.getId(accessToken);
+        if("USER".equals(role)) {
+            id = jwtUtil.getId(accessToken);
+        }
 
         // MemberDTO 생성
         MemberDTO memberDTO = MemberDTO.builder()
@@ -71,13 +70,6 @@ public class JWTFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
-    }
-
-    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json;charset=UTF-8");
-        ApiResponse<?> apiResponse = ApiResponse.error(errorCode.getMessage());
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
     }
 
     public String extractToken(HttpServletRequest request) {

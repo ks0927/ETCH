@@ -4,6 +4,7 @@ import com.ssafy.etch.coverLetter.entity.CoverLetterEntity;
 import com.ssafy.etch.follow.entity.FollowEntity;
 import com.ssafy.etch.member.dto.MemberDTO;
 import com.ssafy.etch.member.dto.MemberRequestDTO;
+import com.ssafy.etch.portfolio.entity.PortfolioEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -54,6 +55,9 @@ public class MemberEntity {
 
     @OneToMany(mappedBy = "member")
     private List<CoverLetterEntity> coverLetterList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "member")
+    private List<PortfolioEntity>  portfolioList = new ArrayList<>();
 //    @OneToMany(mappedBy = "user")
 //    private List<ProjectEntity> projects = new ArrayList<>();
 //
@@ -91,9 +95,9 @@ public class MemberEntity {
         memberEntity.birth = LocalDate.parse(memberDTO.getBirth());
         memberEntity.isDeleted = false;
         memberEntity.refreshToken = memberDTO.getRefreshToken();
+        memberEntity.role = MemberRole.valueOf(memberDTO.getRole());
         return memberEntity;
     }
-
 
     public static void updateRefreshToken(MemberEntity memberEntity, String refreshToken) {
         memberEntity.refreshToken = refreshToken;
@@ -101,10 +105,17 @@ public class MemberEntity {
     public static void changeMemberStatus(MemberEntity memberEntity, boolean isDeleted) {
         memberEntity.isDeleted = isDeleted;
     }
-    public static void updateMemberInfo(MemberEntity memberEntity, MemberRequestDTO memberRequestDTO) {
+    public static void updateMemberInfo(MemberEntity memberEntity, MemberRequestDTO memberRequestDTO, String profileUrl) {
         memberEntity.nickname = memberRequestDTO.getNickname();
         memberEntity.phoneNumber = memberRequestDTO.getPhoneNumber();
-        memberEntity.profile = memberRequestDTO.getProfile();
+        memberEntity.profile = profileUrl;
     }
 
+    public static void updateProfileImage(MemberEntity memberEntity, String profileUrl) {
+        memberEntity.profile = profileUrl;
+    }
+
+    public Long getId() {
+        return id;
+    }
 }

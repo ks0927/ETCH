@@ -1,118 +1,41 @@
-type category = "field" | "stack" | "sort";
+import { ProjectWriteCategoryData } from "./project/projectCategroyData";
+
+type category = "field" | "sort";
 
 export interface ProjectSidebarInventory {
   type: category;
-  list: string;
-  value: string;
+  list: string; // 화면에 표시될 한글 텍스트
+  value: string; // 백엔드로 전송할 값
   checked: boolean;
 }
 
+// ProjectWriteCategoryData를 기반으로 자동 생성
 export const ProjectSidebarType: ProjectSidebarInventory[] = [
-  //field
+  // field (개발 분야) - ProjectWriteCategoryData에서 자동 생성
+  ...ProjectWriteCategoryData.map((categoryData) => ({
+    type: "field" as const,
+    list: categoryData.text, // "웹 개발", "모바일 앱" 등
+    value: categoryData.category, // "WEB", "MOBILE" 등
+    checked: false,
+  })),
 
-  {
-    type: "field",
-    list: "웹 개발",
-    value: "웹 개발",
-    checked: false,
-  },
-  {
-    type: "field",
-    list: "모바일 앱",
-    value: "모바일 앱",
-    checked: false,
-  },
-  {
-    type: "field",
-    list: "서버",
-    value: "서버",
-    checked: false,
-  },
-  {
-    type: "field",
-    list: "데이터베이스",
-    value: "데이터베이스",
-    checked: false,
-  },
-  {
-    type: "field",
-    list: "DevOps",
-    value: "DevOps",
-    checked: false,
-  },
-
-  {
-    type: "field",
-    list: "보안",
-    value: "보안",
-    checked: false,
-  },
-  //stack
-  {
-    type: "stack",
-    list: "React",
-    value: "React",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Vue.js",
-    value: "Vue.js",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Node.js",
-    value: "Node.js",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Python",
-    value: "Python",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Java",
-    value: "Java",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Spring",
-    value: "Spring",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Flutter",
-    value: "Flutter",
-    checked: false,
-  },
-  {
-    type: "stack",
-    list: "Docker",
-    value: "Docker",
-    checked: false,
-  },
-  //sort
-  {
-    type: "sort",
-    list: "인기순",
-    value: "인기순",
-    checked: false,
-  },
+  // sort (정렬)
   {
     type: "sort",
     list: "최신순",
-    value: "최신순",
+    value: "LATEST",
     checked: false,
   },
   {
     type: "sort",
     list: "조회순",
-    value: "조회순",
+    value: "VIEWS",
+    checked: false,
+  },
+  {
+    type: "sort",
+    list: "인기순",
+    value: "POPULAR",
     checked: false,
   },
 ];

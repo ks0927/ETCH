@@ -1,19 +1,22 @@
 import { useState } from "react";
-import type { ProjectCardProps } from "../../../../atoms/card";
 import ProjectModal from "../../../../common/projectModal";
 import MyProjectCard from "../../../../molecules/mypage/project/myProjectCard";
+import type { ProjectData } from "../../../../../types/project/projectDatas";
+import { getProjectById } from "../../../../../api/projectApi"; // 🎯 추가
 
 interface Props {
-  mockProjects: ProjectCardProps[];
+  mockProjects: ProjectData[]; // 🎯 타입 변경
+  onProjectUpdate?: (updatedProject: ProjectData) => void; // 🎯 추가
 }
 
-function MypageProjectList({ mockProjects }: Props) {
+function MypageProjectList({ mockProjects, onProjectUpdate }: Props) {
   const [visibleCount, setVisibleCount] = useState(10);
   const hasMore = mockProjects.length > visibleCount;
 
-  // 모달 상태 관리
-  const [selectedProject, setSelectedProject] =
-    useState<ProjectCardProps | null>(null);
+  // 🎯 모달 상태를 ProjectData로 변경
+  const [selectedProject, setSelectedProject] = useState<ProjectData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const visibleProjects = mockProjects.slice(0, visibleCount);
@@ -22,19 +25,37 @@ function MypageProjectList({ mockProjects }: Props) {
     setVisibleCount((prev) => prev + 10);
   };
 
-  // 카드 클릭 핸들러
-  const handleCardClick = (projectId: number) => {
-    const project = mockProjects.find((p) => p.id === projectId);
-    if (project) {
-      setSelectedProject(project);
+  // 🎯 카드 클릭 핸들러 - API로 최신 데이터 가져오기
+  const handleCardClick = async (projectId: number) => {
+    try {
+      const detailProject = await getProjectById(projectId);
+      setSelectedProject(detailProject);
       setIsModalOpen(true);
+    } catch (error) {
+      console.error("상세 정보 로딩 실패:", error);
+      // 실패 시 기존 데이터라도 보여주기
+      const project = mockProjects.find((p) => p.id === projectId);
+      if (project) {
+        setSelectedProject(project);
+        setIsModalOpen(true);
+      }
     }
   };
 
-  // 모달 닫기 핸들러
+  // 🎯 모달 닫기 시 프로젝트 데이터 업데이트
   const handleCloseModal = () => {
+    // 선택된 프로젝트가 변경되었다면 부모 컴포넌트에 알림
+    if (selectedProject && onProjectUpdate) {
+      onProjectUpdate(selectedProject);
+    }
+
     setIsModalOpen(false);
     setSelectedProject(null);
+  };
+
+  // 🎯 모달에서 프로젝트 업데이트 핸들러
+  const handleProjectUpdate = (updatedProject: ProjectData) => {
+    setSelectedProject(updatedProject);
   };
 
   return (
@@ -44,7 +65,14 @@ function MypageProjectList({ mockProjects }: Props) {
         {visibleProjects.map((project) => (
           <MyProjectCard
             key={project.id}
-            {...project}
+            id={project.id}
+            title={project.title}
+            content={project.content}
+            thumbnailUrl={project.thumbnailUrl}
+            viewCount={project.viewCount}
+            likeCount={project.likeCount}
+            likedByMe={project.likedByMe}
+            nickname={project.nickname}
             type="project"
             onCardClick={handleCardClick}
           />
@@ -70,9 +98,13 @@ function MypageProjectList({ mockProjects }: Props) {
         </div>
       )}
 
-      {/* 프로젝트 모달 */}
+      {/* 🎯 프로젝트 모달 - onProjectUpdate 추가 */}
       {isModalOpen && selectedProject && (
-        <ProjectModal project={selectedProject} onClose={handleCloseModal} />
+        <ProjectModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectUpdate={handleProjectUpdate} // 프로젝트 업데이트 핸들러 전달
+        />
       )}
     </div>
   );

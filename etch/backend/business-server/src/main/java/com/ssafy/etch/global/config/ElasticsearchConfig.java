@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @EnableJpaRepositories(
     basePackages = {
+        "com.ssafy.etch.file.repository",
+        "com.ssafy.etch.tech.repository",
         "com.ssafy.etch.comment.repository",
         "com.ssafy.etch.company.repository",
         "com.ssafy.etch.coverLetter.repository", 
@@ -15,7 +17,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.ssafy.etch.like.repository",
         "com.ssafy.etch.member.repository",
         "com.ssafy.etch.news.repository",
-        "com.ssafy.etch.project.repository"
+        "com.ssafy.etch.project.repository",
+        "com.ssafy.etch.portfolio.repository"
     }
 )
 @EnableElasticsearchRepositories(

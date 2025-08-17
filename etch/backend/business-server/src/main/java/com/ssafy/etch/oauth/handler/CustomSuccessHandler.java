@@ -1,5 +1,6 @@
 package com.ssafy.etch.oauth.handler;
 
+import com.ssafy.etch.global.service.FastApiService;
 import com.ssafy.etch.global.util.CookieUtil;
 import com.ssafy.etch.member.entity.MemberEntity;
 import com.ssafy.etch.member.repository.MemberRepository;
@@ -19,10 +20,12 @@ import java.io.IOException;
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
+    private final FastApiService  fastApiService;
 
-    public CustomSuccessHandler(JWTUtil jwtUtil, MemberRepository memberRepository) {
+    public CustomSuccessHandler(JWTUtil jwtUtil, MemberRepository memberRepository, FastApiService fastApiService) {
         this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
+        this.fastApiService = fastApiService;
     }
 
     @Override
@@ -52,8 +55,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         //String redirectUrl = "http://localhost:3000/login?token=" + accessToken;
 
         // ⭐️ [수정] 로그인 성공 후 리디렉션될 프론트엔드 주소를 변경합니다.
-        String redirectUrl = "https://etch.it.kr/login?token=" + accessToken;
-
+        String redirectUrl = "https://etch.it.kr/Oauth?token=" + accessToken;
+        System.out.println("redirectUrl: " + redirectUrl);
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

@@ -143,7 +143,7 @@ public class LikeController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(ApiResponse.error("인증되지 않은 사용자입니다."));
         }
-        likeService.deleteLike(oAuth2User.getId(), id, LikeType.JOB);
+        likeService.deleteLike(oAuth2User.getId(), id, LikeType.PROJECT);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(null, "프로젝트 좋아요가 삭제되었습니다."));
     }

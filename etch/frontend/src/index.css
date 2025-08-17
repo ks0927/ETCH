@@ -12,3 +12,8 @@
   --color-brand-800: #003366;
   --color-brand-900: #001a33;
 }
+
+/* 채팅 메시지 안읽은 사람 숫자 숨기기 */
+.chat-unread-count {
+  display: none !important;
+}

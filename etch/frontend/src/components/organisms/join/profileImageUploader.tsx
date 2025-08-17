@@ -2,12 +2,20 @@ import { useState } from "react";
 import FileUploadButton from "../../molecules/join/FileUploadButton";
 import ProfileImagePreview from "../../molecules/join/ProfileImagePreview";
 
-function ProfileImageUploader() {
+interface ProfileImageUploaderProps {
+  onChange?: (file: File | null) => void;
+}
+
+function ProfileImageUploader({ onChange }: ProfileImageUploaderProps) {
   const [imageUrl, setImageUrl] = useState<string>("");
 
   const handleFileSelect = (file: File) => {
     const url = URL.createObjectURL(file);
     setImageUrl(url);
+    // onChange가 있을 때만 호출
+    if (onChange) {
+      onChange(file);
+    }
   };
 
   return (

@@ -6,7 +6,6 @@ import lombok.Getter;
 @Builder
 @Getter
 public class CoverLetterRequestDTO {
-    private Long id;
     private String name;
     private String answer1;
     private String answer2;
@@ -16,7 +15,6 @@ public class CoverLetterRequestDTO {
 
     public CoverLetterDTO toCoverLetterDTO() {
         return CoverLetterDTO.builder()
-                .id(id)
                 .name(name)
                 .answer1(answer1)
                 .answer2(answer2)

@@ -1,4 +1,4 @@
-import type { mockJobData } from "../../../types/mockJobData";
+import type { mockJobData } from "../../../types/mock/mockJobData";
 import JobCard from "../../molecules/home/jobCard";
 
 interface Props {
