@@ -1,4 +1,4 @@
-\## 기술 버전
+## 기술 버전
 
 | 구분 | 항목 | 내용 |
 
@@ -14,19 +14,19 @@
 
 
 
-\## 환경 변수
+## 환경 변수
 
 ```
 
-\# Server Port
+# Server Port
 
 server.port=8083
 
 
 
-\# Spring Datasource
+# Spring Datasource
 
-spring.datasource.url=jdbc:mysql://<DB 주소>/<DB 이름>?serverTimezone=UTC\&useUnicode=true\&characterEncoding=utf8
+spring.datasource.url=jdbc:mysql://<DB 주소>/<DB 이름>?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
 
 spring.datasource.username=<username>
 
@@ -36,7 +36,7 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 
 
-\# JPA
+# JPA
 
 spring.jpa.hibernate.ddl-auto=update
 
@@ -44,7 +44,7 @@ spring.jpa.show-sql=true
 
 
 
-\# Redis
+# Redis
 
 spring.data.redis.host=redis
 
@@ -52,7 +52,7 @@ spring.data.redis.port=6379
 
 
 
-\# JWT Secret Key (business-server와 반드시 동일해야 함)
+# JWT Secret Key (business-server와 반드시 동일해야 함)
 
 spring.jwt.secret=<jwt secretkey>
 
