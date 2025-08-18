@@ -1,4 +1,4 @@
-\## 기술 버전
+## 기술 버전
 
 | 구분 | 항목 | 내용 |
 
@@ -12,79 +12,79 @@
 
 
 
-\## 환경 변수
+## 환경 변수
 
 ```
 
-\# NewsAPI
+# NewsAPI
 
-NEWSAPI\_KEY=<api key>
-
-
-
-NEWS\_QUERY=삼성전자
-
-NEWS\_LANGUAGE=ko
-
-NEWS\_PAGE\_SIZE=100
-
-NEWS\_SORT\_BY=publishedAt
+NEWSAPI_KEY=<api key>
 
 
 
-\# MySQL 
+NEWS_QUERY=삼성전자
 
-MYSQL\_HOST=ssafy-mysql-db.mysql.database.azure.com
+NEWS_LANGUAGE=ko
 
-MYSQL\_PORT=3306
+NEWS_PAGE_SIZE=100
 
-MYSQL\_USER=<db user>
-
-MYSQL\_PASSWORD=<db password>
-
-MYSQL\_DB=<db name>
-
-MYSQL\_CHARSET=utf8mb4
-
-\#MYSQL\_SSL\_CA=certs/azure-ca.pem #local 환경
-
-MYSQL\_SSL\_CA=<인증서 경로>#EC2 환경
+NEWS_SORT_BY=publishedAt
 
 
 
-\# Redis 
+# MySQL 
 
-REDIS\_HOST=i13a402.p.ssafy.io
+MYSQL_HOST=ssafy-mysql-db.mysql.database.azure.com
 
-REDIS\_PORT=6379
+MYSQL_PORT=3306
 
+MYSQL_USER=<db user>
 
+MYSQL_PASSWORD=<db password>
 
-\# BATCH
+MYSQL_DB=<db name>
 
-NEWSAPI\_DAILY\_COUNT=100
+MYSQL_CHARSET=utf8mb4
 
-NEWSAPI\_TEST\_COUNT=5
+#MYSQL_SSL_CA=certsazure-ca.pem #local 환경
 
-NEWSAPI\_CALL\_INTERVAL\_SEC=0.2
-
-NEWSAPI\_LANG=
-
-
-
-\# LOCK / RR
-
-NEWS\_LOCK\_KEY=news:lock
-
-NEWS\_LOCK\_TTL=900
-
-NEWS\_RR\_INDEX\_KEY=news:rr:index
+MYSQL_SSL_CA=<인증서 경로>#EC2 환경
 
 
 
-\#  사람인 api key
+# Redis 
 
-ACCESS\_KEY=<사람인 api key>
+REDIS_HOST=i13a402.p.ssafy.io
+
+REDIS_PORT=6379
+
+
+
+# BATCH
+
+NEWSAPI_DAILY_COUNT=100
+
+NEWSAPI_TEST_COUNT=5
+
+NEWSAPI_CALL_INTERVAL_SEC=0.2
+
+NEWSAPI_LANG=
+
+
+
+# LOCK RR
+
+NEWS_LOCK_KEY=news:lock
+
+NEWS_LOCK_TTL=900
+
+NEWS_RR_INDEX_KEY=news:rr:index
+
+
+
+#  사람인 api key
+
+ACCESS_KEY=<사람인 api key>
 
 ```
 
@@ -93,7 +93,7 @@ ACCESS\_KEY=<사람인 api key>
 ## 사용DB 정보
 
 ```
-url: jdbc:mysql://ssafy-mysql-db.mysql.database.azure.com:3306/S13P12A402?serverTimezone=UTC\\\&useUnicode=true\\\&characterEncoding=utf8
+url: jdbc:mysql://ssafy-mysql-db.mysql.database.azure.com:3306/S13P12A402?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8
 
 username: S13P12A402
 
