@@ -31,12 +31,12 @@ fi
 if [ "$SERVICE_NAME" == "business-server" ]; then
     NGINX_CONF_FILE="./nginx/conf.d/blue-green-business-server.inc"
     UPSTREAM_VAR_NAME="\$target_business_server_upstream"
-    UPSTREAM_GROUP_NAME="business_servers" # Nginx upstream 이름
+    UPSTREAM_GROUP_NAME="business-servers" # Nginx upstream 이름
     HEALTH_CHECK_ENABLED=true
 elif [ "$SERVICE_NAME" == "frontend" ]; then
     NGINX_CONF_FILE="./nginx/conf.d/blue-green-frontend.inc"
     UPSTREAM_VAR_NAME="\$target_frontend_upstream"
-    UPSTREAM_GROUP_NAME="frontend_server" # Nginx upstream 이름
+    UPSTREAM_GROUP_NAME="frontend-server" # Nginx upstream 이름
     HEALTH_CHECK_ENABLED=false # Frontend는 별도의 헬스체크를 생략합니다.
 else
     echo "!!! [ERROR] 잘못된 서비스 이름입니다: ${SERVICE_NAME}. 'business-server' 또는 'frontend'만 가능합니다."
@@ -119,11 +119,15 @@ fi
 
 # --- 6. Nginx 트래픽 전환 ---
 echo ">>> [Step 5/7] Switching Nginx traffic to ${IDLE_GROUP} group..."
+
+echo "==> Ensuring all Blue/Green containers are running for Nginx reload..."
+docker-compose up -d --no-deps business-server-blue business-server-green frontend-blue frontend-green
+
 # Nginx 설정 파일의 내용을 새로운 upstream 그룹을 바라보도록 덮어씁니다.
 if [ "$SERVICE_NAME" == "business-server" ]; then
-    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}_${UPSTREAM_GROUP_NAME};" > ${NGINX_CONF_FILE}
+    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}-${UPSTREAM_GROUP_NAME};" > ${NGINX_CONF_FILE}
 else # frontend
-    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}_${SERVICE_NAME}_server;" > ${NGINX_CONF_FILE} # upstream 이름 규칙에 맞춤
+    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}-${UPSTREAM_GROUP_NAME};" > ${NGINX_CONF_FILE} # upstream 이름 규칙에 맞춤
 fi
 
 # Nginx 설정을 서비스 중단 없이 즉시 리로드합니다.
@@ -135,6 +139,31 @@ LIVE_CONTAINER="${SERVICE_NAME}-${LIVE_GROUP}"
 echo ">>> [Step 7/7] Stopping old version: ${LIVE_CONTAINER}"
 docker-compose stop ${LIVE_CONTAINER}
 
+# --- 8. 다른 서비스의 유휴 컨테이너 정리 ---
+echo ">>> [Step extra] Cleaning up idle container of the other service..."
+if [ "$SERVICE_NAME" == "business-server" ]; then
+    # business-server를 배포했으니, frontend의 유휴 컨테이너를 찾아서 중지
+    CURRENT_FRONTEND_UPSTREAM_LINE=$(grep "\$target_frontend_upstream" ./nginx/conf.d/blue-green-frontend.inc)
+    if [[ "$CURRENT_FRONTEND_UPSTREAM_LINE" == *"blue"* ]]; then
+        echo "==> Frontend LIVE is blue, stopping idle container: frontend-green"
+        docker-compose stop frontend-green
+    else
+        echo "==> Frontend LIVE is green, stopping idle container: frontend-blue"
+        docker-compose stop frontend-blue
+    fi
+elif [ "$SERVICE_NAME" == "frontend" ]; then
+    # frontend를 배포했으니, business-server의 유휴 컨테이너를 찾아서 중지
+    CURRENT_BUSINESS_UPSTREAM_LINE=$(grep "\$target_business_server_upstream" ./nginx/conf.d/blue-green-business-server.inc)
+    if [[ "$CURRENT_BUSINESS_UPSTREAM_LINE" == *"blue"* ]]; then
+        echo "==> Business-server LIVE is blue, stopping idle container: business-server-green"
+        docker-compose stop business-server-green
+    else
+        echo "==> Business-server LIVE is green, stopping idle container: business-server-blue"
+        docker-compose stop business-server-blue
+    fi
+fi
+
 echo "========================================"
 echo " Blue/Green Deployment for [${SERVICE_NAME}] Completed!"
+echo " All idle containers are cleaned up. ✅"
 echo "========================================"

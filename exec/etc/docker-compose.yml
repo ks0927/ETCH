@@ -65,6 +65,7 @@ services:
       - MANAGEMENT_METRICS_TAGS_APPLICATION=business-server-blue
       # ⭐️ 강제로 MinIO 내부 URL 설정 (이게 우선순위 높음)
       - CLOUD_AWS_S3_ENDPOINT=http://minio:9000
+      - TZ=Asia/Seoul
     ports:
       - "8081:8081"
     networks:
@@ -88,6 +89,7 @@ services:
       - MANAGEMENT_METRICS_TAGS_APPLICATION=business-server-green
       # ⭐️ 강제로 MinIO 내부 URL 설정 (이게 우선순위 높음)
       - CLOUD_AWS_S3_ENDPOINT=http://minio:9000
+      - TZ=Asia/Seoul
     ports:
       - "8085:8081"
     networks:
@@ -110,6 +112,8 @@ services:
     #   - "8083:8083"
     env_file:
       - ./chat-server.env
+    environment:
+      - TZ=Asia/Seoul
     networks:
       - etch-network
     depends_on:
