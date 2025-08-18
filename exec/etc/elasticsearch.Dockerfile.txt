@@ -1,0 +1,7 @@
+# ~/app/elasticsearch.Dockerfile
+
+# 1. 공식 Elasticsearch 이미지를 기반으로 시작합니다.
+FROM elasticsearch:9.1.0
+
+# 2. nori 한글 형태소 분석기 플러그인을 설치합니다.
+RUN bin/elasticsearch-plugin install analysis-nori

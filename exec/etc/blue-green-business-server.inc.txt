@@ -1,0 +1,1 @@
+set $target_business_server_upstream http://blue-business-servers;

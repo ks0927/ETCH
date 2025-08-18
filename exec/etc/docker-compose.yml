@@ -1,0 +1,353 @@
+# ~/app/docker-compose.yml (Nginx 포함 최종 버전)
+
+version: "3.8"
+
+services:
+  # --- 리버스 프록시 서버 ---
+  nginx:
+    image: nginx:alpine # 가벼운 alpine 버전의 Nginx 이미지를 사용합니다.
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"   # 외부의 80번 포트 요청을 Nginx 컨테이너의 80번 포트로 연결합니다.
+      - "443:443" # 추후 HTTPS 적용을 위해 443 포트도 열어둡니다.
+    volumes:
+      # ⭐️ [수정] Nginx 설정 폴더, Certbot 인증서 폴더, 인증용 웹루트 폴더를 공유합니다.
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - etch-network
+    # 다른 백엔드 서비스들이 먼저 실행된 후에 Nginx가 실행되도록 의존성을 설정합니다.
+    depends_on:
+      - frontend-blue
+      - frontend-green
+      - business-server-blue
+      - business-server-green
+      - chat-server
+      - batch-server
+      - recommend-server
+      - minio
+
+  # ⭐️ [추가] Certbot 서비스
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      # Nginx와 동일한 폴더를 공유하여 인증서를 생성하고 Nginx 설정을 수정할 수 있게 합니다.
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  # --- frontend blue/green deploy ---
+  frontend-blue:
+    image: kkaebu/etch-frontend:latest
+    container_name: frontend-blue
+    restart: always
+    networks:
+      - etch-network
+
+  frontend-green:
+    image: kkaebu/etch-frontend:latest
+    container_name: frontend-green
+    restart: always
+    networks:
+      - etch-network
+
+  # --- 백엔드 애플리케이션 서버 ---
+  business-server-blue:
+    image: kkaebu/etch-business-server:latest
+    container_name: business-server-blue
+    restart: always
+    env_file:
+      - ./business-server.env
+    environment:
+      - MANAGEMENT_METRICS_TAGS_APPLICATION=business-server-blue
+      # ⭐️ 강제로 MinIO 내부 URL 설정 (이게 우선순위 높음)
+      - CLOUD_AWS_S3_ENDPOINT=http://minio:9000
+    ports:
+      - "8081:8081"
+    networks:
+      - etch-network
+    # business-server가 mysql과 redis에 의존함을 명시합니다.
+    # 이렇게 하면 mysql과 redis가 먼저 실행된 후 business-server가 실행됩니다.
+    depends_on:
+      redis:
+        condition: service_started
+      # elasticsearch가 'healthy' 상태가 될 때까지 기다립니다.
+      elasticsearch:
+        condition: service_healthy
+
+  business-server-green:
+    image: kkaebu/etch-business-server:latest
+    container_name: business-server-green
+    restart: always
+    env_file:
+      - ./business-server.env
+    environment:
+      - MANAGEMENT_METRICS_TAGS_APPLICATION=business-server-green
+      # ⭐️ 강제로 MinIO 내부 URL 설정 (이게 우선순위 높음)
+      - CLOUD_AWS_S3_ENDPOINT=http://minio:9000
+    ports:
+      - "8085:8081"
+    networks:
+      - etch-network
+    # business-server가 mysql과 redis에 의존함을 명시합니다.
+    # 이렇게 하면 mysql과 redis가 먼저 실행된 후 business-server가 실행됩니다.
+    depends_on:
+      redis:
+        condition: service_started
+      # elasticsearch가 'healthy' 상태가 될 때까지 기다립니다.
+      elasticsearch:
+        condition: service_healthy
+
+  chat-server:
+    image: kkaebu/etch-chat-server:latest
+    container_name: chat-server
+    restart: always
+    # ports는 Nginx가 내부적으로 통신하므로 외부에 노출할 필요가 없습니다. 주석 처리합니다.
+    # ports:
+    #   - "8083:8083"
+    env_file:
+      - ./chat-server.env
+    networks:
+      - etch-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  batch-server:
+    image: kkaebu/etch-batch-server:latest
+    container_name: batch-server
+    restart: always
+      #ports:
+      # - "8082:8082"
+    env_file:
+      - ./batch-server.env
+    volumes:
+      - ./azure-ca.pem:/app/azure-ca.pem:ro
+    networks:
+      - etch-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  recommend-server:
+    image: kkaebu/etch-recommend-server:latest
+    container_name: recommend-server
+    restart: always
+    # ports:
+    #   - "8084:8084"
+    env_file:
+      - ./recommend-server.env
+    volumes:
+      - ./azure-ca.pem:/app/azure-ca.pem:ro
+    networks:
+      - etch-network
+    depends_on:
+      redis:
+        condition: service_started
+
+  # --- 데이터베이스 및 캐시 서비스 추가 ---
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: always
+    volumes:
+      # Redis 데이터를 EC2 호스트에 저장하여 데이터 지속성을 확보합니다.
+      - ./redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - etch-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: elasticsearch.Dockerfile
+    #image: elasticsearch:8.14.3 #spring3.x는 es8.x
+    container_name: elasticsearch
+    restart: always
+    user: "1000:1000"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - etch-network
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    # ⭐️ [수정] Elasticsearch가 준비되었는지 30초마다 확인하는 healthcheck를 추가합니다.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  #  Elasticsearch 데이터 시각화 도구
+  kibana:
+    image: kibana:8.14.3 # 사용하는 Elasticsearch와 버전을 맞추는 것이 좋습니다.
+    container_name: kibana
+    restart: always
+    environment:
+      # Kibana가 접속해야 할 Elasticsearch 서버의 주소를 알려줍니다.
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      # Nginx 리버스 프록시의 하위 경로(/kibana)를 인식하도록 설정합니다.
+      - SERVER_BASEPATH=/kibana
+    networks:
+      - etch-network
+    depends_on:
+      # elasticsearch가 먼저 실행된 후 실행되도록 의존성을 설정합니다.
+      elasticsearch:
+        condition: service_healthy
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.1.0
+    container_name: logstash
+    restart: always
+    ports:
+      - "5044:5044"
+    volumes:
+      # 파이프라인 설정
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      # pipline env setting
+      - ./logstash/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro
+      # JDBC 드라이버
+      - ./logstash/drivers:/drivers:ro
+      # Azure 인증서
+      - ./logstash/certs:/certs:ro
+    environment:
+      - TZ="Asia/Seoul"
+    networks:
+      - etch-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    command:
+      - '--config.reload.automatic'
+
+
+  #  --- 객체 스토리지 서버 ---
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    volumes:
+      # MinIO가 저장하는 파일(객체)들을 EC2 호스트에 보존합니다.
+      - ./minio-data:/data
+    ports:
+      # 9000: Spring Boot 등 다른 서비스와 통신하는 API 포트
+      - "9000:9000"
+      # 9001: 관리자 페이지 접속을 위한 웹 콘솔 포트
+      - "9001:9001"
+    networks:
+      - etch-network
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin1234
+      - MINIO_BROWSER_REDIRECT_URL=https://etch.it.kr/minio-console/
+      # CORS 설정
+      - MINIO_API_CORS_ALLOW_ORIGIN="https://etch.it.kr,http://localhost:3000,http://localhost:5173,http://localhost:8080,http://localhost:8089"
+      - MINIO_CONSOLE_CORS_ALLOW_ORIGIN="https://etch.it.kr"
+    command: server /data --console-address ":9001"
+
+  # --- [추가] 모니터링 시스템 ---
+  prometheus:
+    image: prom/prometheus:latest # 프로메테우스 공식 최신 이미지를 사용합니다.
+    container_name: prometheus
+    restart: always # 컨테이너가 중지되면 항상 자동으로 재시작합니다.
+    volumes:
+      # 로컬의 prometheus.yml 파일을 컨테이너 내부의 설정 파일 경로로 연결합니다.
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      # 프로메테우스가 수집한 데이터를 저장할 볼륨을 연결하여 데이터 영속성을 확보합니다.
+      - prometheus-data:/prometheus
+    command:
+      # 컨테이너 실행 시 사용할 명령어 (설정 파일 위치 지정)
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      # 호스트의 9090 포트와 컨테이너의 9090 포트를 연결하여 외부에서 접근 가능하게 합니다.
+      - "9090:9090"
+    networks:
+      - etch-network # 다른 컨테이너와 통신하기 위해 동일한 네트워크를 사용합니다.
+
+  grafana:
+    image: grafana/grafana-oss:latest # 그라파나 오픈소스 버전 공식 최신 이미지를 사용합니다.
+    container_name: grafana
+    restart: always
+    volumes:
+      # 그라파나의 설정 및 대시보드 데이터를 저장할 볼륨을 연결하여 영속성을 확보합니다.
+      - grafana-data:/var/lib/grafana
+    ports:
+      # 호스트의 3001 포트와 컨테이너의 3000 포트를 연결하여 외부에서 접근 가능하게 합니다.
+      - "3001:3000"
+    environment:
+      # 그라파나에게 자신의 외부 접속 전체 URL을 알려줍니다.
+      # 이렇게 하면 그라파나가 생성하는 모든 링크(리디렉션, CSS/JS 경로 등)가
+      # '/grafana'를 포함하여 생성됩니다.
+      - GF_SERVER_ROOT_URL=https://etch.it.kr/grafana
+      # 그라파나 관리자 계정의 비밀번호를 설정합니다. (보안을 위해 더 복잡한 비밀번호로 변경하세요)
+      - GF_SECURITY_ADMIN_PASSWORD=admin # 예시 비밀번호, 실제 운영 시에는 변경 필요
+    depends_on:
+      - prometheus # 프로메테우스가 먼저 실행된 후 실행됩니다.
+    networks:
+      - etch-network
+
+  # --- 로키(로그 저장소) 서비스 정의 ---
+  loki:
+    image: grafana/loki:2.9.0 # 로키 공식 이미지를 사용합니다.
+    container_name: loki
+    restart: always
+    ports:
+      - "3100:3100" # 외부에서 로키 API에 직접 접근할 경우를 위해 포트를 엽니다.
+    volumes:
+      # 로컬에 작성한 로키 설정 파일을 컨테이너 내부로 연결합니다.
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      # 로키가 수집한 로그 데이터(인덱스, 청크)를 저장할 공간을 호스트 볼륨과 연결하여 영속성을 확보합니다.
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml # 컨테이너 실행 시 사용할 설정 파일을 지정합니다.
+    networks:
+      - etch-network
+
+  # --- 프로메테일(로그 수집기) 서비스 정의 ---
+  promtail:
+    image: grafana/promtail:2.9.0 # 프로메테일 공식 이미지를 사용합니다.
+    container_name: promtail
+    restart: always
+    volumes:
+      # 로컬에 작성한 프로메테일 설정 파일을 컨테이너 내부로 연결합니다.
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      # 프로메테일이 다른 컨테이너를 감지할 수 있도록 호스트의 Docker 소켓을 공유합니다. (필수)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 다른 컨테이너들이 생성하는 로그 파일 경로를 공유하여 프로메테일이 읽을 수 있게 합니다. (필수)
+      - /var/lib/docker/containers:/var/lib/docker/containers
+    command: -config.file=/etc/promtail/config.yml # 컨테이너 실행 시 사용할 설정 파일을 지정합니다.
+    networks:
+      - etch-network
+
+networks:
+  etch-network:
+    driver: bridge
+
+# 파일 최하단에 Docker Named Volume을 정의합니다.
+volumes:
+  esdata:
+  prometheus-data:
+  grafana-data:
+  redis-data:
+  loki-data: # 로키 데이터 저장용 볼륨
+  minio-data:

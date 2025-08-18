@@ -1,0 +1,68 @@
+input {
+  jdbc {
+    jdbc_connection_string => "jdbc:mysql://ssafy-mysql-db.mysql.database.azure.com:3306/S13P12A402?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStoreUrl=file:/certs/mysql-truststore.jks&trustCertificateKeyStorePassword=admin1234"
+    jdbc_driver_library    => "/drivers/mysql-connector-j-8.4.0.jar"
+    jdbc_driver_class      => "com.mysql.cj.jdbc.Driver"
+    jdbc_user              => "S13P12A402"
+    jdbc_password          => "mmPPHmgIAU"
+    schedule               => "* * * * *"     # 1분마다
+    jdbc_paging_enabled    => true
+    jdbc_page_size         => 1000
+
+    # ★ 반드시 statement 명시 (컬럼/별칭을 ES 문서 필드명에 맞춤)
+    statement => "
+      SELECT
+        id               AS jobId,
+        title            AS title,
+        company_name     AS companyName,
+        industry         AS industries,
+        region           AS regions,
+        job_category     AS jobCategories,
+        work_type        AS workType,
+        education_level  AS educationLevel,
+        opening_date     AS openingDate,
+        expiration_date  AS expirationDate
+      FROM job
+    "
+  }
+}
+
+filter {
+  # ★ mutate 블록 안에서 rename/remove_field 수행
+  mutate {
+    # 여긴 alias로 이미 맞췄으므로 rename 불필요; 남겨둘 것도 없음
+    # 필요 없는 원본 snake 필드는 SELECT에서 제외했으므로 remove_field도 불필요
+  }
+
+  # 다중값 분리 + 공백 제거
+  if [regions] {
+    mutate { split => { "regions" => "," } }
+    mutate { strip => ["regions"] }
+    ruby { code => 'v=event.get("regions"); event.set("regions", v.reject{|x| x.nil? || x.strip.empty?}) if v.is_a?(Array)' }
+  }
+
+  if [industries] {
+    mutate { split => { "industries" => "," } }
+    mutate { strip => ["industries"] }
+    ruby { code => 'v=event.get("industries"); event.set("industries", v.reject{|x| x.nil? || x.strip.empty?}) if v.is_a?(Array)' }
+  }
+
+  if [jobCategories] {
+    mutate { split => { "jobCategories" => "," } }
+    mutate { strip => ["jobCategories"] }
+    ruby { code => 'v=event.get("jobCategories"); event.set("jobCategories", v.reject{|x| x.nil? || x.strip.empty?}) if v.is_a?(Array)' }
+  }
+
+  # 날짜 변환
+  date { match => ["openingDate",    "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "ISO8601"] target => "openingDate"    timezone => "Asia/Seoul" }
+  date { match => ["expirationDate", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "ISO8601"] target => "expirationDate" timezone => "Asia/Seoul" }
+}
+
+output {
+  elasticsearch {
+    hosts       => ["http://elasticsearch:9200"]  # 같은 네트워크
+    index       => "job"
+    document_id => "%{jobId}"                      # _id = jobId
+  }
+  stdout { codec => rubydebug }
+}

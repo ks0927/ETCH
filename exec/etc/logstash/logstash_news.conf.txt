@@ -1,0 +1,50 @@
+input {
+  jdbc {
+    jdbc_connection_string => "jdbc:mysql://ssafy-mysql-db.mysql.database.azure.com:3306/S13P12A402?serverTimezone=UTC&useUnicode=true&characterEncoding=utf8&useSSL=true&requireSSL=true&verifyServerCertificate=true&trustCertificateKeyStoreUrl=file:/certs/mysql-truststore.jks&trustCertificateKeyStorePassword=admin1234"
+    jdbc_driver_library    => "/drivers/mysql-connector-j-8.4.0.jar"
+    jdbc_driver_class      => "com.mysql.cj.jdbc.Driver"
+    jdbc_user              => "S13P12A402"
+    jdbc_password          => "mmPPHmgIAU"
+
+    schedule               => "* * * * *"     # 1분마다
+    jdbc_paging_enabled    => true
+    jdbc_page_size         => 1000
+
+    # 별칭의 대소문자 보존 (newsId, companyName 등)
+    lowercase_column_names => false
+
+    # 테이블 컬럼 -> ES 도큐먼트 필드명으로 alias
+    statement => "
+      SELECT
+        id                            AS newsId,
+        title                         AS title,
+        description                   AS summary,
+        company_name                  AS companyName,
+        url                           AS link,
+        thumbnail_url                 AS thumbnailUrl,
+        CAST(published_at AS DATETIME) AS publishedAt
+      FROM news
+    "
+  }
+}
+
+filter {
+  # 날짜 변환 (DATE/DATETIME/ISO 대응)
+  date {
+    match    => ["publishedAt", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "ISO8601"]
+    target   => "publishedAt"
+    timezone => "Asia/Seoul"
+  }
+
+  # 안전장치: ID 없으면 드롭
+  if ![newsId] { drop {} }
+}
+
+output {
+  elasticsearch {
+    hosts       => ["http://elasticsearch:9200"]
+    index       => "news"
+    document_id => "%{newsId}"
+  }
+  stdout { codec => rubydebug }
+}

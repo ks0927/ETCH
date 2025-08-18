@@ -1,0 +1,1 @@
+set $target_frontend_upstream http://blue-frontend-server;

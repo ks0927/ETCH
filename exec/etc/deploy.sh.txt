@@ -1,0 +1,140 @@
+#!/bin/bash
+# ==============================================================================
+# Blue/Green 무중단 배포 스크립트 for Etch Project
+# ==============================================================================
+#
+# 사용법:
+# ./deploy.sh business-server
+# ./deploy.sh frontend
+#
+# 이 스크립트는 Jenkinsfile에 의해 호출되며, 주어진 서비스($1)에 대해
+# 무중단 배포를 자동으로 수행합니다.
+#
+
+# --- 스크립트 기본 설정 ---
+# 1. 오류 발생 시 즉시 스크립트를 중단합니다.
+set -e
+# 2. 스크립트 파일이 위치한 디렉토리로 이동하여 경로 문제를 방지합니다.
+cd "$(dirname "$0")"
+
+# --- 1. 배포 대상 서비스 확인 및 변수 설정 ---
+# Jenkins로부터 첫 번째 인자($1)로 배포할 서비스 이름을 받습니다.
+SERVICE_NAME=$1
+
+# 인자가 없으면 사용법을 안내하고 스크립트를 종료합니다.
+if [ -z "$SERVICE_NAME" ]; then
+    echo "!!! [ERROR] 배포할 서비스를 지정해주세요. (예: ./deploy.sh business-server)"
+    exit 1
+fi
+
+# 배포할 서비스에 따라 사용할 설정 파일, 변수 이름 등을 동적으로 지정합니다.
+if [ "$SERVICE_NAME" == "business-server" ]; then
+    NGINX_CONF_FILE="./nginx/conf.d/blue-green-business-server.inc"
+    UPSTREAM_VAR_NAME="\$target_business_server_upstream"
+    UPSTREAM_GROUP_NAME="business_servers" # Nginx upstream 이름
+    HEALTH_CHECK_ENABLED=true
+elif [ "$SERVICE_NAME" == "frontend" ]; then
+    NGINX_CONF_FILE="./nginx/conf.d/blue-green-frontend.inc"
+    UPSTREAM_VAR_NAME="\$target_frontend_upstream"
+    UPSTREAM_GROUP_NAME="frontend_server" # Nginx upstream 이름
+    HEALTH_CHECK_ENABLED=false # Frontend는 별도의 헬스체크를 생략합니다.
+else
+    echo "!!! [ERROR] 잘못된 서비스 이름입니다: ${SERVICE_NAME}. 'business-server' 또는 'frontend'만 가능합니다."
+    exit 1
+fi
+
+echo "========================================"
+echo " Starting Blue/Green Deployment for [${SERVICE_NAME}]"
+echo "========================================"
+
+# --- 2. 최신 Docker 이미지 받기 ---
+echo ">>> [Step 1/7] Pulling latest image for ${SERVICE_NAME}..."
+# blue와 green은 동일한 이미지를 사용하므로, 이름이 고정된 -blue 서비스를 pull 합니다.
+docker-compose pull ${SERVICE_NAME}-blue
+
+# --- 3. 현재 운영(LIVE) 그룹과 배포할(IDLE) 그룹 결정 ---
+echo ">>> [Step 2/7] Checking current LIVE group..."
+# Nginx 설정 파일을 읽어 현재 트래픽이 어느 그룹으로 향하는지 확인합니다.
+CURRENT_UPSTREAM_LINE=$(grep "${UPSTREAM_VAR_NAME}" ${NGINX_CONF_FILE})
+
+if [[ "$CURRENT_UPSTREAM_LINE" == *"blue"* ]]; then
+    LIVE_GROUP="blue"
+    IDLE_GROUP="green"
+else
+    LIVE_GROUP="green"
+    IDLE_GROUP="blue"
+fi
+
+# 배포할 대상 컨테이너의 전체 이름을 변수에 저장합니다. (예: business-server-green)
+IDLE_CONTAINER="${SERVICE_NAME}-${IDLE_GROUP}"
+echo "==> Current LIVE group: ${SERVICE_NAME}-${LIVE_GROUP}"
+echo "==> Deploying to IDLE group: ${IDLE_CONTAINER}"
+
+# --- 4. 새 버전의 컨테이너 실행 (IDLE 그룹) ---
+echo ">>> [Step 3/7] Starting new container for IDLE group..."
+# --no-deps: 의존 관계에 있는 다른 서비스는 건드리지 않고, 지정된 서비스만 재시작합니다.
+docker-compose up -d --force-recreate --no-deps ${IDLE_CONTAINER}
+
+# --- 5. 헬스 체크 ---
+echo ">>> [Step 4/7] Health check for new container..."
+if [ "$HEALTH_CHECK_ENABLED" = true ]; then
+    # business-server의 포트는 그룹에 따라 다릅니다. (blue: 8081, green: 8085)
+    if [ "$IDLE_GROUP" == "blue" ]; then
+        IDLE_PORT="8081"
+    else
+        IDLE_PORT="8085" # docker-compose.yml에 명시된 그린 서버 포트
+    fi
+
+    echo "==> Waiting for health check on http://localhost:${IDLE_PORT}/actuator/health..."
+    # 12번 시도 (5초 간격으로 총 60초 대기)
+    for i in {1..12}; do
+        echo "i: $i"
+        RESPONSE=$(curl -s http://localhost:${IDLE_PORT}/actuator/health || true)
+        echo "Response: ${RESPONSE}"
+        # jq 없이 status 값 추출 (최상위 status만 추출)
+        STATUS=$(echo "$RESPONSE" | jq -r .status)
+
+        if [ "$STATUS" == "UP" ]; then
+            echo "Health check PASSED! Server is UP. ✅"
+            break
+        fi
+        echo "Health check waiting... (Status: ${STATUS:-'No response'}, Retry: $i/12)"
+        sleep 5
+    done
+
+    # 60초가 지나도 헬스 체크에 실패하면, 배포를 중단하고 새로 띄운 컨테이너를 종료합니다 (롤백).
+    if [ "$STATUS" != "UP" ]; then
+        echo "!!! [FATAL] Deployment FAILED: New server is not healthy."
+        echo "!!! Last Health Check Response: $RESPONSE"
+        echo ">>> Rolling back... Stopping the new container."
+        docker-compose stop ${IDLE_CONTAINER}
+        exit 1 # 스크립트를 실패 상태로 종료하여 Jenkins에 알립니다.
+    fi
+else
+    # Frontend는 별도의 헬스체크 API가 없으므로, 시작될 때까지 15초간 기다립니다.
+    echo "==> Waiting 15 seconds for frontend container to start..."
+    sleep 15
+    echo "Frontend container is assumed to be up."
+fi
+
+# --- 6. Nginx 트래픽 전환 ---
+echo ">>> [Step 5/7] Switching Nginx traffic to ${IDLE_GROUP} group..."
+# Nginx 설정 파일의 내용을 새로운 upstream 그룹을 바라보도록 덮어씁니다.
+if [ "$SERVICE_NAME" == "business-server" ]; then
+    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}_${UPSTREAM_GROUP_NAME};" > ${NGINX_CONF_FILE}
+else # frontend
+    echo "set ${UPSTREAM_VAR_NAME} http://${IDLE_GROUP}_${SERVICE_NAME}_server;" > ${NGINX_CONF_FILE} # upstream 이름 규칙에 맞춤
+fi
+
+# Nginx 설정을 서비스 중단 없이 즉시 리로드합니다.
+docker-compose exec nginx nginx -s reload
+echo ">>> [Step 6/7] Traffic switched successfully! 🚀"
+
+# --- 7. 구버전 컨테이너 중지 ---
+LIVE_CONTAINER="${SERVICE_NAME}-${LIVE_GROUP}"
+echo ">>> [Step 7/7] Stopping old version: ${LIVE_CONTAINER}"
+docker-compose stop ${LIVE_CONTAINER}
+
+echo "========================================"
+echo " Blue/Green Deployment for [${SERVICE_NAME}] Completed!"
+echo "========================================"
