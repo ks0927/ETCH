@@ -1,4 +1,4 @@
-\## 기술 ver
+## 기술 ver
 
 | 구분 | 항목 | 내용 |
 
@@ -10,63 +10,63 @@
 
 
 
-\## 환경 변수 (배포 환경)
+## 환경 변수 (배포 환경)
 
 ```
 
-\# NewsAPI
+# NewsAPI
 
-NEWSAPI\_KEY=<api key>
-
-
-
-NEWS\_QUERY=삼성전자
-
-NEWS\_LANGUAGE=ko
-
-NEWS\_PAGE\_SIZE=100
-
-NEWS\_SORT\_BY=publishedAt
+NEWSAPI_KEY=<api key>
 
 
 
-\# MySQL 
+NEWS_QUERY=삼성전자
 
-MYSQL\_HOST=ssafy-mysql-db.mysql.database.azure.com
+NEWS_LANGUAGE=ko
 
-MYSQL\_PORT=3306
+NEWS_PAGE_SIZE=100
 
-MYSQL\_USER=<db user>
-
-MYSQL\_PASSWORD=<db password>
-
-MYSQL\_DB=<db name>
-
-MYSQL\_CHARSET=utf8mb4
-
-\#MYSQL\_SSL\_CA=certs/azure-ca.pem #local 환경
-
-MYSQL\_SSL\_CA=<인증서 경로>#EC2 환경
+NEWS_SORT_BY=publishedAt
 
 
 
-\# Redis 
+# MySQL 
 
-REDIS\_HOST=i13a402.p.ssafy.io
+MYSQL_HOST=ssafy-mysql-db.mysql.database.azure.com
 
-REDIS\_PORT=6379
+MYSQL_PORT=3306
+
+MYSQL_USER=<db user>
+
+MYSQL_PASSWORD=<db password>
+
+MYSQL_DB=<db name>
+
+MYSQL_CHARSET=utf8mb4
+
+#MYSQL_SSL_CA=certs/azure-ca.pem #local 환경
+
+MYSQL_SSL_CA=<인증서 경로>#EC2 환경
 
 
 
-\# BATCH
+# Redis 
 
-NEWSAPI\_DAILY\_COUNT=100
+REDIS_HOST=i13a402.p.ssafy.io
 
-NEWSAPI\_TEST\_COUNT=5
+REDIS_PORT=6379
 
-NEWSAPI\_CALL\_INTERVAL\_SEC=0.2
 
-NEWSAPI\_LANG=
+
+# BATCH
+
+NEWSAPI_DAILY_COUNT=100
+
+NEWSAPI_TEST_COUNT=5
+
+NEWSAPI_CALL_INTERVAL_SEC=0.2
+
+NEWSAPI_LANG=
 
 
 
