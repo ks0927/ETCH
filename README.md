@@ -255,3 +255,80 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 | **Co-op** | Jira, Figma, Notion, Git/GitLab |
 
 ---
+
+# 📄 라이센스
+
+본 프로젝트는 다음과 같은 오픈소스 라이브러리와 프레임워크를 사용합니다:
+
+## 주요 의존성 라이센스
+
+### Backend (Spring Boot)
+- **Spring Boot 3.5.4** - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- **Spring Security & OAuth2** - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- **JWT (jsonwebtoken)** - [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- **MySQL Connector/J** - [GPL v2 with FOSS Exception](https://www.mysql.com/about/legal/licensing/foss-exception/)
+- **Redis** - [BSD 3-Clause License](https://redis.io/legal/licenses/)
+- **Elasticsearch** - [Elastic License 2.0](https://www.elastic.co/licensing/elastic-license)
+
+### Frontend (React)
+- **React 19.1.0** - [MIT License](https://github.com/facebook/react/blob/main/LICENSE)
+- **TypeScript** - [Apache License 2.0](https://github.com/Microsoft/TypeScript/blob/main/LICENSE.txt)
+- **Vite** - [MIT License](https://github.com/vitejs/vite/blob/main/LICENSE)
+- **Redux Toolkit** - [MIT License](https://github.com/reduxjs/redux-toolkit/blob/master/LICENSE)
+- **Axios** - [MIT License](https://github.com/axios/axios/blob/v1.x/LICENSE)
+- **TailwindCSS** - [MIT License](https://github.com/tailwindlabs/tailwindcss/blob/master/LICENSE)
+
+### Python Services (Batch & Recommend Server)
+- **FastAPI** - [MIT License](https://github.com/tiangolo/fastapi/blob/master/LICENSE)
+- **scikit-learn** - [BSD 3-Clause License](https://github.com/scikit-learn/scikit-learn/blob/main/COPYING)
+- **NumPy** - [BSD 3-Clause License](https://github.com/numpy/numpy/blob/main/LICENSE.txt)
+- **Requests** - [Apache License 2.0](https://github.com/psf/requests/blob/main/LICENSE)
+- **PyMySQL** - [MIT License](https://github.com/PyMySQL/PyMySQL/blob/main/LICENSE)
+- **APScheduler** - [MIT License](https://github.com/agronholm/apscheduler/blob/master/LICENSE.txt)
+
+### Infrastructure & DevOps
+- **Docker** - [Apache License 2.0](https://github.com/moby/moby/blob/master/LICENSE)
+- **Jenkins** - [MIT License](https://github.com/jenkinsci/jenkins/blob/master/LICENSE.txt)
+- **Nginx** - [BSD 2-Clause License](http://nginx.org/LICENSE)
+- **Prometheus** - [Apache License 2.0](https://github.com/prometheus/prometheus/blob/main/LICENSE)
+- **Grafana** - [AGPL v3 License](https://github.com/grafana/grafana/blob/main/LICENSE)
+
+## 프로젝트 라이센스
+
+이 프로젝트는 **MIT License** 하에 배포됩니다.
+
+```
+MIT License
+
+Copyright (c) 2025 ETCH Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## 주의사항
+
+- **Elasticsearch**: Elastic License 2.0에 따라 상업적 용도로 사용 시 제한이 있을 수 있습니다.
+- **MySQL**: GPL v2 라이센스이지만 FOSS Exception이 적용되어 오픈소스 프로젝트에서 자유롭게 사용 가능합니다.
+- **외부 API**: 사람인 API, News API, 전자공시 API 등은 각각의 이용약관을 따릅니다.
+
+자세한 라이센스 정보는 각 의존성의 공식 문서를 참조하시기 바랍니다.
+
+---
+
+**ETCH Team © 2025. All rights reserved.**
