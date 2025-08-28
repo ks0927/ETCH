@@ -5,9 +5,6 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 > 
 
 프로젝트 기간 : 2025.07 ~ 2025.08
-
-**[✨Notion README 보러가기✨](https://antique-beechnut-31b.notion.site/ETCH-README-248b4441359c80f38e5fccf2413416f6?source=copy_link)**
-
 ---
 
 # 🔗프로젝트 링크
@@ -65,17 +62,20 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 - **Jenkins**: Git Webhook을 통한 자동 빌드/배포
 - **Docker Hub**: 컨테이너 이미지 저장소
 - **Git**: GitLab을 통한 소스코드 관리
-
-**🌐 Frontend (React)**
 - **Nginx**: 리버스 프록시 및 로드 밸런서
 - **Blue-Green 배포**: 무중단 배포 전략 적용
-- **사용자 접근점**: SSAFY EC2를 통한 서비스 제공
+- **사용자 접근점**: EC2를 통한 서비스 제공
+
+**🌐 Frontend**
+- **React**: React + Typescript + Vite 기반 동적 웹페이지 (Blue-Green 배포)
+- **UI/UX**: Figma를 통한 사용자 중심의 UI/UX 설계
+- **Design Pattern**: Atomic Design Pattern 기반 프로젝트 구조 설계
 
 **🏗️ Backend Microservices**
 - **Business Server**: Spring Boot 기반 핵심 비즈니스 로직 (Blue-Green 배포)
 - **Batch Server**: Python 기반 주기적 데이터 수집 및 처리
-- **Recommend Server**: FastAPI 기반 개인 맞춤형 추천 시스템
-- **Chatting Server**: Spring Boot + STOMP 기반 실시간 채팅
+- **Recommend Server**: FastAPI + TF-IDF&LSA 기반 개인 맞춤형 추천 시스템
+- **Chatting Server**: Spring Boot + STOMP + Redis 기반 실시간 채팅
 
 **💾 Data Storage**
 - **MySQL**: 메인 관계형 데이터베이스
@@ -83,7 +83,7 @@ IT 취업 준비생을 위한 통합 취업 지원 플랫폼
 - **MinIO**: S3 호환 객체 스토리지 (파일 업로드)
 
 **📊 Monitoring & Logging**
-- **Grafana**: 시스템 모니터링 대시보드
+- **Grafana & Prometheus**: 시스템 모니터링 대시보드
 - **Promtail & Loki**: 로그 수집 및 분석
 
 ## 서버별 기술 스택 상세
